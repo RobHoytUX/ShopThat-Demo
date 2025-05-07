@@ -1,0 +1,4 @@
+This will hold all the current work that Lokesh and Ivan will be working on. 
+
+  Lokesh will lead the backend development
+  Ivan will lead the frontend design
