@@ -1,0 +1,16 @@
+services:
+  postgres:
+    container_name: postgress
+    image: postgres:15.2
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=pangee
+    ports:
+      - 5433:5432
+    volumes:
+      - ./postgres_data:/var/lib/postgresql/data
+    restart: always
+
+volumes:
+  postgres_data:
