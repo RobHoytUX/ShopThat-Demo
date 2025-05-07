@@ -1,0 +1,8 @@
+-- AlterTable
+ALTER TABLE "Comapaings" ADD COLUMN     "subTitle" TEXT;
+
+-- AlterTable
+ALTER TABLE "Products" ADD COLUMN     "endDate" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+ADD COLUMN     "launchDate" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+ADD COLUMN     "salesAmount" TEXT,
+ADD COLUMN     "shortDescription" TEXT;
