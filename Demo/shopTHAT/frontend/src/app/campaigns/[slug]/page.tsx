@@ -1,19 +1,29 @@
 'use client';
 
-import { useParams } from 'next/navigation';
-import Chatbot from '@/components/Chatbot';
-
+import { useEffect, useState } from 'react';
+import { useParams }        from 'next/navigation';
+import Chatbot              from '@/components/Chatbot';
 
 export default function CampaignPage() {
-  const params = useParams(); // gets slug from the URL
+  const { slug } = useParams() as { slug: string };
+  const [title, setTitle] = useState('');
+
+  useEffect(() => {
+    if (!slug) return;
+    setTitle(
+      slug
+        .split('_')
+        .map(w => w[0].toUpperCase() + w.slice(1))
+        .join(' ')
+
+    );
+  }, [slug]);
 
   return (
-    <div style={{ padding: '40px' }}>
-      <h1>Campaign: {params.slug}</h1>
+    <main style={{ padding: 24 }}>
+      <h1>Campaign: {title}</h1>
       <p>This is the detail page for the campaign.</p>
-
-      <Chatbot />
-
-    </div>
+      <Chatbot slug={slug} />
+    </main>
   );
 }

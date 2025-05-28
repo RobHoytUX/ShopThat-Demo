@@ -2,7 +2,7 @@ from tenacity import retry, wait_exponential, stop_after_attempt, retry_if_excep
 from groq import Groq, RateLimitError, APIError
 from langchain.llms.base import LLM
 from pydantic import Field
-from settings import settings
+from backend.parser.app.settings import settings
 import logging
 
 logger = logging.getLogger(__name__)
