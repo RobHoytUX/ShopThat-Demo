@@ -18,6 +18,7 @@ export default function HomePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError]     = useState<string | null>(null);
 
+
   useEffect(() => {
     fetch('http://localhost:8000/api/campaigns')
       .then(res => {
@@ -38,36 +39,37 @@ export default function HomePage() {
   }, []);
 
   return (
-    <MainWrapper>
-      <h2 style={{ fontSize: '18px' }}>Campaigns</h2>
+  <MainWrapper backgroundImage="/background/bg.avif">
+  <h2 style={{ fontSize: '18px' }}>Campaigns</h2>
 
-      {loading && <p>Loading campaigns…</p>}
-      {error   && <p style={{ color: 'red' }}>{error}</p>}
+  {loading && <p>Loading campaigns…</p>}
+  {error   && <p style={{ color: 'red' }}>{error}</p>}
 
-      {!loading && !error && (
-        <div
-          style={{
-            display: 'flex',
-            flexWrap: 'wrap',
-            gap: '24px',
-            justifyContent: 'center',
-            alignItems: 'center',
-            marginTop: '32px',
-          }}
-        >
-          {slugs.map(slug => (
-            <CampaignCard
-              key={slug}
-              slug={slug}
-              title={slugToTitle(slug)}
-            />
-          ))}
-        </div>
-      )}
+  {!loading && !error && (
+    <div
+      style={{
+        display: 'flex',
+        flexWrap: 'wrap',
+        gap: '24px',
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginTop: '32px',
+      }}
+    >
+      {slugs.map(slug => (
+        <CampaignCard
+          key={slug}
+          slug={slug}
+          title={slugToTitle(slug)}
+        />
+      ))}
+    </div>
+  )}
 
-      {!loading && !error && slugs.length === 0 && (
-        <p>No campaigns available.</p>
-      )}
-    </MainWrapper>
+  {!loading && !error && slugs.length === 0 && (
+    <p>No campaigns available.</p>
+  )}
+</MainWrapper>
+
   );
 }
