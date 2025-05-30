@@ -9,16 +9,15 @@ interface MainWrapperProps {
 
 export default function MainWrapper({ children, backgroundImage }: MainWrapperProps) {
   const wrapperStyle: React.CSSProperties = {
-    minHeight: '100vh',
+    minHeight: '200vh',
     width: '100%',
     backgroundImage: backgroundImage ? `url(${backgroundImage})` : undefined,
     backgroundSize: 'cover',
     backgroundPosition: 'center',
     backgroundRepeat: 'no-repeat',
-    backgroundAttachment: 'fixed',
+    backgroundAttachment: 'scroll',
     padding: '40px 24px',
     boxSizing: 'border-box',
-    overflowY: 'auto',
   };
 
   const contentStyle: React.CSSProperties = {
@@ -32,7 +31,6 @@ export default function MainWrapper({ children, backgroundImage }: MainWrapperPr
     color: 'white',
     boxShadow: '0 4px 24px rgba(0,0,0,0.3)',
     animation: 'fadeIn 1.2s ease-in-out',
-    minHeight: '100vh',
     boxSizing: 'border-box',
   };
 
