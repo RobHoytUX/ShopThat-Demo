@@ -6,10 +6,10 @@ import MainWrapper from '@/components/MainWrapper';
 
 
 const backgroundMap: Record<string, string> = {
-  'ai_research': '/background/bg.avif',
+  'ai_research': '/background/home_bg.jpg',
   'climate_change': '/background/bg2.avif',
-  'core_values_campaign': '/background/bggirl.jpg',
-  'kusama_campaign': '/background/bggirl2.jpg',
+  'core_values_campaign': '/background/bg.avif',
+  'kusama_campaign': '/background/bggirl.jpg',
   'murakami_campaign': '/background/bgboy.jpg',
 };
 

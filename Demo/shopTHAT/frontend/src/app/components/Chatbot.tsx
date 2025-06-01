@@ -114,7 +114,8 @@ export default function Chatbot() {
     }
   };
 
-  if (!config || !enabled.length) return null;
+  if (!slug) return null;
+if (!config || !enabled.length) return null;
 
   const campaignTitle = titleCase(slug.replace(/_/g, ' '));
   const shouldShowFullChatbot = hovered || isExpanded;

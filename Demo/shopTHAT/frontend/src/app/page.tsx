@@ -39,8 +39,8 @@ export default function HomePage() {
   }, []);
 
   return (
-  <MainWrapper backgroundImage="/background/bg.avif">
-  <h2 style={{ fontSize: '18px' }}>Campaigns</h2>
+  <MainWrapper backgroundImage="/background/home_bg.jpg">
+  <h2 style={{ fontSize: '18px' }}>LV Exclusive Campaigns</h2>
 
   {loading && <p>Loading campaigns…</p>}
   {error   && <p style={{ color: 'red' }}>{error}</p>}

@@ -1,42 +1,97 @@
+/* app/globals.css */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
-html,
-body {
-  max-width: 100vw;
-  overflow-x: hidden;
-}
-
-body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  --bg: #f9fafb;
+  --card-bg: #ffffff;
+  --text: #111827;
+  --subtle: #6b7280;
+  --primary: #111;
+  --accent: #4ade80;
 }
 
 * {
-  box-sizing: border-box;
-  padding: 0;
   margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
-a {
-  color: inherit;
-  text-decoration: none;
+body {
+  font-family: 'Segoe UI', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
 }
 
-@media (prefers-color-scheme: dark) {
-  html {
-    color-scheme: dark;
-  }
+h2 {
+  font-size: 1.25rem;
+  margin-bottom: 1rem;
 }
+
+.card {
+  background: var(--card-bg);
+  padding: 1.5rem;
+  border-radius: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  margin-bottom: 2rem;
+}
+
+.grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.flex {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.switch-thumb {
+  height: 16px;
+  width: 16px;
+  background: white;
+  border-radius: 50%;
+  transition: transform 0.2s ease;
+}
+
+.switch-root {
+  width: 36px;
+  height: 20px;
+  border-radius: 9999px;
+  background: #d1d5db;
+  display: flex;
+  align-items: center;
+  padding: 2px;
+  cursor: pointer;
+}
+
+.switch-root.checked {
+  background: var(--primary);
+}
+
+.switch-root.checked .switch-thumb {
+  transform: translateX(16px);
+}
+.switch-label {
+  font-size: 0.875rem;
+  color: var(--subtle);
+}
+.switch-label.checked {
+  color: var(--primary);
+}
+.switch-label:hover {
+  color: var(--primary);
+}
+.switch-label.checked:hover {
+  color: var(--accent);
+}
+.switch-label:active {
+  color: var(--accent);
+}
+.switch-label.checked:active {
+  color: var(--primary);
+}
+.switch-label:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}     
