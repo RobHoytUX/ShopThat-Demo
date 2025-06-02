@@ -35,13 +35,19 @@ export default function Chatbot() {
   const [isExpanded, setIsExpanded] = useState(false);
 
  useEffect(() => {
+  setIsScrolled(false);
+  setIsExpanded(false);
+
   const handleScroll = () => {
     setIsScrolled(true);
     setIsExpanded(true);
   };
+
   window.addEventListener('scroll', handleScroll, { once: true });
+
   return () => window.removeEventListener('scroll', handleScroll);
-}, []);
+}, [slug]); 
+
 
 
   useEffect(() => {
