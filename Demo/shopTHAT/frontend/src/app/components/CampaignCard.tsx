@@ -1,40 +1,36 @@
 'use client';
+
 import React from 'react';
 import Link from 'next/link';
-export default function CampaignCard({ title, slug, onClick }: CampaignCardProps) {
-  return (
-    <div style={cardStyle} >
-      <Link href={`/campaigns/${slug}`} onClick={onClick} style={{ textDecoration: 'none', color: 'inherit' }}>
-        <div style={titleStyle}>{title}</div>
-        <div style={viewStyle}>View &gt;</div>
-      </Link>
-    </div>
-  );
-}
-const cardStyle: React.CSSProperties = {
-  backgroundColor: 'white',
-  color: '#1A1A1A',
-  padding: '48px 24px',
-  borderRadius: '16px',
-  textAlign: 'center',
-  width: '280px',
-  cursor: 'pointer',
-  display: 'flex',
-  flexDirection: 'column',
-  justifyContent: 'center',
-  transition: 'transform 0.2s ease',
+
+const backgroundMap: Record<string, string> = {
+  'ai_research': '/background/home_bg.jpg',
+  'climate_change': '/background/bg2.avif',
+  'core_values_campaign': '/background/bg.avif',
+  'kusama_campaign': '/background/bggirl.jpg',
+  'murakami_campaign': '/background/bg_murakami.avif',
 };
-const titleStyle: React.CSSProperties = {
-  fontSize: '20px',
-  fontWeight: 600,
-  marginBottom: '12px',
-};
-const viewStyle: React.CSSProperties = {
-  fontSize: '12px',
-  color: '#666',
-};
-interface CampaignCardProps {
-  title: string;
+
+export interface CampaignCardProps {
   slug: string;
-  onClick?: () => void;
+  title: string;
+}
+
+export default function CampaignCard({ slug, title }: CampaignCardProps) {
+  const normalizedSlug = slug.replace(/[-\s]/g, '_').toLowerCase();
+  const bgImage = backgroundMap[normalizedSlug] ?? '/background/default.jpg';
+
+  return (
+    <Link href={`/campaigns/${slug}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+      <div
+        className="campaign-card"
+        style={{ backgroundImage: `url(${bgImage})` }}
+      >
+        <div className="campaign-overlay">
+          <div className="campaign-title">{title}</div>
+          <div className="campaign-cta">View ➜</div>
+        </div>
+      </div>
+    </Link>
+  );
 }

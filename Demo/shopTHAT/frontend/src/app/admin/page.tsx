@@ -2,13 +2,11 @@
 
 import React, { useEffect, useState } from 'react';
 import { Switch } from '@/components/ui/switch';
+import BubbleExplorer from '@/components/ui/BubbleExplorer';
 
 interface ToggleItem { name: string; enabled: boolean }
 interface DocItem { title: string; enabled: boolean }
-interface ExternalDocItem {
-  title: string;
-  enabled: boolean;
-}
+interface ExternalDocItem { title: string; enabled: boolean }
 interface PubItem { name: string; percent: string }
 interface KeywordItem { keyword: string; percent: string }
 interface ArticleItem { title: string; views: string }
@@ -32,6 +30,7 @@ export default function AdminDashboardPage() {
   const [rightToggles, setRightToggles] = useState<ToggleItem[]>([]);
   const [internalPage, setInternalPage] = useState(1);
   const [externalPage, setExternalPage] = useState(1);
+  const [activeTab, setActiveTab] = useState('Internals');
   const itemsPerPage = 5;
 
   useEffect(() => {
@@ -52,20 +51,53 @@ export default function AdminDashboardPage() {
 
   if (!data) return <div>Loading...</div>;
 
+  if (activeTab === 'Internals') {
+    return (
+      <div style={{ padding: '24px', background: 'linear-gradient(to bottom right, #e2e8f0, #fefce8)', minHeight: '100vh' }}>
+        {/* Header */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+          <div style={{ display: 'flex', gap: '8px' }}>
+            {['Home', 'Internals', 'Publishers', 'Open Source', 'Ecommerce'].map((tab: string) => (
+              <button
+                key={tab}
+                onClick={() => setActiveTab(tab)}
+                style={{
+                  background: tab === activeTab ? '#d1d5db' : '#f1f5f9',
+                  padding: '6px 12px',
+                  borderRadius: '8px',
+                  border: '1px solid #ccc',
+                  cursor: 'pointer'
+                }}
+              >
+                {tab}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', background: 'white', padding: '20px', borderRadius: '12px', maxWidth: '500px' }}>
+          <h3 style={{ fontWeight: 'bold' }}>Upload Internals</h3>
+          <input type="file" accept="application/pdf" />
+          <input type="text" placeholder="Enter link to document" style={{ padding: '8px 10px', borderRadius: '6px', border: '1px solid #ccc' }} />
+        </div>
+      </div>
+    );
+  }
+
   const pagedInternalDocs = data.documents.internal.slice((internalPage - 1) * itemsPerPage, internalPage * itemsPerPage);
   const pagedExternalDocs = data.documents.external.slice((externalPage - 1) * itemsPerPage, externalPage * itemsPerPage);
 
   return (
     <div style={{ padding: '24px', background: 'linear-gradient(to bottom right, #e2e8f0, #fefce8)', minHeight: '100vh' }}>
-      
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
         <div style={{ display: 'flex', gap: '8px' }}>
           {['Home', 'Internals', 'Publishers', 'Open Source', 'Ecommerce'].map((tab: string) => (
             <button
               key={tab}
+              onClick={() => setActiveTab(tab)}
               style={{
-                background: tab === 'Publishers' ? '#d1d5db' : '#f1f5f9',
+                background: tab === activeTab ? '#d1d5db' : '#f1f5f9',
                 padding: '6px 12px',
                 borderRadius: '8px',
                 border: '1px solid #ccc',
@@ -82,48 +114,31 @@ export default function AdminDashboardPage() {
         </div>
       </div>
 
-      <div style={{ display: 'flex', gap: '20px' }}>
-        
+    <div style={{ display: 'flex', gap: '20px' }}>
         {/* Filter Card */}
         <div style={{ width: '220px', background: 'white', padding: '16px', borderRadius: '16px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
           <h3 style={{ fontWeight: 'bold', marginBottom: '16px' }}>Document Filter</h3>
           <label style={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
             <input type="checkbox" checked={showInternal} onChange={() => setShowInternal(!showInternal)} />
-            <span style={{ marginLeft: '8px' }}>Internal Documents</span>
+            <span style={{ marginLeft: '8px' }}>Internal</span>
           </label>
           <label style={{ display: 'flex', alignItems: 'center' }}>
             <input type="checkbox" checked={showExternal} onChange={() => setShowExternal(!showExternal)} />
-            <span style={{ marginLeft: '8px' }}>External Documents</span>
+            <span style={{ marginLeft: '8px' }}>External</span>
           </label>
         </div>
 
-        {/* Center Column */}
+        {/* Center Column with Bubbles */}
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '20px' }}>
-
-          {/* Toggle Grid */}
-          <div style={{ background: 'white', padding: '16px', borderRadius: '16px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
-            <input type="text" placeholder="Takeshi Murakami" style={{ width: '100%', marginBottom: '16px', padding: '8px 12px', borderRadius: '8px', border: '1px solid #ccc' }} />
-            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-              {[leftToggles, rightToggles].map((toggles: ToggleItem[], sideIdx: number) => (
-                <div key={sideIdx} style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  {toggles.map((item: ToggleItem, idx: number) => (
-                    <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <Switch checked={item.enabled} onCheckedChange={() => toggleHandler(idx, sideIdx === 0 ? 'left' : 'right')} />
-                      <span>{item.name}</span>
-                    </div>
-                  ))}
-                </div>
-              ))}
-            </div>
-          </div>
+          <BubbleExplorer />
 
           {/* Documents */}
           <div style={{ background: 'white', padding: '16px', borderRadius: '16px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
-            <h3 style={{ fontWeight: 'bold', marginBottom: '12px' }}>Current Documents & Uses</h3>
+            <h3 style={{ fontWeight: 'bold', marginBottom: '12px' }}>Matching Articles</h3>
 
             {showInternal && (
               <>
-                <h4 style={{ fontWeight: 'bold', marginBottom: '8px' }}>Internal Documents</h4>
+                <h4 style={{ fontWeight: 'bold', marginBottom: '8px' }}>Internal</h4>
                 {pagedInternalDocs.map((doc: DocItem, idx: number) => (
                   <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
                     <Switch checked={doc.enabled} />
@@ -142,14 +157,13 @@ export default function AdminDashboardPage() {
 
             {showExternal && (
               <>
-                <h4 style={{ fontWeight: 'bold', marginTop: '16px', marginBottom: '8px' }}>External Documents</h4>
-               {pagedExternalDocs.map((doc: DocItem, idx: number) => (
-  <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
-    <Switch checked={doc.enabled} />
-    <span>{doc.title}</span>
-  </div>
-))}
-
+                <h4 style={{ fontWeight: 'bold', marginTop: '16px', marginBottom: '8px' }}>External</h4>
+                {pagedExternalDocs.map((doc: DocItem, idx: number) => (
+                  <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+                    <Switch checked={doc.enabled} />
+                    <span>{doc.title}</span>
+                  </div>
+                ))}
                 <div>
                   {Array.from({ length: Math.ceil(data.documents.external.length / itemsPerPage) }, (_, i: number) => (
                     <button key={i} onClick={() => setExternalPage(i + 1)} style={{ marginRight: '6px' }}>
