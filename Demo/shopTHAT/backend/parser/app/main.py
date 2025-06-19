@@ -109,23 +109,23 @@ def chat(req: ChatRequest):
     # print(">>> Enabled Keywords:", req.enabled)
     # print(">>> Disabled Keywords:", req.disabled)
     # print(">>> FAISS Store Path:", store.)
-    ctx, sources, image_urls = retrieve_context(
+    ctx, sources = retrieve_context(
         req.message, store, req.enabled, req.disabled, top_k=1
     )
 
     print(">>> CONTEXT:\n", ctx)
-    print(">>> Img SOURCES\n:", image_urls)
+    # print(">>> Img SOURCES\n:", image_urls)
     # print(">>> URL SOURCES\n:", sources)
 
     enabled_str   = ", ".join(req.enabled)   or  "None"
     disabled_str  = ", ".join(req.disabled)  or  "None"
     sources_str   = ", ".join(sources)       or  "None"
-    image_urls_str = ", ".join(image_urls) or "None"
+    # image_urls_str = ", ".join(image_urls) or "None"
     system_prompt = SYSTEM_PROMPT.format(
         enabled_str=enabled_str,
         disabled_str=disabled_str,
-        sources_str=sources_str,
-        image_urls_str = image_urls 
+        sources_str=sources_str
+        # image_urls_str = image_urls 
     )
 
     full_prompt = "\n\n".join([
@@ -157,5 +157,5 @@ def chat(req: ChatRequest):
         evaluation=       evaluation,
         similarity_score= sim_score,
         sources=          sources,
-        image_urls=       image_urls 
+        image_urls=       [] 
     )

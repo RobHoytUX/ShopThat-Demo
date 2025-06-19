@@ -28,6 +28,8 @@ def retrieve_context(query, vectorstore, enabled=None, disabled=None, top_k=2):
     if not selected:
         return "No matching campaign information found.", [], []
 
+    # 5) Build context and collect URL
+    ctx_parts, product_urls = [], []
     # 5) Build context and collect URLs
     ctx_parts, image_urls, product_urls = [], [], []
     for doc in selected:
