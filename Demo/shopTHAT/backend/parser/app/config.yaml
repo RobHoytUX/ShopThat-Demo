@@ -11,7 +11,7 @@ llm:
     backoff_max: 60
 
 faiss:
-  pickle_path: "../faiss/faiss_vectorstore_metadata_content.pkl"
+  pickle_path: "backend/parser/faiss/faiss_stores/faiss_all_campaigns_text"
 
 groq:
   api_key_env: GROQ_API_KEY
