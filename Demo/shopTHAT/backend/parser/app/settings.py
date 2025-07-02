@@ -27,10 +27,12 @@ class Settings:
         self.retry_backoff_min       = retry_cfg["backoff_min"]
         self.retry_backoff_max       = retry_cfg["backoff_max"]
 
-        # 3) FAISS paths
+        # ————— FAISS section —————
         faiss_cfg = raw["faiss"]
-        # self.FAISS_STORE_PATH        = faiss_cfg["store_path"]
-        self.FAISS_PICKLE_PATH       = faiss_cfg["pickle_path"]
+        rel = faiss_cfg["store_path"]               # e.g. "backend/parser/faiss_stores/…"
+        
+        self.FAISS_STORE_PATH = BASE_DIR / rel      # absolute Path to that folder
+
 
         # 4) GROQ API key from env var name in config
         self.GROQ_API_KEY = os.getenv("GROQ_API_KEY")

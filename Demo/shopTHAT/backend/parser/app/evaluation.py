@@ -2,8 +2,8 @@
 
 import mlflow
 from groq import Groq
-from backend.parser.app.settings import settings
-from backend.parser.app.llm import GroqLLM
+from .settings import settings
+from .llm import GroqLLM
 from langchain.chains import LLMChain
 from langchain.prompts import PromptTemplate
 from langchain_huggingface import HuggingFaceEmbeddings

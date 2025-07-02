@@ -1,5 +1,7 @@
 // src/app/page.tsx
 'use client';
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+
 
 import { useEffect, useState } from 'react';
 import MainWrapper from '@/components/MainWrapper';
@@ -20,7 +22,7 @@ export default function HomePage() {
 
 
   useEffect(() => {
-    fetch('http://localhost:8000/api/campaigns')
+    fetch('${API_BASE}/api/campaigns')
       .then(res => {
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         return res.json();

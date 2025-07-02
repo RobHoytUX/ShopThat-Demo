@@ -2,28 +2,29 @@ import os
 import re
 from pathlib import Path
 from typing import List
+
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi import Request
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
+
 from groq import Groq
-import pickle
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_community.vectorstores import FAISS
 
-from backend.parser.app.settings import settings
-from backend.parser.app.llm import GroqLLM
-from backend.parser.app.retrieval import retrieve_context
-from backend.parser.app.logger import ConversationLogger
-from backend.parser.app.evaluation import evaluate_response
-
-# import your campaigns router
-from backend.parser.app.routers.campaigns import router as campaigns_router
+from .settings import settings
+from .llm import GroqLLM
+from .retrieval import retrieve_context
+from .logger import ConversationLogger
+from .evaluation import evaluate_response
+from .routers.campaigns import router as campaigns_router
 
 app = FastAPI(title="Pangee Chat Inference")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origins=["http://localhost:3000", "https://5.161.217.209"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -38,63 +39,64 @@ if not PROMPT_PATH.exists():
     raise FileNotFoundError(f"Could not find prompt file at {PROMPT_PATH}")
 SYSTEM_PROMPT = PROMPT_PATH.read_text(encoding="utf-8")
 
-# init LLM, embeddings, FAISS, logger
-# print("Groq API Key:", settings.GROQ_API_KEY)
-client     = Groq(api_key=settings.GROQ_API_KEY)
-llm        = GroqLLM(client=client)
-embedder   = HuggingFaceEmbeddings(model_name=settings.embedder_model)
-store = FAISS.load_local(
-    settings.FAISS_PICKLE_PATH,
-    embedder,
-    allow_dangerous_deserialization=True
-)
-conv_logger = ConversationLogger()
+
+@app.on_event("startup")
+def startup_event():
+    """Initialize heavy resources once at startup."""
+    # Groq client & LLM
+    client     = Groq(api_key=settings.GROQ_API_KEY)
+    app.state.llm = GroqLLM(client=client)
+
+    # Embeddings & FAISS
+    app.state.embedder = HuggingFaceEmbeddings(model_name=settings.embedder_model)
+    app.state.store    = FAISS.load_local(
+        settings.FAISS_STORE_PATH,
+        app.state.embedder,
+        allow_dangerous_deserialization=True,
+    )
+
+    # Conversation logger
+    app.state.conv_logger = ConversationLogger()
+
+    print("✅ Startup complete: LLM, embeddings, FAISS index, logger ready.")
 
 
 def format_bot_response(text: str, sources: List[str]) -> str:
-    # 1) Strip “You:” prefix
+    # 0) Normalize newlines
+    text = text.replace("\r\n", "\n").replace("\r", "\n")
+
+    # 1) Cut at the first "sources:" (case-insensitive)
+    idx = text.lower().find("sources:")
+    if idx != -1:
+        text = text[:idx].rstrip()
+
+    # 2) Strip “You:” prefix if present
     text = re.sub(r"^You[:\s]+", "", text).strip()
 
-    # 2) Bulletify EVERY block under a “Something:” header
-    lines = text.splitlines()
-    out = []
-    in_block = False
-
+    # 3) Bulletify blocks under a header
+    lines, out, in_block = text.splitlines(), [], False
     for line in lines:
         if re.match(r".+:\s*$", line):
             out.append(line)
             in_block = True
-            continue
-
-        if in_block:
-            if not line.strip():
-                in_block = False
-                out.append(line)
-                continue
-            clean = re.sub(r'^[\-\–\s]+', '', line)
+        elif in_block and line.strip():
+            clean = re.sub(r"^[\-\–\s]+", "", line)
             out.append(f"- {clean}")
-            continue
-
-        out.append(line)
-
-    text = "\n".join(out)
-
-    # 3) Remove any trailing “Sources:” section (to ensure we append a fresh one)
-    text = re.sub(r"(?is)\n*Sources:.*$", "", text).rstrip()
-
-    # 4) (Removed) Inline-cite logic
-
-    # 5) Optionally append sources as a list at the end (not inlined)
-    if sources:
-        text += "\n\nSources:\n" + "\n".join(f"- {u}" for u in sources)
+        else:
+            in_block = False
+            out.append(line)
+    text = "\n".join(out).strip()
 
     return text
 
-# chat endpoint
+
+
+
 class ChatRequest(BaseModel):
-    message: str
-    enabled: List[str] = []
+    message:  str
+    enabled:  List[str] = []
     disabled: List[str] = []
+
 
 class ChatResponse(BaseModel):
     response:         str
@@ -103,29 +105,28 @@ class ChatResponse(BaseModel):
     sources:          List[str]
     image_urls:       List[str]
 
+
 @app.post("/api/chat", response_model=ChatResponse)
-def chat(req: ChatRequest):
-    # print(">>> User Request:", req.message)
-    # print(">>> Enabled Keywords:", req.enabled)
-    # print(">>> Disabled Keywords:", req.disabled)
-    # print(">>> FAISS Store Path:", store.)
-    ctx, sources = retrieve_context(
+async def chat(req: ChatRequest, request: Request):
+    store       = request.app.state.store
+    llm         = request.app.state.llm
+    conv_logger = request.app.state.conv_logger
+
+    # 1) Retrieval
+    ctx, sources, _ = retrieve_context(
         req.message, store, req.enabled, req.disabled, top_k=1
     )
 
-    print(">>> CONTEXT:\n", ctx)
-    # print(">>> Img SOURCES\n:", image_urls)
-    # print(">>> URL SOURCES\n:", sources)
+    # 2) Build the prompt
+    enabled_str  = ", ".join(req.enabled)  or "None"
+    disabled_str = ", ".join(req.disabled) or "None"
+    sources_str  = ", ".join(sources)      or "None"
 
-    enabled_str   = ", ".join(req.enabled)   or  "None"
-    disabled_str  = ", ".join(req.disabled)  or  "None"
-    sources_str   = ", ".join(sources)       or  "None"
-    # image_urls_str = ", ".join(image_urls) or "None"
     system_prompt = SYSTEM_PROMPT.format(
-        enabled_str=enabled_str,
-        disabled_str=disabled_str,
-        sources_str=sources_str
-        # image_urls_str = image_urls 
+        enabled_str   = enabled_str,
+        disabled_str  = disabled_str,
+        sources_str   = sources_str,
+        image_urls_str= ""  # if you need images later
     )
 
     full_prompt = "\n\n".join([
@@ -135,27 +136,43 @@ def chat(req: ChatRequest):
         ctx,
         "Answer:"
     ])
-    # print(">>> FULL PROMPT:\n", full_prompt)
-    raw_resp = llm._call(full_prompt)
-    formatted_resp = format_bot_response(raw_resp, sources)
-    print(">>> FINAL BOT TEXT:\n", formatted_resp) 
 
+    # 3) Generate & format
+    try:
+         raw_resp = llm._call(full_prompt)
+    except groq.InternalServerError as e:
+        # retry once after a short backoff
+         import time
+         time.sleep(1)
+         try:
+             raw_resp = llm._call(full_prompt)
+         except groq.InternalServerError:
+            # final fallback: return a friendly error to the client
+             raise HTTPException(
+                status_code=503,
+                detail="Our AI backend is temporarily unavailable. Please try again in a few seconds."
+             )
+    formatted_resp = format_bot_response(raw_resp, sources)
+
+    # 4) Evaluate
     evaluation, sim_score = evaluate_response(
-        user_request= req.message,
-        context=      ctx,
-        model_response= raw_resp
+        user_request   = req.message,
+        context        = ctx,
+        model_response = raw_resp,
     )
 
+    # 5) Log
     conv_logger.add(
         "Assistant", formatted_resp,
         req.enabled, req.disabled,
         sources, evaluation, sim_score
     )
 
+    # 6) Return
     return ChatResponse(
-        response=         formatted_resp,
-        evaluation=       evaluation,
-        similarity_score= sim_score,
-        sources=          sources,
-        image_urls=       [] 
+        response         = formatted_resp,
+        evaluation       = evaluation,
+        similarity_score = sim_score,
+        sources          = sources,
+        image_urls       = []
     )

@@ -1,4 +1,5 @@
 'use client';
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams } from 'next/navigation';
@@ -6,7 +7,7 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeRaw from 'rehype-raw';
 
-const API_BASE = 'http://localhost:8000';
+
 
 interface ToggleItem { name: string; enabled: boolean }
 interface CampaignConfig {
