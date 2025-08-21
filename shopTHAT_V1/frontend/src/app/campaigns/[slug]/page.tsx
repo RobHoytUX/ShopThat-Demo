@@ -3,14 +3,13 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import MainWrapper from '@/components/MainWrapper';
-import Chatbot from '@/components/Chatbot';
 
 // Map campaign slug to background image
 const backgroundMap: Record<string, string> = {
   'ai_research': '/background/home_bg.jpg',
   'climate_change': '/background/bg2.avif',
   'core_values_campaign': '/background/bg.avif',
-  'kusama_campaign': '/background/bg_polka.avif',
+  'kusama_campaign': '/background/bggirl.jpg',
   'murakami_campaign': '/background/bg_murakami.avif',
 };
 
@@ -41,9 +40,6 @@ export default function CampaignPage() {
         </p>
         <div style={styles.scrollPrompt}>↓ Scroll down</div>
       </div>
-      
-      {/* Add the Chatbot component */}
-      <Chatbot />
     </MainWrapper>
   );
 }

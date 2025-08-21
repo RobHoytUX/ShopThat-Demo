@@ -31,29 +31,31 @@ export default function Chatbot() {
   const [input, setInput] = useState('');
   const ref = useRef<HTMLInputElement>(null);
 
-  const [isScrolled, setIsScrolled] = useState(false);
+  const [isVisible, setIsVisible] = useState(true);
   const [hovered, setHovered] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
+  const scrollIdleTimeoutRef = useRef<number | null>(null);
 
 useEffect(() => {
-  const scrollThreshold = 300;
-
   const handleScroll = () => {
-    const currentScroll = window.scrollY;
-
-    if (currentScroll >= scrollThreshold) {
-      setIsScrolled(true);
-      setIsExpanded(true);
-    } else {
-      setIsScrolled(false);
-      setIsExpanded(false);
-      setHovered(false);
+    setIsVisible(false);
+    setHovered(false);
+    if (scrollIdleTimeoutRef.current !== null) {
+      window.clearTimeout(scrollIdleTimeoutRef.current);
     }
+    scrollIdleTimeoutRef.current = window.setTimeout(() => {
+      setIsVisible(true);
+    }, 250);
   };
 
-  window.addEventListener('scroll', handleScroll);
-  return () => window.removeEventListener('scroll', handleScroll);
-}, [slug]);
+  window.addEventListener('scroll', handleScroll, { passive: true });
+  return () => {
+    window.removeEventListener('scroll', handleScroll);
+    if (scrollIdleTimeoutRef.current !== null) {
+      window.clearTimeout(scrollIdleTimeoutRef.current);
+    }
+  };
+}, []);
 
 
 
@@ -137,8 +139,8 @@ if (!config || !enabled.length) return null;
     <div
       style={{
         ...styles.wrapper,
-        opacity: isScrolled || hovered || isExpanded ? (hovered || isExpanded ? 1 : 0.3) : 0,
-        pointerEvents: isScrolled || hovered || isExpanded ? 'auto' : 'none',
+        opacity: isVisible ? (hovered || isExpanded ? 1 : 0.3) : 0,
+        pointerEvents: isVisible ? 'auto' : 'none',
         transition: 'opacity 0.3s ease, pointer-events 0.3s ease',
         backgroundColor:
   isExpanded
@@ -154,8 +156,8 @@ if (!config || !enabled.length) return null;
       <div
         style={{
           ...styles.toggle,
-          opacity: isScrolled ? 0.3 : 0,
-          pointerEvents: isScrolled ? 'auto' : 'none',
+          opacity: isVisible ? 0.3 : 0,
+          pointerEvents: isVisible ? 'auto' : 'none',
           transition: 'opacity 0.3s ease',
         }}
         onClick={() => setIsExpanded(!isExpanded)}

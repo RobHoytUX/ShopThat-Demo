@@ -4,7 +4,6 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "dev:with-backend": "concurrently \"npm run dev\" \"cd ../graph_rag_backend && python run_server.py\"",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
@@ -12,7 +11,7 @@
   "dependencies": {
     "@radix-ui/react-switch": "^1.2.5",
     "framer-motion": "^12.16.0",
-    "next": "^15.4.4",
+    "next": "15.3.2",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-icons": "^5.5.0",
@@ -26,7 +25,6 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "autoprefixer": "^10.4.21",
-    "concurrently": "^8.2.2",
     "eslint": "^9",
     "eslint-config-next": "15.3.2",
     "postcss": "^8.5.4",

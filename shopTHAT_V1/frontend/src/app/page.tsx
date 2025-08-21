@@ -15,13 +15,8 @@ function slugToTitle(slug: string) {
     .join(' ');
 }
 
-interface Campaign {
-  key: string;
-  display_name: string;
-}
-
 export default function HomePage() {
-  const [campaigns, setCampaigns] = useState<Campaign[]>([]);
+  const [slugs, setSlugs] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError]     = useState<string | null>(null);
 
@@ -32,8 +27,8 @@ export default function HomePage() {
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         return res.json();
       })
-      .then((data: Campaign[]) => {
-        setCampaigns(data);
+      .then((data: string[]) => {
+        setSlugs(data);
         setError(null);
       })
       .catch(err => {
@@ -63,17 +58,17 @@ export default function HomePage() {
         marginTop: '32px',
       }}
     >
-      {campaigns.map(campaign => (
+      {slugs.map(slug => (
         <CampaignCard
-          key={campaign.key}
-          slug={campaign.key}
-          title={campaign.display_name}
+          key={slug}
+          slug={slug}
+          title={slugToTitle(slug)}
         />
       ))}
     </div>
   )}
 
-  {!loading && !error && campaigns.length === 0 && (
+  {!loading && !error && slugs.length === 0 && (
     <p>No campaigns available.</p>
   )}
 </MainWrapper>

@@ -6,17 +6,7 @@ const nextConfig: NextConfig = {
     // your project has ESLint errors
     ignoreDuringBuilds: true,
   },
-  async rewrites() {
-    return [
-      {
-        source: '/api/:path*',
-        destination: 'http://localhost:8000/api/:path*',
-      },
-    ];
-  },
-  env: {
-    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000',
-  },
+  // …any other config options you already had
 };
 
 export default nextConfig;

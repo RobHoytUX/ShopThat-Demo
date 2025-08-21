@@ -22,7 +22,7 @@ export default function HomePage() {
 
 
   useEffect(() => {
-    fetch('${API_BASE}/api/campaigns')
+    fetch(`${API_BASE}/api/campaigns`)
       .then(res => {
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         return res.json();
