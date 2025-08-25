@@ -1,0 +1,82 @@
+INFO:     Will watch for changes in these directories: ['/Users/asksage/Documents/shopTHAT/shopTHAT_V1/graph_rag_backend']
+INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
+INFO:     Started reloader process [70771] using StatReload
+INFO src.backend.main: [env] loaded /Users/asksage/Documents/shopTHAT/shopTHAT_V1/graph_rag_backend/.env
+INFO:     Started server process [70773]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     127.0.0.1:49687 - "GET /api/test HTTP/1.1" 200 OK
+WARNING:  StatReload detected changes in 'src/backend/main.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [70773]
+INFO src.backend.main: [env] loaded /Users/asksage/Documents/shopTHAT/shopTHAT_V1/graph_rag_backend/.env
+INFO:     Started server process [71027]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     127.0.0.1:49796 - "GET /api/campaigns HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49835 - "GET /api/campaigns HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49844 - "GET /api/campaigns HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49884 - "GET /api/campaigns HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49884 - "GET /api/campaigns/kusama_campaign HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49888 - "GET /api/campaigns HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49888 - "GET /api/campaigns/kusama_campaign/keywords HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49900 - "GET /api/campaigns HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49899 - "GET /api/campaigns/kusama_campaign HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49899 - "GET /api/campaigns HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49900 - "GET /api/campaigns/kusama_campaign HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49900 - "GET /api/campaigns/kusama_campaign/keywords HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49900 - "GET /api/campaigns/kusama_campaign/keywords HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49929 - "GET /api/campaigns/kusama_campaign HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49931 - "GET /api/campaigns/kusama_campaign/keywords HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49943 - "GET /api/campaigns/kusama_campaign HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49944 - "GET /api/campaigns HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49944 - "GET /api/campaigns/kusama_campaign/keywords HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49961 - "GET /api/campaigns/kusama_campaign HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49964 - "GET /api/campaigns HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49964 - "GET /api/campaigns/kusama_campaign/keywords HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49984 - "GET /api/campaigns HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49983 - "GET /api/campaigns/kusama_campaign HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49983 - "GET /api/campaigns/kusama_campaign/keywords HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50047 - "GET /api/campaigns HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50046 - "GET /api/campaigns/kusama_campaign HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50046 - "GET /api/campaigns/kusama_campaign/keywords HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50116 - "GET /api/campaigns/kusama_campaign HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50118 - "GET /api/campaigns HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50118 - "GET /api/campaigns/kusama_campaign/keywords HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50118 - "GET /api/campaigns/kusama_campaign HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50116 - "GET /api/campaigns HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50116 - "GET /api/campaigns/kusama_campaign/keywords HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50171 - "GET /api/campaigns HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50170 - "GET /api/campaigns/kusama_campaign HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50170 - "GET /api/campaigns/kusama_campaign/keywords HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50171 - "GET /api/campaigns HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50173 - "GET /api/campaigns/kusama_campaign HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50171 - "GET /api/campaigns/kusama_campaign/keywords HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50198 - "GET /api/campaigns/kusama_campaign HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50199 - "GET /api/campaigns HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50198 - "GET /api/campaigns/kusama_campaign HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50199 - "GET /api/campaigns HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50199 - "GET /api/campaigns/kusama_campaign/keywords HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50199 - "GET /api/campaigns/kusama_campaign/keywords HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50309 - "GET /api/campaigns/kusama_campaign HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50311 - "GET /api/campaigns HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50311 - "GET /api/campaigns/kusama_campaign/keywords HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50547 - "GET /api/campaigns/kusama_campaign HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50549 - "GET /api/campaigns HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50549 - "GET /api/campaigns/%5Bobject%20Object%5D/keywords HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:50549 - "GET /api/campaigns HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50630 - "GET /api/campaigns HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50724 - "GET /api/campaigns/kusama_campaign HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50726 - "GET /api/campaigns HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50726 - "GET /api/campaigns/%5Bobject%20Object%5D/keywords HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:50822 - "GET /api/campaigns/kusama_campaign HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50823 - "GET /api/campaigns HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50823 - "GET /api/campaigns/kusama_campaign/keywords HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51567 - "GET /api/campaigns/kusama_campaign HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51569 - "GET /api/campaigns HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51569 - "GET /api/campaigns/kusama_campaign/keywords HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51586 - "GET /api/campaigns/kusama_campaign HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51588 - "GET /api/campaigns HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51588 - "GET /api/campaigns/kusama_campaign/keywords HTTP/1.1" 200 OK

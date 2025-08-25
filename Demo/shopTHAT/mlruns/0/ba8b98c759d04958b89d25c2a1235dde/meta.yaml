@@ -1,0 +1,14 @@
+artifact_uri: file:///Users/asksage/Documents/shopTHAT-main/Demo/shopTHAT/mlruns/0/ba8b98c759d04958b89d25c2a1235dde/artifacts
+end_time: null
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: active
+run_id: ba8b98c759d04958b89d25c2a1235dde
+run_name: selective-midge-582
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1755788405649
+status: 1
+tags: []
+user_id: asksage

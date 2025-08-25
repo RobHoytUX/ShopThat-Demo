@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import MainWrapper from '@/components/MainWrapper';
+import Chatbot from '@/components/Chatbot';
 
 // Map campaign slug to background image
 const backgroundMap: Record<string, string> = {
@@ -40,6 +41,7 @@ export default function CampaignPage() {
         </p>
         <div style={styles.scrollPrompt}>↓ Scroll down</div>
       </div>
+      <Chatbot />
     </MainWrapper>
   );
 }

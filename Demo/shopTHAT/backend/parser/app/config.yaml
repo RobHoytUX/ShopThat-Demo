@@ -11,8 +11,7 @@ llm:
     backoff_max: 60
 
 faiss:
-  
-  store_path: "backend/parser/faiss_local_stub/faiss_stores/faiss_all_campaigns_text"
+  store_path: "backend/parser/faiss/faiss_stores/faiss_all_campaigns_text"
   
 groq:
   api_key_env: GROQ_API_KEY

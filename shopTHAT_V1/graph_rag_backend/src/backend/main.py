@@ -14,7 +14,7 @@ from dotenv import load_dotenv
 # Routers & retrieval
 from .campaigns import router as campaigns_router
 from .keywords import router as keywords_router
-from .retrieval import retrieve_and_answer
+# NOTE: Avoid importing retrieval (heavy model load) at startup; import lazily in the handler
 
 # -----------------------------------------------------------------------------
 # Logging
@@ -128,6 +128,8 @@ def chat(req: ChatRequest):
     - Appends a Sources: section with the exact URLs used.
     """
     try:
+        # Lazy import to avoid model/downloads at startup
+        from .retrieval import retrieve_and_answer  # type: ignore
         logger.info(f"[chat] q='{req.message[:80]}', kw_id={req.keyword_id}, kw_name={req.keyword_name}")
         enabled_csv  = _to_csv(req.enabled,  "all")
         disabled_csv = _to_csv(req.disabled, "none")

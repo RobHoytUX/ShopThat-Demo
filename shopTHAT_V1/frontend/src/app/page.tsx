@@ -27,8 +27,11 @@ export default function HomePage() {
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         return res.json();
       })
-      .then((data: string[]) => {
-        setSlugs(data);
+      .then((data: any[]) => {
+        const keys = Array.isArray(data)
+          ? data.map((item: any) => (typeof item === 'string' ? item : item?.key)).filter(Boolean)
+          : [];
+        setSlugs(keys as string[]);
         setError(null);
       })
       .catch(err => {

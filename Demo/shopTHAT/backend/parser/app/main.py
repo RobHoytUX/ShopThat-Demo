@@ -24,7 +24,13 @@ app = FastAPI(title="Pangee Chat Inference")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "https://5.161.217.209"],
+    allow_origins=[
+        "http://localhost:3000",
+        "http://localhost:3001",
+        "http://127.0.0.1:3000",
+        "http://127.0.0.1:3001",
+        "https://5.161.217.209",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -43,17 +49,40 @@ SYSTEM_PROMPT = PROMPT_PATH.read_text(encoding="utf-8")
 @app.on_event("startup")
 def startup_event():
     """Initialize heavy resources once at startup."""
-    # Groq client & LLM
+    # Optionally skip heavy init in demo
+    if os.getenv("DEMO_SKIP_HEAVY") == "1":
+        class _DummyLLM:
+            def _call(self, prompt: str) -> str:
+                return "This is a demo response (LLM disabled)."
+        class _DummyStore:
+            def similarity_search_with_score(self, query, k=2):
+                return []
+        app.state.llm = _DummyLLM()
+        app.state.embedder = None
+        app.state.store = _DummyStore()
+        app.state.conv_logger = ConversationLogger()
+        print("⚠️  Demo mode: heavy init skipped. Using dummy LLM and empty store.")
+        print("✅ Startup complete: demo mode ready.")
+        return
+
+    # Groq client & LLM (full init)
     client     = Groq(api_key=settings.GROQ_API_KEY)
     app.state.llm = GroqLLM(client=client)
 
-    # Embeddings & FAISS
+    # Embeddings & FAISS (with safe fallback)
     app.state.embedder = HuggingFaceEmbeddings(model_name=settings.embedder_model)
-    app.state.store    = FAISS.load_local(
-        settings.FAISS_STORE_PATH,
-        app.state.embedder,
-        allow_dangerous_deserialization=True,
-    )
+    try:
+        app.state.store = FAISS.load_local(
+            settings.FAISS_STORE_PATH,
+            app.state.embedder,
+            allow_dangerous_deserialization=True,
+        )
+    except Exception as e:
+        class _DummyStore:
+            def similarity_search_with_score(self, query, k=2):
+                return []
+        app.state.store = _DummyStore()
+        print(f"⚠️  FAISS load failed ({e}). Using empty fallback store for demo.")
 
     # Conversation logger
     app.state.conv_logger = ConversationLogger()
