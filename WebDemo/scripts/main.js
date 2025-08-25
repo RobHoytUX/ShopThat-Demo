@@ -260,7 +260,7 @@
   .chatbot-messages{flex:1;overflow:auto;margin-bottom:8px;display:flex;flex-direction:column;gap:8px;padding:4px}
   .chatbot-msg{max-width:80%;padding:10px 12px;border-radius:16px;line-height:1.35;font-size:14px;word-wrap:break-word;white-space:pre-wrap;position:relative}
   .chatbot-msg-user{align-self:flex-end;background:rgba(0,0,0,0.78);color:#fff;border-radius:30px 30px 6px 30px}
-  .chatbot-msg-bot{align-self:flex-start;background:rgba(0,0,0,0.06);color:#111;border-radius:30px 30px 30px 6px}
+  .chatbot-msg-bot{align-self:flex-start;background:#f2f2f2;color:#111;border-radius:30px 30px 30px 6px}
   .chatbot-input{display:flex;gap:8px}
   .chatbot-input input{flex:1;padding:12px 8px 12px 20px;border-radius:50px;border:1px solid #ccc}
   .chatbot-input input::placeholder{color:#444;opacity:1}
