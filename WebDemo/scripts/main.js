@@ -226,3 +226,226 @@
 })();
 
 
+// Chatbox widget
+(function(){
+  const API_BASE = 'http://localhost:8000';
+  const DEFAULT_SLUG = 'kusama_campaign';
+
+  const styles = `
+  .chatbot-wrapper{position:fixed;bottom:104px;right:20px;z-index:999}
+  .chatbot-toggle{background:#000;color:#fff;border-radius:50%;cursor:pointer;position:absolute;bottom:-80px;right:8px;border:0;outline:none;box-shadow:none;display:grid;place-items:center;width:56px;height:56px;padding:0}
+  .chatbot-toggle:focus{outline:none}
+  .chatbot-toggle img{width:24px;height:24px;filter:brightness(0) invert(1)}
+  .chatbot-box{height:500px;width:360px;color:#111;border-radius:12px;padding:12px;display:flex;flex-direction:column;
+    background: linear-gradient(135deg, rgba(255,255,255,0.4), rgba(255,255,255,0.22));
+    border: 1px solid rgba(255,255,255,0.35);
+    box-shadow: 0 8px 32px 0 rgba(31,38,135,0.3);
+    backdrop-filter: blur(16px) saturate(180%);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
+  }
+  .chatbot-box[hidden]{display:none !important}
+  .chatbot-header{text-align:center}
+  .chatbot-title{font-size:21px;font-weight:600;margin:0 0 8px}
+  .chatbot-sub{font-size:13px;color:#232323;margin:0 0 8px}
+  .chatbot-logo{display:block;margin:0 auto 8px;height:40px;width:auto}
+  .chatbot-options{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-bottom:8px}
+  .chatbot-options button{padding:6px 10px;border:1px solid rgba(0,0,0,0.35);border-radius:12px;background:rgba(255,255,255,0.32);cursor:pointer;font-size:12px}
+  .chatbot-presets{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:24px 0 8px}
+  .chatbot-presets button{padding:8px 12px;border:1px solid rgba(0,0,0,0.35);border-radius:16px;background:rgba(255,255,255,0.32);backdrop-filter:saturate(160%);font-size:12px;cursor:pointer}
+  .chatbot-messages{flex:1;overflow:auto;margin-bottom:8px}
+  .chatbot-msg-user{text-align:right;font-weight:600;margin:4px 0}
+  .chatbot-msg-bot{text-align:left;margin:4px 0;white-space:pre-wrap}
+  .chatbot-input{display:flex;gap:8px}
+  .chatbot-input input{flex:1;padding:12px 8px 12px 20px;border-radius:50px;border:1px solid #ccc}
+  .chatbot-input button{width:40px;height:40px;border-radius:50%;border:0;background:#000;color:#fff;cursor:pointer;display:grid;place-items:center;padding:0}
+  @media (max-width:600px){.chatbot-box{width:90vw}}
+  `;
+
+  function injectStyles(){
+    if (document.getElementById('chatbot-styles')) return;
+    const s = document.createElement('style');
+    s.id = 'chatbot-styles';
+    s.textContent = styles;
+    document.head.appendChild(s);
+  }
+
+  function createEl(tag, attrs, children){
+    const el = document.createElement(tag);
+    if (attrs) Object.entries(attrs).forEach(([k,v])=>{
+      if (k === 'class') el.className = v; else if (k === 'text') el.textContent = v; else el.setAttribute(k, v);
+    });
+    (children||[]).forEach(c => el.appendChild(c));
+    return el;
+  }
+
+  async function fetchJSON(url){
+    const res = await fetch(url);
+    if (!res.ok) throw new Error('HTTP '+res.status);
+    return res.json();
+  }
+
+  function titleCase(s){
+    return String(s||'').split(' ').map(w=>w.charAt(0).toUpperCase()+w.slice(1).toLowerCase()).join(' ');
+  }
+
+  function markdownToText(md){
+    // Minimal rendering for bullets/headers; keep simple for demo
+    return String(md||'')
+      .replace(/^###?\s+/gm,'')
+      .replace(/^\*\s+/gm,'• ')
+      .replace(/^\-\s+/gm,'• ')
+      .replace(/\*\*(.*?)\*\*/g,'$1')
+      .replace(/`([^`]+)`/g,'$1');
+  }
+
+  async function initChatbot(){
+    injectStyles();
+
+    const wrapper = createEl('div', { class: 'chatbot-wrapper', role: 'complementary', 'aria-label': 'Chatbot' });
+    const toggle  = createEl('button', { class: 'chatbot-toggle', 'aria-expanded': 'false', 'aria-controls': 'chatbot-box', title: 'Open chat' });
+    const box     = createEl('div', { class: 'chatbot-box', id: 'chatbot-box', hidden: '' });
+    const header  = createEl('div', { class: 'chatbot-header' });
+    const logo    = createEl('img', { class: 'chatbot-logo', src: 'assets/lv.png', alt: 'LV' });
+    const title   = createEl('div', { class: 'chatbot-title', text: '' });
+    const sub     = createEl('p', { class: 'chatbot-sub', text: 'Would you like to learn more about these?' });
+    const presets = createEl('div', { class: 'chatbot-presets' });
+    const options = createEl('div', { class: 'chatbot-options' });
+    const messages= createEl('div', { class: 'chatbot-messages' });
+    const inputW  = createEl('div', { class: 'chatbot-input' });
+    const input   = createEl('input', { type: 'text', placeholder: 'Type your message', 'aria-label': 'Message' });
+    const sendBtn = createEl('button', { type: 'button', 'aria-label': 'Send message' });
+    const icon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    icon.setAttribute('xmlns','http://www.w3.org/2000/svg');
+    icon.setAttribute('viewBox','0 0 24 24');
+    icon.setAttribute('fill','none');
+    icon.setAttribute('stroke','currentColor');
+    icon.setAttribute('width','20');
+    icon.setAttribute('height','20');
+    const path = document.createElementNS('http://www.w3.org/2000/svg','path');
+    path.setAttribute('d','M4.5 10.5 12 3m0 0 7.5 7.5M12 3v18');
+    path.setAttribute('stroke-linecap','round');
+    path.setAttribute('stroke-linejoin','round');
+    path.setAttribute('stroke-width','1.5');
+    icon.appendChild(path);
+    sendBtn.appendChild(icon);
+    inputW.appendChild(input); inputW.appendChild(sendBtn);
+    header.appendChild(logo); header.appendChild(title); header.appendChild(sub); header.appendChild(presets); header.appendChild(options);
+    // Add three static chips labeled "keyword"
+    ['keyword','keyword','keyword'].forEach(lbl => {
+      const b = createEl('button', { type: 'button' }, [document.createTextNode(lbl)]);
+      b.addEventListener('click', ()=>{ input.value = lbl; input.focus(); });
+      presets.appendChild(b);
+    });
+
+    box.appendChild(header); box.appendChild(messages); box.appendChild(inputW);
+    wrapper.appendChild(toggle); wrapper.appendChild(box);
+    document.body.appendChild(wrapper);
+
+    let slug = DEFAULT_SLUG;
+    let enabled = [];
+    let disabled = [];
+
+    try {
+      const campaigns = await fetchJSON(`${API_BASE}/api/campaigns`);
+      const keys = Array.isArray(campaigns)
+        ? campaigns.map(it => typeof it === 'string' ? it : (it?.key || it?.slug || it?.id)).filter(Boolean)
+        : [];
+      if (keys.length) slug = String(keys[0]);
+
+      const config = await fetchJSON(`${API_BASE}/api/campaigns/${slug}`);
+      const kwResp = await Promise.all(keys.map(k => fetchJSON(`${API_BASE}/api/campaigns/${k}/keywords`).catch(()=>[])));
+      const allMap = {};
+      kwResp.forEach((kw, i) => { allMap[keys[i]] = Array.isArray(kw) ? kw : (Array.isArray(kw?.keywords) ? kw.keywords : (Array.isArray(kw?.data) ? kw.data : [])); });
+
+      enabled = Array.isArray(config?.keywords) ? config.keywords.filter(t=>t.enabled).map(t=>t.name) : [];
+      const others = [];
+      Object.entries(allMap).forEach(([k, arr]) => { if (k !== slug) others.push(...(Array.isArray(arr)?arr:[])); });
+      disabled = others;
+
+      title.textContent = 'Hello!';
+      options.replaceChildren();
+      enabled.forEach(kw => {
+        const b = createEl('button', { type: 'button' }, [document.createTextNode(titleCase(kw))]);
+        b.addEventListener('click', ()=>{ input.value = titleCase(kw); input.focus(); });
+        options.appendChild(b);
+      });
+    } catch (e) {
+      title.textContent = 'Hello!';
+    }
+
+    function addMessage(sender, text){
+      const div = createEl('div', { class: sender === 'user' ? 'chatbot-msg-user' : 'chatbot-msg-bot' });
+      div.textContent = sender === 'user' ? text : markdownToText(text);
+      messages.appendChild(div);
+      messages.scrollTop = messages.scrollHeight;
+    }
+
+    async function send(){
+      const txt = (input.value||'').trim();
+      if (!txt) return;
+      addMessage('user', txt);
+      input.value = '';
+      try {
+        const res = await fetch(`${API_BASE}/api/chat`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message: txt, enabled, disabled })
+        });
+        if (!res.ok) throw new Error('HTTP '+res.status);
+        const d = await res.json();
+        addMessage('bot', String(d?.response||'No response'));
+      } catch (e) {
+        addMessage('bot', '❗ Failed to fetch response');
+      }
+    }
+
+    sendBtn.addEventListener('click', send);
+    input.addEventListener('keydown', (e)=>{ if (e.key === 'Enter'){ e.preventDefault(); send(); }});
+
+    let expanded = false;
+
+    function createCloseIcon(){
+      const icon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      icon.setAttribute('xmlns','http://www.w3.org/2000/svg');
+      icon.setAttribute('viewBox','0 0 24 24');
+      icon.setAttribute('fill','none');
+      icon.setAttribute('stroke','currentColor');
+      icon.setAttribute('width','20');
+      icon.setAttribute('height','20');
+      const path = document.createElementNS('http://www.w3.org/2000/svg','path');
+      path.setAttribute('d','M6 18 18 6M6 6l12 12');
+      path.setAttribute('stroke-linecap','round');
+      path.setAttribute('stroke-linejoin','round');
+      path.setAttribute('stroke-width','1.5');
+      icon.appendChild(path);
+      return icon;
+    }
+
+    function updateToggle(){
+      toggle.replaceChildren();
+      toggle.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+      toggle.setAttribute('title', expanded ? 'Close chat' : 'Open chat');
+      if (expanded) {
+        toggle.appendChild(createCloseIcon());
+      } else {
+        const img = document.createElement('img');
+        img.src = 'assets/louis-vuitton.svg';
+        img.alt = 'Open chat';
+        toggle.appendChild(img);
+      }
+    }
+
+    function toggleBox(){
+      expanded = !expanded;
+      if (expanded) { box.removeAttribute('hidden'); }
+      else { box.setAttribute('hidden',''); }
+      updateToggle();
+    }
+    updateToggle();
+    toggle.addEventListener('click', toggleBox);
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initChatbot);
+  else initChatbot();
+})();
+
