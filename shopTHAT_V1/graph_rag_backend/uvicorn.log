@@ -112,3 +112,57 @@ INFO:     127.0.0.1:54921 - "GET /api/campaigns HTTP/1.1" 200 OK
 INFO:     127.0.0.1:54929 - "GET /api/campaigns HTTP/1.1" 200 OK
 INFO:     127.0.0.1:54974 - "GET /api/campaigns HTTP/1.1" 200 OK
 INFO:     127.0.0.1:55101 - "GET /api/campaigns HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55221 - "GET /api/campaigns HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55225 - "OPTIONS /api/chat HTTP/1.1" 400 Bad Request
+INFO:     127.0.0.1:55233 - "GET /api/campaigns HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55281 - "GET /api/campaigns HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55309 - "GET /api/campaigns HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55391 - "OPTIONS /api/chat HTTP/1.1" 400 Bad Request
+INFO:     127.0.0.1:55391 - "GET /api/campaigns HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55391 - "OPTIONS /api/chat HTTP/1.1" 400 Bad Request
+INFO:     127.0.0.1:55441 - "GET /api/campaigns HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55441 - "OPTIONS /api/chat HTTP/1.1" 400 Bad Request
+INFO:     127.0.0.1:55492 - "GET /api/campaigns HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55506 - "OPTIONS /api/chat HTTP/1.1" 400 Bad Request
+INFO:     127.0.0.1:55518 - "OPTIONS /api/chat HTTP/1.1" 400 Bad Request
+INFO:     127.0.0.1:55518 - "OPTIONS /api/chat HTTP/1.1" 400 Bad Request
+INFO:     127.0.0.1:55533 - "GET /api/campaigns HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55537 - "OPTIONS /api/chat HTTP/1.1" 400 Bad Request
+INFO:     127.0.0.1:55618 - "OPTIONS /api/chat HTTP/1.1" 400 Bad Request
+INFO:     127.0.0.1:55618 - "GET /api/campaigns HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55618 - "OPTIONS /api/chat HTTP/1.1" 400 Bad Request
+INFO:     127.0.0.1:55648 - "OPTIONS /api/chat HTTP/1.1" 400 Bad Request
+INFO:     127.0.0.1:55668 - "GET /api/campaigns HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55668 - "OPTIONS /api/chat HTTP/1.1" 400 Bad Request
+INFO:     127.0.0.1:55715 - "GET /api/campaigns HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55723 - "OPTIONS /api/chat HTTP/1.1" 400 Bad Request
+INFO:     127.0.0.1:55894 - "OPTIONS /api/chat HTTP/1.1" 400 Bad Request
+INFO:     127.0.0.1:56016 - "GET /api/campaigns HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56036 - "OPTIONS /api/chat HTTP/1.1" 400 Bad Request
+INFO:     127.0.0.1:56039 - "OPTIONS /api/chat HTTP/1.1" 400 Bad Request
+INFO:     127.0.0.1:56078 - "GET /api/campaigns HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56140 - "GET /api/campaigns HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56140 - "GET /api/campaigns HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56158 - "OPTIONS /api/chat HTTP/1.1" 400 Bad Request
+INFO:     127.0.0.1:56171 - "GET /api/campaigns HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56277 - "GET /api/campaigns HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56322 - "GET /api/campaigns HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56466 - "GET /api/campaigns HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56482 - "OPTIONS /api/chat HTTP/1.1" 400 Bad Request
+INFO:     127.0.0.1:56492 - "GET /api/campaigns HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56506 - "OPTIONS /api/chat HTTP/1.1" 400 Bad Request
+INFO:     127.0.0.1:56508 - "OPTIONS /api/chat HTTP/1.1" 400 Bad Request
+INFO:     127.0.0.1:56508 - "OPTIONS /api/chat HTTP/1.1" 400 Bad Request
+INFO:     127.0.0.1:56512 - "OPTIONS /api/chat HTTP/1.1" 400 Bad Request
+INFO:     127.0.0.1:56565 - "OPTIONS /api/chat HTTP/1.1" 400 Bad Request
+INFO:     127.0.0.1:56565 - "OPTIONS /api/chat HTTP/1.1" 400 Bad Request
+INFO:     127.0.0.1:56565 - "OPTIONS /api/chat HTTP/1.1" 400 Bad Request
+INFO:     127.0.0.1:56569 - "OPTIONS /api/chat HTTP/1.1" 400 Bad Request
+INFO:     127.0.0.1:56581 - "GET /api/campaigns HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56598 - "GET /api/campaigns HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56683 - "GET /api/campaigns HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56774 - "GET /api/campaigns HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56787 - "OPTIONS /api/chat HTTP/1.1" 400 Bad Request
+INFO:     127.0.0.1:56787 - "OPTIONS /api/chat HTTP/1.1" 400 Bad Request
+INFO:     127.0.0.1:56789 - "OPTIONS /api/chat HTTP/1.1" 400 Bad Request
+INFO:     127.0.0.1:56789 - "OPTIONS /api/chat HTTP/1.1" 400 Bad Request

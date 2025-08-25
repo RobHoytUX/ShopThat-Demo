@@ -107,9 +107,7 @@ button { font: inherit; }
 .carousel__prev, .carousel__next { pointer-events: auto; width: 40px; height: 40px; border-radius: 50%; border: 0; background: rgba(0,0,0,0.6); color: #fff; cursor: pointer; display: grid; place-items: center; }
 .carousel__prev::before { content: '‹'; font-size: 28px; line-height: 1; }
 .carousel__next::before { content: '›'; font-size: 28px; line-height: 1; }
-.carousel__dots { display: flex; gap: 10px; justify-content: center; margin-bottom: 16px; align-items: center; }
-.carousel__dots button { -webkit-appearance: none; appearance: none; display: inline-block; width: 10px; height: 10px; border-radius: 50%; border: 0; background: #bbb; transform: none; vertical-align: middle; }
-.carousel__dots button[aria-selected="true"] { background: #111; }
+.carousel__dots { display: none; }
 
 /* Copy */
 .copy { padding: 60px 20px 100px; background: #fafafa; }
