@@ -159,6 +159,15 @@
         const bgOffset = Math.round((eased * -700)); // extreme background drift
         const textOffset = Math.round(eased * 280);  // stronger text motion
         bg.style.backgroundPosition = `center calc(50% ${bgOffset}px)`;
+        // center hero content between header bottom and hero bottom by tracking heights
+        const header = document.querySelector('.lv-header');
+        const headerH = header ? header.getBoundingClientRect().height : 72;
+        const contentInner = content.querySelector('.hero__content-inner');
+        if (contentInner) {
+          const innerH = contentInner.getBoundingClientRect().height;
+          document.documentElement.style.setProperty('--header-h', headerH + 'px');
+          document.documentElement.style.setProperty('--content-h', innerH + 'px');
+        }
         content.style.transform = `translateY(${textOffset}px)`;
         ticking = false;
       });
