@@ -250,6 +250,8 @@
   .chatbot-refresh{position:absolute;top:8px;right:8px;width:32px;height:32px;border-radius:16px;border:1px solid rgba(0,0,0,0.2);background:rgba(255,255,255,0.95);display:grid;place-items:center;color:#111;cursor:pointer;transition:opacity 200ms ease}
   .chatbot-refresh[hidden]{display:none}
   .chatbot-refresh.is-fading{opacity:0;pointer-events:none}
+  .chatbot-back{position:absolute;top:10px;right:46px;width:24px;height:24px;border:0;background:transparent;color:#111;cursor:pointer;display:grid;place-items:center}
+  .chatbot-back[hidden]{display:none}
   .chatbot-header{text-align:center}
   .chatbot-title{font-size:21px;font-weight:600;margin:0 0 8px}
   .chatbot-sub{font-size:13px;color:#232323;margin:0 0 8px}
@@ -257,7 +259,9 @@
   .chatbot-options{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-bottom:8px}
   .chatbot-options button{padding:6px 10px;border:1px solid rgba(0,0,0,0.35);border-radius:12px;background:rgba(255,255,255,0.92);cursor:pointer;font-size:12px}
   .chatbot-presets{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:24px 0 8px}
-  .chatbot-presets button{padding:8px 12px;border:1px solid rgba(0,0,0,0.35);border-radius:16px;background:rgba(255,255,255,0.92);backdrop-filter:saturate(160%);font-size:12px;cursor:pointer}
+  .chatbot-presets button{padding:8px 12px;border:1px solid rgba(0,0,0,0.35);border-radius:16px;background:rgba(255,255,255,0.92);backdrop-filter:saturate(160%);font-size:12px;cursor:pointer;position:relative;transition:opacity 150ms ease, transform 150ms ease}
+  .chatbot-presets--details{display:grid;grid-template-columns:repeat(3,max-content);gap:8px;justify-content:center}
+  .chip-badge{position:absolute;top:-6px;right:-6px;background:#111;color:#fff;border-radius:12px;padding:0 6px;font-size:10px;line-height:16px;height:16px;min-width:16px;display:inline-grid;place-items:center}
   .chatbot-messages{flex:1;overflow:auto;margin-bottom:8px;display:flex;flex-direction:column;gap:8px;padding:4px}
   .chatbot-msg{max-width:80%;padding:10px 12px;border-radius:16px;line-height:1.35;font-size:14px;word-wrap:break-word;white-space:pre-wrap;position:relative;transition:opacity 200ms ease}
   .chatbot-msg-user{align-self:flex-end;background:rgba(0,0,0,0.78);color:#fff;border-radius:30px 30px 6px 30px}
@@ -335,6 +339,21 @@
     const title   = createEl('div', { class: 'chatbot-title', text: '' });
     const sub     = createEl('p', { class: 'chatbot-sub', text: 'Would you like to learn more about these?' });
     const presets = createEl('div', { class: 'chatbot-presets' });
+    const backBtn = createEl('button', { class: 'chatbot-back', title: 'Back', hidden: '' });
+    const backIcon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    backIcon.setAttribute('xmlns','http://www.w3.org/2000/svg');
+    backIcon.setAttribute('viewBox','0 0 24 24');
+    backIcon.setAttribute('fill','none');
+    backIcon.setAttribute('stroke','currentColor');
+    backIcon.setAttribute('width','20');
+    backIcon.setAttribute('height','20');
+    const backPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    backPath.setAttribute('d','M9 15 3 9m0 0 6-6M3 9h12a6 6 0 0 1 0 12h-3');
+    backPath.setAttribute('stroke-linecap','round');
+    backPath.setAttribute('stroke-linejoin','round');
+    backPath.setAttribute('stroke-width','1.5');
+    backIcon.appendChild(backPath);
+    backBtn.appendChild(backIcon);
     const options = createEl('div', { class: 'chatbot-options' });
     const messages= createEl('div', { class: 'chatbot-messages' });
     const inputW  = createEl('div', { class: 'chatbot-input' });
@@ -376,13 +395,60 @@
     }
 
     // Add three static chips labeled "keyword"
-    ['keyword','keyword','keyword'].forEach(lbl => {
+    const baseChips = ['keyword','keyword','keyword'];
+    const chipEls = baseChips.map((lbl, i) => {
       const b = createEl('button', { type: 'button' }, [document.createTextNode(lbl)]);
+      if (i === 1) {
+        const badge = createEl('span', { class: 'chip-badge' }, [document.createTextNode('5')]);
+        b.appendChild(badge);
+      }
       b.addEventListener('click', ()=> onKeywordSelect(lbl));
       presets.appendChild(b);
+      return b;
     });
 
-    box.appendChild(refreshBtn); box.appendChild(header); box.appendChild(messages); box.appendChild(inputW);
+    // Secondary 5 keywords
+    const detailLabels = ['detail one','detail two','detail three','detail four','detail five'];
+    const detailsWrap = createEl('div', { class: 'chatbot-presets chatbot-presets--details' });
+    const detailEls = detailLabels.map(lbl => {
+      const b = createEl('button', { type: 'button' }, [document.createTextNode(titleCase(lbl))]);
+      b.addEventListener('click', ()=> onKeywordSelect(titleCase(lbl)));
+      detailsWrap.appendChild(b);
+      return b;
+    });
+    detailsWrap.setAttribute('hidden','');
+    header.appendChild(detailsWrap);
+
+    function showDetails(){
+      backBtn.removeAttribute('hidden');
+      chipEls.forEach(el => { el.classList.add('is-fade-out'); });
+      setTimeout(()=>{
+        presets.setAttribute('hidden','');
+        detailEls.forEach(el => { el.style.opacity = '0'; el.style.transform = 'translateY(4px)'; });
+        detailsWrap.removeAttribute('hidden');
+        requestAnimationFrame(()=>{
+          detailEls.forEach(el => { el.style.transition = 'opacity 150ms ease, transform 150ms ease'; el.style.opacity = '1'; el.style.transform = 'translateY(0)'; });
+        });
+      }, 160);
+    }
+
+    function showBase(){
+      backBtn.setAttribute('hidden','');
+      detailsWrap.setAttribute('hidden','');
+      chipEls.forEach(el => { el.classList.remove('is-fade-out'); });
+      presets.removeAttribute('hidden');
+    }
+
+    // Middle chip opens details
+    if (chipEls[1]) chipEls[1].addEventListener('click', (e)=>{
+      // Keep keyword selection behavior but also show details
+      onKeywordSelect(baseChips[1]);
+      showDetails();
+    });
+
+    backBtn.addEventListener('click', showBase);
+
+    box.appendChild(refreshBtn); box.appendChild(backBtn); box.appendChild(header); box.appendChild(messages); box.appendChild(inputW);
     wrapper.appendChild(toggle); wrapper.appendChild(box);
     document.body.appendChild(wrapper);
 
