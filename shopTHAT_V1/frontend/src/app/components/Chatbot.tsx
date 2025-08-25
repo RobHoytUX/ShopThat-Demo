@@ -34,26 +34,17 @@ export default function Chatbot() {
   const [isVisible, setIsVisible] = useState(true);
   const [hovered, setHovered] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
-  const scrollIdleTimeoutRef = useRef<number | null>(null);
+  // No scroll idle timeout needed in V1 variant
 
 useEffect(() => {
   const handleScroll = () => {
-    setIsVisible(false);
+    // Keep toggle visible during scroll; only collapse hover state
+    setIsVisible(true);
     setHovered(false);
-    if (scrollIdleTimeoutRef.current !== null) {
-      window.clearTimeout(scrollIdleTimeoutRef.current);
-    }
-    scrollIdleTimeoutRef.current = window.setTimeout(() => {
-      setIsVisible(true);
-    }, 250);
   };
-
   window.addEventListener('scroll', handleScroll, { passive: true });
   return () => {
     window.removeEventListener('scroll', handleScroll);
-    if (scrollIdleTimeoutRef.current !== null) {
-      window.clearTimeout(scrollIdleTimeoutRef.current);
-    }
   };
 }, []);
 
@@ -66,23 +57,49 @@ useEffect(() => {
       .then((c: CampaignConfig) => setConfig(c))
       .catch(() => setConfig(null));
 
+    type CampaignListItem = string | { key?: string; slug?: string; id?: string };
     fetch(`${API_BASE}/api/campaigns`)
-      .then(r => r.json())
-      .then((keys: string[]) =>
-        Promise.all(
+      .then(r => r.json() as Promise<unknown>)
+      .then((data: unknown) => {
+        const arr: CampaignListItem[] = Array.isArray(data) ? (data as CampaignListItem[]) : [];
+        const keys: string[] = arr
+          .map(item => {
+            if (typeof item === 'string') return item;
+            if (item && typeof item === 'object') {
+              return item.key ?? item.slug ?? item.id ?? null;
+            }
+            return null;
+          })
+          .filter((v): v is string => typeof v === 'string' && v.length > 0);
+        return Promise.all(
           keys.map(k =>
             fetch(`${API_BASE}/api/campaigns/${k}/keywords`)
-              .then(r => r.json())
-              .then((kw: string[]) => ({ key: k, kw }))
+              .then(r => r.json() as Promise<unknown>)
+              .then((kw: unknown) => {
+                const toStringArray = (val: unknown): string[] =>
+                  Array.isArray(val)
+                    ? (val as unknown[]).filter((x): x is string => typeof x === 'string')
+                    : [];
+
+                const list: string[] = Array.isArray(kw)
+                  ? toStringArray(kw)
+                  : (kw && typeof kw === 'object')
+                    ? toStringArray((kw as { keywords?: unknown; data?: unknown }).keywords)
+                        .concat(toStringArray((kw as { data?: unknown }).data))
+                    : typeof kw === 'string'
+                      ? [kw]
+                      : [];
+                return { key: k, kw: list };
+              })
           )
-        )
-      )
+        );
+      })
       .then(entries => {
         const m: Record<string, string[]> = {};
-        entries.forEach(({ key, kw }) => m[key] = kw);
+        entries.forEach(({ key, kw }) => { m[key] = kw; });
         setAllMap(m);
       })
-      .catch(() => { });
+      .catch(() => { /* ignore */ });
   }, [slug]);
 
   useEffect(() => {
@@ -90,7 +107,8 @@ useEffect(() => {
     setEnabled(config.keywords.filter(t => t.enabled).map(t => t.name));
     const others: string[] = [];
     for (const [k, kw] of Object.entries(allMap)) {
-      if (k !== slug) others.push(...kw);
+      const list = Array.isArray(kw) ? kw : [];
+      if (k !== slug) others.push(...list);
     }
     setDisabled(others);
   }, [config, allMap, slug]);
@@ -129,9 +147,6 @@ useEffect(() => {
     }
   };
 
-  if (!slug) return null;
-if (!config || !enabled.length) return null;
-
   const campaignTitle = titleCase(slug.replace(/_/g, ' '));
   const shouldShowFullChatbot = hovered || isExpanded;
 
@@ -148,7 +163,7 @@ if (!config || !enabled.length) return null;
       ? 'white' 
       : 'rgba(255, 255, 255, 0.4)'
     : 'transparent',
-
+        outline: '1px dashed rgba(0,0,0,0.15)', // debug outline to verify mount
       }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
@@ -163,6 +178,8 @@ if (!config || !enabled.length) return null;
         onClick={() => setIsExpanded(!isExpanded)}
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
+        aria-label="Open chat"
+        title="Chat"
       >
         {isExpanded ? '➖' : '💬'}
       </div>
