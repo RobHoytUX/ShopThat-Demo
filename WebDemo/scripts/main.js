@@ -250,7 +250,7 @@
   .chatbot-refresh{position:absolute;top:8px;right:8px;width:32px;height:32px;border-radius:16px;border:1px solid rgba(0,0,0,0.2);background:rgba(255,255,255,0.95);display:grid;place-items:center;color:#111;cursor:pointer;transition:opacity 200ms ease}
   .chatbot-refresh[hidden]{display:none}
   .chatbot-refresh.is-fading{opacity:0;pointer-events:none}
-  .chatbot-back{position:absolute;top:10px;right:46px;width:24px;height:24px;border:0;background:transparent;color:#111;cursor:pointer;display:grid;place-items:center}
+  .chatbot-back{position:absolute;top:10px;left:8px;width:24px;height:24px;border:0;background:transparent;color:#111;cursor:pointer;display:grid;place-items:center}
   .chatbot-back[hidden]{display:none}
   .chatbot-header{text-align:center}
   .chatbot-title{font-size:21px;font-weight:600;margin:0 0 8px}
@@ -421,11 +421,14 @@
 
     function showDetails(){
       backBtn.removeAttribute('hidden');
+      // Fade out base chips in place
       chipEls.forEach(el => { el.classList.add('is-fade-out'); });
+      // After fade, swap content: hide base container, show details taking its place
       setTimeout(()=>{
         presets.setAttribute('hidden','');
-        detailEls.forEach(el => { el.style.opacity = '0'; el.style.transform = 'translateY(4px)'; });
         detailsWrap.removeAttribute('hidden');
+        // Initial state for fade-in
+        detailEls.forEach(el => { el.style.opacity = '0'; el.style.transform = 'translateY(4px)'; });
         requestAnimationFrame(()=>{
           detailEls.forEach(el => { el.style.transition = 'opacity 150ms ease, transform 150ms ease'; el.style.opacity = '1'; el.style.transform = 'translateY(0)'; });
         });
@@ -434,15 +437,18 @@
 
     function showBase(){
       backBtn.setAttribute('hidden','');
-      detailsWrap.setAttribute('hidden','');
-      chipEls.forEach(el => { el.classList.remove('is-fade-out'); });
-      presets.removeAttribute('hidden');
+      // Fade out details quickly, then restore base chips in same spot
+      detailEls.forEach(el => { el.style.opacity = '0'; el.style.transform = 'translateY(4px)'; });
+      setTimeout(()=>{
+        detailsWrap.setAttribute('hidden','');
+        presets.removeAttribute('hidden');
+        chipEls.forEach(el => { el.classList.remove('is-fade-out'); });
+      }, 150);
     }
 
     // Middle chip opens details
     if (chipEls[1]) chipEls[1].addEventListener('click', (e)=>{
-      // Keep keyword selection behavior but also show details
-      onKeywordSelect(baseChips[1]);
+      // Only transition to details; leave input enabling to user if desired
       showDetails();
     });
 
