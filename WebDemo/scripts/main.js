@@ -242,7 +242,10 @@
     box-shadow: 0 8px 32px 0 rgba(31,38,135,0.3);
     backdrop-filter: blur(16px) saturate(180%);
     -webkit-backdrop-filter: blur(16px) saturate(180%);
+    opacity:1; transform: translateY(0);
+    transition: opacity 200ms ease, transform 200ms ease;
   }
+  .chatbot-box.is-scroll-hidden{opacity:0; transform: translateY(8px); pointer-events:none}
   .chatbot-box[hidden]{display:none !important}
   .chatbot-header{text-align:center}
   .chatbot-title{font-size:21px;font-weight:600;margin:0 0 8px}
@@ -443,6 +446,30 @@
     }
     updateToggle();
     toggle.addEventListener('click', toggleBox);
+
+    // Hide the open chat box while the user is actively scrolling and
+    // fade it back in shortly after scrolling stops. The floating button
+    // remains available so the user can still close/open manually.
+    let scrollHideTimeout = null;
+    let isTemporarilyHidden = false;
+
+    function hideOnScroll(){
+      if (!expanded || box.hasAttribute('hidden')) return;
+      if (!isTemporarilyHidden){
+        isTemporarilyHidden = true;
+        box.classList.add('is-scroll-hidden');
+      }
+      if (scrollHideTimeout) clearTimeout(scrollHideTimeout);
+      scrollHideTimeout = setTimeout(()=>{
+        // Reveal immediately after scrolling stops
+        if (expanded && !box.hasAttribute('hidden')){
+          box.classList.remove('is-scroll-hidden');
+          isTemporarilyHidden = false;
+        }
+      }, 160); // small debounce for a natural feel
+    }
+
+    window.addEventListener('scroll', hideOnScroll, { passive: true });
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initChatbot);
