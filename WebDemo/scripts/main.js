@@ -236,7 +236,7 @@
   .chatbot-toggle{background:#000;color:#fff;border-radius:50%;cursor:pointer;position:absolute;bottom:-80px;right:8px;border:0;outline:none;box-shadow:none;display:grid;place-items:center;width:56px;height:56px;padding:0}
   .chatbot-toggle:focus{outline:none}
   .chatbot-toggle img{width:24px;height:24px;filter:brightness(0) invert(1)}
-  .chatbot-box{height:500px;width:360px;color:#111;border-radius:12px;padding:12px;display:flex;flex-direction:column;
+  .chatbot-box{height:500px;width:360px;color:#111;border-radius:12px;padding:12px;display:flex;flex-direction:column;position:relative;
     background: linear-gradient(135deg, rgba(255,255,255,0.4), rgba(255,255,255,0.22));
     border: 1px solid rgba(255,255,255,0.35);
     box-shadow: 0 8px 32px 0 rgba(31,38,135,0.3);
@@ -247,6 +247,8 @@
   }
   .chatbot-box.is-scroll-hidden{opacity:0; transform: translateY(8px); pointer-events:none}
   .chatbot-box[hidden]{display:none !important}
+  .chatbot-refresh{position:absolute;top:8px;right:8px;width:32px;height:32px;border-radius:16px;border:1px solid rgba(0,0,0,0.2);background:rgba(255,255,255,0.95);display:grid;place-items:center;color:#111;cursor:pointer}
+  .chatbot-refresh[hidden]{display:none}
   .chatbot-header{text-align:center}
   .chatbot-title{font-size:21px;font-weight:600;margin:0 0 8px}
   .chatbot-sub{font-size:13px;color:#232323;margin:0 0 8px}
@@ -313,6 +315,21 @@
     const toggle  = createEl('button', { class: 'chatbot-toggle', 'aria-expanded': 'false', 'aria-controls': 'chatbot-box', title: 'Open chat' });
     const box     = createEl('div', { class: 'chatbot-box', id: 'chatbot-box', hidden: '' });
     const header  = createEl('div', { class: 'chatbot-header' });
+    const refreshBtn = createEl('button', { class: 'chatbot-refresh', title: 'Clear chat', hidden: '' });
+    const refreshIcon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    refreshIcon.setAttribute('xmlns','http://www.w3.org/2000/svg');
+    refreshIcon.setAttribute('viewBox','0 0 24 24');
+    refreshIcon.setAttribute('fill','none');
+    refreshIcon.setAttribute('stroke','currentColor');
+    refreshIcon.setAttribute('width','18');
+    refreshIcon.setAttribute('height','18');
+    const refreshPath = document.createElementNS('http://www.w3.org/2000/svg','path');
+    refreshPath.setAttribute('d','M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99');
+    refreshPath.setAttribute('stroke-linecap','round');
+    refreshPath.setAttribute('stroke-linejoin','round');
+    refreshPath.setAttribute('stroke-width','1.5');
+    refreshIcon.appendChild(refreshPath);
+    refreshBtn.appendChild(refreshIcon);
     const logo    = createEl('img', { class: 'chatbot-logo', src: 'assets/lv.png', alt: 'LV' });
     const title   = createEl('div', { class: 'chatbot-title', text: '' });
     const sub     = createEl('p', { class: 'chatbot-sub', text: 'Would you like to learn more about these?' });
@@ -364,7 +381,7 @@
       presets.appendChild(b);
     });
 
-    box.appendChild(header); box.appendChild(messages); box.appendChild(inputW);
+    box.appendChild(refreshBtn); box.appendChild(header); box.appendChild(messages); box.appendChild(inputW);
     wrapper.appendChild(toggle); wrapper.appendChild(box);
     document.body.appendChild(wrapper);
 
@@ -407,6 +424,8 @@
       div.textContent = sender === 'user' ? text : markdownToText(text);
       messages.appendChild(div);
       messages.scrollTop = messages.scrollHeight;
+      // Show refresh after the first bot response exists
+      if (sender !== 'user') refreshBtn.removeAttribute('hidden');
     }
 
     async function send(){
@@ -425,6 +444,8 @@
         if (!res.ok) throw new Error('HTTP '+res.status);
         const d = await res.json();
         addMessage('bot', String(d?.response||'No response'));
+        // ensure refresh visible after bot message
+        refreshBtn.removeAttribute('hidden');
       } catch (e) {
         addMessage('bot', '❗ Failed to fetch response');
       }
@@ -474,6 +495,16 @@
     }
     updateToggle();
     toggle.addEventListener('click', toggleBox);
+
+    // Refresh handler: clear messages and hide button
+    refreshBtn.addEventListener('click', () => {
+      messages.replaceChildren();
+      refreshBtn.setAttribute('hidden','');
+      input.value = '';
+      // Optionally re-disable inputs until keyword selected again
+      // setInputsEnabled(false); hasSelectedKeyword = false; // Uncomment if desired
+      messages.scrollTop = 0;
+    });
 
     // Hide the open chat box while the user is actively scrolling and
     // fade it back in shortly after scrolling stops. The floating button
