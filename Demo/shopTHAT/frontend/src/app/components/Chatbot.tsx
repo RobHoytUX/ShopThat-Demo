@@ -68,15 +68,35 @@ useEffect(() => {
 
     fetch(`${API_BASE}/api/campaigns`)
       .then(r => r.json())
-      .then((keys: string[]) =>
-        Promise.all(
+      .then((data: any[]) => {
+        const keys = Array.isArray(data)
+          ? data
+              .map((item: any) =>
+                typeof item === 'string'
+                  ? item
+                  : item?.key ?? item?.slug ?? item?.id ?? null
+              )
+              .filter((v: any): v is string => typeof v === 'string' && v.length > 0)
+          : [];
+        return Promise.all(
           keys.map(k =>
             fetch(`${API_BASE}/api/campaigns/${k}/keywords`)
               .then(r => r.json())
-              .then((kw: string[]) => ({ key: k, kw }))
+              .then((kw: any) => {
+                const list: string[] = Array.isArray(kw)
+                  ? kw
+                  : Array.isArray(kw?.keywords)
+                    ? kw.keywords
+                    : Array.isArray(kw?.data)
+                      ? kw.data
+                      : typeof kw === 'string'
+                        ? [kw]
+                        : [];
+                return { key: k, kw: list.filter((x: any): x is string => typeof x === 'string') };
+              })
           )
-        )
-      )
+        );
+      })
       .then(entries => {
         const m: Record<string, string[]> = {};
         entries.forEach(({ key, kw }) => m[key] = kw);
@@ -90,7 +110,8 @@ useEffect(() => {
     setEnabled(config.keywords.filter(t => t.enabled).map(t => t.name));
     const others: string[] = [];
     for (const [k, kw] of Object.entries(allMap)) {
-      if (k !== slug) others.push(...kw);
+      const list = Array.isArray(kw) ? kw : [];
+      if (k !== slug) others.push(...list);
     }
     setDisabled(others);
   }, [config, allMap, slug]);
