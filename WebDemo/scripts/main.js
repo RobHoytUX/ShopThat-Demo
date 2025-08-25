@@ -252,9 +252,9 @@
   .chatbot-sub{font-size:13px;color:#232323;margin:0 0 8px}
   .chatbot-logo{display:block;margin:0 auto 8px;height:40px;width:auto}
   .chatbot-options{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-bottom:8px}
-  .chatbot-options button{padding:6px 10px;border:1px solid rgba(0,0,0,0.35);border-radius:12px;background:rgba(255,255,255,0.32);cursor:pointer;font-size:12px}
+  .chatbot-options button{padding:6px 10px;border:1px solid rgba(0,0,0,0.35);border-radius:12px;background:rgba(255,255,255,0.92);cursor:pointer;font-size:12px}
   .chatbot-presets{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:24px 0 8px}
-  .chatbot-presets button{padding:8px 12px;border:1px solid rgba(0,0,0,0.35);border-radius:16px;background:rgba(255,255,255,0.32);backdrop-filter:saturate(160%);font-size:12px;cursor:pointer}
+  .chatbot-presets button{padding:8px 12px;border:1px solid rgba(0,0,0,0.35);border-radius:16px;background:rgba(255,255,255,0.92);backdrop-filter:saturate(160%);font-size:12px;cursor:pointer}
   .chatbot-messages{flex:1;overflow:auto;margin-bottom:8px}
   .chatbot-msg-user{text-align:right;font-weight:600;margin:4px 0}
   .chatbot-msg-bot{text-align:left;margin:4px 0;white-space:pre-wrap}
