@@ -255,9 +255,10 @@
   .chatbot-options button{padding:6px 10px;border:1px solid rgba(0,0,0,0.35);border-radius:12px;background:rgba(255,255,255,0.92);cursor:pointer;font-size:12px}
   .chatbot-presets{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:24px 0 8px}
   .chatbot-presets button{padding:8px 12px;border:1px solid rgba(0,0,0,0.35);border-radius:16px;background:rgba(255,255,255,0.92);backdrop-filter:saturate(160%);font-size:12px;cursor:pointer}
-  .chatbot-messages{flex:1;overflow:auto;margin-bottom:8px}
-  .chatbot-msg-user{text-align:right;font-weight:600;margin:4px 0}
-  .chatbot-msg-bot{text-align:left;margin:4px 0;white-space:pre-wrap}
+  .chatbot-messages{flex:1;overflow:auto;margin-bottom:8px;display:flex;flex-direction:column;gap:8px;padding:4px}
+  .chatbot-msg{max-width:80%;padding:10px 12px;border-radius:16px;line-height:1.35;font-size:14px;word-wrap:break-word;white-space:pre-wrap}
+  .chatbot-msg-user{align-self:flex-end;background:rgba(0,0,0,0.78);color:#fff}
+  .chatbot-msg-bot{align-self:flex-start;background:rgba(0,0,0,0.06);color:#111}
   .chatbot-input{display:flex;gap:8px}
   .chatbot-input input{flex:1;padding:12px 8px 12px 20px;border-radius:50px;border:1px solid #ccc}
   .chatbot-input input::placeholder{color:#444;opacity:1}
@@ -399,7 +400,8 @@
     }
 
     function addMessage(sender, text){
-      const div = createEl('div', { class: sender === 'user' ? 'chatbot-msg-user' : 'chatbot-msg-bot' });
+      const klass = sender === 'user' ? 'chatbot-msg chatbot-msg-user' : 'chatbot-msg chatbot-msg-bot';
+      const div = createEl('div', { class: klass });
       div.textContent = sender === 'user' ? text : markdownToText(text);
       messages.appendChild(div);
       messages.scrollTop = messages.scrollHeight;
