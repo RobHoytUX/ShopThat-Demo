@@ -315,8 +315,8 @@
     const options = createEl('div', { class: 'chatbot-options' });
     const messages= createEl('div', { class: 'chatbot-messages' });
     const inputW  = createEl('div', { class: 'chatbot-input' });
-    const input   = createEl('input', { type: 'text', placeholder: 'Type your message', 'aria-label': 'Message' });
-    const sendBtn = createEl('button', { type: 'button', 'aria-label': 'Send message' });
+    const input   = createEl('input', { type: 'text', placeholder: 'Select a keyword to begin', 'aria-label': 'Message', disabled: '' });
+    const sendBtn = createEl('button', { type: 'button', 'aria-label': 'Send message', disabled: '' });
     const icon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     icon.setAttribute('xmlns','http://www.w3.org/2000/svg');
     icon.setAttribute('viewBox','0 0 24 24');
@@ -333,10 +333,29 @@
     sendBtn.appendChild(icon);
     inputW.appendChild(input); inputW.appendChild(sendBtn);
     header.appendChild(logo); header.appendChild(title); header.appendChild(sub); header.appendChild(presets); header.appendChild(options);
+    let hasSelectedKeyword = false;
+    function setInputsEnabled(enabled){
+      if (enabled){
+        input.removeAttribute('disabled');
+        sendBtn.removeAttribute('disabled');
+        input.setAttribute('placeholder','Type your message');
+      } else {
+        input.setAttribute('disabled','');
+        sendBtn.setAttribute('disabled','');
+        input.setAttribute('placeholder','Select a keyword to begin');
+      }
+    }
+    function onKeywordSelect(label){
+      hasSelectedKeyword = true;
+      setInputsEnabled(true);
+      input.value = label;
+      input.focus();
+    }
+
     // Add three static chips labeled "keyword"
     ['keyword','keyword','keyword'].forEach(lbl => {
       const b = createEl('button', { type: 'button' }, [document.createTextNode(lbl)]);
-      b.addEventListener('click', ()=>{ input.value = lbl; input.focus(); });
+      b.addEventListener('click', ()=> onKeywordSelect(lbl));
       presets.appendChild(b);
     });
 
@@ -368,8 +387,9 @@
       title.textContent = 'Hello!';
       options.replaceChildren();
       enabled.forEach(kw => {
-        const b = createEl('button', { type: 'button' }, [document.createTextNode(titleCase(kw))]);
-        b.addEventListener('click', ()=>{ input.value = titleCase(kw); input.focus(); });
+        const label = titleCase(kw);
+        const b = createEl('button', { type: 'button' }, [document.createTextNode(label)]);
+        b.addEventListener('click', ()=> onKeywordSelect(label));
         options.appendChild(b);
       });
     } catch (e) {
@@ -388,6 +408,8 @@
       if (!txt) return;
       addMessage('user', txt);
       input.value = '';
+      // After first send, keep inputs enabled for continued conversation
+      if (!hasSelectedKeyword) setInputsEnabled(true);
       try {
         const res = await fetch(`${API_BASE}/api/chat`, {
           method: 'POST',
