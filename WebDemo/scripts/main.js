@@ -247,8 +247,9 @@
   }
   .chatbot-box.is-scroll-hidden{opacity:0; transform: translateY(8px); pointer-events:none}
   .chatbot-box[hidden]{display:none !important}
-  .chatbot-refresh{position:absolute;top:8px;right:8px;width:32px;height:32px;border-radius:16px;border:1px solid rgba(0,0,0,0.2);background:rgba(255,255,255,0.95);display:grid;place-items:center;color:#111;cursor:pointer}
+  .chatbot-refresh{position:absolute;top:8px;right:8px;width:32px;height:32px;border-radius:16px;border:1px solid rgba(0,0,0,0.2);background:rgba(255,255,255,0.95);display:grid;place-items:center;color:#111;cursor:pointer;transition:opacity 200ms ease}
   .chatbot-refresh[hidden]{display:none}
+  .chatbot-refresh.is-fading{opacity:0;pointer-events:none}
   .chatbot-header{text-align:center}
   .chatbot-title{font-size:21px;font-weight:600;margin:0 0 8px}
   .chatbot-sub{font-size:13px;color:#232323;margin:0 0 8px}
@@ -258,9 +259,10 @@
   .chatbot-presets{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:24px 0 8px}
   .chatbot-presets button{padding:8px 12px;border:1px solid rgba(0,0,0,0.35);border-radius:16px;background:rgba(255,255,255,0.92);backdrop-filter:saturate(160%);font-size:12px;cursor:pointer}
   .chatbot-messages{flex:1;overflow:auto;margin-bottom:8px;display:flex;flex-direction:column;gap:8px;padding:4px}
-  .chatbot-msg{max-width:80%;padding:10px 12px;border-radius:16px;line-height:1.35;font-size:14px;word-wrap:break-word;white-space:pre-wrap;position:relative}
+  .chatbot-msg{max-width:80%;padding:10px 12px;border-radius:16px;line-height:1.35;font-size:14px;word-wrap:break-word;white-space:pre-wrap;position:relative;transition:opacity 200ms ease}
   .chatbot-msg-user{align-self:flex-end;background:rgba(0,0,0,0.78);color:#fff;border-radius:30px 30px 6px 30px}
   .chatbot-msg-bot{align-self:flex-start;background:#f2f2f2;color:#111;border-radius:30px 30px 30px 6px}
+  .chatbot-msg.is-fading{opacity:0}
   .chatbot-input{display:flex;gap:8px}
   .chatbot-input input{flex:1;padding:12px 8px 12px 20px;border-radius:50px;border:1px solid #ccc}
   .chatbot-input input::placeholder{color:#444;opacity:1}
@@ -496,12 +498,21 @@
 
     // Refresh handler: clear messages and hide button
     refreshBtn.addEventListener('click', () => {
-      messages.replaceChildren();
-      refreshBtn.setAttribute('hidden','');
-      input.value = '';
-      // Optionally re-disable inputs until keyword selected again
-      // setInputsEnabled(false); hasSelectedKeyword = false; // Uncomment if desired
-      messages.scrollTop = 0;
+      const items = Array.from(messages.children);
+      items.forEach((el, idx) => {
+        el.classList.add('is-fading');
+      });
+      refreshBtn.classList.add('is-fading');
+      // Wait for fade then clear
+      setTimeout(() => {
+        messages.replaceChildren();
+        refreshBtn.classList.remove('is-fading');
+        refreshBtn.setAttribute('hidden','');
+        input.value = '';
+        // Optionally re-disable inputs until keyword selected again
+        // setInputsEnabled(false); hasSelectedKeyword = false; // Uncomment if desired
+        messages.scrollTop = 0;
+      }, 220);
     });
 
     // Hide the open chat box while the user is actively scrolling and
