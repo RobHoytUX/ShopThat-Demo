@@ -267,6 +267,7 @@
   .chatbot-input input{flex:1;padding:12px 8px 12px 20px;border-radius:50px;border:1px solid #ccc}
   .chatbot-input input::placeholder{color:#444;opacity:1}
   .chatbot-input input::-webkit-input-placeholder{color:#444;opacity:1}
+  .chatbot-input input:focus{outline:none;box-shadow:none;border-color:#ccc}
   .chatbot-input button{width:40px;height:40px;border-radius:50%;border:0;background:#000;color:#fff;cursor:pointer;display:grid;place-items:center;padding:0}
   @media (max-width:600px){.chatbot-box{width:90vw}}
   `;
