@@ -646,15 +646,18 @@
       toggle.setAttribute('aria-expanded', expanded ? 'true' : 'false');
       toggle.setAttribute('title', expanded ? 'Close chat' : 'Open chat');
       if (expanded) {
-        toggle.appendChild(createCloseIcon());
+        const closeIcon = createCloseIcon();
+        // Force black X in glass state
+        closeIcon.style.stroke = '#111';
+        toggle.appendChild(closeIcon);
       } else {
         const img = document.createElement('img');
         img.src = 'assets/louis-vuitton.svg';
         img.alt = 'Open chat';
         toggle.appendChild(img);
       }
-      // When chat is closed, apply glass style; when open, use default dark style
-      toggle.classList.toggle('chatbot-toggle--glass', !expanded);
+      // Apply glass style when chat is OPEN (X shown); keep default black when CLOSED (LV shown)
+      toggle.classList.toggle('chatbot-toggle--glass', expanded);
     }
 
     // Smooth open/close using the same fade class as scroll behavior
