@@ -245,7 +245,7 @@
   .chatbot-toggle{background:#000;color:#fff;border-radius:50%;cursor:pointer;position:absolute;bottom:-80px;right:8px;border:0;outline:none;box-shadow:none;display:grid;place-items:center;width:56px;height:56px;padding:0}
   .chatbot-toggle:focus{outline:none}
   .chatbot-toggle img{width:24px;height:24px;filter:brightness(0) invert(1)}
-  .chatbot-box{height:625px;width:450px;color:#111;border-radius:12px;padding:12px;display:flex;flex-direction:column;position:relative;
+  .chatbot-box{height:781.25px;width:562.5px;color:#111;border-radius:12px;padding:28px 12px 20px 12px;display:flex;flex-direction:column;position:relative;box-sizing:border-box;overflow:hidden;
     background: linear-gradient(135deg, rgba(255,255,255,0.4), rgba(255,255,255,0.22));
     border: 1px solid rgba(255,255,255,0.35);
     box-shadow: 0 8px 32px 0 rgba(31,38,135,0.3);
@@ -254,14 +254,15 @@
     opacity:1; transform: translateY(0);
     transition: opacity 200ms ease, transform 200ms ease, width 200ms ease, height 200ms ease;
   }
+  .chatbot-box.chatbot-box--compact{width:281.25px;height:390.625px}
   .chatbot-box.is-scroll-hidden{opacity:0; transform: translateY(8px); pointer-events:none}
   .chatbot-box[hidden]{display:none !important}
-  .chatbot-refresh{position:absolute;top:8px;right:8px;width:32px;height:32px;border-radius:16px;border:1px solid rgba(0,0,0,0.2);background:rgba(255,255,255,0.95);display:grid;place-items:center;color:#111;cursor:pointer;transition:opacity 200ms ease}
+  .chatbot-refresh{position:absolute;top:20px;right:8px;width:32px;height:32px;border-radius:16px;border:1px solid rgba(0,0,0,0.2);background:rgba(255,255,255,0.95);display:grid;place-items:center;color:#111;cursor:pointer;transition:opacity 200ms ease}
   .chatbot-refresh[hidden]{display:none}
   .chatbot-refresh.is-fading{opacity:0;pointer-events:none}
-  .chatbot-back{position:absolute;top:10px;left:8px;width:24px;height:24px;border:0;background:transparent;color:#111;cursor:pointer;display:grid;place-items:center}
+  .chatbot-back{position:absolute;top:20px;left:8px;width:24px;height:24px;border:0;background:transparent;color:#111;cursor:pointer;display:grid;place-items:center}
   .chatbot-back[hidden]{display:none}
-  .chatbot-header{text-align:center}
+  .chatbot-header{text-align:center;padding-top:8px}
   .chatbot-title{font-size:21px;font-weight:600;margin:0 0 8px}
   .chatbot-sub{font-size:15px;color:#232323;margin:0 0 8px;font-weight:600}
   .chatbot-logo{display:block;margin:0 auto 8px;height:40px;width:auto}
@@ -273,7 +274,7 @@
   .chatbot-presets--details{display:grid;grid-template-columns:repeat(3,max-content);gap:8px;justify-content:center}
   .chatbot-presets--details[hidden]{display:none !important}
   .chip-badge{position:absolute;top:-6px;right:-6px;background:#111;color:#fff;border-radius:12px;padding:0 6px;font-size:10px;line-height:16px;height:16px;min-width:16px;display:inline-grid;place-items:center}
-  .chatbot-messages{flex:1;overflow:auto;margin-bottom:8px;display:flex;flex-direction:column;gap:8px;padding:4px;padding-right:12px;scrollbar-gutter:stable both-edges}
+  .chatbot-messages{flex:1 1 auto;min-height:48px;overflow:auto;margin-bottom:8px;display:flex;flex-direction:column;gap:8px;padding:4px;padding-right:12px;scrollbar-gutter:stable both-edges}
   .chatbot-messages::-webkit-scrollbar{width:10px}
   .chatbot-messages::-webkit-scrollbar-track{background:rgba(0,0,0,0.06);border-radius:8px}
   .chatbot-messages::-webkit-scrollbar-thumb{background:rgba(0,0,0,0.25);border-radius:8px}
@@ -281,8 +282,8 @@
   .chatbot-msg-user{align-self:flex-end;background:rgba(0,0,0,0.78);color:#fff;border-radius:30px 30px 6px 30px;margin-right:8px}
   .chatbot-msg-bot{align-self:flex-start;background:#f2f2f2;color:#111;border-radius:30px 30px 30px 6px}
   .chatbot-msg.is-fading{opacity:0}
-  .chatbot-input{display:flex;gap:8px}
-  .chatbot-input input{flex:1;padding:12px 8px 12px 20px;border-radius:50px;border:1px solid #ccc}
+  .chatbot-input{display:flex;gap:8px;width:100%;padding-top:8px}
+  .chatbot-input input{flex:1;min-width:0;padding:12px 8px 12px 20px;border-radius:50px;border:1px solid #ccc}
   .chatbot-input input::placeholder{color:#444;opacity:1}
   .chatbot-input input::-webkit-input-placeholder{color:#444;opacity:1}
   .chatbot-input input:focus{outline:none;box-shadow:none;border-color:#ccc}
@@ -389,6 +390,64 @@
     sendBtn.appendChild(icon);
     inputW.appendChild(input); inputW.appendChild(sendBtn);
     header.appendChild(logo); header.appendChild(title); header.appendChild(sub); header.appendChild(presets); header.appendChild(options);
+    // Sizing constants and helpers
+    const FULL_W = 562.5; const FULL_H = 795.25; // slightly taller to ensure input isn't clipped
+    const COMPACT_W = 281.25; const COMPACT_H = 406.625; // maintain proportion with added paddings
+    function setBoxSize(widthPx, heightPx){
+      box.style.width = widthPx + 'px';
+      box.style.height = heightPx + 'px';
+    }
+    // Initial compact size with glass background intact
+    box.classList.add('chatbot-box--compact');
+    setBoxSize(COMPACT_W, COMPACT_H);
+
+    function measureChipRowWidth(container){
+      if (!container || container.hasAttribute('hidden') || !container.children.length) return 0;
+      let total = 0;
+      const gap = 8; // approximate gap between chips
+      Array.from(container.children).forEach((child, idx) => {
+        if (!(child instanceof HTMLElement)) return;
+        total += (child.offsetWidth || 0);
+        if (idx) total += gap;
+      });
+      // add some side padding inside the box
+      return total + 40;
+    }
+
+    function preferredCompactWidth(){
+      const w1 = measureChipRowWidth(options);
+      const w2 = !detailsWrap.hasAttribute('hidden') ? measureChipRowWidth(detailsWrap) : measureChipRowWidth(presets);
+      const needed = Math.max(COMPACT_W, w1, w2);
+      return Math.min(FULL_W, needed);
+    }
+
+    function computeMinHeight(){
+      const style = getComputedStyle(box);
+      const padTop = parseFloat(style.paddingTop) || 0;
+      const padBottom = parseFloat(style.paddingBottom) || 0;
+      const headerH = header ? (header.offsetHeight || 0) : 0;
+      const inputH = inputW ? (inputW.offsetHeight || 0) : 0;
+      const gaps = 24; // spacing between sections
+      const minMessages = 48; // minimal space reserved for messages area
+      return Math.ceil(padTop + headerH + gaps + minMessages + inputH + padBottom);
+    }
+
+    function updateBoxSizeForState(){
+      const hasBot = Array.from(messages.children).some(el => el.classList.contains('chatbot-msg-bot'));
+      if (hasBot){
+        box.classList.remove('chatbot-box--compact');
+        const minH = computeMinHeight();
+        setBoxSize(FULL_W, Math.max(FULL_H, minH));
+      } else {
+        const w = preferredCompactWidth();
+        box.classList.add('chatbot-box--compact');
+        const minH = computeMinHeight();
+        setBoxSize(w, Math.max(COMPACT_H, minH));
+      }
+      // Ensure top controls are always visible: scroll container to top and keep padding
+      box.scrollTop = 0;
+    }
+
     let hasSelectedKeyword = false;
     function setInputsEnabled(enabled){
       if (enabled){
@@ -505,6 +564,11 @@
       title.textContent = 'Hello!';
     }
 
+    function ensureSizeForContent(){
+      // Compact when no chat; adapt compact width to chips; expand to full on bot reply
+      updateBoxSizeForState();
+    }
+
     function addMessage(sender, text){
       const klass = sender === 'user' ? 'chatbot-msg chatbot-msg-user' : 'chatbot-msg chatbot-msg-bot';
       const div = createEl('div', { class: klass });
@@ -525,6 +589,7 @@
       }
       // Show refresh after the first bot response exists
       if (sender !== 'user') refreshBtn.removeAttribute('hidden');
+      ensureSizeForContent();
     }
     // removed expand/collapse control; default size reflects previous expanded state
 
@@ -596,6 +661,10 @@
       requestAnimationFrame(()=>{
         box.classList.remove('is-scroll-hidden');
       });
+      // kick off analysis of the currently visible image(s)
+      scheduleAnalysis();
+      // On open, determine size based on current content
+      ensureSizeForContent();
     }
     function closeBox(){
       // Fade out, then actually hide after transition ends
@@ -629,6 +698,8 @@
         // Optionally re-disable inputs until keyword selected again
         // setInputsEnabled(false); hasSelectedKeyword = false; // Uncomment if desired
         messages.scrollTop = 0;
+        // Adjust size based on remaining chips/options
+        ensureSizeForContent();
       }, 220);
     });
 
@@ -655,6 +726,198 @@
     }
 
     window.addEventListener('scroll', hideOnScroll, { passive: true });
+
+    // =====================
+    // Visible image → bag keywords
+    // =====================
+    const keywordsCache = new Map(); // imageUrl -> payload
+    let analyzeDebounce = null;
+    let selectedBagIndex = 0;
+    const visibleImageRatios = new Map(); // img -> ratio
+
+    function observeImages(){
+      if (!('IntersectionObserver' in window)) return;
+      const imgs = Array.from(document.querySelectorAll('img'));
+      const io = new IntersectionObserver((entries)=>{
+        entries.forEach(e => {
+          if (e.isIntersecting) {
+            visibleImageRatios.set(e.target, e.intersectionRatio || 0);
+          } else {
+            visibleImageRatios.delete(e.target);
+          }
+        });
+      }, { threshold: [0, 0.5, 0.75, 0.9], root: null });
+      imgs.forEach(img => io.observe(img));
+    }
+
+    function getTopVisibleImage(){
+      if (!visibleImageRatios.size) return null;
+      const arr = Array.from(visibleImageRatios.entries())
+        .filter(([img]) => img && img.src)
+        .sort((a,b)=>{
+          const brA = a[0].getBoundingClientRect();
+          const brB = b[0].getBoundingClientRect();
+          if (a[1] !== b[1]) return b[1] - a[1]; // higher ratio first
+          return brA.top - brB.top; // otherwise topmost
+        });
+      return arr.length ? arr[0][0] : null;
+    }
+
+    function assembleBagLabel(bag){
+      const pick = (arr)=>Array.isArray(arr)&&arr.length ? String(arr[0]) : '';
+      const parts = [pick(bag?.attributes?.collection), pick(bag?.attributes?.pattern) || pick(bag?.attributes?.material), pick(bag?.attributes?.style)];
+      const label = parts.filter(Boolean).map(titleCase).join(' ');
+      return label || 'Bag';
+    }
+
+    async function mockVisionKeywords(imageUrl){
+      // Lightweight deterministic mock based on URL for demo
+      const isKusama = /kusama/i.test(imageUrl);
+      return {
+        imageId: String(imageUrl||'mock'),
+        bags: [
+          {
+            box: [120,140,640,520],
+            keywords: isKusama ? ['louis vuitton','neverfull','monogram','polka dot motif','gold-tone hardware','tote'] : ['louis vuitton','alma','epi leather','black','silver-tone hardware','top-handle'],
+            attributes: isKusama ? {
+              material: ['Coated Canvas'],
+              pattern: ['Monogram','Polka Dot'],
+              color: ['Brown','White'],
+              hardware: ['Gold-tone'],
+              style: ['Tote'],
+              collection: ['Neverfull']
+            } : {
+              material: ['Epi Leather'],
+              pattern: [],
+              color: ['Black'],
+              hardware: ['Silver-tone'],
+              style: ['Top-handle'],
+              collection: ['Alma']
+            },
+            confidence: 0.9
+          }
+        ],
+        campaign: isKusama ? { name: 'LV x Kusama 2023', confidence: 0.88 } : { name: 'Core Values', confidence: 0.72 },
+        designer: isKusama ? { name: 'Yayoi Kusama', confidence: 0.93 } : { name: 'Louis Vuitton Studio', confidence: 0.6 }
+      };
+    }
+
+    async function fetchVisionKeywords(imageUrl){
+      if (!imageUrl) return null;
+      const url = String(imageUrl);
+      if (keywordsCache.has(url)) return keywordsCache.get(url);
+      try {
+        const res = await fetch(`${API_BASE}/api/vision/keywords`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ imageUrl: url })
+        });
+        if (!res.ok) throw new Error('HTTP '+res.status);
+        const data = await res.json();
+        keywordsCache.set(url, data);
+        return data;
+      } catch (e) {
+        const mock = await mockVisionKeywords(url);
+        keywordsCache.set(url, mock);
+        return mock;
+      }
+    }
+
+    function clearChildren(el){ while (el.firstChild) el.removeChild(el.firstChild); }
+
+    function renderCampaignOptions(payload){
+      options.replaceChildren();
+      const items = [];
+      if (payload?.campaign?.name) items.push({ label: payload.campaign.name, type: 'campaign' });
+      if (payload?.designer?.name) items.push({ label: payload.designer.name, type: 'designer' });
+      items.forEach(({label}) => {
+        const b = createEl('button', { type: 'button' }, [document.createTextNode(titleCase(label))]);
+        b.addEventListener('click', ()=> onKeywordSelect(titleCase(label)));
+        options.appendChild(b);
+      });
+      ensureSizeForContent();
+    }
+
+    function renderDetails(bag){
+      detailsWrap.removeAttribute('hidden');
+      clearChildren(detailsWrap);
+      const kw = Array.isArray(bag?.keywords) ? bag.keywords : [];
+      const attrs = bag?.attributes || {};
+      const flat = new Set(kw.concat(
+        (attrs.material||[]), (attrs.pattern||[]), (attrs.color||[]), (attrs.hardware||[]), (attrs.style||[]), (attrs.collection||[])
+      ).filter(Boolean));
+      Array.from(flat).slice(0, 12).forEach(lbl => {
+        const b = createEl('button', { type: 'button' }, [document.createTextNode(titleCase(lbl))]);
+        b.addEventListener('click', ()=> onKeywordSelect(titleCase(lbl)));
+        detailsWrap.appendChild(b);
+      });
+      ensureSizeForContent();
+    }
+
+    function showDetailsView(){
+      backBtn.removeAttribute('hidden');
+      presets.setAttribute('hidden','');
+      detailsWrap.removeAttribute('hidden');
+      // Recompute size to accommodate details chips if needed
+      requestAnimationFrame(()=> ensureSizeForContent());
+    }
+    function showBaseView(){
+      backBtn.setAttribute('hidden','');
+      detailsWrap.setAttribute('hidden','');
+      presets.removeAttribute('hidden');
+      // Recompute size to shrink back to base chips width
+      requestAnimationFrame(()=> ensureSizeForContent());
+    }
+
+    backBtn.removeEventListener('click', showBase); // replace old handler if any
+    backBtn.addEventListener('click', showBaseView);
+
+    function renderBagChips(payload){
+      clearChildren(presets);
+      const bags = Array.isArray(payload?.bags) ? payload.bags : [];
+      bags.forEach((bag, idx) => {
+        const label = assembleBagLabel(bag) || `Bag ${idx+1}`;
+        const b = createEl('button', { type: 'button' }, [document.createTextNode(label)]);
+        if (Array.isArray(bag?.keywords) && bag.keywords.length) {
+          const badge = createEl('span', { class: 'chip-badge' }, [document.createTextNode(String(Math.min(9, bag.keywords.length)))]);
+          b.appendChild(badge);
+        }
+        b.addEventListener('click', ()=>{
+          selectedBagIndex = idx;
+          renderDetails(bag);
+          showDetailsView();
+          onKeywordSelect(label);
+        });
+        presets.appendChild(b);
+      });
+      if (!bags.length){
+        const b = createEl('button', { type: 'button' }, [document.createTextNode('No bag detected')]);
+        b.addEventListener('click', ()=> onKeywordSelect('Bag'));
+        presets.appendChild(b);
+      }
+      ensureSizeForContent();
+    }
+
+    async function analyzeCurrentView(){
+      if (!expanded || box.hasAttribute('hidden')) return;
+      const img = getTopVisibleImage();
+      const url = img ? (img.currentSrc || img.src) : '';
+      if (!url) return;
+      const payload = await fetchVisionKeywords(url);
+      title.textContent = 'Hello!';
+      sub.textContent = 'Would you like to learn more about these?';
+      renderCampaignOptions(payload);
+      renderBagChips(payload);
+    }
+
+    function scheduleAnalysis(){
+      if (analyzeDebounce) clearTimeout(analyzeDebounce);
+      analyzeDebounce = setTimeout(()=>{ analyzeCurrentView(); }, 180);
+    }
+
+    // Observe images and trigger analysis on scroll when chat is open
+    observeImages();
+    window.addEventListener('scroll', ()=>{ if (expanded) scheduleAnalysis(); }, { passive: true });
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initChatbot);
