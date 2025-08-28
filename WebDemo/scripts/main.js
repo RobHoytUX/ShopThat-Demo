@@ -245,6 +245,8 @@
   .chatbot-toggle{background:#000;color:#fff;border-radius:50%;cursor:pointer;position:absolute;bottom:-80px;right:8px;border:0;outline:none;box-shadow:none;display:grid;place-items:center;width:56px;height:56px;padding:0}
   .chatbot-toggle:focus{outline:none}
   .chatbot-toggle img{width:24px;height:24px;filter:brightness(0) invert(1)}
+  .chatbot-toggle--glass{background: linear-gradient(135deg, rgba(255,255,255,0.9), rgba(255,255,255,0.7)); color:#111; border:1px solid rgba(0,0,0,0.15); box-shadow:0 8px 32px 0 rgba(31,38,135,0.2); backdrop-filter: blur(12px) saturate(160%); -webkit-backdrop-filter: blur(12px) saturate(160%)}
+  .chatbot-toggle--glass img{filter:none}
   .chatbot-box{height:781.25px;width:562.5px;color:#111;border-radius:12px;padding:28px 12px 20px 12px;display:flex;flex-direction:column;position:relative;box-sizing:border-box;overflow:hidden;
     background: linear-gradient(135deg, rgba(255,255,255,0.4), rgba(255,255,255,0.22));
     border: 1px solid rgba(255,255,255,0.35);
@@ -288,6 +290,7 @@
   .chatbot-input input::-webkit-input-placeholder{color:#444;opacity:1}
   .chatbot-input input:focus{outline:none;box-shadow:none;border-color:#ccc}
   .chatbot-input button{width:40px;height:40px;border-radius:50%;border:0;background:#000;color:#fff;cursor:pointer;display:grid;place-items:center;padding:0}
+  .chatbot-input button[disabled]{background:rgba(0,0,0,0.15);color:#666;cursor:not-allowed;border:1px solid rgba(0,0,0,0.1)}
   @media (max-width:600px){.chatbot-box{width:90vw}}
   `;
 
@@ -650,6 +653,8 @@
         img.alt = 'Open chat';
         toggle.appendChild(img);
       }
+      // When chat is closed, apply glass style; when open, use default dark style
+      toggle.classList.toggle('chatbot-toggle--glass', !expanded);
     }
 
     // Smooth open/close using the same fade class as scroll behavior
