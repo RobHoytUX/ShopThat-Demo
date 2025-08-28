@@ -245,14 +245,14 @@
   .chatbot-toggle{background:#000;color:#fff;border-radius:50%;cursor:pointer;position:absolute;bottom:-80px;right:8px;border:0;outline:none;box-shadow:none;display:grid;place-items:center;width:56px;height:56px;padding:0}
   .chatbot-toggle:focus{outline:none}
   .chatbot-toggle img{width:24px;height:24px;filter:brightness(0) invert(1)}
-  .chatbot-box{height:500px;width:360px;color:#111;border-radius:12px;padding:12px;display:flex;flex-direction:column;position:relative;
+  .chatbot-box{height:625px;width:450px;color:#111;border-radius:12px;padding:12px;display:flex;flex-direction:column;position:relative;
     background: linear-gradient(135deg, rgba(255,255,255,0.4), rgba(255,255,255,0.22));
     border: 1px solid rgba(255,255,255,0.35);
     box-shadow: 0 8px 32px 0 rgba(31,38,135,0.3);
     backdrop-filter: blur(16px) saturate(180%);
     -webkit-backdrop-filter: blur(16px) saturate(180%);
     opacity:1; transform: translateY(0);
-    transition: opacity 200ms ease, transform 200ms ease;
+    transition: opacity 200ms ease, transform 200ms ease, width 200ms ease, height 200ms ease;
   }
   .chatbot-box.is-scroll-hidden{opacity:0; transform: translateY(8px); pointer-events:none}
   .chatbot-box[hidden]{display:none !important}
@@ -263,7 +263,7 @@
   .chatbot-back[hidden]{display:none}
   .chatbot-header{text-align:center}
   .chatbot-title{font-size:21px;font-weight:600;margin:0 0 8px}
-  .chatbot-sub{font-size:13px;color:#232323;margin:0 0 8px}
+  .chatbot-sub{font-size:15px;color:#232323;margin:0 0 8px;font-weight:600}
   .chatbot-logo{display:block;margin:0 auto 8px;height:40px;width:auto}
   .chatbot-options{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-bottom:8px}
   .chatbot-options button{padding:6px 10px;border:1px solid rgba(0,0,0,0.35);border-radius:12px;background:rgba(255,255,255,0.92);cursor:pointer;font-size:12px}
@@ -273,9 +273,12 @@
   .chatbot-presets--details{display:grid;grid-template-columns:repeat(3,max-content);gap:8px;justify-content:center}
   .chatbot-presets--details[hidden]{display:none !important}
   .chip-badge{position:absolute;top:-6px;right:-6px;background:#111;color:#fff;border-radius:12px;padding:0 6px;font-size:10px;line-height:16px;height:16px;min-width:16px;display:inline-grid;place-items:center}
-  .chatbot-messages{flex:1;overflow:auto;margin-bottom:8px;display:flex;flex-direction:column;gap:8px;padding:4px}
+  .chatbot-messages{flex:1;overflow:auto;margin-bottom:8px;display:flex;flex-direction:column;gap:8px;padding:4px;padding-right:12px;scrollbar-gutter:stable both-edges}
+  .chatbot-messages::-webkit-scrollbar{width:10px}
+  .chatbot-messages::-webkit-scrollbar-track{background:rgba(0,0,0,0.06);border-radius:8px}
+  .chatbot-messages::-webkit-scrollbar-thumb{background:rgba(0,0,0,0.25);border-radius:8px}
   .chatbot-msg{max-width:80%;padding:10px 12px;border-radius:16px;line-height:1.35;font-size:14px;word-wrap:break-word;white-space:pre-wrap;position:relative;transition:opacity 200ms ease}
-  .chatbot-msg-user{align-self:flex-end;background:rgba(0,0,0,0.78);color:#fff;border-radius:30px 30px 6px 30px}
+  .chatbot-msg-user{align-self:flex-end;background:rgba(0,0,0,0.78);color:#fff;border-radius:30px 30px 6px 30px;margin-right:8px}
   .chatbot-msg-bot{align-self:flex-start;background:#f2f2f2;color:#111;border-radius:30px 30px 30px 6px}
   .chatbot-msg.is-fading{opacity:0}
   .chatbot-input{display:flex;gap:8px}
@@ -507,10 +510,23 @@
       const div = createEl('div', { class: klass });
       div.textContent = sender === 'user' ? text : markdownToText(text);
       messages.appendChild(div);
-      messages.scrollTop = messages.scrollHeight;
+      if (sender === 'user') {
+        // keep UX: after sending, keep at bottom to see pending reply
+        messages.scrollTop = messages.scrollHeight;
+      } else {
+        // after bot response, anchor just above the preceding user bubble
+        // so both the query and the start of the response are visible
+        const botH = div.offsetHeight || 0;
+        const prev = div.previousElementSibling;
+        const prevH = prev && prev instanceof HTMLElement ? (prev.offsetHeight || 0) : 0;
+        const gutter = 16; // small padding so both bubbles breathe
+        const target = Math.max(0, messages.scrollHeight - (botH + prevH + gutter));
+        messages.scrollTop = target;
+      }
       // Show refresh after the first bot response exists
       if (sender !== 'user') refreshBtn.removeAttribute('hidden');
     }
+    // removed expand/collapse control; default size reflects previous expanded state
 
     async function send(){
       const txt = (input.value||'').trim();
@@ -571,10 +587,27 @@
       }
     }
 
+    // Smooth open/close using the same fade class as scroll behavior
+    const OPEN_CLOSE_MS = 200;
+    function openBox(){
+      // Start hidden style then reveal next frame for a fade-in
+      box.removeAttribute('hidden');
+      box.classList.add('is-scroll-hidden');
+      requestAnimationFrame(()=>{
+        box.classList.remove('is-scroll-hidden');
+      });
+    }
+    function closeBox(){
+      // Fade out, then actually hide after transition ends
+      box.classList.add('is-scroll-hidden');
+      setTimeout(()=>{
+        box.setAttribute('hidden','');
+        box.classList.remove('is-scroll-hidden');
+      }, OPEN_CLOSE_MS);
+    }
     function toggleBox(){
       expanded = !expanded;
-      if (expanded) { box.removeAttribute('hidden'); }
-      else { box.setAttribute('hidden',''); }
+      if (expanded) openBox(); else closeBox();
       updateToggle();
     }
     updateToggle();
