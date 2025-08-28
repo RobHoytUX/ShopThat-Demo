@@ -237,7 +237,7 @@
 
 // Chatbox widget
 (function(){
-  const API_BASE = 'http://localhost:8000';
+  const API_BASE = 'http://localhost:8001';
   const DEFAULT_SLUG = 'kusama_campaign';
 
   const styles = `

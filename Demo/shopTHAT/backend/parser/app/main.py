@@ -9,15 +9,22 @@ from fastapi import Request
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 
-from groq import Groq
-from langchain_huggingface import HuggingFaceEmbeddings
-from langchain_community.vectorstores import FAISS
-
-from .settings import settings
-from .llm import GroqLLM
+try:
+    from .settings import settings  # type: ignore
+except Exception:
+    settings = None  # loaded lazily in startup when needed
 from .retrieval import retrieve_context
-from .logger import ConversationLogger
-from .evaluation import evaluate_response
+try:
+    from .logger import ConversationLogger  # type: ignore
+except Exception:  # pragma: no cover
+    class ConversationLogger:  # type: ignore
+        def add(self, *args, **kwargs):
+            return None
+try:
+    from .evaluation import evaluate_response  # type: ignore
+except Exception:  # pragma: no cover
+    def evaluate_response(user_request: str, context: str, model_response: str):  # type: ignore
+        return "", 0.0
 from .routers.campaigns import router as campaigns_router
 
 app = FastAPI(title="Pangee Chat Inference")
@@ -31,6 +38,8 @@ app.add_middleware(
         "http://127.0.0.1:3001",
         "http://localhost:5173",
         "http://127.0.0.1:5173",
+        "http://localhost:8000",
+        "http://127.0.0.1:8000",
         "https://5.161.217.209",
     ],
     allow_credentials=True,
@@ -67,8 +76,23 @@ def startup_event():
         print("✅ Startup complete: demo mode ready.")
         return
 
-    # Groq client & LLM (full init)
-    client     = Groq(api_key=settings.GROQ_API_KEY)
+    # Groq client & LLM (full init) — lazy imports to avoid heavy deps in demo
+    from .llm import GroqLLM  # type: ignore
+    try:
+        from groq import Groq  # type: ignore
+        from langchain_huggingface import HuggingFaceEmbeddings  # type: ignore
+        from langchain_community.vectorstores import FAISS  # type: ignore
+    except Exception as e:  # pragma: no cover
+        raise RuntimeError(
+            "Required ML dependencies are missing. Install backend deps or set DEMO_SKIP_HEAVY=1"
+        ) from e
+
+    # Load settings if not yet imported (avoids yaml/pandas in import path for demo)
+    global settings
+    if settings is None:
+        from .settings import settings as _settings  # type: ignore
+        settings = _settings
+    client = Groq(api_key=settings.GROQ_API_KEY)
     app.state.llm = GroqLLM(client=client)
 
     # Embeddings & FAISS (with safe fallback)
@@ -170,19 +194,19 @@ async def chat(req: ChatRequest, request: Request):
 
     # 3) Generate & format
     try:
-         raw_resp = llm._call(full_prompt)
-    except groq.InternalServerError as e:
+        raw_resp = llm._call(full_prompt)
+    except Exception:
         # retry once after a short backoff
-         import time
-         time.sleep(1)
-         try:
-             raw_resp = llm._call(full_prompt)
-         except groq.InternalServerError:
+        import time
+        time.sleep(1)
+        try:
+            raw_resp = llm._call(full_prompt)
+        except Exception:
             # final fallback: return a friendly error to the client
-             raise HTTPException(
+            raise HTTPException(
                 status_code=503,
-                detail="Our AI backend is temporarily unavailable. Please try again in a few seconds."
-             )
+                detail="Our AI backend is temporarily unavailable. Please try again in a few seconds.",
+            )
     formatted_resp = format_bot_response(raw_resp, sources)
 
     # 4) Evaluate
