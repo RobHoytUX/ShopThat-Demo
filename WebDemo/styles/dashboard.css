@@ -33,7 +33,7 @@
 
 .card { background: #fff; border: 1px solid #e8e8ef; border-radius: 16px; padding: 16px; display: grid; gap: 12px; }
 .card__header { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-.card__header h2 { margin: 0; font-size: 15px; font-weight: 600; }
+.card__header h2 { margin: 0; font-size: 17px; font-weight: 400; }
 .chip { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; border: 1px solid #d9d9e6; border-radius: 999px; padding: 6px 10px; color: #312e81; background: #f6f7ff; }
 
 .kpi { display: grid; gap: 2px; padding: 10px; }
