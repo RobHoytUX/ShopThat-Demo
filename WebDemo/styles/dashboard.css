@@ -58,8 +58,8 @@
   box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
 }
 
-.card { background: #fff; border: 1px solid #e8e8ef; border-radius: 16px; padding: 16px; display: grid; gap: 12px; }
-.card__header { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.card { background: #fff; border: 1px solid #e8e8ef; border-radius: 16px; padding: 12px 16px 16px 16px; display: grid; gap: 12px; }
+.card__header { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 4px; }
 .card__header h2 { margin: 0; font-size: 17px; font-weight: 400; }
 .card__actions { display: flex; align-items: center; gap: 8px; }
 
@@ -84,14 +84,18 @@
 .data-table { width: 100%; border-collapse: collapse; }
 .data-table th, .data-table td { padding: 8px 6px; text-align: left; border-bottom: 1px solid #f0f0f6; font-size: 13px; }
 
-.stats { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
-.stats li { display: flex; justify-content: space-between; font-size: 14px; padding: 8px 0; }
+.stats { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.stats li { display: flex; justify-content: space-between; font-size: 14px; padding: 4px 0; }
 .stats li span { color: #666; }
 .stats li strong { font-weight: 600; }
 
-.list { display: grid; gap: 10px; }
-.list .row { display: grid; grid-template-columns: 24px 1fr auto; align-items: center; gap: 10px; }
-.list .bar { height: 8px; border-radius: 999px; background: #ececff; position: relative; overflow: hidden; }
+/* Fix Quick chatbot overview card spacing to match revenue cards */
+.kpis .card:last-child { padding-top: 6px; }
+.kpis .card:last-child .card__header { margin-top: -20px; margin-bottom: 0px; }
+
+.list { display: grid; gap: 4px; }
+.list .row { display: grid; grid-template-columns: 12px 1fr auto; align-items: center; gap: 10px; }
+.list .bar { height: 4px; border-radius: 999px; background: #ececff; position: relative; overflow: hidden; }
 .list .bar > span { position: absolute; inset: 0 auto 0 0; width: 45%; background: linear-gradient(90deg,#605efb,#8a87ff); }
 
 .map { height: 220px; background: linear-gradient(135deg,#fafbff,#f4f6ff); border-radius: 12px; display: grid; place-items: center; color: #666; }
