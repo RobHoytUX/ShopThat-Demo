@@ -86,10 +86,10 @@
   function renderCharts(){
     const barCtx = document.getElementById('barChart');
     const lineCtx = document.getElementById('lineChart');
-    const pieCtx = document.getElementById('pieChart');
-    if (!barCtx || !lineCtx || !pieCtx || !window.Chart) return;
+    const catCtx = document.getElementById('categoriesChart');
+    if (!barCtx || !lineCtx || !catCtx || !window.Chart) return;
 
-    new Chart(barCtx, {
+    new Chart(barCtx.getContext('2d'), {
       type: 'bar',
       data: {
         labels: days,
@@ -98,10 +98,10 @@
           { label: 'Offline Sales', data: offline, backgroundColor: 'rgba(99,102,241,.3)' }
         ]
       },
-      options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } } }
+      options: { responsive: true, maintainAspectRatio: true, aspectRatio: 2, scales: { y: { beginAtZero: true } }, animation: false }
     });
 
-    new Chart(lineCtx, {
+    new Chart(lineCtx.getContext('2d'), {
       type: 'line',
       data: {
         labels: lineLabels,
@@ -110,13 +110,20 @@
           { label: 'This Month', data: thisMonth, borderColor: 'rgba(16,185,129,.8)', fill: false, tension: .35 }
         ]
       },
-      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: true } }, scales: { y: { beginAtZero: false } } }
+      options: { responsive: true, maintainAspectRatio: true, aspectRatio: 2, plugins: { legend: { display: true } }, scales: { y: { beginAtZero: false } }, animation: false }
     });
 
-    new Chart(pieCtx, {
-      type: 'doughnut',
-      data: { labels: categories, datasets: [{ data: catSpend, backgroundColor: ['#8b5cf6','#06b6d4','#60a5fa','#a7f3d0'], borderWidth: 0 }] },
-      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+    new Chart(catCtx.getContext('2d'), {
+      type: 'bar',
+      data: {
+        labels: categories,
+        datasets: [{
+          label: 'Spend %',
+          data: catSpend,
+          backgroundColor: ['#8b5cf6','#06b6d4','#60a5fa','#a7f3d0']
+        }]
+      },
+      options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, max: 100 } }, plugins: { legend: { display: false } }, animation: false }
     });
   }
 

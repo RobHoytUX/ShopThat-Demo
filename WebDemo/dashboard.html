@@ -14,7 +14,6 @@
     <a href="#main" class="skip-link">Skip to content</a>
     <aside class="sidebar" aria-label="Primary">
       <div class="sidebar__brand">
-        <img src="assets/logo.svg" alt="shopThat" />
         <span>shopThat</span>
       </div>
       <nav class="sidebar__nav">
@@ -68,21 +67,6 @@
         </div>
       </section>
       <section class="grid kpis" aria-label="Sales summary">
-        <article class="card kpi">
-          <div class="kpi__title">Total Sales</div>
-          <div class="kpi__value" id="kpi-sales" aria-live="polite">$1k</div>
-          <div class="kpi__delta kpi__delta--up">+8% from yesterday</div>
-        </article>
-        <article class="card kpi">
-          <div class="kpi__title">Total Order</div>
-          <div class="kpi__value" id="kpi-orders" aria-live="polite">300</div>
-          <div class="kpi__delta kpi__delta--up">+5% from yesterday</div>
-        </article>
-        <article class="card kpi">
-          <div class="kpi__title">Product Sold</div>
-          <div class="kpi__value" id="kpi-products" aria-live="polite">5</div>
-          <div class="kpi__delta kpi__delta--up">+1.2% from yesterday</div>
-        </article>
         <article class="card top-keywords">
           <div class="card__header">
             <h2>Top keywords</h2>
@@ -95,6 +79,10 @@
             </table>
           </div>
         </article>
+        <article class="card">
+          <div class="card__header"><h2>Quick chatbot overview</h2></div>
+          <ul class="stats" id="bot-overview"></ul>
+        </article>
       </section>
 
       <section class="grid charts">
@@ -106,9 +94,9 @@
           <div class="card__header"><h2>Revenue trends</h2></div>
           <canvas id="lineChart" height="120"></canvas>
         </article>
-        <article class="card">
-          <div class="card__header"><h2>Quick chatbot overview</h2></div>
-          <ul class="stats" id="bot-overview"></ul>
+        <article class="card card--categories">
+          <div class="card__header"><h2>Categories spend</h2></div>
+          <canvas id="categoriesChart"></canvas>
         </article>
       </section>
 
@@ -117,18 +105,10 @@
           <div class="card__header"><h2>Document access</h2></div>
           <div class="list" id="doc-access"></div>
         </article>
-        <article class="card">
-          <div class="card__header"><h2>Sales by country</h2></div>
-          <div id="map" class="map" aria-label="Sales by country map"></div>
-        </article>
-        <article class="card">
-          <div class="card__header"><h2>Categories spend</h2></div>
-          <canvas id="pieChart" height="120"></canvas>
-        </article>
       </section>
     </main>
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" integrity="sha384-V3C8z9H3p7F8kP2b8Z9o8z0dZWkT8QmK3c0pr1+R9tY5ZrD4sZy9YbqAq2nYhJ5l" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     <script src="scripts/dashboard.js" defer></script>
   </body>
 </html>
