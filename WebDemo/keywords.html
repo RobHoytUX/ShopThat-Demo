@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>shopThat — Keywords</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles/main.css">
+    <link rel="stylesheet" href="styles/dashboard.css">
+  </head>
+  <body class="app app--keywords">
+    <aside class="sidebar" aria-label="Primary">
+      <div class="sidebar__brand"><img src="assets/logo.svg" alt="shopThat" /><span>shopThat</span></div>
+      <nav class="sidebar__nav">
+        <a href="/dashboard.html">Dashboard</a>
+        <a class="is-active" href="/keywords.html">Keywords</a>
+      </nav>
+    </aside>
+    <header class="appbar">
+      <div class="appbar__inner">
+        <a class="icon-btn" href="/dashboard.html" aria-label="Back">←</a>
+        <h1 class="appbar__title">Keywords</h1>
+        <div class="appbar__search"><input type="search" placeholder="Search here..." aria-label="Search" /></div>
+        <div class="appbar__account"><span class="locale">Eng (US)</span><div class="avatar" role="img" aria-label="Person, Admin"></div></div>
+      </div>
+    </header>
+
+    <main id="main" class="keywords" role="main">
+      <section class="toolbar" aria-label="Filters">
+        <div class="toolbar__left">
+          <label class="sr-only" for="kwFilter">Filter keywords</label>
+          <input id="kwFilter" class="input" type="search" placeholder="Search keywords" />
+          <button type="button" id="resetKw" class="chip">Reset</button>
+        </div>
+        <div class="toolbar__right" role="group" aria-label="Graph controls">
+          <button class="chip" id="zoomIn" aria-label="Zoom in">＋</button>
+          <button class="chip" id="zoomOut" aria-label="Zoom out">−</button>
+          <button class="chip" id="fit" aria-label="Fit to screen">Fit</button>
+        </div>
+      </section>
+      <div class="keywords__canvas">
+        <svg id="bubbleGraph" role="img" aria-label="Keyword knowledge graph"></svg>
+      </div>
+      <aside class="drawer" aria-label="Keyword details" aria-hidden="true">
+        <div class="drawer__header">
+          <h2 id="drawerTitle">Keyword</h2>
+          <button class="icon-btn" id="drawerClose" aria-label="Close">✕</button>
+        </div>
+        <div class="drawer__body" id="drawerBody"></div>
+      </aside>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+    <script src="scripts/keywords.js" defer></script>
+  </body>
+</html>
+
+
