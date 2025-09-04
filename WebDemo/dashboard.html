@@ -52,25 +52,27 @@
     <main id="main" class="dashboard" role="main">
       <section class="toolbar" aria-label="Filters">
         <div class="toolbar__left">
+        </div>
+        <div class="toolbar__right">
           <label class="sr-only" for="range">Time range</label>
-          <select id="range" class="select">
+          <select id="range" class="select select--styled">
             <option value="week">This Week</option>
             <option value="month" selected>This Month</option>
             <option value="quarter">Last 3 Months</option>
             <option value="year">Year to date</option>
           </select>
-          <button type="button" id="resetDashboard" class="chip" aria-label="Reset filters">Reset</button>
-        </div>
-        <div class="toolbar__right">
-          <label class="sr-only" for="kwSearch">Filter top keywords</label>
-          <input id="kwSearch" class="input" type="search" placeholder="Filter top keywords" />
+          <button type="button" id="resetDashboard" class="btn btn--secondary" aria-label="Reset filters">Reset</button>
         </div>
       </section>
       <section class="grid kpis" aria-label="Sales summary">
         <article class="card top-keywords">
           <div class="card__header">
             <h2>Top keywords</h2>
-            <a class="chip" href="/keywords.html" id="view-keywords">View</a>
+            <div class="card__actions">
+              <label class="sr-only" for="kwSearch">Filter top keywords</label>
+              <input id="kwSearch" class="input input--compact" type="search" placeholder="Filter keywords" />
+              <a class="btn btn--primary" href="/keywords.html" id="view-keywords">View</a>
+            </div>
           </div>
           <div class="table-wrap">
             <table class="data-table">
