@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>Core Values Campaign — WebDemo</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles/main.css">
+  </head>
+  <body>
+    <a href="#main" class="skip-link">Skip to content</a>
+    <header class="lv-header" role="banner">
+      <div class="lv-header__inner">
+        <div class="lv-left">
+          <button class="lv-burger" aria-label="Open menu" aria-expanded="false" aria-controls="nav"><span></span></button>
+          <span class="lv-menu-label">Menu</span>
+          <a class="lv-search-link" href="#" aria-label="Search">
+            <span class="lv-search-icon" aria-hidden="true"></span>
+            <span>Search</span>
+          </a>
+        </div>
+        <a class="lv-logo" href="#" aria-label="Louis Vuitton Home">
+          <img src="assets/logo.svg" alt="Louis Vuitton" />
+        </a>
+        <div class="lv-right">
+          <a class="lv-contact" href="#">Contact Us</a>
+          <a class="lv-ico lv-ico--heart" href="#" aria-label="Wishlist">
+            <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M12 21s-6.5-4.2-9-7.7C1.3 11.1 2 7.8 5 6.6c2.1-.9 4.1.2 5 1.6 1-1.4 2.9-2.5 5-1.6 3 1.2 3.7 4.5 2 6.7-2.5 3.5-9 7.7-9 7.7z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </a>
+          <a class="lv-ico lv-ico--user" href="#" aria-label="Account">
+            <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="12" cy="8" r="3.5" fill="none" stroke="currentColor" stroke-width="2"/>
+              <path d="M4 19c1.8-3 5-5 8-5s6.2 2 8 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+          </a>
+          <a class="lv-ico lv-ico--bag" href="#" aria-label="Shopping bag">
+            <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M6 9h12l-1 10H7L6 9z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+              <path d="M9 9V7a3 3 0 0 1 6 0v2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+            <span class="lv-badge" aria-hidden="true">0</span>
+          </a>
+        </div>
+      </div>
+    </header>
+
+    <main id="main" class="lv-main" role="main">
+      <!-- Hero Section with video placeholder -->
+      <section class="hero" aria-label="Core Values Campaign Hero">
+        <div class="hero__media">
+          <video class="hero__video" autoplay muted playsinline loop aria-label="Campaign reel" poster="assets/hero-poster.jpg"></video>
+          <div class="hero__fallback" aria-hidden="true"></div>
+        </div>
+        <div class="hero__content">
+          <div class="hero__content-inner">
+            <h1 class="hero__title">shopThat Demo</h1>
+            <p class="hero__subtitle">Kusama campaign</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Interlude text block on white background -->
+      <section class="interlude" aria-label="Intro copy">
+        <div class="interlude__inner">
+          <p class="interlude__text">
+            Discover the Louis Vuitton x Yayoi Kusama campaign—playful, graphic, and unmistakably modern. Polka‑dot motifs reimagine iconic silhouettes and leather finishes, celebrating craftsmanship and joyful expression through bold color, texture, and form.
+          </p>
+        </div>
+      </section>
+
+      <!-- Full-bleed image band (moved directly after hero) -->
+      <section class="fullbleed" aria-label="Campaign Visual">
+        <figure class="fullbleed__figure">
+          <div class="fullbleed__media">
+            <img src="assets/kusamamain.png" alt="Campaign visual" />
+            <div class="fullbleed__overlay" aria-hidden="true"></div>
+            <button class="fullbleed__play" aria-label="Play video"></button>
+          </div>
+          
+        </figure>
+      </section>
+
+      <!-- Stories grid -->
+      <section id="stories" class="stories" aria-label="Stories">
+        <div class="section-intro">
+          <h2>Stories</h2>
+          <p>Discover portraits and moments from the campaign.</p>
+        </div>
+        <div class="stories__grid">
+          <article class="story-card story-card--span-6">
+            <a class="story-card__link" href="#" aria-label="Open story 1">
+              <img src="assets/kusama2.png" alt="Portrait 1" loading="lazy" />
+              <div class="story-card__meta">
+                <h3>Portrait One</h3>
+                <p>Location — Year</p>
+              </div>
+            </a>
+          </article>
+          <article class="story-card story-card--span-6">
+            <a class="story-card__link" href="#" aria-label="Open story 2">
+              <img src="assets/kusama3.png" alt="Portrait 2" loading="lazy" />
+              <div class="story-card__meta">
+                <h3>Portrait Two</h3>
+                <p>Location — Year</p>
+              </div>
+            </a>
+          </article>
+          
+          
+          
+        </div>
+      </section>
+
+      
+
+      
+
+      <!-- About/Copy section -->
+      <section id="about" class="copy" aria-label="About the campaign">
+        <div class="copy__inner">
+          <h2>About</h2>
+          <p>The Core Values campaign is an ode to the spirit of travel and discovery.</p>
+        </div>
+      </section>
+    </main>
+
+    <footer class="lv-footer" role="contentinfo">
+      <div class="lv-footer__inner">
+        <nav aria-label="Footer">
+          <ul>
+            <li><a href="#">Privacy</a></li>
+            <li><a href="#">Terms</a></li>
+            <li><a href="#">Contact</a></li>
+          </ul>
+        </nav>
+        <p class="copyright">shopThat demo</p>
+      </div>
+    </footer>
+
+    <script src="scripts/main.js" defer></script>
+  </body>
+  </html>
+
+

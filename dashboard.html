@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>shopThat — Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles/main.css">
+    <link rel="stylesheet" href="styles/dashboard.css">
+  </head>
+  <body class="app app--dashboard">
+    <a href="#main" class="skip-link">Skip to content</a>
+    <aside class="sidebar" aria-label="Primary">
+      <div class="sidebar__brand">
+        <span>shopThat</span>
+      </div>
+      <nav class="sidebar__nav">
+        <a class="is-active" href="/dashboard.html">Dashboard</a>
+        <a href="#" aria-disabled="true">Internals</a>
+        <a href="#" aria-disabled="true">Publishers</a>
+        <a href="#" aria-disabled="true">Open source</a>
+        <a href="#" aria-disabled="true">Ecommerce</a>
+        <a href="#" aria-disabled="true">Financials</a>
+        <a href="#" aria-disabled="true">Settings</a>
+        <a href="#" aria-disabled="true">Sign Out</a>
+      </nav>
+      <div class="sidebar__cta">
+        <div class="cta">
+          <div class="cta__title">shopThat</div>
+          <div class="cta__desc">Get access to all features on shopThat</div>
+          <button class="cta__btn" type="button">Upgrade</button>
+        </div>
+      </div>
+    </aside>
+
+    <header class="appbar" role="banner">
+      <div class="appbar__inner">
+        <h1 class="appbar__title">Dashboard</h1>
+        <div class="appbar__search">
+          <input type="search" placeholder="Search here..." aria-label="Search" />
+        </div>
+        <div class="appbar__account">
+          <span class="locale">Eng (US)</span>
+          <button class="icon-btn" aria-label="Notifications">🔔</button>
+          <div class="avatar" role="img" aria-label="Person, Admin"></div>
+        </div>
+      </div>
+    </header>
+
+    <main id="main" class="dashboard" role="main">
+      <section class="toolbar" aria-label="Filters">
+        <div class="toolbar__left">
+        </div>
+        <div class="toolbar__right">
+          <label class="sr-only" for="range">Time range</label>
+          <select id="range" class="select select--styled">
+            <option value="week">This Week</option>
+            <option value="month" selected>This Month</option>
+            <option value="quarter">Last 3 Months</option>
+            <option value="year">Year to date</option>
+          </select>
+          <button type="button" id="resetDashboard" class="btn btn--secondary" aria-label="Reset filters">Reset</button>
+        </div>
+      </section>
+      <section class="grid kpis" aria-label="Sales summary">
+        <article class="card top-keywords">
+          <div class="card__header">
+            <h2>Top keywords</h2>
+            <div class="card__actions">
+              <label class="sr-only" for="kwSearch">Filter top keywords</label>
+              <input id="kwSearch" class="input input--compact" type="search" placeholder="Filter keywords" />
+              <a class="btn btn--primary" href="/keywords.html" id="view-keywords">View</a>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead><tr><th>Keyword name</th><th>Volume</th><th>Keywords</th><th>Volume</th></tr></thead>
+              <tbody id="top-keywords-body"></tbody>
+            </table>
+          </div>
+        </article>
+        <article class="card">
+          <div class="card__header"><h2>Quick chatbot overview</h2></div>
+          <ul class="stats" id="bot-overview"></ul>
+        </article>
+      </section>
+
+      <section class="grid charts">
+        <article class="card">
+          <div class="card__header"><h2>Revenue vs. data spend</h2></div>
+          <canvas id="barChart" height="120"></canvas>
+        </article>
+        <article class="card">
+          <div class="card__header"><h2>Revenue trends</h2></div>
+          <canvas id="lineChart" height="120"></canvas>
+        </article>
+        <article class="card card--categories">
+          <div class="card__header"><h2>Categories spend</h2></div>
+          <canvas id="categoriesChart"></canvas>
+        </article>
+      </section>
+
+      <section class="grid lower">
+        <article class="card">
+          <div class="card__header"><h2>Document access</h2></div>
+          <div class="list" id="doc-access"></div>
+        </article>
+      </section>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script src="scripts/dashboard.js" defer></script>
+  </body>
+</html>
+
+
