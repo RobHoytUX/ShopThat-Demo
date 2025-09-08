@@ -53,6 +53,30 @@
   const color = d3.scaleOrdinal([ '#6366F1', '#7C3AED', '#4F46E5', '#312E81' ]);
   const radius = d3.scaleSqrt().domain([10, 90]).range([16, 90]);
 
+  function computeFontSizeForRadius(r){
+    return Math.max(10, Math.min(18, Math.round(r * 0.28)));
+  }
+
+  function wrapText(textSel, label, maxWidth){
+    textSel.text(null);
+    const words = String(label||'').split(/\s+/).filter(Boolean);
+    let line = [];
+    let lineNumber = 0;
+    const lineHeight = 1.1;
+    let tspan = textSel.append('tspan').attr('x',0).attr('y',0).attr('dy','0em');
+    for(const word of words){
+      line.push(word);
+      tspan.text(line.join(' '));
+      if (tspan.node().getComputedTextLength() > maxWidth){
+        line.pop();
+        tspan.text(line.join(' '));
+        line = [word];
+        tspan = textSel.append('tspan').attr('x',0).attr('y',0).attr('dy', `${++lineNumber * lineHeight}em`).text(word);
+      }
+    }
+    textSel.attr('dy', `${-(lineNumber * lineHeight)/2}em`);
+  }
+
   const gLinks = svg.append('g').attr('stroke', '#d9d9ef').attr('stroke-width', 1.2);
   const gNodes = svg.append('g');
   const zoom = d3.zoom().scaleExtent([0.5, 2]).on('zoom', (ev)=>{
@@ -92,13 +116,15 @@
       .attr('r', d => radius(d.value))
       .attr('fill', d => d3.color(color(d.group)).formatHex())
       .attr('opacity', .9);
-    g.append('text')
+    const text = g.append('text')
       .attr('text-anchor','middle')
-      .attr('dy','.35em')
       .attr('fill','#fff')
-      .style('font-size','14px')
-      .style('font-weight','700')
-      .text(d => d.id.length > 14 ? d.id.slice(0,12)+'…' : d.id);
+      .style('font-weight','700');
+    text.each(function(d){
+      const r = radius(d.value);
+      d3.select(this).style('font-size', `${computeFontSizeForRadius(r)}px`);
+      wrapText(d3.select(this), d.id, r * 1.6);
+    });
     return g;
   });
 
@@ -122,13 +148,15 @@
         .attr('r', d => radius(d.value))
         .attr('fill', d => d3.color(color(d.group)).formatHex())
         .attr('opacity', .9);
-      g.append('text')
+      const text = g.append('text')
         .attr('text-anchor','middle')
-        .attr('dy','.35em')
         .attr('fill','#fff')
-        .style('font-size','14px')
-        .style('font-weight','700')
-        .text(d => d.id.length > 14 ? d.id.slice(0,12)+'…' : d.id);
+        .style('font-weight','700');
+      text.each(function(d){
+        const r = radius(d.value);
+        d3.select(this).style('font-size', `${computeFontSizeForRadius(r)}px`);
+        wrapText(d3.select(this), d.id, r * 1.6);
+      });
       return g;
     });
     node.on('click', (_, d) => openDrawer(d));
