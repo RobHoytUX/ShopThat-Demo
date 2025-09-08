@@ -118,13 +118,15 @@
 .lower .card canvas { display: block; width: 100% !important; height: auto !important; aspect-ratio: 16 / 9; }
 
 /* Keywords Page */
-.keywords { padding: 16px; display: grid; gap: 16px; grid-column: 2 / -1; grid-row: 2; height: calc(100vh - 64px); overflow: auto; grid-template-columns: 1fr; }
+.keywords { --drawer-w: 360px; padding: 16px; display: grid; gap: 16px; grid-column: 2 / -1; grid-row: 2; height: calc(100vh - 64px); overflow: auto; grid-template-columns: 1fr; }
 .keywords.drawer-open { grid-template-columns: 1fr; }
-.keywords .toolbar { max-width: 1100px; margin: 0 auto; width: 100%; }
+.keywords .toolbar { max-width: 1100px; margin: 0 auto; width: 100%; transition: transform .25s ease; }
 .neo4j-panel { display: grid; grid-template-columns: 1fr; gap: 8px; margin-top: 8px; }
 .neo4j-panel .btn { width: fit-content; }
-.keywords__canvas { background: #fff; border-left: 1px solid #e8e8ef; border-top: 1px solid #e8e8ef; border-bottom: 1px solid #e8e8ef; border-radius: 16px 0 0 16px; margin: 16px auto; max-width: 1100px; width: 100%; }
-.drawer { background: #fff; border: 1px solid #e8e8ef; border-left: none; border-radius: 0 16px 16px 0; transform: translateX(100%); transition: transform .25s ease; position: fixed; right: 16px; top: 80px; width: 360px; height: calc(100vh - 96px); overflow: auto; z-index: 20; margin: 0; }
+.keywords__canvas { background: #fff; border: 1px solid #e8e8ef; border-radius: 16px; margin: 16px auto; max-width: 1100px; width: 100%; transition: transform .25s ease; }
+.keywords.drawer-open .toolbar { transform: translateX(calc(-1 * var(--drawer-w) / 2)); }
+.keywords.drawer-open .keywords__canvas { transform: translateX(calc(-1 * var(--drawer-w) / 2)); }
+.drawer { background: #fff; border: 1px solid #e8e8ef; border-right: none; border-radius: 16px 0 0 16px; transform: translateX(100%); transition: transform .25s ease; position: fixed; right: 0; top: 0; width: 360px; height: 100vh; overflow: auto; z-index: 20; margin: 0; }
 .drawer[aria-hidden="false"] { transform: translateX(0); }
 .drawer__header { display: flex; align-items: center; justify-content: space-between; padding: 16px; border-bottom: 1px solid #f0f0f6; }
 .drawer__body { padding: 16px; display: grid; gap: 10px; }
