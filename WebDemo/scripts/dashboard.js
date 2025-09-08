@@ -15,6 +15,11 @@
   const categories = ['Daily','Weekly','Monthly','Quarterly'];
   const catSpend = [5,18,27,52];
 
+  const STORAGE_KEY = 'st_keywords_v1';
+  function loadStored(){
+    try { return JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]'); } catch { return []; }
+  }
+
   const topKeywordsLeft = [
     ['Roger Federer', 348],
     ['Rafael Nadal', 230],
@@ -34,7 +39,9 @@
     const body = $('#top-keywords-body');
     if (!body) return;
     body.replaceChildren();
-    const left = topKeywordsLeft.filter(([n]) => n.toLowerCase().includes(filterTerm.toLowerCase()));
+    const stored = loadStored();
+    const fromStorage = stored.length ? stored.map(k=>[k.name, k.value]) : [];
+    const left = (fromStorage.length?fromStorage:topKeywordsLeft).filter(([n]) => n.toLowerCase().includes(filterTerm.toLowerCase()));
     const right = topKeywordsRight.filter(([n]) => n.toLowerCase().includes(filterTerm.toLowerCase()));
     const max = Math.max(left.length, right.length);
     for (let i=0;i<max;i++){

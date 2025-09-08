@@ -20,8 +20,8 @@
   const width = () => svg.node().clientWidth;
   const height = () => svg.node().clientHeight;
 
-  // Mock graph data (also used for seeding Neo4j)
-  const nodes = [
+  // Mock graph data (also used for seeding Neo4j). Will be overridden by localStorage if present.
+  const defaultNodes = [
     { id: 'Yayoi Kusama', group: 1, value: 90 },
     { id: 'Trio Messenger', group: 1, value: 35 },
     { id: 'Keepall Bag', group: 1, value: 28 },
@@ -35,7 +35,7 @@
     { id: 'Polka Dots', group: 3, value: 20 },
     { id: 'Tote', group: 3, value: 16 }
   ];
-  const links = [
+  const defaultLinks = [
     { source: 'Yayoi Kusama', target: 'Polka Dots' },
     { source: 'Yayoi Kusama', target: 'Monogram' },
     { source: 'Yayoi Kusama', target: 'Tote' },
@@ -47,8 +47,12 @@
     { source: 'Zendaya', target: 'Oscars' }
   ];
 
-  let graphNodes = nodes.slice();
-  let graphLinks = links.slice();
+  const STORAGE_KEY = 'st_keywords_v1';
+  function loadStored(){
+    try { return JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]'); } catch { return []; }
+  }
+  let graphNodes = (loadStored().length ? loadStored() : defaultNodes).slice();
+  let graphLinks = defaultLinks.slice();
 
   const color = d3.scaleOrdinal([ '#6366F1', '#7C3AED', '#4F46E5', '#312E81' ]);
   const radius = d3.scaleSqrt().domain([10, 90]).range([16, 90]);
@@ -259,8 +263,8 @@
       try {
         await session.executeWrite(async tx => {
           await tx.run('CREATE CONSTRAINT keyword_name IF NOT EXISTS FOR (k:Keyword) REQUIRE k.name IS UNIQUE');
-          await tx.run('UNWIND $data AS row MERGE (k:Keyword {name: row.name}) SET k.volume = row.value, k.group = row.group', { data: nodes });
-          await tx.run('UNWIND $rels AS r MATCH (a:Keyword {name:r.source}),(b:Keyword {name:r.target}) MERGE (a)-[:RELATED_TO]->(b)', { rels: links });
+          await tx.run('UNWIND $data AS row MERGE (k:Keyword {name: row.name}) SET k.volume = row.value, k.group = row.group', { data: graphNodes });
+          await tx.run('UNWIND $rels AS r MATCH (a:Keyword {name:r.source}),(b:Keyword {name:r.target}) MERGE (a)-[:RELATED_TO]->(b)', { rels: graphLinks.length?graphLinks:defaultLinks });
         });
         setStatus('Seeded sample graph', true);
         neo4jLoadBtn && (neo4jLoadBtn.disabled = false);

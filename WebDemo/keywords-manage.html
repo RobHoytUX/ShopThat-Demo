@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>shopThat — Manage Keywords</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles/main.css">
+    <link rel="stylesheet" href="styles/dashboard.css">
+  </head>
+  <body class="app app--keywords">
+    <aside class="sidebar" aria-label="Primary">
+      <div class="sidebar__brand"><img src="assets/logo.svg" alt="shopThat" /><span>shopThat</span></div>
+      <nav class="sidebar__nav">
+        <a href="/dashboard.html">Dashboard</a>
+        <a class="is-active" href="/keywords-manage.html">Manage Keywords</a>
+        <a href="/keywords.html">Keywords</a>
+        <a href="#" aria-disabled="true">Internals</a>
+        <a href="#" aria-disabled="true">Publishers</a>
+        <a href="#" aria-disabled="true">Open source</a>
+        <a href="#" aria-disabled="true">Ecommerce</a>
+        <a href="#" aria-disabled="true">Financials</a>
+        <a href="#" aria-disabled="true">Settings</a>
+        <a href="#" aria-disabled="true">Sign Out</a>
+      </nav>
+      <div class="sidebar__cta">
+        <div class="cta">
+          <div class="cta__title">shopThat</div>
+          <div class="cta__desc">Get access to all features on shopThat</div>
+          <button class="cta__btn" type="button">Upgrade</button>
+        </div>
+      </div>
+    </aside>
+
+    <header class="appbar" role="banner">
+      <div class="appbar__inner">
+        <h1 class="appbar__title"><span class="appbar__title-row">Manage Keywords</span></h1>
+        <div></div>
+        <div class="appbar__account"><span class="locale">Eng (US)</span><div class="avatar" role="img" aria-label="Person, Admin"></div></div>
+      </div>
+    </header>
+
+    <main id="main" class="dashboard" role="main" style="grid-template-columns: 1fr;">
+      <section class="card" aria-label="Keyword management">
+        <div class="card__header">
+          <h2 style="margin:0;font-size:16px;">Add keyword</h2>
+        </div>
+        <div class="toolbar" id="mk-toolbar" style="flex-wrap:wrap; justify-content:flex-start;">
+          <input id="mk-name" class="input" type="text" placeholder="Keyword name" style="min-width:220px" />
+          <button id="mk-add" class="btn btn--primary" type="button">Add</button>
+          <button id="mk-clear" class="btn btn--secondary" type="button">Clear</button>
+          <a class="btn" href="/keywords.html">View Graph</a>
+        </div>
+        <div id="mk-list" class="list" style="margin-top:16px;"></div>
+      </section>
+    </main>
+
+    <script src="scripts/keywords-manage.js" defer></script>
+  </body>
+  </html>
+
+
