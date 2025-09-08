@@ -4,10 +4,13 @@
 
   const svg = d3.select('#bubbleGraph');
   const container = document.querySelector('.keywords');
-  const drawer = document.querySelector('.drawer');
+  const detailsDrawer = document.getElementById('detailsDrawer');
   const drawerTitle = document.getElementById('drawerTitle');
   const drawerBody = document.getElementById('drawerBody');
-  const drawerClose = document.getElementById('drawerClose');
+  const detailsClose = document.getElementById('detailsClose');
+  const neo4jDrawer = document.getElementById('neo4jDrawer');
+  const neo4jClose = document.getElementById('neo4jClose');
+  const openNeo4jBtn = document.getElementById('openNeo4j');
   const filterInput = document.getElementById('kwFilter');
   const resetBtn = document.getElementById('resetKw');
   const zoomIn = document.getElementById('zoomIn');
@@ -17,7 +20,7 @@
   const width = () => svg.node().clientWidth;
   const height = () => svg.node().clientHeight;
 
-  // Mock graph data
+  // Mock graph data (also used for seeding Neo4j)
   const nodes = [
     { id: 'Yayoi Kusama', group: 1, value: 90 },
     { id: 'Trio Messenger', group: 1, value: 35 },
@@ -44,6 +47,9 @@
     { source: 'Zendaya', target: 'Oscars' }
   ];
 
+  let graphNodes = nodes.slice();
+  let graphLinks = links.slice();
+
   const color = d3.scaleOrdinal([ '#6366F1', '#7C3AED', '#4F46E5', '#312E81' ]);
   const radius = d3.scaleSqrt().domain([10, 90]).range([16, 90]);
 
@@ -55,21 +61,21 @@
   });
   svg.call(zoom);
 
-  const sim = d3.forceSimulation(nodes)
-    .force('link', d3.forceLink(links).id(d => d.id).distance(160).strength(0.08))
+  const centerForce = d3.forceCenter(0, 0);
+  const sim = d3.forceSimulation(graphNodes)
+    .force('link', d3.forceLink(graphLinks).id(d => d.id).distance(160).strength(0.08))
     .force('charge', d3.forceManyBody().strength(-200))
-    .force('center', d3.forceCenter(0,0))
+    .force('center', centerForce)
     .force('collision', d3.forceCollide().radius(d => radius(d.value)+4));
 
   function rescaleForDrawer(){
-    const open = drawer.getAttribute('aria-hidden') === 'false';
-    const w = width();
-    const h = height();
-    const leftPad = open ? 40 : 0;
-    const scale = open ? 0.88 : 1; // shrink slightly when drawer open
-    gNodes.attr('transform', `translate(${leftPad},0) scale(${scale})`);
-    gLinks.attr('transform', `translate(${leftPad},0) scale(${scale})`);
-    sim.alpha(0.6).restart();
+    const openDetails = detailsDrawer.getAttribute('aria-hidden') === 'false';
+    const openNeo = neo4jDrawer.getAttribute('aria-hidden') === 'false';
+    const scale = (openDetails || openNeo) ? 0.88 : 1;
+    const tx = 0;
+    gNodes.attr('transform', `translate(${tx},0) scale(${scale})`);
+    gLinks.attr('transform', `translate(${tx},0) scale(${scale})`);
+    sim.alpha(0.3).restart();
   }
 
   function ticked(){
@@ -78,9 +84,9 @@
     node.attr('transform', d => `translate(${d.x},${d.y})`);
   }
 
-  const link = gLinks.selectAll('line').data(links).join('line');
+  let link = gLinks.selectAll('line').data(graphLinks).join('line');
 
-  const node = gNodes.selectAll('g.node').data(nodes).join(enter => {
+  let node = gNodes.selectAll('g.node').data(graphNodes).join(enter => {
     const g = enter.append('g').attr('class','node').style('cursor','pointer');
     g.append('circle')
       .attr('r', d => radius(d.value))
@@ -100,10 +106,45 @@
 
   sim.on('tick', ticked);
 
+  function setGraphData(newNodes, newLinks){
+    graphNodes = newNodes || [];
+    graphLinks = (newLinks || []).filter(l => l.source && l.target && l.source !== l.target);
+
+    link = gLinks.selectAll('line').data(graphLinks);
+    link.exit().remove();
+    link = link.join('line');
+
+    node = gNodes.selectAll('g.node').data(graphNodes, d => d.id);
+    node.exit().remove();
+    node = node.join(enter => {
+      const g = enter.append('g').attr('class','node').style('cursor','pointer');
+      g.append('circle')
+        .attr('r', d => radius(d.value))
+        .attr('fill', d => d3.color(color(d.group)).formatHex())
+        .attr('opacity', .9);
+      g.append('text')
+        .attr('text-anchor','middle')
+        .attr('dy','.35em')
+        .attr('fill','#fff')
+        .style('font-size','14px')
+        .style('font-weight','700')
+        .text(d => d.id.length > 14 ? d.id.slice(0,12)+'…' : d.id);
+      return g;
+    });
+    node.on('click', (_, d) => openDrawer(d));
+
+    sim.nodes(graphNodes);
+    sim.force('link').links(graphLinks);
+    sim.alpha(0.9).restart();
+  }
+
   function resize(){
-    const w = container.querySelector('.keywords__canvas').clientWidth;
+    const canvasEl = container.querySelector('.keywords__canvas');
+    const w = canvasEl.clientWidth;
     const h = window.innerHeight * 0.7;
-    svg.attr('viewBox', [-w/2, -h/2, w, h].join(' '));
+    svg.attr('viewBox', [0, 0, w, h].join(' '));
+    centerForce.x(w/2).y(h/2);
+    sim.alpha(0.5).restart();
     rescaleForDrawer();
   }
   window.addEventListener('resize', resize);
@@ -113,26 +154,32 @@
     drawerTitle.textContent = d.id;
     drawerBody.innerHTML = ''+
       `<div><strong>Volume:</strong> ${d.value}</div>`+
-      `<div><strong>Connections:</strong> ${links.filter(l=>l.source.id===d.id||l.target.id===d.id).length}</div>`+
+      `<div><strong>Connections:</strong> ${graphLinks.filter(l=> (l.source.id?l.source.id:l.source)===d.id || (l.target.id?l.target.id:l.target)===d.id).length}</div>`+
       `<div><strong>Description:</strong> Placeholder description about ${d.id} with sample insights.</div>`+
       `<hr /><div><strong>Related Keywords</strong></div>`+
-      `${links.filter(l=>l.source.id===d.id||l.target.id===d.id).map(l=>`<span class="chip" style="margin:4px 6px 0 0">${l.source.id===d.id?l.target.id:l.source.id}</span>`).join('')}`;
-    drawer.setAttribute('aria-hidden','false');
+      `${graphLinks.filter(l=> (l.source.id?l.source.id:l.source)===d.id || (l.target.id?l.target.id:l.target)===d.id).map(l=>`<span class="chip" style="margin:4px 6px 0 0">${(l.source.id?l.source.id:l.source)===d.id ? (l.target.id?l.target.id:l.target) : (l.source.id?l.source.id:l.source)}</span>`).join('')}`;
+    detailsDrawer.setAttribute('aria-hidden','false');
     container.classList.add('drawer-open');
     rescaleForDrawer();
   }
   function closeDrawer(){
-    drawer.setAttribute('aria-hidden','true');
+    detailsDrawer.setAttribute('aria-hidden','true');
     container.classList.remove('drawer-open');
     rescaleForDrawer();
   }
-  drawerClose.addEventListener('click', closeDrawer);
+  detailsClose && detailsClose.addEventListener('click', closeDrawer);
+  neo4jClose && neo4jClose.addEventListener('click', ()=>{ neo4jDrawer.setAttribute('aria-hidden','true'); rescaleForDrawer(); });
+  openNeo4jBtn && openNeo4jBtn.addEventListener('click', ()=>{ neo4jDrawer.setAttribute('aria-hidden','false'); rescaleForDrawer(); });
 
   // Filtering
   function applyFilter(term){
     const t = String(term||'').toLowerCase();
     node.style('opacity', d => d.id.toLowerCase().includes(t) ? 1 : 0.3);
-    link.style('opacity', l => (l.source.id.toLowerCase().includes(t) || l.target.id.toLowerCase().includes(t)) ? 1 : 0.15);
+    link.style('opacity', l => {
+      const s = (l.source.id?l.source.id:l.source).toLowerCase();
+      const tg = (l.target.id?l.target.id:l.target).toLowerCase();
+      return (s.includes(t) || tg.includes(t)) ? 1 : 0.15;
+    });
   }
   filterInput && filterInput.addEventListener('input', (e)=> applyFilter(e.target.value));
   resetBtn && resetBtn.addEventListener('click', ()=>{ filterInput && (filterInput.value=''); applyFilter(''); closeDrawer(); svg.transition().duration(250).call(zoom.transform, d3.zoomIdentity); });
@@ -141,6 +188,73 @@
   zoomIn && zoomIn.addEventListener('click', ()=> svg.transition().duration(200).call(zoom.scaleBy, 1.2));
   zoomOut && zoomOut.addEventListener('click', ()=> svg.transition().duration(200).call(zoom.scaleBy, 0.8));
   fitBtn && fitBtn.addEventListener('click', ()=> svg.transition().duration(250).call(zoom.transform, d3.zoomIdentity));
+
+  // Neo4j integration
+  const neo4jUriEl = document.getElementById('neo4jUri');
+  const neo4jUserEl = document.getElementById('neo4jUser');
+  const neo4jPassEl = document.getElementById('neo4jPass');
+  const neo4jConnectBtn = document.getElementById('neo4jConnect');
+  const neo4jLoadBtn = document.getElementById('neo4jLoad');
+  const neo4jSeedBtn = document.getElementById('neo4jSeed');
+  const neo4jStatusEl = document.getElementById('neo4jStatus');
+
+  let driver = null;
+  function setStatus(msg, ok){
+    if(neo4jStatusEl){ neo4jStatusEl.textContent = msg; neo4jStatusEl.style.color = ok ? '#065f46' : '#6b7280'; }
+  }
+  async function ensureDriver(){
+    if(driver){ return driver; }
+    const uri = (neo4jUriEl && neo4jUriEl.value) || 'bolt://localhost:7687';
+    const user = (neo4jUserEl && neo4jUserEl.value) || 'neo4j';
+    const pass = (neo4jPassEl && neo4jPassEl.value) || 'neo4j';
+    driver = neo4j.driver(uri, neo4j.auth.basic(user, pass));
+    await driver.verifyConnectivity();
+    return driver;
+  }
+
+  neo4jConnectBtn && neo4jConnectBtn.addEventListener('click', async () => {
+    try {
+      if(driver){ await driver.close(); driver = null; }
+      await ensureDriver();
+      setStatus('Connected', true);
+      neo4jLoadBtn && (neo4jLoadBtn.disabled = false);
+    } catch(err){
+      console.error(err);
+      setStatus('Connection failed');
+    }
+  });
+
+  neo4jSeedBtn && neo4jSeedBtn.addEventListener('click', async () => {
+    try {
+      const drv = await ensureDriver();
+      const session = drv.session({ defaultAccessMode: neo4j.session.WRITE });
+      try {
+        await session.executeWrite(async tx => {
+          await tx.run('CREATE CONSTRAINT keyword_name IF NOT EXISTS FOR (k:Keyword) REQUIRE k.name IS UNIQUE');
+          await tx.run('UNWIND $data AS row MERGE (k:Keyword {name: row.name}) SET k.volume = row.value, k.group = row.group', { data: nodes });
+          await tx.run('UNWIND $rels AS r MATCH (a:Keyword {name:r.source}),(b:Keyword {name:r.target}) MERGE (a)-[:RELATED_TO]->(b)', { rels: links });
+        });
+        setStatus('Seeded sample graph', true);
+        neo4jLoadBtn && (neo4jLoadBtn.disabled = false);
+      } finally { await session.close(); }
+    } catch(err){ console.error(err); setStatus('Seed failed'); }
+  });
+
+  neo4jLoadBtn && neo4jLoadBtn.addEventListener('click', async () => {
+    try {
+      const drv = await ensureDriver();
+      const session = drv.session({ defaultAccessMode: neo4j.session.READ });
+      try {
+        const resNodes = await session.run('MATCH (k:Keyword) RETURN k.name AS id, coalesce(k.volume, 20) AS value, coalesce(k.group, 1) AS group');
+        const resLinks = await session.run('MATCH (a:Keyword)-[:RELATED_TO]->(b:Keyword) RETURN a.name AS source, b.name AS target');
+        const n = resNodes.records.map(r => ({ id: r.get('id'), value: r.get('value'), group: r.get('group') }));
+        const l = resLinks.records.map(r => ({ source: r.get('source'), target: r.get('target') }));
+        if(n.length === 0){ setStatus('No data found. Try Seed.', false); return; }
+        setGraphData(n, l);
+        setStatus(`Loaded ${n.length} nodes / ${l.length} links`, true);
+      } finally { await session.close(); }
+    } catch(err){ console.error(err); setStatus('Load failed'); }
+  });
 })();
 
 

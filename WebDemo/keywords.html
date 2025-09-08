@@ -12,16 +12,36 @@
   </head>
   <body class="app app--keywords">
     <aside class="sidebar" aria-label="Primary">
-      <div class="sidebar__brand"><img src="assets/logo.svg" alt="shopThat" /><span>shopThat</span></div>
+      <div class="sidebar__brand">
+        <img src="assets/logo.svg" alt="shopThat" />
+        <span>shopThat</span>
+      </div>
       <nav class="sidebar__nav">
         <a href="/dashboard.html">Dashboard</a>
         <a class="is-active" href="/keywords.html">Keywords</a>
+        <a href="#" aria-disabled="true">Internals</a>
+        <a href="#" aria-disabled="true">Publishers</a>
+        <a href="#" aria-disabled="true">Open source</a>
+        <a href="#" aria-disabled="true">Ecommerce</a>
+        <a href="#" aria-disabled="true">Financials</a>
+        <a href="#" aria-disabled="true">Settings</a>
+        <a href="#" aria-disabled="true">Sign Out</a>
       </nav>
+      <div class="sidebar__cta">
+        <div class="cta">
+          <div class="cta__title">shopThat</div>
+          <div class="cta__desc">Get access to all features on shopThat</div>
+          <button class="cta__btn" type="button">Upgrade</button>
+        </div>
+      </div>
     </aside>
     <header class="appbar">
       <div class="appbar__inner">
-        <a class="icon-btn" href="/dashboard.html" aria-label="Back">←</a>
-        <h1 class="appbar__title">Keywords</h1>
+        <h1 class="appbar__title">
+          <span class="appbar__title-row">Keywords
+            <a class="icon-btn icon-btn--sm" href="/dashboard.html" aria-label="Back" title="Back">←</a>
+          </span>
+        </h1>
         <div class="appbar__search"><input type="search" placeholder="Search here..." aria-label="Search" /></div>
         <div class="appbar__account"><span class="locale">Eng (US)</span><div class="avatar" role="img" aria-label="Person, Admin"></div></div>
       </div>
@@ -38,21 +58,40 @@
           <button class="chip" id="zoomIn" aria-label="Zoom in">＋</button>
           <button class="chip" id="zoomOut" aria-label="Zoom out">−</button>
           <button class="chip" id="fit" aria-label="Fit to screen">Fit</button>
+          <button class="chip" id="openNeo4j" aria-label="Open Neo4j panel">Neo4j</button>
         </div>
       </section>
       <div class="keywords__canvas">
         <svg id="bubbleGraph" role="img" aria-label="Keyword knowledge graph"></svg>
       </div>
-      <aside class="drawer" aria-label="Keyword details" aria-hidden="true">
+      <aside class="drawer" id="detailsDrawer" aria-label="Keyword details" aria-hidden="true">
         <div class="drawer__header">
           <h2 id="drawerTitle">Keyword</h2>
-          <button class="icon-btn" id="drawerClose" aria-label="Close">✕</button>
+          <button class="icon-btn" id="detailsClose" aria-label="Close">✕</button>
         </div>
         <div class="drawer__body" id="drawerBody"></div>
+      </aside>
+      <aside class="drawer" id="neo4jDrawer" aria-label="Neo4j connection" aria-hidden="true">
+        <div class="drawer__header">
+          <h2>Neo4j</h2>
+          <button class="icon-btn" id="neo4jClose" aria-label="Close">✕</button>
+        </div>
+        <div class="drawer__body">
+          <div class="neo4j-panel" id="neo4jPanel">
+            <input id="neo4jUri" class="input" type="text" placeholder="neo4j+s://<host> (or bolt://localhost:7687)" />
+            <input id="neo4jUser" class="input" type="text" placeholder="username" />
+            <input id="neo4jPass" class="input" type="password" placeholder="password" />
+            <button type="button" class="btn btn--secondary" id="neo4jConnect">Connect</button>
+            <button type="button" class="btn btn--primary" id="neo4jLoad" disabled>Load Graph</button>
+            <button type="button" class="btn" id="neo4jSeed">Seed Sample</button>
+            <span id="neo4jStatus" style="color:#666"></span>
+          </div>
+        </div>
       </aside>
     </main>
 
     <script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/neo4j-driver-lite@5.23.0/lib/browser/neo4j-web.min.js"></script>
     <script src="scripts/keywords.js" defer></script>
   </body>
 </html>
