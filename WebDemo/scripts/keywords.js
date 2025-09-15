@@ -1,5 +1,10 @@
 /* Keywords Bubble Graph */
+console.log('Keywords.js loading...');
+console.log('D3 available:', typeof d3 !== 'undefined');
+console.log('Document ready state:', document.readyState);
+
 (function(){
+  console.log('IIFE started');
   function $(sel, root=document){ return root.querySelector(sel); }
 
   const svg = d3.select('#bubbleGraph');
@@ -16,6 +21,13 @@
   const zoomIn = document.getElementById('zoomIn');
   const zoomOut = document.getElementById('zoomOut');
   const fitBtn = document.getElementById('fit');
+
+  console.log('DOM elements check:', {
+    svg: svg.node(),
+    container: container,
+    svgExists: !!document.getElementById('bubbleGraph'),
+    containerExists: !!container
+  });
 
   const width = () => svg.node().clientWidth;
   const height = () => svg.node().clientHeight;
@@ -49,10 +61,48 @@
 
   const STORAGE_KEY = 'st_keywords_v1';
   function loadStored(){
+    if (window.ShopThatData) return window.ShopThatData.getKeywords();
     try { return JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]'); } catch { return []; }
   }
-  let graphNodes = (loadStored().length ? loadStored() : defaultNodes).slice();
+  function loadStoredConnections(){
+    if (window.ShopThatData) return window.ShopThatData.getConnections();
+    try { return JSON.parse(localStorage.getItem('st_connections_v1')||'[]'); } catch { return []; }
+  }
+  
+  // Initialize with default data first, then try to load from storage
+  let graphNodes = defaultNodes.slice();
   let graphLinks = defaultLinks.slice();
+  
+  // Try to load from shared data system
+  const storedNodes = loadStored();
+  const storedConnections = loadStoredConnections();
+  
+  if (storedNodes.length > 0) {
+    // Convert stored format to D3 format if needed
+    graphNodes = storedNodes.map(node => ({
+      id: node.id || node.name,
+      group: node.group || 1,
+      value: node.value || 50
+    }));
+  }
+  
+  if (storedConnections.length > 0) {
+    graphLinks = storedConnections.slice();
+  }
+  
+  // Ensure we always have some data to display
+  if (graphNodes.length === 0) {
+    console.warn('No nodes found, using default data');
+    graphNodes = defaultNodes.slice();
+    graphLinks = defaultLinks.slice();
+  }
+  
+  console.log('Final graph data:', {
+    nodes: graphNodes.length,
+    links: graphLinks.length,
+    nodesSample: graphNodes.slice(0, 3),
+    linksSample: graphLinks.slice(0, 3)
+  });
 
   const color = d3.scaleOrdinal([ '#6366F1', '#7C3AED', '#4F46E5', '#312E81' ]);
   const radius = d3.scaleSqrt().domain([10, 90]).range([16, 90]);
@@ -115,6 +165,7 @@
   let link = gLinks.selectAll('line').data(graphLinks).join('line');
 
   let node = gNodes.selectAll('g.node').data(graphNodes).join(enter => {
+    console.log('Creating node for:', enter.data());
     const g = enter.append('g').attr('class','node').style('cursor','pointer');
     g.append('circle')
       .attr('r', d => radius(d.value))
@@ -131,6 +182,8 @@
     });
     return g;
   });
+  
+  console.log('Total nodes created:', node.size());
 
   node.on('click', (_, d) => openDrawer(d));
 
@@ -172,15 +225,48 @@
 
   function resize(){
     const canvasEl = container.querySelector('.keywords__canvas');
-    const w = canvasEl.clientWidth;
-    const h = window.innerHeight * 0.7;
-    svg.attr('viewBox', [0, 0, w, h].join(' '));
+    const w = canvasEl?.clientWidth || 800; // Fallback width
+    const h = Math.max(window.innerHeight * 0.7, 400); // Minimum height
+    console.log('Resize called with dimensions:', { w, h });
+    svg.attr('viewBox', `0 0 ${w} ${h}`).attr('width', w).attr('height', h);
     centerForce.x(w/2).y(h/2);
     sim.alpha(0.5).restart();
     rescaleForDrawer();
   }
+  
+  // Ensure resize is called after DOM is ready and elements have dimensions
+  function initializeGraph() {
+    console.log('initializeGraph called');
+    console.log('SVG element exists:', !!svg.node());
+    console.log('Container element exists:', !!container);
+    console.log('D3 version:', d3.version);
+    
+    setTimeout(() => {
+      console.log('Delayed initialization starting...');
+      const canvasEl = container.querySelector('.keywords__canvas');
+      console.log('Canvas element dimensions:', {
+        width: canvasEl?.clientWidth,
+        height: canvasEl?.clientHeight,
+        exists: !!canvasEl
+      });
+      
+      resize();
+      // Force a restart of the simulation to ensure nodes are visible
+      sim.alpha(1).restart();
+      
+      console.log('Graph nodes in simulation:', sim.nodes().length);
+      console.log('Graph links in simulation:', sim.force('link').links().length);
+    }, 100);
+  }
+  
   window.addEventListener('resize', resize);
-  resize();
+  
+  // Call initialization after a short delay to ensure DOM is ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializeGraph);
+  } else {
+    initializeGraph();
+  }
 
   function openDrawer(d){
     drawerTitle.textContent = d.id;
@@ -287,6 +373,77 @@
       } finally { await session.close(); }
     } catch(err){ console.error(err); setStatus('Load failed'); }
   });
+
+  // Real-time synchronization with shared data system
+  if (window.ShopThatData) {
+    // Listen for keyword changes from other pages
+    window.ShopThatData.on('keywords', (keywords) => {
+      graphNodes = keywords.map(node => ({
+        id: node.id || node.name,
+        group: node.group || 1,
+        value: node.value || 50
+      }));
+      setGraphData(graphNodes, graphLinks);
+    });
+    
+    // Listen for connection changes from other pages
+    window.ShopThatData.on('connections', (connections) => {
+      graphLinks = connections.slice();
+      setGraphData(graphNodes, graphLinks);
+    });
+  }
+
+  // Function to refresh data from shared storage
+  function refreshFromSharedData() {
+    if (window.ShopThatData) {
+      const keywords = window.ShopThatData.getKeywords();
+      const connections = window.ShopThatData.getConnections();
+      
+      // Convert keywords to D3 format
+      graphNodes = keywords.map(node => ({
+        id: node.id || node.name,
+        group: node.group || 1,
+        value: node.value || 50
+      }));
+      
+      graphLinks = connections.slice();
+      setGraphData(graphNodes, graphLinks);
+    }
+  }
+
+  // Refresh data when page becomes visible (handles tab switching)
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) {
+      refreshFromSharedData();
+    }
+  });
+
+  // Initial refresh in case data was updated while page was loading
+  setTimeout(refreshFromSharedData, 100);
+
+  // Dark mode functionality
+  function initDarkMode() {
+    const darkModeToggle = document.getElementById('darkModeToggle');
+    const body = document.body;
+    
+    // Check for saved dark mode preference
+    const isDarkMode = localStorage.getItem('darkMode') === 'true';
+    if (isDarkMode) {
+      body.classList.add('dark-mode');
+    }
+    
+    // Toggle dark mode
+    if (darkModeToggle) {
+      darkModeToggle.addEventListener('click', () => {
+        body.classList.toggle('dark-mode');
+        const isNowDark = body.classList.contains('dark-mode');
+        localStorage.setItem('darkMode', isNowDark);
+      });
+    }
+  }
+
+  // Initialize dark mode
+  initDarkMode();
 })();
 
 
