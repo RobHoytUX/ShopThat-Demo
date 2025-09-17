@@ -18,12 +18,12 @@
       <nav class="sidebar__nav">
         <a class="is-active" href="/dashboard.html">Dashboard</a>
         <a href="/keywords.html">Keywords</a>
-        <a href="#" aria-disabled="true">Internals</a>
-        <a href="#" aria-disabled="true">Publishers</a>
-        <a href="#" aria-disabled="true">Open source</a>
-        <a href="#" aria-disabled="true">Ecommerce</a>
-        <a href="#" aria-disabled="true">Financials</a>
-        <a href="#" aria-disabled="true">Settings</a>
+        <a href="/internals.html">Internals</a>
+        <a href="/publishers.html">Publishers</a>
+        <a href="/open-source.html">Open source</a>
+        <a href="/ecommerce.html">Ecommerce</a>
+        <a href="/financials.html">Financials</a>
+        <a href="/settings.html">Settings</a>
         <a href="#" aria-disabled="true">Sign Out</a>
       </nav>
       <div class="sidebar__cta">
@@ -49,6 +49,12 @@
               <path d="M13.73 21a2 2 0 01-3.46 0"/>
             </svg>
           </button>
+          <button class="icon-btn" id="darkModeToggle" aria-label="Toggle dark mode" title="Toggle dark mode">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="12" cy="12" r="5"/>
+              <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+            </svg>
+          </button>
           <div class="avatar" role="img" aria-label="Person, Admin"></div>
         </div>
       </div>
@@ -57,8 +63,13 @@
     <main id="main" class="dashboard" role="main">
       <section class="toolbar" aria-label="Filters">
         <div class="toolbar__left">
-        </div>
-        <div class="toolbar__right">
+          <div class="demo-toggle">
+            <label class="toggle-switch">
+              <input type="checkbox" id="investorMode" />
+              <span class="toggle-slider"></span>
+              <span class="toggle-label">Investor Demo Mode</span>
+            </label>
+          </div>
           <label class="sr-only" for="range">Time range</label>
           <select id="range" class="select select--styled">
             <option value="week">This Week</option>
@@ -68,7 +79,98 @@
           </select>
           <button type="button" id="resetDashboard" class="btn btn--secondary" aria-label="Reset filters">Reset</button>
         </div>
+        <div class="toolbar__right">
+        </div>
       </section>
+      <!-- RPV and Industry Context Section -->
+      <section class="grid rpv-section" aria-label="Revenue and Industry Context">
+        <article class="card rpv-card">
+          <div class="card__header">
+            <h2>Revenue Per View (RPV) & Industry Context</h2>
+            <button class="icon-btn icon-btn--sm" id="rpv-info" aria-label="RPV Information" title="View RPV Details">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <path d="M12 16v-4"/>
+                <path d="M12 8h.01"/>
+              </svg>
+            </button>
+          </div>
+          
+          <div class="rpv-three-column-layout">
+            <!-- Section 1: Current RPV Data -->
+            <div class="rpv-section-1">
+              <div class="section-header">
+                <h3>Current Performance</h3>
+              </div>
+              <div class="rpv-metrics">
+                <div class="metric-item">
+                  <span class="metric-label">Average RPV</span>
+                  <span class="metric-value rpv-green">$0.25</span>
+                  <span class="metric-unit">per article use</span>
+                </div>
+                <div class="metric-item">
+                  <span class="metric-label">Payment Ceiling</span>
+                  <span class="metric-value ceiling-red">$3,000</span>
+                  <span class="metric-unit">per article</span>
+                </div>
+              </div>
+              <div class="rpv-progress">
+                <div class="progress-bar">
+                  <div class="progress-fill" style="width: 8.33%"></div>
+                </div>
+                <span class="progress-text">$250 of $3,000 ceiling reached</span>
+              </div>
+            </div>
+            
+            <!-- Section 2: Industry Benchmarks -->
+            <div class="rpv-section-2">
+              <div class="section-header">
+                <h3>Industry Benchmarks</h3>
+              </div>
+              <div class="benchmark-stats">
+                <div class="benchmark-item traditional">
+                  <span class="benchmark-label">Traditional RPV</span>
+                  <span class="benchmark-value">$0.0002</span>
+                  <span class="benchmark-unit">($5-50 per mille)</span>
+                </div>
+                <div class="benchmark-item ai-deals">
+                  <span class="benchmark-label">AI Publisher Deals</span>
+                  <span class="benchmark-value">$3,000</span>
+                  <span class="benchmark-unit">avg per article/year</span>
+                </div>
+              </div>
+              <div class="improvement-indicator">
+                <span class="improvement-text">1,250x increase over traditional</span>
+              </div>
+            </div>
+            
+            <!-- Section 3: Recent Major Deals -->
+            <div class="rpv-section-3">
+              <div class="section-header">
+                <h3>Recent Major Deals</h3>
+              </div>
+              <div class="deals-list">
+                <div class="deal-item">
+                  <span class="deal-companies">Apple + OpenAI → CondeNast</span>
+                  <span class="deal-amount">$50M multi-year</span>
+                </div>
+                <div class="deal-item">
+                  <span class="deal-companies">Meta AI → Publishers</span>
+                  <span class="deal-amount">$1-5M each</span>
+                </div>
+                <div class="deal-item">
+                  <span class="deal-companies">Google AI → Content Partners</span>
+                  <span class="deal-amount">Similar structures</span>
+                </div>
+              </div>
+              <div class="deal-context">
+                <span class="context-text">These deals justify our $0.25/use model</span>
+              </div>
+            </div>
+          </div>
+        </article>
+      </section>
+
       <section class="grid kpis" aria-label="Sales summary">
         <article class="card top-keywords">
           <div class="card__header">
@@ -82,7 +184,7 @@
           </div>
           <div class="table-wrap">
             <table class="data-table">
-              <thead><tr><th>Keyword name</th><th>Volume</th><th>Keywords</th><th>Volume</th></tr></thead>
+              <thead><tr><th>Keyword name</th><th>Volume</th><th>Cost</th><th>Volume</th></tr></thead>
               <tbody id="top-keywords-body"></tbody>
             </table>
           </div>
@@ -113,10 +215,22 @@
           <div class="card__header"><h2>Document access</h2></div>
           <div class="list" id="doc-access"></div>
         </article>
+        <article class="card ecommerce-section">
+          <div class="card__header">
+            <h2>E-commerce Integration</h2>
+            <div class="card__actions">
+              <div class="chip">Louis Vuitton Campaign</div>
+            </div>
+          </div>
+          <div class="ecommerce-products" id="ecommerce-products">
+            <!-- Products will be populated by JavaScript -->
+          </div>
+        </article>
       </section>
     </main>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script src="scripts/shared-data.js"></script>
     <script src="scripts/dashboard.js" defer></script>
   </body>
 </html>
