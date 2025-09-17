@@ -169,28 +169,12 @@
 /* Section 2: Industry Benchmarks */
 .rpv-section-2 { 
   padding: 16px; 
-  background: #fef2f2; 
+  background: #f8fafc; 
   border-radius: 12px; 
-  border: 1px solid #fecaca;
+  border: 1px solid #e2e8f0;
 }
-.benchmark-stats { display: grid; gap: 16px; margin-bottom: 16px; }
-.benchmark-item { 
-  display: grid; 
-  gap: 4px; 
-  padding: 12px; 
-  border-radius: 8px; 
-  border: 1px solid #f3f4f6; 
-}
-.benchmark-item.traditional { background: #f9fafb; border-color: #e5e7eb; }
-.benchmark-label { font-size: 16px; color: #6b7280; font-weight: 500; }
-.benchmark-value { font-size: 28px; font-weight: 700; color: #374151; }
-.benchmark-item.ai-deals .benchmark-value { color: #dc2626; }
-.benchmark-item.ai-deals { 
-  background: rgba(239, 68, 68, 0.1); 
-  border-color: #ef4444; 
-  border-left: 3px solid #ef4444;
-}
-.benchmark-unit { font-size: 11px; color: #9ca3af; }
+.benchmark-metrics { display: grid; gap: 16px; margin-bottom: 16px; }
+/* Benchmark metrics now use the same styling as Current Performance metrics */
 .improvement-indicator { 
   text-align: center; 
   padding: 8px; 
@@ -308,12 +292,292 @@ svg#bubbleGraph { width: 100%; height: 70vh; display: block; }
 /* E-commerce Section Styles */
 .ecommerce-section { background: #fff; border: 1px solid #e8e8ef; }
 .ecommerce-products { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px; }
-.product-item { display: grid; gap: 6px; padding: 8px; background: #fff; border-radius: 8px; border: 1px solid #f0f0f6; transition: transform 0.2s, box-shadow 0.2s; }
+.product-item { 
+  display: grid; 
+  gap: 6px; 
+  padding: 8px; 
+  background: #fff; 
+  border-radius: 8px; 
+  border: 1px solid #f0f0f6; 
+  transition: transform 0.2s, box-shadow 0.2s; 
+  cursor: pointer;
+}
 .product-item:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-.product-image { width: 100%; height: 80px; background: #f9fafb; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 12px; color: #6b7280; }
+.product-image { 
+  width: 100%; 
+  height: 80px; 
+  background: #f9fafb; 
+  border-radius: 6px; 
+  display: flex; 
+  align-items: center; 
+  justify-content: center; 
+  font-size: 12px; 
+  color: #6b7280; 
+  overflow: hidden;
+}
+.product-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 6px;
+}
 .product-name { font-size: 12px; font-weight: 600; color: #374151; }
 .product-price { font-size: 14px; font-weight: 700; color: #059669; }
 .product-cost { font-size: 11px; color: #ef4444; }
+
+/* Product Detail Side Panel */
+.product-panel-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.product-panel-overlay.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.product-panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  height: 100vh;
+  width: 480px;
+  background: #ffffff;
+  box-shadow: -4px 0 20px rgba(0, 0, 0, 0.15);
+  transform: translateX(100%);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow-y: auto;
+  z-index: 1001;
+}
+
+.product-panel.active {
+  transform: translateX(0);
+}
+
+.product-panel-header {
+  position: sticky;
+  top: 0;
+  background: #ffffff;
+  padding: 20px;
+  border-bottom: 1px solid #e5e7eb;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  z-index: 1;
+}
+
+.product-panel-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #111827;
+  margin: 0;
+}
+
+.product-panel-close {
+  background: none;
+  border: none;
+  padding: 8px;
+  cursor: pointer;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s;
+}
+
+.product-panel-close:hover {
+  background: #f3f4f6;
+}
+
+.product-panel-close svg {
+  width: 20px;
+  height: 20px;
+  stroke: #6b7280;
+}
+
+.product-panel-content {
+  padding: 0 20px 20px;
+}
+
+.product-detail-image {
+  width: 100%;
+  height: 300px;
+  background: #f9fafb;
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.product-detail-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.product-detail-info {
+  margin-bottom: 32px;
+}
+
+.product-detail-name {
+  font-size: 24px;
+  font-weight: 700;
+  color: #111827;
+  margin: 0 0 8px 0;
+}
+
+.product-detail-price {
+  font-size: 28px;
+  font-weight: 700;
+  color: #059669;
+  margin: 0 0 16px 0;
+}
+
+.product-detail-description {
+  font-size: 14px;
+  color: #6b7280;
+  line-height: 1.6;
+  margin: 0 0 24px 0;
+}
+
+.product-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.stat-card {
+  background: #f9fafb;
+  border-radius: 12px;
+  padding: 16px;
+  text-align: center;
+}
+
+.stat-value {
+  font-size: 20px;
+  font-weight: 700;
+  color: #111827;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.stat-label {
+  font-size: 12px;
+  color: #6b7280;
+  text-transform: uppercase;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+}
+
+.stat-card.cost .stat-value {
+  color: #ef4444;
+}
+
+.stat-card.uses .stat-value {
+  color: #3b82f6;
+}
+
+.product-details-section {
+  margin-bottom: 32px;
+}
+
+.section-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #111827;
+  margin: 0 0 16px 0;
+}
+
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.detail-row:last-child {
+  border-bottom: none;
+}
+
+.detail-label {
+  font-size: 14px;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.detail-value {
+  font-size: 14px;
+  color: #111827;
+  font-weight: 600;
+}
+
+.analytics-section {
+  background: #f8fafc;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 24px;
+}
+
+.analytics-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #374151;
+  margin: 0 0 16px 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.analytics-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.analytics-item {
+  text-align: center;
+}
+
+.analytics-value {
+  font-size: 18px;
+  font-weight: 700;
+  color: #111827;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.analytics-label {
+  font-size: 11px;
+  color: #6b7280;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .product-panel {
+    width: 100vw;
+  }
+  
+  .product-stats {
+    grid-template-columns: 1fr;
+  }
+  
+  .analytics-grid {
+    grid-template-columns: 1fr;
+  }
+}
 
 /* Investor Demo Mode Highlights */
 .investor-mode .cost-justification-modal { animation: pulse 2s infinite; }
@@ -441,9 +705,90 @@ svg#bubbleGraph { width: 100%; height: 70vh; display: block; }
   border: 1px solid #374151;
 }
 
+/* Dark Mode Product Panel */
+.dark-mode .product-panel {
+  background: #1f2937;
+}
+
+.dark-mode .product-panel-header {
+  background: #1f2937;
+  border-bottom: 1px solid #374151;
+}
+
+.dark-mode .product-panel-title {
+  color: #f9fafb;
+}
+
+.dark-mode .product-panel-close:hover {
+  background: #374151;
+}
+
+.dark-mode .product-panel-close svg {
+  stroke: #9ca3af;
+}
+
+.dark-mode .product-detail-image {
+  background: #374151;
+}
+
+.dark-mode .product-detail-name {
+  color: #f9fafb;
+}
+
+.dark-mode .product-detail-description {
+  color: #9ca3af;
+}
+
+.dark-mode .stat-card {
+  background: #374151;
+}
+
+.dark-mode .stat-value {
+  color: #f9fafb;
+}
+
+.dark-mode .stat-label {
+  color: #9ca3af;
+}
+
+.dark-mode .section-title {
+  color: #f9fafb;
+}
+
+.dark-mode .detail-row {
+  border-bottom: 1px solid #374151;
+}
+
+.dark-mode .detail-label {
+  color: #9ca3af;
+}
+
+.dark-mode .detail-value {
+  color: #f9fafb;
+}
+
+.dark-mode .analytics-section {
+  background: #374151;
+}
+
+.dark-mode .analytics-title {
+  color: #d1d5db;
+}
+
+.dark-mode .analytics-value {
+  color: #f9fafb;
+}
+
+.dark-mode .analytics-label {
+  color: #9ca3af;
+}
+
 .dark-mode .product-image {
   background: #374151;
   color: #9ca3af;
+}
+.dark-mode .product-image img {
+  opacity: 0.9;
 }
 
 .dark-mode .product-name {
@@ -490,27 +835,7 @@ svg#bubbleGraph { width: 100%; height: 70vh; display: block; }
   background: #1f2937;
   border: 1px solid #374151;
 }
-.dark-mode .benchmark-item.traditional {
-  background: #374151;
-  border-color: #4b5563;
-}
-.dark-mode .benchmark-item.ai-deals {
-  background: rgba(239, 68, 68, 0.2);
-  border-color: #ef4444;
-  border-left: 3px solid #ef4444;
-}
-.dark-mode .benchmark-label {
-  color: #9ca3af;
-}
-.dark-mode .benchmark-value {
-  color: #e5e7eb;
-}
-.dark-mode .benchmark-item.ai-deals .benchmark-value {
-  color: #ef4444;
-}
-.dark-mode .benchmark-unit {
-  color: #6b7280;
-}
+/* Benchmark metrics now use the same dark mode styling as Current Performance metrics */
 .dark-mode .improvement-indicator {
   background: rgba(16, 185, 129, 0.2);
 }

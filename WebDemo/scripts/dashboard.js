@@ -116,22 +116,99 @@
     el.replaceChildren();
     
     const lvProducts = [
-      { name: 'Keepall 50', price: '$2,570', cost: '$32.13', uses: 125 },
-      { name: 'Neverfull MM', price: '$2,030', cost: '$41.25', uses: 165 },
-      { name: 'Speedy 30', price: '$1,760', cost: '$28.75', uses: 115 },
-      { name: 'Twist Bag', price: '$4,400', cost: '$67.50', uses: 270 },
-      { name: 'Capucines MM', price: '$5,800', cost: '$89.25', uses: 357 }
+      { 
+        id: 1,
+        name: 'Keepall 50', 
+        price: '$2,570', 
+        cost: '$32.13', 
+        uses: 125,
+        description: 'Iconic Louis Vuitton travel bag crafted from Monogram canvas with natural leather trim. Features spacious interior and classic design.',
+        category: 'Travel Bags',
+        material: 'Monogram Canvas',
+        dimensions: '50 x 29 x 23 cm',
+        avgSessionTime: '2m 15s',
+        conversionRate: '8.2%',
+        totalRevenue: '$21,525',
+        keywordMentions: 89
+      },
+      { 
+        id: 2,
+        name: 'Neverfull MM', 
+        price: '$2,030', 
+        cost: '$41.25', 
+        uses: 165,
+        description: 'Versatile tote bag in Monogram canvas with leather handles and trim. Perfect for everyday use with spacious interior.',
+        category: 'Handbags',
+        material: 'Monogram Canvas',
+        dimensions: '32 x 29 x 17 cm',
+        avgSessionTime: '3m 42s',
+        conversionRate: '12.1%',
+        totalRevenue: '$33,495',
+        keywordMentions: 124
+      },
+      { 
+        id: 3,
+        name: 'Speedy 30', 
+        price: '$1,760', 
+        cost: '$28.75', 
+        uses: 115,
+        description: 'Classic Louis Vuitton handbag in Monogram canvas. Compact yet spacious with iconic curved silhouette.',
+        category: 'Handbags',
+        material: 'Monogram Canvas',
+        dimensions: '30 x 21 x 17 cm',
+        avgSessionTime: '1m 58s',
+        conversionRate: '6.5%',
+        totalRevenue: '$20,240',
+        keywordMentions: 67
+      },
+      { 
+        id: 4,
+        name: 'Twist Bag', 
+        price: '$4,400', 
+        cost: '$67.50', 
+        uses: 270,
+        description: 'Modern interpretation of the LV turn-lock closure in Epi leather. Contemporary design meets traditional craftsmanship.',
+        category: 'Handbags',
+        material: 'Epi Leather',
+        dimensions: '23 x 18 x 9 cm',
+        avgSessionTime: '4m 12s',
+        conversionRate: '15.3%',
+        totalRevenue: '$67,320',
+        keywordMentions: 198
+      },
+      { 
+        id: 5,
+        name: 'Capucines MM', 
+        price: '$5,800', 
+        cost: '$89.25', 
+        uses: 357,
+        description: 'Elegant bag named after the street where Louis Vuitton opened his first store. Features luxurious leather and distinctive LV closure.',
+        category: 'Handbags',
+        material: 'Leather',
+        dimensions: '27 x 18 x 9 cm',
+        avgSessionTime: '5m 28s',
+        conversionRate: '18.7%',
+        totalRevenue: '$103,530',
+        keywordMentions: 267
+      }
     ];
     
     lvProducts.forEach(product => {
       const item = document.createElement('div');
       item.className = 'product-item';
+      item.setAttribute('data-product-id', product.id);
       item.innerHTML = `
-        <div class="product-image">LV ${product.name}</div>
+        <div class="product-image">
+          <img src="assets/kusama3.png" alt="LV ${product.name}" />
+        </div>
         <div class="product-name">${product.name}</div>
         <div class="product-price">${product.price}</div>
         <div class="product-cost">RPV Cost: ${product.cost}</div>
       `;
+      
+      // Add click handler to open product panel
+      item.addEventListener('click', () => openProductPanel(product));
+      
       el.appendChild(item);
     });
   }
@@ -205,6 +282,132 @@
     });
     
     return modal;
+  }
+
+  // Product Panel functionality
+  function createProductPanel(product) {
+    const overlay = document.createElement('div');
+    overlay.className = 'product-panel-overlay';
+    
+    const panel = document.createElement('div');
+    panel.className = 'product-panel';
+    
+    panel.innerHTML = `
+      <div class="product-panel-header">
+        <h2 class="product-panel-title">Product Details</h2>
+        <button class="product-panel-close" aria-label="Close panel">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+      <div class="product-panel-content">
+        <div class="product-detail-image">
+          <img src="assets/kusama3.png" alt="${product.name}" />
+        </div>
+        
+        <div class="product-detail-info">
+          <h1 class="product-detail-name">${product.name}</h1>
+          <div class="product-detail-price">${product.price}</div>
+          <p class="product-detail-description">${product.description}</p>
+        </div>
+
+        <div class="product-stats">
+          <div class="stat-card cost">
+            <span class="stat-value">${product.cost}</span>
+            <span class="stat-label">RPV Cost</span>
+          </div>
+          <div class="stat-card uses">
+            <span class="stat-value">${product.uses}</span>
+            <span class="stat-label">Total Uses</span>
+          </div>
+        </div>
+
+        <div class="analytics-section">
+          <h3 class="analytics-title">Performance Analytics</h3>
+          <div class="analytics-grid">
+            <div class="analytics-item">
+              <span class="analytics-value">${product.avgSessionTime}</span>
+              <span class="analytics-label">Avg Session</span>
+            </div>
+            <div class="analytics-item">
+              <span class="analytics-value">${product.conversionRate}</span>
+              <span class="analytics-label">Conversion</span>
+            </div>
+            <div class="analytics-item">
+              <span class="analytics-value">${product.totalRevenue}</span>
+              <span class="analytics-label">Total Revenue</span>
+            </div>
+            <div class="analytics-item">
+              <span class="analytics-value">${product.keywordMentions}</span>
+              <span class="analytics-label">Mentions</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="product-details-section">
+          <h3 class="section-title">Product Information</h3>
+          <div class="detail-row">
+            <span class="detail-label">Category</span>
+            <span class="detail-value">${product.category}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Material</span>
+            <span class="detail-value">${product.material}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Dimensions</span>
+            <span class="detail-value">${product.dimensions}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">SKU</span>
+            <span class="detail-value">LV-${product.id.toString().padStart(4, '0')}</span>
+          </div>
+        </div>
+      </div>
+    `;
+    
+    overlay.appendChild(panel);
+    document.body.appendChild(overlay);
+    
+    // Close panel functionality
+    const closePanel = () => {
+      overlay.classList.remove('active');
+      panel.classList.remove('active');
+      setTimeout(() => {
+        if (document.body.contains(overlay)) {
+          document.body.removeChild(overlay);
+        }
+      }, 300);
+    };
+    
+    // Event listeners
+    panel.querySelector('.product-panel-close').addEventListener('click', closePanel);
+    overlay.addEventListener('click', (e) => {
+      if (e.target === overlay) closePanel();
+    });
+    
+    // Escape key handler
+    const handleEscape = (e) => {
+      if (e.key === 'Escape') {
+        closePanel();
+        document.removeEventListener('keydown', handleEscape);
+      }
+    };
+    document.addEventListener('keydown', handleEscape);
+    
+    // Animate in
+    requestAnimationFrame(() => {
+      overlay.classList.add('active');
+      panel.classList.add('active');
+    });
+    
+    return { overlay, panel, closePanel };
+  }
+
+  function openProductPanel(product) {
+    createProductPanel(product);
   }
 
   function showRPVInfo() {
