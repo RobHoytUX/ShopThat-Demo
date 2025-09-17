@@ -141,8 +141,38 @@
       </div>
     </footer>
 
+    <script src="scripts/shared-data.js"></script>
     <script src="scripts/main.js" defer></script>
+    <script>
+      // Dark mode functionality
+      function initDarkMode() {
+        const darkModeToggle = document.getElementById('darkModeToggle');
+        const body = document.body;
+        
+        // Check for saved dark mode preference
+        const isDarkMode = localStorage.getItem('darkMode') === 'true';
+        if (isDarkMode) {
+          body.classList.add('dark-mode');
+        }
+        
+        // Toggle dark mode
+        if (darkModeToggle) {
+          darkModeToggle.addEventListener('click', () => {
+            body.classList.toggle('dark-mode');
+            const isNowDark = body.classList.contains('dark-mode');
+            localStorage.setItem('darkMode', isNowDark);
+          });
+        }
+      }
+      
+      // Initialize when DOM is ready
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initDarkMode);
+      } else {
+        initDarkMode();
+      }
+    </script>
   </body>
-  </html>
+</html>
 
 

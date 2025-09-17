@@ -2,10 +2,28 @@
   const STORAGE_KEY = 'st_keywords_v1';
   const CONNECTIONS_KEY = 'st_connections_v1';
   
-  function load(){ try { return JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]'); } catch { return []; } }
-  function save(arr){ localStorage.setItem(STORAGE_KEY, JSON.stringify(arr)); }
-  function loadConnections(){ try { return JSON.parse(localStorage.getItem(CONNECTIONS_KEY)||'[]'); } catch { return []; } }
-  function saveConnections(arr){ localStorage.setItem(CONNECTIONS_KEY, JSON.stringify(arr)); }
+  function load(){ 
+    if (window.ShopThatData) return window.ShopThatData.getKeywords();
+    try { return JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]'); } catch { return []; } 
+  }
+  function save(arr){ 
+    if (window.ShopThatData) {
+      window.ShopThatData.saveKeywords(arr);
+    } else {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(arr)); 
+    }
+  }
+  function loadConnections(){ 
+    if (window.ShopThatData) return window.ShopThatData.getConnections();
+    try { return JSON.parse(localStorage.getItem(CONNECTIONS_KEY)||'[]'); } catch { return []; } 
+  }
+  function saveConnections(arr){ 
+    if (window.ShopThatData) {
+      window.ShopThatData.saveConnections(arr);
+    } else {
+      localStorage.setItem(CONNECTIONS_KEY, JSON.stringify(arr)); 
+    }
+  }
 
   function render(){
     const list = document.getElementById('mk-list');
