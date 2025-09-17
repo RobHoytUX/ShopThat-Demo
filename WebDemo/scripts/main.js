@@ -291,6 +291,8 @@
   .chatbot-input input:focus{outline:none;box-shadow:none;border-color:#ccc}
   .chatbot-input button{width:40px;height:40px;border-radius:50%;border:0;background:#000;color:#fff;cursor:pointer;display:grid;place-items:center;padding:0}
   .chatbot-input button[disabled]{background:rgba(0,0,0,0.15);color:#666;cursor:not-allowed;border:1px solid rgba(0,0,0,0.1)}
+  .no-keywords-message{text-align:center;padding:16px 12px;color:#666;font-size:13px;font-style:italic;background:rgba(255,255,255,0.5);border-radius:12px;margin:8px 0}
+  .error-message{text-align:center;padding:16px 12px;color:#d32f2f;font-size:13px;background:rgba(255,235,238,0.8);border-radius:12px;margin:8px 0;border:1px solid rgba(211,47,47,0.3)}
   @media (max-width:600px){.chatbot-box{width:90vw}}
   `;
 
@@ -419,7 +421,7 @@
 
     function preferredCompactWidth(){
       const w1 = measureChipRowWidth(options);
-      const w2 = !detailsWrap.hasAttribute('hidden') ? measureChipRowWidth(detailsWrap) : measureChipRowWidth(presets);
+      const w2 = measureChipRowWidth(presets);
       const needed = Math.max(COMPACT_W, w1, w2);
       return Math.min(FULL_W, needed);
     }
@@ -468,67 +470,23 @@
       setInputsEnabled(true);
       input.value = label;
       input.focus();
-    }
-
-    // Add three static chips labeled "keyword"
-    const baseChips = ['keyword','keyword','keyword'];
-    const chipEls = baseChips.map((lbl, i) => {
-      const b = createEl('button', { type: 'button' }, [document.createTextNode(lbl)]);
-      if (i === 1) {
-        const badge = createEl('span', { class: 'chip-badge' }, [document.createTextNode('5')]);
-        b.appendChild(badge);
+      
+      // Track keyword usage in ShopThatData system
+      if (window.ShopThatData) {
+        window.ShopThatData.trackKeywordUsage(label, 'chatbot-selection');
+        
+        // Add message to current chat session
+        if (currentSessionId) {
+          window.ShopThatData.addChatMessage(currentSessionId, label, 'user', [label]);
+        }
       }
-      b.addEventListener('click', ()=> onKeywordSelect(lbl));
-      presets.appendChild(b);
-      return b;
-    });
-
-    // Secondary 5 keywords
-    const detailLabels = ['detail one','detail two','detail three','detail four','detail five'];
-    const detailsWrap = createEl('div', { class: 'chatbot-presets chatbot-presets--details' });
-    const detailEls = detailLabels.map(lbl => {
-      const b = createEl('button', { type: 'button' }, [document.createTextNode(titleCase(lbl))]);
-      b.addEventListener('click', ()=> onKeywordSelect(titleCase(lbl)));
-      detailsWrap.appendChild(b);
-      return b;
-    });
-    detailsWrap.setAttribute('hidden','');
-    header.appendChild(detailsWrap);
-
-    function showDetails(){
-      backBtn.removeAttribute('hidden');
-      // Fade out base chips in place
-      chipEls.forEach(el => { el.classList.add('is-fade-out'); });
-      // After fade, swap content: hide base container, show details taking its place
-      setTimeout(()=>{
-        presets.setAttribute('hidden','');
-        detailsWrap.removeAttribute('hidden');
-        // Initial state for fade-in
-        detailEls.forEach(el => { el.style.opacity = '0'; el.style.transform = 'translateY(4px)'; });
-        requestAnimationFrame(()=>{
-          detailEls.forEach(el => { el.style.transition = 'opacity 150ms ease, transform 150ms ease'; el.style.opacity = '1'; el.style.transform = 'translateY(0)'; });
-        });
-      }, 160);
     }
 
-    function showBase(){
-      backBtn.setAttribute('hidden','');
-      // Fade out details quickly, then restore base chips in same spot
-      detailEls.forEach(el => { el.style.opacity = '0'; el.style.transform = 'translateY(4px)'; });
-      setTimeout(()=>{
-        detailsWrap.setAttribute('hidden','');
-        presets.removeAttribute('hidden');
-        chipEls.forEach(el => { el.classList.remove('is-fade-out'); });
-      }, 150);
-    }
+    // Remove hardcoded mock keywords - now using ShopThatData system above
 
-    // Middle chip opens details
-    if (chipEls[1]) chipEls[1].addEventListener('click', (e)=>{
-      // Only transition to details; leave input enabling to user if desired
-      showDetails();
-    });
-
-    backBtn.addEventListener('click', showBase);
+    // Details functionality removed since we're using ShopThatData keywords directly
+    // The back button is no longer needed since there are no detail views
+    backBtn.setAttribute('hidden','');
 
     box.appendChild(refreshBtn); box.appendChild(backBtn); box.appendChild(header); box.appendChild(messages); box.appendChild(inputW);
     wrapper.appendChild(toggle); wrapper.appendChild(box);
@@ -537,34 +495,56 @@
     let slug = DEFAULT_SLUG;
     let enabled = [];
     let disabled = [];
+    let currentSessionId = null;
+    
+    // Initialize chat session tracking
+    if (window.ShopThatData) {
+      currentSessionId = window.ShopThatData.startChatSession();
+    }
 
-    try {
-      const campaigns = await fetchJSON(`${API_BASE}/api/campaigns`);
-      const keys = Array.isArray(campaigns)
-        ? campaigns.map(it => typeof it === 'string' ? it : (it?.key || it?.slug || it?.id)).filter(Boolean)
-        : [];
-      if (keys.length) slug = String(keys[0]);
+    // Use ShopThatData system for keywords instead of API
+    function loadKeywordsFromSharedData() {
+      if (window.ShopThatData) {
+        const keywords = window.ShopThatData.getKeywords();
+        enabled = keywords.map(k => k.name);
+        disabled = [];
 
-      const config = await fetchJSON(`${API_BASE}/api/campaigns/${slug}`);
-      const kwResp = await Promise.all(keys.map(k => fetchJSON(`${API_BASE}/api/campaigns/${k}/keywords`).catch(()=>[])));
-      const allMap = {};
-      kwResp.forEach((kw, i) => { allMap[keys[i]] = Array.isArray(kw) ? kw : (Array.isArray(kw?.keywords) ? kw.keywords : (Array.isArray(kw?.data) ? kw.data : [])); });
+        title.textContent = 'Hello!';
+        options.replaceChildren();
+        
+        if (enabled.length > 0) {
+          enabled.forEach(kw => {
+            const label = titleCase(kw);
+            const b = createEl('button', { type: 'button' }, [document.createTextNode(label)]);
+            b.addEventListener('click', ()=> onKeywordSelect(label));
+            options.appendChild(b);
+          });
+        } else {
+          // Show message when no keywords available
+          const noKeywordsMsg = createEl('div', { class: 'no-keywords-message' }, [
+            document.createTextNode('No keywords available. Add keywords in the Keywords Manager.')
+          ]);
+          options.appendChild(noKeywordsMsg);
+        }
+      } else {
+        title.textContent = 'Hello!';
+        options.replaceChildren();
+        const errorMsg = createEl('div', { class: 'error-message' }, [
+          document.createTextNode('Keywords system not available.')
+        ]);
+        options.appendChild(errorMsg);
+      }
+    }
 
-      enabled = Array.isArray(config?.keywords) ? config.keywords.filter(t=>t.enabled).map(t=>t.name) : [];
-      const others = [];
-      Object.entries(allMap).forEach(([k, arr]) => { if (k !== slug) others.push(...(Array.isArray(arr)?arr:[])); });
-      disabled = others;
+    // Load keywords from shared data
+    loadKeywordsFromSharedData();
 
-      title.textContent = 'Hello!';
-      options.replaceChildren();
-      enabled.forEach(kw => {
-        const label = titleCase(kw);
-        const b = createEl('button', { type: 'button' }, [document.createTextNode(label)]);
-        b.addEventListener('click', ()=> onKeywordSelect(label));
-        options.appendChild(b);
+    // Listen for keyword changes from other pages
+    if (window.ShopThatData) {
+      window.ShopThatData.on('keywords', () => {
+        loadKeywordsFromSharedData();
+        ensureSizeForContent();
       });
-    } catch (e) {
-      title.textContent = 'Hello!';
     }
 
     function ensureSizeForContent(){
@@ -599,6 +579,15 @@
     async function send(){
       const txt = (input.value||'').trim();
       if (!txt) return;
+      
+      // Track keyword usage from user message
+      if (window.ShopThatData) {
+        const keywordsFound = window.ShopThatData.extractKeywordsFromText(txt);
+        if (currentSessionId && keywordsFound.length > 0) {
+          window.ShopThatData.addChatMessage(currentSessionId, txt, 'user', keywordsFound);
+        }
+      }
+      
       addMessage('user', txt);
       input.value = '';
       // After first send, keep inputs enabled for continued conversation
@@ -611,7 +600,17 @@
         });
         if (!res.ok) throw new Error('HTTP '+res.status);
         const d = await res.json();
-        addMessage('bot', String(d?.response||'No response'));
+        const botResponse = String(d?.response||'No response');
+        addMessage('bot', botResponse);
+        
+        // Track keywords from bot response
+        if (window.ShopThatData) {
+          const botKeywords = window.ShopThatData.extractKeywordsFromText(botResponse);
+          if (currentSessionId && botKeywords.length > 0) {
+            window.ShopThatData.addChatMessage(currentSessionId, botResponse, 'bot', botKeywords);
+          }
+        }
+        
         // ensure refresh visible after bot message
         refreshBtn.removeAttribute('hidden');
       } catch (e) {
@@ -675,6 +674,11 @@
       ensureSizeForContent();
     }
     function closeBox(){
+      // End chat session when closing
+      if (window.ShopThatData && currentSessionId) {
+        window.ShopThatData.endChatSession(currentSessionId);
+      }
+      
       // Fade out, then actually hide after transition ends
       box.classList.add('is-scroll-hidden');
       setTimeout(()=>{
@@ -711,29 +715,7 @@
       }, 220);
     });
 
-    // Hide the open chat box while the user is actively scrolling and
-    // fade it back in shortly after scrolling stops. The floating button
-    // remains available so the user can still close/open manually.
-    let scrollHideTimeout = null;
-    let isTemporarilyHidden = false;
-
-    function hideOnScroll(){
-      if (!expanded || box.hasAttribute('hidden')) return;
-      if (!isTemporarilyHidden){
-        isTemporarilyHidden = true;
-        box.classList.add('is-scroll-hidden');
-      }
-      if (scrollHideTimeout) clearTimeout(scrollHideTimeout);
-      scrollHideTimeout = setTimeout(()=>{
-        // Reveal immediately after scrolling stops
-        if (expanded && !box.hasAttribute('hidden')){
-          box.classList.remove('is-scroll-hidden');
-          isTemporarilyHidden = false;
-        }
-      }, 160); // small debounce for a natural feel
-    }
-
-    window.addEventListener('scroll', hideOnScroll, { passive: true });
+    // Scroll-based hide/show functionality removed - chatbot stays visible when open
 
     // =====================
     // Visible image → bag keywords
@@ -834,76 +816,15 @@
     function clearChildren(el){ while (el.firstChild) el.removeChild(el.firstChild); }
 
     function renderCampaignOptions(payload){
-      options.replaceChildren();
-      const items = [];
-      if (payload?.campaign?.name) items.push({ label: payload.campaign.name, type: 'campaign' });
-      if (payload?.designer?.name) items.push({ label: payload.designer.name, type: 'designer' });
-      items.forEach(({label}) => {
-        const b = createEl('button', { type: 'button' }, [document.createTextNode(titleCase(label))]);
-        b.addEventListener('click', ()=> onKeywordSelect(titleCase(label)));
-        options.appendChild(b);
-      });
-      ensureSizeForContent();
+      // Instead of using image analysis keywords, use ShopThatData keywords
+      loadKeywordsFromSharedData();
     }
 
-    function renderDetails(bag){
-      detailsWrap.removeAttribute('hidden');
-      clearChildren(detailsWrap);
-      const kw = Array.isArray(bag?.keywords) ? bag.keywords : [];
-      const attrs = bag?.attributes || {};
-      const flat = new Set(kw.concat(
-        (attrs.material||[]), (attrs.pattern||[]), (attrs.color||[]), (attrs.hardware||[]), (attrs.style||[]), (attrs.collection||[])
-      ).filter(Boolean));
-      Array.from(flat).slice(0, 12).forEach(lbl => {
-        const b = createEl('button', { type: 'button' }, [document.createTextNode(titleCase(lbl))]);
-        b.addEventListener('click', ()=> onKeywordSelect(titleCase(lbl)));
-        detailsWrap.appendChild(b);
-      });
-      ensureSizeForContent();
-    }
-
-    function showDetailsView(){
-      backBtn.removeAttribute('hidden');
-      presets.setAttribute('hidden','');
-      detailsWrap.removeAttribute('hidden');
-      // Recompute size to accommodate details chips if needed
-      requestAnimationFrame(()=> ensureSizeForContent());
-    }
-    function showBaseView(){
-      backBtn.setAttribute('hidden','');
-      detailsWrap.setAttribute('hidden','');
-      presets.removeAttribute('hidden');
-      // Recompute size to shrink back to base chips width
-      requestAnimationFrame(()=> ensureSizeForContent());
-    }
-
-    backBtn.removeEventListener('click', showBase); // replace old handler if any
-    backBtn.addEventListener('click', showBaseView);
+    // Removed detail view functions since we're using ShopThatData keywords directly
 
     function renderBagChips(payload){
-      clearChildren(presets);
-      const bags = Array.isArray(payload?.bags) ? payload.bags : [];
-      bags.forEach((bag, idx) => {
-        const label = assembleBagLabel(bag) || `Bag ${idx+1}`;
-        const b = createEl('button', { type: 'button' }, [document.createTextNode(label)]);
-        if (Array.isArray(bag?.keywords) && bag.keywords.length) {
-          const badge = createEl('span', { class: 'chip-badge' }, [document.createTextNode(String(Math.min(9, bag.keywords.length)))]);
-          b.appendChild(badge);
-        }
-        b.addEventListener('click', ()=>{
-          selectedBagIndex = idx;
-          renderDetails(bag);
-          showDetailsView();
-          onKeywordSelect(label);
-        });
-        presets.appendChild(b);
-      });
-      if (!bags.length){
-        const b = createEl('button', { type: 'button' }, [document.createTextNode('No bag detected')]);
-        b.addEventListener('click', ()=> onKeywordSelect('Bag'));
-        presets.appendChild(b);
-      }
-      ensureSizeForContent();
+      // Don't render bag chips since we're using ShopThatData keywords
+      // Keep presets area clear for our keyword system
     }
 
     async function analyzeCurrentView(){
