@@ -188,20 +188,19 @@
             <div class="card__actions">
               <label class="sr-only" for="kwSearch">Filter top keywords</label>
               <input id="kwSearch" class="input input--compact" type="search" placeholder="Filter keywords" />
-              <a class="btn btn--primary" href="/keywords.html" id="view-keywords">View</a>
-              <a class="btn" href="/keywords-manage.html" id="manage-keywords">Manage</a>
+              <a class="btn btn--primary" href="/keywords.html" id="view-keywords">View keywords</a>
             </div>
           </div>
           <div class="table-wrap">
             <table class="data-table">
-              <thead><tr><th>Keyword name</th><th>Volume</th><th>Cost</th><th>Volume</th></tr></thead>
+              <thead><tr><th>Keyword name</th><th>Uses</th><th>Cost</th></tr></thead>
               <tbody id="top-keywords-body"></tbody>
             </table>
           </div>
         </article>
-        <article class="card">
-          <div class="card__header"><h2>Quick chatbot overview</h2></div>
-          <ul class="stats" id="bot-overview"></ul>
+        <article class="card quick-chatbot-card" style="padding-top: 2px !important;">
+          <div class="card__header" style="margin-bottom: 4px !important;"><h2 style="margin: -48px 0 0 0 !important; padding: 0 !important;">Quick chatbot overview</h2></div>
+          <ul class="stats" id="bot-overview" style="margin-top: -32px !important;"></ul>
         </article>
       </section>
 
@@ -222,17 +221,30 @@
 
       <section class="grid lower">
         <article class="card">
-          <div class="card__header"><h2>Document access</h2></div>
-          <div class="list" id="doc-access"></div>
+          <div class="card__header">
+            <h2>Document access</h2>
+            <div class="card__tabs">
+              <button class="tab-btn active" data-tab="trending">Trending Articles</button>
+              <button class="tab-btn" data-tab="new-content">New Content</button>
+            </div>
+          </div>
+          <div class="card__content">
+            <div class="tab-content active" id="trending-articles">
+              <div class="articles-list"></div>
+            </div>
+            <div class="tab-content" id="new-content-articles">
+              <div class="articles-list"></div>
+            </div>
+          </div>
         </article>
         <article class="card ecommerce-section">
           <div class="card__header">
-            <h2>E-Commerce</h2>
-            <div class="card__actions">
+            <h2 style="margin: -60px 0 0 0 !important; padding: 0 !important;">E-Commerce</h2>
+            <div class="card__actions" style="margin: -52px 0 0 0 !important; padding: 0 !important;">
               <div class="chip">Louis Vuitton Campaign</div>
             </div>
           </div>
-          <div class="ecommerce-products" id="ecommerce-products">
+          <div class="ecommerce-products" id="ecommerce-products" style="margin: -42px 0 0 0 !important; padding: 0 !important;">
             <!-- Products will be populated by JavaScript -->
           </div>
         </article>

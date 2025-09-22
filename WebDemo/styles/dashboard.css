@@ -125,6 +125,8 @@
 .stats li span { color: #666; }
 .stats li strong { font-weight: 600; }
 
+/* Quick chatbot overview card spacing reverted */
+
 /* RPV Section Styles */
 .rpv-card { background: #fff; border: 1px solid #e8e8ef; }
 
@@ -239,14 +241,148 @@
 .deal-companies { font-size: 12px; font-weight: 600; color: #374151; }
 .deal-amount { font-size: 14px; font-weight: 700; color: #059669; }
 
-/* Fix Quick chatbot overview card spacing to match revenue cards */
-.kpis .card:last-child { padding-top: 6px; }
-.kpis .card:last-child .card__header { margin-top: -20px; margin-bottom: 0px; }
 
 .list { display: grid; gap: 12px; }
 .list .row { display: grid; grid-template-columns: 12px 1fr auto; align-items: center; gap: 10px; padding: 8px 0; }
 .list .bar { height: 4px; border-radius: 999px; background: #ececff; position: relative; overflow: hidden; }
 .list .bar > span { position: absolute; inset: 0 auto 0 0; width: 45%; background: linear-gradient(90deg,#605efb,#8a87ff); }
+
+/* Top Keywords Card Scrollable Table */
+.top-keywords .table-wrap {
+  max-height: 300px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: #d1d5db #f9fafb;
+}
+
+.top-keywords .table-wrap::-webkit-scrollbar {
+  width: 6px;
+}
+
+.top-keywords .table-wrap::-webkit-scrollbar-track {
+  background: #f9fafb;
+  border-radius: 3px;
+}
+
+.top-keywords .table-wrap::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 3px;
+}
+
+.top-keywords .table-wrap::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}
+
+/* Document Access Card Tabs */
+.card__tabs {
+  display: flex;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.tab-btn {
+  padding: 6px 12px;
+  border: 1px solid #e5e7eb;
+  background: #fff;
+  color: #6b7280;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.tab-btn:hover {
+  background: #f9fafb;
+  border-color: #d1d5db;
+}
+
+.tab-btn.active {
+  background: #605efb;
+  border-color: #605efb;
+  color: #fff;
+}
+
+.card__content {
+  flex: 1;
+  min-height: 0;
+  position: relative;
+  overflow-x: hidden;
+}
+
+.tab-content {
+  display: none;
+  height: 100%;
+  overflow-x: hidden;
+}
+
+.tab-content.active {
+  display: block;
+}
+
+.articles-list {
+  height: 100%;
+  max-height: 300px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 8px;
+  scrollbar-width: thin;
+  scrollbar-color: #d1d5db #f9fafb;
+}
+
+.articles-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.articles-list::-webkit-scrollbar-track {
+  background: #f9fafb;
+  border-radius: 3px;
+}
+
+.articles-list::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 3px;
+}
+
+.articles-list::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}
+
+.article-item {
+  display: block;
+  padding: 12px 0;
+  border-bottom: 1px solid #f3f4f6;
+  text-decoration: none;
+  color: inherit;
+  transition: background-color 0.2s ease;
+}
+
+.article-item:last-child {
+  border-bottom: none;
+}
+
+.article-item:hover {
+  background-color: #f9fafb;
+  margin: 0 -12px;
+  padding-left: 12px;
+  padding-right: 12px;
+  border-radius: 6px;
+}
+
+.article-title {
+  font-size: 13px;
+  font-weight: 500;
+  color: #374151;
+  line-height: 1.4;
+  margin-bottom: 4px;
+}
+
+.article-url {
+  font-size: 11px;
+  color: #9ca3af;
+  word-break: break-all;
+}
 
 .map { height: 220px; background: linear-gradient(135deg,#fafbff,#f4f6ff); border-radius: 12px; display: grid; place-items: center; color: #666; }
 
@@ -919,6 +1055,73 @@ svg#bubbleGraph { width: 100%; height: 70vh; display: block; }
   display: block;
 }
 
+/* Dark mode for Document Access Tabs */
+.dark-mode .tab-btn {
+  background: #374151;
+  border-color: #4b5563;
+  color: #d1d5db;
+}
+
+.dark-mode .tab-btn:hover {
+  background: #4b5563;
+  border-color: #6b7280;
+}
+
+.dark-mode .tab-btn.active {
+  background: #605efb;
+  border-color: #605efb;
+  color: #fff;
+}
+
+.dark-mode .articles-list {
+  scrollbar-color: #4b5563 #374151;
+}
+
+.dark-mode .articles-list::-webkit-scrollbar-track {
+  background: #374151;
+}
+
+.dark-mode .articles-list::-webkit-scrollbar-thumb {
+  background: #4b5563;
+}
+
+.dark-mode .articles-list::-webkit-scrollbar-thumb:hover {
+  background: #6b7280;
+}
+
+.dark-mode .article-item {
+  border-bottom-color: #374151;
+}
+
+.dark-mode .article-item:hover {
+  background-color: #374151;
+}
+
+.dark-mode .article-title {
+  color: #e5e7eb;
+}
+
+.dark-mode .article-url {
+  color: #9ca3af;
+}
+
+/* Dark mode for Top Keywords scrollable table */
+.dark-mode .top-keywords .table-wrap {
+  scrollbar-color: #4b5563 #374151;
+}
+
+.dark-mode .top-keywords .table-wrap::-webkit-scrollbar-track {
+  background: #374151;
+}
+
+.dark-mode .top-keywords .table-wrap::-webkit-scrollbar-thumb {
+  background: #4b5563;
+}
+
+.dark-mode .top-keywords .table-wrap::-webkit-scrollbar-thumb:hover {
+  background: #6b7280;
+}
+
 @media (max-width: 900px) {
   .app { grid-template-columns: 64px 1fr; }
   .sidebar__brand span { display:none; }
@@ -927,3 +1130,4 @@ svg#bubbleGraph { width: 100%; height: 70vh; display: block; }
 }
 
 
+/* Cache bust: Mon Sep 22 10:45:41 MDT 2025 */

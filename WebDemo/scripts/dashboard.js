@@ -43,18 +43,34 @@
     const body = $('#top-keywords-body');
     if (!body) return;
     body.replaceChildren();
-    const stored = loadStored();
-    const fromStorage = stored.length ? stored.map(k=>[k.name, k.value, `$${(k.value * 0.25).toFixed(2)}`]) : [];
-    const left = (fromStorage.length?fromStorage:topKeywordsLeft).filter(([n]) => n.toLowerCase().includes(filterTerm.toLowerCase()));
-    const right = topKeywordsRight.filter(([n]) => n.toLowerCase().includes(filterTerm.toLowerCase()));
-    const max = Math.max(left.length, right.length);
-    for (let i=0;i<max;i++){
-      const l = left[i] || ['', '', ''];
-      const r = right[i] || ['', '', ''];
+    
+    // Get keywords from ShopThatData system
+    const keywords = window.ShopThatData ? window.ShopThatData.getKeywords() : [];
+    
+    // Filter and sort keywords
+    const filteredKeywords = keywords
+      .filter(k => k.name.toLowerCase().includes(filterTerm.toLowerCase()))
+      .sort((a, b) => (b.uses || 0) - (a.uses || 0))
+      .slice(0, 10); // Show top 10
+    
+    // Populate table with keywords (single row per keyword now)
+    filteredKeywords.forEach(keyword => {
       const tr = document.createElement('tr');
-      tr.innerHTML = `<td>${l[0]}</td><td>${l[1]}</td><td>${l[2]}</td><td>${r[1]}</td>`;
+      tr.innerHTML = `
+        <td>${keyword.name}</td>
+        <td>${keyword.uses || 0}</td>
+        <td>$${keyword.totalCost ? keyword.totalCost.toLocaleString() : keyword.cost ? keyword.cost.toLocaleString() : '0'}</td>
+      `;
+      body.appendChild(tr);
+    });
+    
+    // If no keywords found, show placeholder
+    if (filteredKeywords.length === 0) {
+      const tr = document.createElement('tr');
+      tr.innerHTML = '<td colspan="3" style="text-align: center; color: #9ca3af;">No keywords found</td>';
       body.appendChild(tr);
     }
+    
     const link = $('#view-keywords');
     if (link){ link.addEventListener('click', ()=>{}); }
   }
@@ -93,21 +109,123 @@
   }
 
   function renderDocs(){
-    const el = $('#doc-access');
-    if (!el) return;
-    el.replaceChildren();
-    ['Document name here','Document name here','Document name here','Document name here']
-      .forEach((name, i)=>{
-        const row = document.createElement('div');
-        row.className = 'row';
-        row.innerHTML = `<span>${String(i+1).padStart(2,'0')}</span>
-          <div>
-            <div>${name}</div>
-            <div class="bar"><span style="width:${[45,29,18,25][i]}%"></span></div>
-          </div>
-          <strong>${[45,29,18,25][i]}%</strong>`;
-        el.appendChild(row);
+    // Initialize tab functionality
+    initDocumentAccessTabs();
+    
+    // Populate articles
+    populateArticles();
+  }
+
+  function initDocumentAccessTabs() {
+    const tabBtns = $all('.tab-btn');
+    const tabContents = $all('.tab-content');
+    
+    tabBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const targetTab = btn.dataset.tab;
+        
+        // Remove active class from all tabs and content
+        tabBtns.forEach(b => b.classList.remove('active'));
+        tabContents.forEach(content => content.classList.remove('active'));
+        
+        // Add active class to clicked tab
+        btn.classList.add('active');
+        
+        // Show corresponding content
+        const targetContent = targetTab === 'trending' ? $('#trending-articles') : $('#new-content-articles');
+        if (targetContent) {
+          targetContent.classList.add('active');
+        }
       });
+    });
+  }
+
+  function populateArticles() {
+    const trendingArticles = [
+      {
+        title: "The Polka Dot Fantasy World of Yayoi Kusama",
+        url: "https://asianews.network/the-polka-dot-fantasy-world-of-yayoi-kusama/"
+      },
+      {
+        title: "Creating Infinity: The Worlds of Louis Vuitton and Yayoi Kusama",
+        url: "https://www.davidzwirner.com/news/2023/creating-infinity-the-worlds-of-louis-vuitton-and-yayoi-kusama"
+      },
+      {
+        title: "Yayoi Kusama - Artist Profile",
+        url: "https://www.davidzwirner.com/artists/yayoi-kusama"
+      },
+      {
+        title: "Louis Vuitton's Collaboration Strategy",
+        url: "https://www.ft.com/content/198207f2-5f5e-441c-b033-7deee8a28feb"
+      },
+      {
+        title: "See the New Louis Vuitton x Yayoi Kusama Collaboration Here",
+        url: "https://www.lofficielph.com/fashion/see-the-new-louis-vuitton-x-yayoi-kusama-collaboration-here"
+      },
+      {
+        title: "Louis Vuitton Second Yayoi Kusama Collection",
+        url: "https://www.harpersbazaar.com/fashion/trends/a42411209/louis-vuitton-second-yayoi-kusama-collection/"
+      }
+    ];
+
+    const newContentArticles = [
+      {
+        title: "Café Louis Vuitton Opens in Seoul Blending Korean Flavors with French Savoir-Faire",
+        url: "https://www.lvmh.com/en/news-lvmh/cafe-louis-vuitton-opens-in-seoul-blending-korean-flavors-with-french-savoir-faire"
+      },
+      {
+        title: "Louis Vuitton Dévoile Tous Ses Trésors Art Déco Lors d'une Expo Gratuite",
+        url: "https://www.timeout.fr/paris/actualites/louis-vuitton-devoile-tous-ses-tresors-art-deco-lors-dune-expo-gratuite-091525"
+      },
+      {
+        title: "Selena Gomez Wears Louis Vuitton on Emmys 2025 Red Carpet",
+        url: "https://pagesix.com/2025/09/14/style/selena-gomez-wears-louis-vuitton-on-emmys-2025-red-carpet/"
+      },
+      {
+        title: "Louis Vuitton Présente les Tenues Officielles de l'Équipe Féminine du Real Madrid",
+        url: "https://fr.fashionnetwork.com/news/Louis-vuitton-presente-les-tenues-officielles-de-l-equipe-feminine-du-real-madrid,1763336.html"
+      },
+      {
+        title: "Louis Vuitton Accélère dans la Beauté avec un Pop-up Immersif à Soho",
+        url: "https://www.meetandmatch.fr/louis-vuitton-accelere-dans-la-beaute-avec-un-pop-up-immersif-a-soho/"
+      }
+    ];
+
+    // Populate trending articles
+    const trendingContainer = $('#trending-articles .articles-list');
+    if (trendingContainer) {
+      trendingContainer.replaceChildren();
+      trendingArticles.forEach(article => {
+        const articleEl = document.createElement('a');
+        articleEl.className = 'article-item';
+        articleEl.href = article.url;
+        articleEl.target = '_blank';
+        articleEl.rel = 'noopener noreferrer';
+        articleEl.innerHTML = `
+          <div class="article-title">${article.title}</div>
+          <div class="article-url">${article.url}</div>
+        `;
+        trendingContainer.appendChild(articleEl);
+      });
+    }
+
+    // Populate new content articles
+    const newContentContainer = $('#new-content-articles .articles-list');
+    if (newContentContainer) {
+      newContentContainer.replaceChildren();
+      newContentArticles.forEach(article => {
+        const articleEl = document.createElement('a');
+        articleEl.className = 'article-item';
+        articleEl.href = article.url;
+        articleEl.target = '_blank';
+        articleEl.rel = 'noopener noreferrer';
+        articleEl.innerHTML = `
+          <div class="article-title">${article.title}</div>
+          <div class="article-url">${article.url}</div>
+        `;
+        newContentContainer.appendChild(articleEl);
+      });
+    }
   }
 
   function renderEcommerce(){

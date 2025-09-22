@@ -35,7 +35,8 @@
           value: keyword.value || 50,
           group: keyword.group || 1,
           uses: 0,
-          cost: 0,
+          cost: keyword.cost || 0,
+          totalCost: keyword.cost || 0,
           lastUsed: null,
           created: new Date().toISOString()
         });
@@ -282,29 +283,45 @@
       return foundKeywords;
     },
 
+    // Clear existing data and reinitialize
+    clearData() {
+      localStorage.removeItem(STORAGE_KEYS.keywords);
+      localStorage.removeItem(STORAGE_KEYS.connections);
+      localStorage.removeItem(STORAGE_KEYS.chatAnalytics);
+      localStorage.removeItem(STORAGE_KEYS.keywordUsage);
+      localStorage.removeItem(STORAGE_KEYS.sessions);
+    },
+
     // Initialize with default data if empty
     initialize() {
       const keywords = this.getKeywords();
-      if (keywords.length === 0) {
-        // Initialize with default keywords
+      // Force reinitialize with new data - remove this condition to always reset
+      if (keywords.length === 0 || !keywords.find(k => k.name === 'Pharrell')) {
+        // Clear existing data first
+        this.clearData();
+        // Initialize with new keyword data
         const defaultKeywords = [
-          { name: 'Yayoi Kusama', value: 90, group: 1 },
-          { name: 'Takashi Murakami', value: 50, group: 1 },
-          { name: 'Louis Vuitton', value: 80, group: 1 },
-          { name: 'Keepall Bag', value: 28, group: 1 },
-          { name: 'Roger Federer', value: 30, group: 2 },
-          { name: 'Rafael Nadal', value: 24, group: 2 },
-          { name: 'Olympics', value: 27, group: 2 },
-          { name: 'Zendaya', value: 22, group: 2 }
+          { name: 'Yayoi Kusama', value: 90, group: 1, cost: 20000 },
+          { name: 'Pharrell', value: 75, group: 1, cost: 5000 },
+          { name: 'Infinity Mirrors', value: 85, group: 1, cost: 15000 },
+          { name: 'Painted Dots', value: 65, group: 1, cost: 3000 },
+          { name: 'Louis Vuitton', value: 80, group: 1, cost: 2000 },
+          { name: 'Pumpkins', value: 60, group: 1, cost: 2000 },
+          { name: 'Gisele Bundchen', value: 70, group: 2, cost: 2000 },
+          { name: 'MoMa', value: 45, group: 2, cost: 370 },
+          { name: 'FeiFei Sun', value: 35, group: 2, cost: 150 },
+          { name: 'Central Park', value: 40, group: 2, cost: 150 }
         ];
         
         defaultKeywords.forEach(keyword => this.addKeyword(keyword));
         
         // Add some default connections
         this.addConnection('Yayoi Kusama', 'Louis Vuitton');
-        this.addConnection('Takashi Murakami', 'Louis Vuitton');
-        this.addConnection('Roger Federer', 'Olympics');
-        this.addConnection('Rafael Nadal', 'Olympics');
+        this.addConnection('Yayoi Kusama', 'Infinity Mirrors');
+        this.addConnection('Yayoi Kusama', 'Painted Dots');
+        this.addConnection('Yayoi Kusama', 'Pumpkins');
+        this.addConnection('Louis Vuitton', 'Gisele Bundchen');
+        this.addConnection('Pharrell', 'Louis Vuitton');
       }
       
       this.updateChatAnalytics();
