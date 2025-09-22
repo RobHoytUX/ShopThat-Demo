@@ -482,9 +482,16 @@
   function toggleInvestorMode(enabled) {
     const body = document.body;
     const rpvSection = $('.rpv-section');
+    const defaultBenchmarks = $('.default-benchmarks');
+    const investorBenchmarks = $('.investor-benchmarks');
     
     if (enabled) {
       body.classList.add('investor-mode');
+      
+      // Toggle benchmark views
+      if (defaultBenchmarks) defaultBenchmarks.style.display = 'none';
+      if (investorBenchmarks) investorBenchmarks.style.display = 'grid';
+      
       // Show RPV and Industry cards
       if (rpvSection) {
         rpvSection.style.display = 'grid';
@@ -502,6 +509,11 @@
       });
     } else {
       body.classList.remove('investor-mode');
+      
+      // Toggle benchmark views back
+      if (defaultBenchmarks) defaultBenchmarks.style.display = 'grid';
+      if (investorBenchmarks) investorBenchmarks.style.display = 'none';
+      
       // Hide RPV and Industry cards with animation
       if (rpvSection) {
         rpvSection.style.transition = 'opacity 0.3s ease, transform 0.3s ease';

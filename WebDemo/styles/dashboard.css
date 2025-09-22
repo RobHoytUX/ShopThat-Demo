@@ -173,8 +173,20 @@
   border-radius: 12px; 
   border: 1px solid #e2e8f0;
 }
+
+/* Default benchmarks (text-based) */
+.benchmark-stats { display: grid; gap: 12px; margin-bottom: 16px; }
+.benchmark-item { display: grid; gap: 4px; }
+.benchmark-label { font-size: 14px; color: #6b7280; font-weight: 500; }
+
+/* Investor Demo Mode benchmarks (metric-style) */
 .benchmark-metrics { display: grid; gap: 16px; margin-bottom: 16px; }
-/* Benchmark metrics now use the same styling as Current Performance metrics */
+.benchmark-metrics .metric-item { display: grid; gap: 4px; }
+.benchmark-metrics .metric-label { font-size: 16px; color: #6b7280; font-weight: 500; }
+.benchmark-metrics .metric-value { font-size: 32px; font-weight: 700; }
+.benchmark-metrics .metric-value.traditional-gray { color: #6b7280; }
+.benchmark-metrics .metric-value.ai-deals-red { color: #dc2626; }
+.benchmark-metrics .metric-unit { font-size: 12px; color: #9ca3af; }
 .improvement-indicator { 
   text-align: center; 
   padding: 8px; 
@@ -835,7 +847,26 @@ svg#bubbleGraph { width: 100%; height: 70vh; display: block; }
   background: #1f2937;
   border: 1px solid #374151;
 }
-/* Benchmark metrics now use the same dark mode styling as Current Performance metrics */
+
+/* Default benchmarks dark mode */
+.dark-mode .benchmark-label {
+  color: #9ca3af;
+}
+
+/* Investor Demo Mode benchmarks dark mode */
+.dark-mode .benchmark-metrics .metric-label {
+  color: #9ca3af;
+}
+.dark-mode .benchmark-metrics .metric-value.traditional-gray {
+  color: #9ca3af;
+}
+.dark-mode .benchmark-metrics .metric-value.ai-deals-red {
+  color: #ef4444;
+}
+.dark-mode .benchmark-metrics .metric-unit {
+  color: #6b7280;
+}
+
 .dark-mode .improvement-indicator {
   background: rgba(16, 185, 129, 0.2);
 }

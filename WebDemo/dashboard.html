@@ -127,16 +127,26 @@
               <div class="section-header">
                 <h3>Industry Benchmarks</h3>
               </div>
-              <div class="benchmark-stats">
+              <!-- Default view: text-based benchmarks -->
+              <div class="benchmark-stats default-benchmarks">
                 <div class="benchmark-item traditional">
-                  <span class="benchmark-label">Traditional RPV</span>
-                  <span class="benchmark-value traditional-gray">$0.0002</span>
-                  <span class="benchmark-unit">($5-50 per mille)</span>
+                  <span class="benchmark-label">Traditional RPV $0.0002 ($5-50 per mille)</span>
                 </div>
                 <div class="benchmark-item ai-deals">
-                  <span class="benchmark-label">AI Publisher Deals</span>
-                  <span class="benchmark-value ai-deals-red">$3,000</span>
-                  <span class="benchmark-unit">avg per article/year</span>
+                  <span class="benchmark-label">AI Publisher Deals $3,000 avg per article/year</span>
+                </div>
+              </div>
+              <!-- Investor Demo Mode view: metric-style layout -->
+              <div class="benchmark-metrics investor-benchmarks" style="display: none;">
+                <div class="metric-item">
+                  <span class="metric-label">Traditional RPV</span>
+                  <span class="metric-value traditional-gray">$0.0002</span>
+                  <span class="metric-unit">($5-50 per mille)</span>
+                </div>
+                <div class="metric-item">
+                  <span class="metric-label">AI Publisher Deals</span>
+                  <span class="metric-value ai-deals-red">$3,000</span>
+                  <span class="metric-unit">avg per article/year</span>
                 </div>
               </div>
               <div class="improvement-indicator">
