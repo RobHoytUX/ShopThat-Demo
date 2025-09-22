@@ -237,7 +237,7 @@
 
 // Chatbox widget
 (function(){
-  const API_BASE = 'http://localhost:8001';
+  const API_BASE = 'http://3.15.39.180';
   const DEFAULT_SLUG = 'kusama_campaign';
 
   const styles = `
@@ -283,6 +283,17 @@
   .chatbot-msg{max-width:80%;padding:10px 12px;border-radius:16px;line-height:1.35;font-size:14px;word-wrap:break-word;white-space:pre-wrap;position:relative;transition:opacity 200ms ease}
   .chatbot-msg-user{align-self:flex-end;background:rgba(0,0,0,0.78);color:#fff;border-radius:30px 30px 6px 30px;margin-right:8px}
   .chatbot-msg-bot{align-self:flex-start;background:#f2f2f2;color:#111;border-radius:30px 30px 30px 6px}
+  .chatbot-images{background:transparent;padding:8px;border-radius:12px;display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-start}
+  .chatbot-images img{border-radius:8px;transition:transform 0.2s ease}
+  .chatbot-images img:hover{transform:scale(1.05)}
+  .chatbot-thinking{align-self:flex-start;background:#f2f2f2;color:#111;border-radius:30px 30px 30px 6px;padding:10px 16px;display:flex;align-items:center;gap:8px}
+  .chatbot-thinking-text{font-size:14px;color:#666}
+  .chatbot-dots{display:flex;gap:2px}
+  .chatbot-dots span{width:4px;height:4px;background:#666;border-radius:50%;animation:bounce 1.4s infinite ease-in-out both}
+  .chatbot-dots span:nth-child(1){animation-delay:-0.32s}
+  .chatbot-dots span:nth-child(2){animation-delay:-0.16s}
+  .chatbot-dots span:nth-child(3){animation-delay:0s}
+  @keyframes bounce{0%,80%,100%{transform:scale(0)}40%{transform:scale(1)}}
   .chatbot-msg.is-fading{opacity:0}
   .chatbot-input{display:flex;gap:8px;width:100%;padding-top:8px}
   .chatbot-input input{flex:1;min-width:0;padding:12px 8px 12px 20px;border-radius:50px;border:1px solid #ccc}
@@ -574,6 +585,60 @@
       if (sender !== 'user') refreshBtn.removeAttribute('hidden');
       ensureSizeForContent();
     }
+
+    function displayImages(imageUrls) {
+      if (!imageUrls || !Array.isArray(imageUrls) || imageUrls.length === 0) return;
+      
+      const imageContainer = createEl('div', { class: 'chatbot-msg chatbot-msg-bot chatbot-images' });
+      imageUrls.forEach(imageUrl => {
+        const img = createEl('img', { 
+          src: imageUrl, 
+          alt: 'Related image',
+          style: 'max-width: 200px; max-height: 200px; border-radius: 8px; margin: 4px; cursor: pointer;'
+        });
+        img.addEventListener('click', () => {
+          window.open(imageUrl, '_blank');
+        });
+        img.addEventListener('error', () => {
+          img.style.display = 'none';
+        });
+        imageContainer.appendChild(img);
+      });
+      
+      messages.appendChild(imageContainer);
+      messages.scrollTop = messages.scrollHeight;
+      ensureSizeForContent();
+    }
+
+    let thinkingIndicator = null;
+
+    function showThinking() {
+      if (thinkingIndicator) return; // Already showing
+      
+      thinkingIndicator = createEl('div', { class: 'chatbot-thinking' });
+      const thinkingText = createEl('span', { class: 'chatbot-thinking-text', text: 'Thinking' });
+      const dots = createEl('div', { class: 'chatbot-dots' });
+      
+      // Create three animated dots
+      for (let i = 0; i < 3; i++) {
+        const dot = createEl('span');
+        dots.appendChild(dot);
+      }
+      
+      thinkingIndicator.appendChild(thinkingText);
+      thinkingIndicator.appendChild(dots);
+      messages.appendChild(thinkingIndicator);
+      messages.scrollTop = messages.scrollHeight;
+      ensureSizeForContent();
+    }
+
+    function hideThinking() {
+      if (thinkingIndicator) {
+        thinkingIndicator.remove();
+        thinkingIndicator = null;
+        ensureSizeForContent();
+      }
+    }
     // removed expand/collapse control; default size reflects previous expanded state
 
     async function send(){
@@ -592,16 +657,29 @@
       input.value = '';
       // After first send, keep inputs enabled for continued conversation
       if (!hasSelectedKeyword) setInputsEnabled(true);
+      
+      // Show thinking indicator
+      showThinking();
+      
       try {
-        const res = await fetch(`${API_BASE}/api/chat`, {
+        const res = await fetch(`${API_BASE}/chat`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ message: txt, enabled, disabled })
+          body: JSON.stringify({ message: txt })
         });
         if (!res.ok) throw new Error('HTTP '+res.status);
         const d = await res.json();
-        const botResponse = String(d?.response||'No response');
+        
+        // Hide thinking indicator before showing response
+        hideThinking();
+        
+        const botResponse = String(d?.answer||'No response');
         addMessage('bot', botResponse);
+        
+        // Handle image URLs if provided
+        if (d?.image_urls && Array.isArray(d.image_urls) && d.image_urls.length > 0) {
+          displayImages(d.image_urls);
+        }
         
         // Track keywords from bot response
         if (window.ShopThatData) {
@@ -614,12 +692,53 @@
         // ensure refresh visible after bot message
         refreshBtn.removeAttribute('hidden');
       } catch (e) {
+        // Hide thinking indicator on error too
+        hideThinking();
         addMessage('bot', '❗ Failed to fetch response');
       }
     }
 
     sendBtn.addEventListener('click', send);
     input.addEventListener('keydown', (e)=>{ if (e.key === 'Enter'){ e.preventDefault(); send(); }});
+
+    // Health check functionality
+    async function checkHealth() {
+      try {
+        const res = await fetch(`${API_BASE}/health`);
+        if (res.ok) {
+          const data = await res.json();
+          console.log('Health check successful:', data);
+          return true;
+        }
+        throw new Error('Health check failed');
+      } catch (e) {
+        console.error('Health check error:', e);
+        return false;
+      }
+    }
+
+    // Search functionality
+    async function searchQuery(query) {
+      try {
+        const encodedQuery = encodeURIComponent(query);
+        const res = await fetch(`${API_BASE}/search?q=${encodedQuery}`);
+        if (!res.ok) throw new Error('HTTP '+res.status);
+        const data = await res.json();
+        return data;
+      } catch (e) {
+        console.error('Search error:', e);
+        return null;
+      }
+    }
+
+    // Perform initial health check when chatbot opens
+    function performHealthCheck() {
+      checkHealth().then(isHealthy => {
+        if (!isHealthy) {
+          addMessage('bot', '⚠️ Backend service is currently unavailable. Some features may not work properly.');
+        }
+      });
+    }
 
     let expanded = false;
 
@@ -672,6 +791,8 @@
       scheduleAnalysis();
       // On open, determine size based on current content
       ensureSizeForContent();
+      // Perform health check when opening
+      performHealthCheck();
     }
     function closeBox(){
       // End chat session when closing
@@ -701,6 +822,10 @@
         el.classList.add('is-fading');
       });
       refreshBtn.classList.add('is-fading');
+      
+      // Clear thinking indicator immediately
+      hideThinking();
+      
       // Wait for fade then clear
       setTimeout(() => {
         messages.replaceChildren();
