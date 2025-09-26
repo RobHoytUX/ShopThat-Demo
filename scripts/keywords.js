@@ -223,8 +223,16 @@ console.log('Document ready state:', document.readyState);
 
   // State management for node visibility
   let selectedNodeId = null;
-  let visibilityMode = 'default'; // 'default', 'connections'
+  let visibilityMode = 'default'; // 'default', 'connections', 'filtered'
   const modeIndicator = document.getElementById('modeIndicator');
+  
+  // Filter state
+  let activeFilters = {
+    topLevel: true,
+    connected: true, 
+    secondary: true,
+    isolated: true
+  };
 
   // Function to update mode indicator
   function updateModeIndicator() {
@@ -235,7 +243,81 @@ console.log('Document ready state:', document.readyState);
       } else if (visibilityMode === 'connections') {
         modeIndicator.innerHTML = `<span>Mode: Connections for "${selectedNodeId}"</span>`;
         modeIndicator.style.color = '#5B21B6';
+      } else if (visibilityMode === 'filtered') {
+        const activeCount = Object.values(activeFilters).filter(Boolean).length;
+        modeIndicator.innerHTML = `<span>Mode: Custom Filter (${activeCount}/4 levels)</span>`;
+        modeIndicator.style.color = '#F59E0B';
       }
+    }
+  }
+
+  // Function to get nodes based on current filter settings
+  function getFilteredNodes(nodes, links) {
+    const hierarchicalNodes = analyzeNodeHierarchy(nodes, links);
+    const visibleNodeIds = new Set();
+    
+    hierarchicalNodes.forEach(node => {
+      const level = getNodeLevel(node, hierarchicalNodes, links);
+      
+      if ((level === 'topLevel' && activeFilters.topLevel) ||
+          (level === 'connected' && activeFilters.connected) ||
+          (level === 'secondary' && activeFilters.secondary) ||
+          (level === 'isolated' && activeFilters.isolated)) {
+        visibleNodeIds.add(node.id);
+      }
+    });
+    
+    return visibleNodeIds;
+  }
+
+  // Function to determine node level
+  function getNodeLevel(node, nodes, links) {
+    const connectionMap = new Map();
+    const nodeConnections = new Map();
+    
+    // Initialize connection counts
+    nodes.forEach(n => {
+      nodeConnections.set(n.id, new Set());
+    });
+    
+    // Count connections for each node
+    links.forEach(link => {
+      const sourceId = typeof link.source === 'object' ? link.source.id : link.source;
+      const targetId = typeof link.target === 'object' ? link.target.id : link.target;
+      
+      if (nodeConnections.has(sourceId)) {
+        nodeConnections.get(sourceId).add(targetId);
+      }
+      if (nodeConnections.has(targetId)) {
+        nodeConnections.get(targetId).add(sourceId);
+      }
+    });
+    
+    const connectionCounts = Array.from(nodeConnections.entries())
+      .map(([id, connections]) => ({ id, count: connections.size }))
+      .sort((a, b) => b.count - a.count);
+    
+    const maxConnections = connectionCounts[0]?.count || 0;
+    const topLevelThreshold = Math.max(1, Math.ceil(maxConnections * 0.7));
+    
+    const nodeConnectionCount = nodeConnections.get(node.id)?.size || 0;
+    
+    if (nodeConnectionCount >= topLevelThreshold && nodeConnectionCount > 0) {
+      return 'topLevel';
+    } else if (nodeConnectionCount === 0) {
+      return 'isolated';
+    } else {
+      // Check if connected to top level nodes
+      const topLevelNodes = new Set(
+        connectionCounts
+          .filter(item => item.count >= topLevelThreshold && item.count > 0)
+          .map(item => item.id)
+      );
+      
+      const connectedToTopLevel = Array.from(nodeConnections.get(node.id) || [])
+        .some(connectedId => topLevelNodes.has(connectedId));
+      
+      return connectedToTopLevel ? 'connected' : 'secondary';
     }
   }
 
@@ -675,6 +757,81 @@ console.log('Document ready state:', document.readyState);
   zoomIn && zoomIn.addEventListener('click', ()=> svg.transition().duration(200).call(zoom.scaleBy, 1.2));
   zoomOut && zoomOut.addEventListener('click', ()=> svg.transition().duration(200).call(zoom.scaleBy, 0.8));
   fitBtn && fitBtn.addEventListener('click', fitNodesToScreen);
+
+  // Filter controls
+  const filterByLevelBtn = document.getElementById('filterByLevel');
+  const showAllBtn = document.getElementById('showAll');
+  const filterModal = document.getElementById('filterModal');
+  const filterModalClose = document.getElementById('filterModalClose');
+  const applyFilterBtn = document.getElementById('applyFilter');
+  const filterSelectAllBtn = document.getElementById('filterSelectAll');
+  const filterSelectNoneBtn = document.getElementById('filterSelectNone');
+
+  // Show filter modal
+  filterByLevelBtn && filterByLevelBtn.addEventListener('click', () => {
+    filterModal.style.display = 'flex';
+    
+    // Update checkboxes to match current filter state
+    document.getElementById('filterTopLevel').checked = activeFilters.topLevel;
+    document.getElementById('filterConnected').checked = activeFilters.connected;
+    document.getElementById('filterSecondary').checked = activeFilters.secondary;
+    document.getElementById('filterIsolated').checked = activeFilters.isolated;
+  });
+
+  // Close filter modal
+  filterModalClose && filterModalClose.addEventListener('click', () => {
+    filterModal.style.display = 'none';
+  });
+
+  // Close modal when clicking outside
+  filterModal && filterModal.addEventListener('click', (e) => {
+    if (e.target === filterModal) {
+      filterModal.style.display = 'none';
+    }
+  });
+
+  // Show all nodes
+  showAllBtn && showAllBtn.addEventListener('click', () => {
+    visibilityMode = 'filtered';
+    activeFilters = { topLevel: true, connected: true, secondary: true, isolated: true };
+    const allNodes = new Set(hierarchicalNodes.map(d => d.id));
+    updateNodeVisibility(allNodes);
+    updateModeIndicator();
+    setTimeout(() => fitNodesToScreen(), 100);
+  });
+
+  // Filter select all/none
+  filterSelectAllBtn && filterSelectAllBtn.addEventListener('click', () => {
+    document.getElementById('filterTopLevel').checked = true;
+    document.getElementById('filterConnected').checked = true;
+    document.getElementById('filterSecondary').checked = true;
+    document.getElementById('filterIsolated').checked = true;
+  });
+
+  filterSelectNoneBtn && filterSelectNoneBtn.addEventListener('click', () => {
+    document.getElementById('filterTopLevel').checked = false;
+    document.getElementById('filterConnected').checked = false;
+    document.getElementById('filterSecondary').checked = false;
+    document.getElementById('filterIsolated').checked = false;
+  });
+
+  // Apply filter
+  applyFilterBtn && applyFilterBtn.addEventListener('click', () => {
+    activeFilters = {
+      topLevel: document.getElementById('filterTopLevel').checked,
+      connected: document.getElementById('filterConnected').checked,
+      secondary: document.getElementById('filterSecondary').checked,
+      isolated: document.getElementById('filterIsolated').checked
+    };
+    
+    visibilityMode = 'filtered';
+    const filteredNodes = getFilteredNodes(hierarchicalNodes, graphLinks);
+    updateNodeVisibility(filteredNodes);
+    updateModeIndicator();
+    filterModal.style.display = 'none';
+    
+    setTimeout(() => fitNodesToScreen(), 100);
+  });
 
   // Neo4j integration
   const neo4jUriEl = document.getElementById('neo4jUri');

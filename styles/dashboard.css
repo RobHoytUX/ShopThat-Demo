@@ -639,6 +639,43 @@ svg#bubbleGraph { width: 100%; height: 75vh; display: block; padding-top: 68px; 
   padding: 6px 10px;
 }
 
+/* Filter Modal Styles */
+.filter-options {
+  display: grid;
+  gap: 12px;
+}
+
+.filter-option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 8px;
+  transition: background-color 0.2s ease;
+}
+
+.filter-option:hover {
+  background-color: #f9fafb;
+}
+
+.filter-option input[type="checkbox"] {
+  margin: 0;
+}
+
+.filter-option__indicator {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  flex-shrink: 0;
+}
+
+.modal-actions {
+  border-top: 1px solid #f3f4f6;
+  padding-top: 16px;
+}
+
 /* Modal Styles */
 .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; }
 .modal-content { background: #fff; border-radius: 16px; max-width: 600px; max-height: 80vh; overflow-y: auto; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04); }
@@ -1134,6 +1171,18 @@ svg#bubbleGraph { width: 100%; height: 75vh; display: block; padding-top: 68px; 
 
 .dark-mode .level-indicator {
   border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.dark-mode .filter-option:hover {
+  background-color: #374151;
+}
+
+.dark-mode .filter-option__indicator {
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.dark-mode .modal-actions {
+  border-top: 1px solid #374151;
 }
 
 .dark-mode .product-item {

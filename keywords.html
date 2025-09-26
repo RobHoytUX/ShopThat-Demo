@@ -70,6 +70,22 @@
             <input id="kwFilter" class="input input--compact" type="search" placeholder="Search keywords" />
             <button type="button" id="resetKw" class="btn btn--secondary">Reset</button>
           </div>
+          <div class="control-group">
+            <button type="button" id="filterByLevel" class="btn btn--secondary">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polygon points="22,3 2,3 10,12.46 10,19 14,21 14,12.46"></polygon>
+              </svg>
+              Filter by Level
+            </button>
+            <button type="button" id="showAll" class="btn btn--secondary">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="3"></circle>
+                <path d="M12 1v6m0 6v6"></path>
+                <path d="m21 12-6-6-6 6 6 6 6-6Z"></path>
+              </svg>
+              Show All
+            </button>
+          </div>
         </div>
         <div class="toolbar__right">
           <div class="control-group" role="group" aria-label="Zoom controls">
@@ -158,6 +174,45 @@
           </div>
         </div>
       </aside>
+      
+      <!-- Filter Modal -->
+      <div class="modal-overlay" id="filterModal" style="display: none;">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h2>Filter by Hierarchy Level</h2>
+            <button class="icon-btn" id="filterModalClose" aria-label="Close">✕</button>
+          </div>
+          <div class="modal-body" style="padding: 20px;">
+            <div class="filter-options">
+              <label class="filter-option">
+                <input type="checkbox" id="filterTopLevel" checked>
+                <span class="filter-option__indicator" style="background-color: #6366F1;"></span>
+                <span>Top Level (Most Connected)</span>
+              </label>
+              <label class="filter-option">
+                <input type="checkbox" id="filterConnected" checked>
+                <span class="filter-option__indicator" style="background-color: #5B21B6;"></span>
+                <span>Connected to Top Level</span>
+              </label>
+              <label class="filter-option">
+                <input type="checkbox" id="filterSecondary" checked>
+                <span class="filter-option__indicator" style="background-color: #F59E0B;"></span>
+                <span>Secondary Connected</span>
+              </label>
+              <label class="filter-option">
+                <input type="checkbox" id="filterIsolated" checked>
+                <span class="filter-option__indicator" style="background-color: #10B981;"></span>
+                <span>Isolated (No Connections)</span>
+              </label>
+            </div>
+            <div class="modal-actions" style="margin-top: 20px; display: flex; gap: 12px; justify-content: flex-end;">
+              <button class="btn btn--secondary" id="filterSelectAll">Select All</button>
+              <button class="btn btn--secondary" id="filterSelectNone">Select None</button>
+              <button class="btn btn--primary" id="applyFilter">Apply Filter</button>
+            </div>
+          </div>
+        </div>
+      </div>
     </main>
 
     <script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
