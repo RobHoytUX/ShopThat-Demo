@@ -60,20 +60,46 @@
       </div>
     </header>
 
-    <main id="main" class="dashboard" role="main" style="grid-template-columns: 1fr;">
-      <section class="card" aria-label="Keyword management">
-        <div class="toolbar" id="mk-toolbar" style="flex-wrap:wrap; justify-content:space-between; margin-top:0px;">
-          <div class="toolbar__left" style="display:flex; gap:8px; align-items:center;">
-            <input id="mk-name" class="input" type="text" placeholder="Keyword name" style="min-width:220px" />
-            <button id="mk-add" class="btn btn--primary" type="button">Add</button>
-            <button id="mk-clear" class="btn btn--secondary" type="button">Clear</button>
-          </div>
-          <div class="toolbar__right">
-            <a class="btn btn--primary" href="/keywords.html">View Keywords</a>
+    <main id="main" class="keywords" role="main">
+      <section class="toolbar" aria-label="Keyword management controls">
+        <div class="toolbar__left">
+          <div class="control-group">
+            <input id="mk-search" class="input input--compact" type="search" placeholder="Search keywords" />
           </div>
         </div>
-        <div id="mk-list" class="list" style="margin-top:16px;"></div>
+        <div class="toolbar__right">
+          <div class="control-group">
+            <input id="mk-name" class="input input--compact" type="text" placeholder="Add new keyword" />
+            <button id="mk-add" class="btn btn--primary" type="button">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="16"></line>
+                <line x1="8" y1="12" x2="16" y2="12"></line>
+              </svg>
+              Add
+            </button>
+          </div>
+          <div class="control-group">
+            <button id="mk-clear" class="btn btn--secondary" type="button">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="3,6 5,6 21,6"></polyline>
+                <path d="M19,6v14a2,2,0,0,1-2,2H7a2,2,0,0,1-2-2V6m3,0V4a2,2,0,0,1,2-2h4a2,2,0,0,1,2,2v2"></path>
+              </svg>
+              Clear All
+            </button>
+            <a class="btn btn--primary" href="/keywords.html">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                <circle cx="12" cy="12" r="3"></circle>
+              </svg>
+              View Keywords
+            </a>
+          </div>
+        </div>
       </section>
+      <div class="keywords-gallery">
+        <div id="mk-list" class="keywords-grid"></div>
+      </div>
     </main>
 
     <script src="scripts/shared-data.js"></script>

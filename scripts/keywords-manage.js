@@ -31,28 +31,61 @@
     const data = load();
     const connections = loadConnections();
     list.replaceChildren();
-    if (!data.length){ list.innerHTML = '<div style="color:#666">No keywords yet.</div>'; return; }
+    
+    if (!data.length){ 
+      list.innerHTML = '<div style="color:#666; text-align: center; padding: 40px; grid-column: 1 / -1;">No keywords yet. Add some keywords to get started.</div>'; 
+      return; 
+    }
     
     data.forEach((k, idx)=>{
-      const row = document.createElement('div');
-      row.className = 'row';
-      const connectedTo = connections.filter(c => c.source === k.name || c.target === k.name);
-      const connectionsList = connectedTo.map(c => c.source === k.name ? c.target : c.source).join(', ') || 'None';
+      const card = document.createElement('div');
+      card.className = 'keyword-card';
       
-      row.innerHTML = `<div></div>
-        <div>
-          <div><strong>${k.name}</strong></div>
-          <div style="font-size:12px; color:#666;">Connected to: ${connectionsList}</div>
-          <div style="margin-top:4px;">
-            <input type="text" class="input" placeholder="Connect to..." style="width:140px; font-size:12px; padding:4px 8px;" data-keyword="${k.name}" />
-            <button class="btn btn--secondary" style="font-size:11px; padding:4px 8px;" data-connect="${k.name}">Connect</button>
+      const connectedTo = connections.filter(c => c.source === k.name || c.target === k.name);
+      const connectionsList = connectedTo.map(c => ({
+        name: c.source === k.name ? c.target : c.source,
+        connection: c
+      }));
+      
+      const connectionsHTML = connectionsList.length > 0 
+        ? connectionsList.map(conn => `
+          <span class="connection-tag">
+            ${conn.name}
+            <span class="connection-tag__remove" data-remove-connection='${JSON.stringify(conn.connection)}' title="Remove connection">×</span>
+          </span>
+        `).join('')
+        : '<span style="color: #9ca3af; font-size: 11px;">No connections</span>';
+      
+      card.innerHTML = `
+        <div class="keyword-card__header">
+          <h3 class="keyword-card__name">${k.name}</h3>
+          <button class="btn btn--secondary keyword-card__remove" data-idx="${idx}" title="Remove keyword">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="3,6 5,6 21,6"></polyline>
+              <path d="M19,6v14a2,2,0,0,1-2,2H7a2,2,0,0,1-2-2V6m3,0V4a2,2,0,0,1,2,2h4a2,2,0,0,1,2,2v2"></path>
+            </svg>
+          </button>
+        </div>
+        <div class="keyword-card__connections">
+          <div class="keyword-card__connections-title">Connections</div>
+          <div class="keyword-card__connections-list">
+            ${connectionsHTML}
           </div>
         </div>
-        <button data-idx="${idx}" class="btn btn--secondary" style="font-size:11px;">Remove</button>`;
-      list.appendChild(row);
+        <div class="keyword-card__add-connection">
+          <input type="text" class="input" placeholder="Connect to..." data-keyword="${k.name}" />
+          <button class="btn btn--secondary" data-connect="${k.name}">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+          </button>
+        </div>
+      `;
+      list.appendChild(card);
     });
 
-    // Handle remove buttons
+    // Handle remove keyword buttons
     list.querySelectorAll('button[data-idx]').forEach(btn=>{
       btn.addEventListener('click', ()=>{
         const i = Number(btn.getAttribute('data-idx'));
@@ -62,6 +95,19 @@
         const conns = loadConnections().filter(c => c.source !== keyword && c.target !== keyword);
         saveConnections(conns);
         arr.splice(i,1); save(arr); render();
+      });
+    });
+
+    // Handle remove connection buttons
+    list.querySelectorAll('[data-remove-connection]').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const connectionData = JSON.parse(btn.getAttribute('data-remove-connection'));
+        const conns = loadConnections().filter(c => 
+          !(c.source === connectionData.source && c.target === connectionData.target) &&
+          !(c.source === connectionData.target && c.target === connectionData.source)
+        );
+        saveConnections(conns);
+        render();
       });
     });
 
@@ -94,10 +140,32 @@
     });
   }
 
+  // Search functionality
+  function applySearch(term) {
+    const cards = document.querySelectorAll('.keyword-card');
+    const searchTerm = term.toLowerCase();
+    
+    cards.forEach(card => {
+      const keywordName = card.querySelector('.keyword-card__name').textContent.toLowerCase();
+      const connections = Array.from(card.querySelectorAll('.connection-tag')).map(tag => 
+        tag.textContent.replace('×', '').trim().toLowerCase()
+      ).join(' ');
+      
+      const matches = keywordName.includes(searchTerm) || connections.includes(searchTerm);
+      card.style.display = matches ? 'block' : 'none';
+    });
+  }
+
   function init(){
     const add = document.getElementById('mk-add');
     const clear = document.getElementById('mk-clear');
     const name = document.getElementById('mk-name');
+    const search = document.getElementById('mk-search');
+
+    // Search functionality
+    search && search.addEventListener('input', (e) => {
+      applySearch(e.target.value);
+    });
 
     // Add keyword on button click
     add && add.addEventListener('click', addKeyword);
@@ -117,7 +185,9 @@
     }
 
     clear && clear.addEventListener('click', ()=>{ 
-      save([]); saveConnections([]); render(); 
+      if (confirm('Are you sure you want to clear all keywords and connections?')) {
+        save([]); saveConnections([]); render(); 
+      }
     });
     
     render();
