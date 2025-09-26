@@ -67,9 +67,9 @@
       </div>
 
       <!-- Top Row - Spend and Conversions -->
-      <div class="grid kpis">
-        <!-- Monthly Spend Circle -->
-        <div class="card spend-circle-card">
+      <div class="grid kpis-redesigned">
+        <!-- Monthly Spend Circle (no card wrapper) -->
+        <div class="spend-circle-standalone">
           <div class="spend-circle">
             <div class="spend-amount">$20,000</div>
             <div class="spend-label">Spend this month</div>
@@ -82,25 +82,42 @@
           </div>
         </div>
 
-        <!-- Conversions Metrics -->
-        <div class="card conversions-card">
-          <div class="conversions-grid">
-            <div class="conversion-metric">
-              <div class="metric-title">Publisher Led Conversions</div>
-              <div class="metric-large-value">1000</div>
+        <!-- Conversions Metrics (redesigned) -->
+        <div class="card conversions-card-redesigned">
+          <div class="conversions-grid-clean">
+            <div class="conversion-metric-clean">
+              <div class="metric-title-clean">Publisher Led Conversions</div>
+              <div class="metric-value-clean">1000</div>
             </div>
-            <div class="conversion-metric">
-              <div class="metric-title">Cost Per Conversion</div>
-              <div class="metric-large-value">$1.25</div>
-              <div class="metric-subtitle">Cost Per Conversion</div>
-              <div class="metric-percentage">1.5%</div>
+            <div class="conversion-metric-clean">
+              <div class="metric-title-clean">Cost Per Conversion</div>
+              <div class="metric-value-clean">$1.25</div>
+              <div class="metric-subtitle-clean">1.5%</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Chatbot Metrics (moved from bottom) -->
+        <div class="card chatbot-card-moved">
+          <div class="chatbot-content-clean">
+            <div class="chatbot-metric">
+              <div class="metric-title-clean">Keyword Click in Chatbot</div>
+              <div class="metric-value-huge">200,000</div>
+            </div>
+            <div class="chatbot-metric">
+              <div class="metric-title-clean">Click Percentage</div>
+              <div class="metric-value-clean">20%</div>
+            </div>
+            <div class="chatbot-metric">
+              <div class="metric-title-clean">Avg Cost</div>
+              <div class="metric-value-clean">$0.02</div>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Charts Row -->
-      <div class="grid charts">
+      <!-- Charts Row (full width) -->
+      <div class="grid charts-fullwidth">
         <!-- Kusama Top Keywords Chart -->
         <div class="card chart-card">
           <div class="card__header">
@@ -108,23 +125,23 @@
           </div>
           <div class="chart-container">
             <canvas id="keywordsChart" aria-label="Kusama keywords performance over time"></canvas>
-            <div class="chart-legend">
-              <div class="legend-item">
-                <div class="legend-color" style="background-color: #ef4444;"></div>
-                <span>Art</span>
-              </div>
-              <div class="legend-item">
-                <div class="legend-color" style="background-color: #3b82f6;"></div>
-                <span>Museum</span>
-              </div>
-              <div class="legend-item">
-                <div class="legend-color" style="background-color: #10b981;"></div>
-                <span>Polka Dots</span>
-              </div>
-              <div class="legend-item">
-                <div class="legend-color" style="background-color: #8b5cf6;"></div>
-                <span>Infinity Mirror</span>
-              </div>
+          </div>
+          <div class="chart-legend-bottom">
+            <div class="legend-item">
+              <div class="legend-color" style="background-color: #ef4444;"></div>
+              <span>Art</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-color" style="background-color: #3b82f6;"></div>
+              <span>Museum</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-color" style="background-color: #10b981;"></div>
+              <span>Polka Dots</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-color" style="background-color: #8b5cf6;"></div>
+              <span>Infinity Mirror</span>
             </div>
           </div>
         </div>
@@ -140,14 +157,14 @@
         </div>
       </div>
 
-      <!-- Bottom Row - Publishers and Chatbot -->
-      <div class="grid lower">
+      <!-- Bottom Row - Publishers Full Width -->
+      <div class="grid publishers-fullwidth">
         <!-- Publishers Metrics -->
-        <div class="card publishers-card">
+        <div class="card publishers-card-fullwidth">
           <div class="card__header">
             <h2>Publishers Metrics</h2>
           </div>
-          <div class="publishers-content">
+          <div class="publishers-content-fullwidth">
             <div class="publishers-section highlighted">
               <div class="section-title">Top Articles</div>
               <div class="section-content">Vogue, WWD, InStyle</div>
@@ -171,24 +188,6 @@
             <div class="publishers-section highlighted">
               <div class="section-title">Top Publisher Led Conversions</div>
               <div class="section-content">Vogue, WWD, InStyle</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Chatbot Metrics -->
-        <div class="card chatbot-card">
-          <div class="chatbot-content">
-            <div class="chatbot-section">
-              <div class="section-title">Keyword Click in Chatbot</div>
-              <div class="metric-huge-value">200,000</div>
-            </div>
-            <div class="chatbot-section">
-              <div class="section-title">Keyword Click Percentage</div>
-              <div class="metric-percentage-large">20%</div>
-            </div>
-            <div class="chatbot-section">
-              <div class="section-title">Average Keyword Cost</div>
-              <div class="metric-large-value">$0.02</div>
             </div>
           </div>
         </div>
