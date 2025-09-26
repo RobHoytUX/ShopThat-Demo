@@ -56,6 +56,11 @@
         `).join('')
         : '<span style="color: #9ca3af; font-size: 11px;">No connections</span>';
       
+      // Get level info
+      const levelNames = {1: 'Top Level', 2: 'Connected', 3: 'Secondary', 4: 'Isolated'};
+      const levelColors = {1: '#6366F1', 2: '#5B21B6', 3: '#F59E0B', 4: '#10B981'};
+      const currentLevel = k.group || 1;
+      
       card.innerHTML = `
         <div class="keyword-card__header">
           <h3 class="keyword-card__name">${k.name}</h3>
@@ -65,6 +70,18 @@
               <path d="M19,6v14a2,2,0,0,1-2,2H7a2,2,0,0,1-2-2V6m3,0V4a2,2,0,0,1,2,2h4a2,2,0,0,1,2,2v2"></path>
             </svg>
           </button>
+        </div>
+        <div class="keyword-card__level">
+          <div class="keyword-card__level-title">Hierarchy Level</div>
+          <div class="keyword-card__level-control">
+            <select class="select select--compact" data-level-change="${k.name}">
+              <option value="1" ${currentLevel === 1 ? 'selected' : ''}>Top Level</option>
+              <option value="2" ${currentLevel === 2 ? 'selected' : ''}>Connected</option>
+              <option value="3" ${currentLevel === 3 ? 'selected' : ''}>Secondary</option>
+              <option value="4" ${currentLevel === 4 ? 'selected' : ''}>Isolated</option>
+            </select>
+            <span class="level-indicator" style="background-color: ${levelColors[currentLevel]};" title="${levelNames[currentLevel]}"></span>
+          </div>
         </div>
         <div class="keyword-card__connections">
           <div class="keyword-card__connections-title">Connections</div>
@@ -138,6 +155,22 @@
         render();
       });
     });
+
+    // Handle level change dropdowns
+    list.querySelectorAll('select[data-level-change]').forEach(select => {
+      select.addEventListener('change', () => {
+        const keywordName = select.getAttribute('data-level-change');
+        const newLevel = parseInt(select.value);
+        
+        const keywords = load();
+        const keyword = keywords.find(k => k.name === keywordName);
+        if (keyword) {
+          keyword.group = newLevel;
+          save(keywords);
+          render(); // Re-render to update the level indicator
+        }
+      });
+    });
   }
 
   // Search functionality
@@ -160,6 +193,7 @@
     const add = document.getElementById('mk-add');
     const clear = document.getElementById('mk-clear');
     const name = document.getElementById('mk-name');
+    const level = document.getElementById('mk-level');
     const search = document.getElementById('mk-search');
 
     // Search functionality
@@ -180,8 +214,13 @@
       if (!n) return;
       const arr = load();
       if (arr.find(x=>x.name.toLowerCase()===n.toLowerCase())) return;
-      arr.push({ id: n, name: n, value: 50, group: 1 }); // default values
-      save(arr); name.value=''; render();
+      
+      const selectedLevel = level ? parseInt(level.value) : 1;
+      arr.push({ id: n, name: n, value: 50, group: selectedLevel });
+      save(arr); 
+      name.value=''; 
+      if (level) level.value = '1'; // Reset to default
+      render();
     }
 
     clear && clear.addEventListener('click', ()=>{ 
