@@ -20,20 +20,13 @@
         <a href="/dashboard.html">Dashboard</a>
         <a class="is-active" href="/keywords.html">Keywords</a>
         <a href="/internals.html">Internals</a>
-        <a href="/publishers.html">Publishers</a>
-        <a href="/open-source.html">Open source</a>
-        <a href="/ecommerce.html">Ecommerce</a>
+        <a href="/publishers.html" aria-disabled="true">Publishers</a>
+        <a href="/open-source.html" aria-disabled="true">Open source</a>
+        <a href="/products.html">Products</a>
         <a href="/financials.html">Financials</a>
-        <a href="/settings.html">Settings</a>
+        <a href="/settings.html" aria-disabled="true">Settings</a>
         <a href="#" aria-disabled="true">Sign Out</a>
       </nav>
-      <div class="sidebar__cta">
-        <div class="cta">
-          <div class="cta__title">shopThat</div>
-          <div class="cta__desc">Get access to all features on shopThat</div>
-          <button class="cta__btn" type="button">Upgrade</button>
-        </div>
-      </div>
     </aside>
     <header class="appbar">
       <div class="appbar__inner">
@@ -63,21 +56,91 @@
     </header>
 
     <main id="main" class="keywords" role="main">
-      <section class="toolbar" aria-label="Filters">
+      <section class="toolbar" aria-label="Graph controls">
         <div class="toolbar__left">
-          <a class="btn btn--primary" href="/keywords-manage.html" aria-label="Manage Keywords">Manage Keywords</a>
+          <div class="control-group">
+            <label class="sr-only" for="kwFilter">Filter keywords</label>
+            <input id="kwFilter" class="input input--compact" type="search" placeholder="Search keywords" />
+            <button type="button" id="resetKw" class="btn btn--secondary">Reset</button>
+          </div>
+          <div class="control-group">
+            <button type="button" id="filterByLevel" class="btn btn--secondary">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polygon points="22,3 2,3 10,12.46 10,19 14,21 14,12.46"></polygon>
+              </svg>
+              Filter by Level
+            </button>
+            <button type="button" id="showAll" class="btn btn--secondary">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="3"></circle>
+                <path d="M12 1v6m0 6v6"></path>
+                <path d="m21 12-6-6-6 6 6 6 6-6Z"></path>
+              </svg>
+              Show All
+            </button>
+          </div>
         </div>
-        <div class="toolbar__right" role="group" aria-label="Graph controls">
-          <label class="sr-only" for="kwFilter">Filter keywords</label>
-          <input id="kwFilter" class="input" type="search" placeholder="Search keywords" />
-          <button type="button" id="resetKw" class="chip">Reset</button>
-          <button class="chip" id="zoomIn" aria-label="Zoom in">＋</button>
-          <button class="chip" id="zoomOut" aria-label="Zoom out">−</button>
-          <button class="chip" id="fit" aria-label="Fit to screen">Fit</button>
-          <button class="chip" id="openNeo4j" aria-label="Open Neo4j panel">Neo4j</button>
+        <div class="toolbar__right">
+          <div class="control-group" role="group" aria-label="Zoom controls">
+            <button class="btn btn--secondary" id="zoomOut" aria-label="Zoom out">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="11" cy="11" r="8"></circle>
+                <path d="M8 11h6"></path>
+              </svg>
+            </button>
+            <button class="btn btn--secondary" id="fit" aria-label="Fit to screen">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
+              </svg>
+            </button>
+            <button class="btn btn--secondary" id="zoomIn" aria-label="Zoom in">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="11" cy="11" r="8"></circle>
+                <path d="M11 8v6m-3-3h6"></path>
+              </svg>
+            </button>
+          </div>
+          <div class="control-group">
+            <button class="btn btn--secondary" id="openNeo4j" aria-label="Open Neo4j panel">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                <polyline points="3.27,6.96 12,12.01 20.73,6.96"></polyline>
+                <line x1="12" y1="22.08" x2="12" y2="12"></line>
+              </svg>
+              Neo4j
+            </button>
+            <a class="btn btn--primary" href="/keywords-manage.html" aria-label="Manage Keywords">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 20h9"></path>
+                <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+              </svg>
+              Manage Keywords
+            </a>
+          </div>
         </div>
       </section>
       <div class="keywords__canvas">
+        <div class="graph-legend">
+          <div class="legend-item">
+            <div class="legend-color" style="background-color: #6366F1;"></div>
+            <span>Top Level (Most Connected)</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-color" style="background-color: #5B21B6;"></div>
+            <span>Connected to Top Level</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-color" style="background-color: #F59E0B;"></div>
+            <span>Secondary Connected</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-color" style="background-color: #10B981;"></div>
+            <span>Isolated (No Connections)</span>
+          </div>
+          <div class="legend-item" id="modeIndicator" style="margin-left: 20px; font-weight: 600; color: #6366F1;">
+            <span>Mode: Default View</span>
+          </div>
+        </div>
         <svg id="bubbleGraph" role="img" aria-label="Keyword knowledge graph"></svg>
       </div>
       <aside class="drawer" id="detailsDrawer" aria-label="Keyword details" aria-hidden="true">
@@ -104,6 +167,45 @@
           </div>
         </div>
       </aside>
+      
+      <!-- Filter Modal -->
+      <div class="modal-overlay" id="filterModal" style="display: none;">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h2>Filter by Hierarchy Level</h2>
+            <button class="icon-btn" id="filterModalClose" aria-label="Close">✕</button>
+          </div>
+          <div class="modal-body" style="padding: 20px;">
+            <div class="filter-options">
+              <label class="filter-option">
+                <input type="checkbox" id="filterTopLevel" checked>
+                <span class="filter-option__indicator" style="background-color: #6366F1;"></span>
+                <span>Top Level (Most Connected)</span>
+              </label>
+              <label class="filter-option">
+                <input type="checkbox" id="filterConnected" checked>
+                <span class="filter-option__indicator" style="background-color: #5B21B6;"></span>
+                <span>Connected to Top Level</span>
+              </label>
+              <label class="filter-option">
+                <input type="checkbox" id="filterSecondary" checked>
+                <span class="filter-option__indicator" style="background-color: #F59E0B;"></span>
+                <span>Secondary Connected</span>
+              </label>
+              <label class="filter-option">
+                <input type="checkbox" id="filterIsolated" checked>
+                <span class="filter-option__indicator" style="background-color: #10B981;"></span>
+                <span>Isolated (No Connections)</span>
+              </label>
+            </div>
+            <div class="modal-actions" style="margin-top: 20px; display: flex; gap: 12px; justify-content: flex-end;">
+              <button class="btn btn--secondary" id="filterSelectAll">Select All</button>
+              <button class="btn btn--secondary" id="filterSelectNone">Select None</button>
+              <button class="btn btn--primary" id="applyFilter">Apply Filter</button>
+            </div>
+          </div>
+        </div>
+      </div>
     </main>
 
     <script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
