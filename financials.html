@@ -64,15 +64,18 @@
       <!-- Page Title with Campaign Switcher -->
       <div class="page-header">
         <div class="campaign-selector">
-          <select id="campaignSelect" class="campaign-dropdown">
-            <option value="kusama">Kusama Campaign</option>
-            <option value="murakami">Murakami Campaign</option>
-            <option value="core-values">Core Values Campaign</option>
-          </select>
-          <div class="campaign-arrow">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-              <polyline points="6,9 12,15 18,9"></polyline>
-            </svg>
+          <div class="campaign-dropdown-wrapper">
+            <div class="campaign-arrow">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="6,9 12,15 18,9"></polyline>
+              </svg>
+            </div>
+            <span class="campaign-text" id="campaignText">Kusama Campaign</span>
+            <div class="campaign-dropdown" id="campaignDropdown">
+              <div class="campaign-option" data-value="kusama">Kusama Campaign</div>
+              <div class="campaign-option" data-value="murakami">Murakami Campaign</div>
+              <div class="campaign-option" data-value="core-values">Core Values Campaign</div>
+            </div>
           </div>
         </div>
       </div>
@@ -261,24 +264,71 @@
 
       // Campaign switching functionality
       function initCampaignSwitcher() {
-        const campaignSelect = document.getElementById('campaignSelect');
-        const campaignArrow = document.querySelector('.campaign-arrow');
+        const dropdownWrapper = document.querySelector('.campaign-dropdown-wrapper');
+        const dropdown = document.getElementById('campaignDropdown');
+        const campaignText = document.getElementById('campaignText');
+        const campaignOptions = document.querySelectorAll('.campaign-option');
         
-        if (campaignSelect) {
-          campaignSelect.addEventListener('change', (e) => {
-            const selectedCampaign = e.target.value;
-            updateDashboardData(selectedCampaign);
+        let isOpen = false;
+        let selectedCampaign = 'kusama';
+        
+        // Update selected option styling
+        function updateSelectedOption() {
+          campaignOptions.forEach(option => {
+            option.classList.remove('selected');
+            if (option.dataset.value === selectedCampaign) {
+              option.classList.add('selected');
+            }
           });
         }
         
-        // Make arrow clickable to open dropdown
-        if (campaignArrow && campaignSelect) {
-          campaignArrow.addEventListener('click', () => {
-            campaignSelect.focus();
-            campaignSelect.click();
-          });
-          campaignArrow.style.pointerEvents = 'auto';
+        // Toggle dropdown
+        function toggleDropdown() {
+          isOpen = !isOpen;
+          dropdownWrapper.classList.toggle('open', isOpen);
+          dropdown.classList.toggle('open', isOpen);
         }
+        
+        // Close dropdown
+        function closeDropdown() {
+          if (isOpen) {
+            isOpen = false;
+            dropdownWrapper.classList.remove('open');
+            dropdown.classList.remove('open');
+          }
+        }
+        
+        // Handle campaign selection
+        function selectCampaign(value, text) {
+          selectedCampaign = value;
+          campaignText.textContent = text;
+          updateSelectedOption();
+          updateDashboardData(value);
+          closeDropdown();
+        }
+        
+        // Event listeners
+        if (dropdownWrapper) {
+          dropdownWrapper.addEventListener('click', (e) => {
+            e.stopPropagation();
+            toggleDropdown();
+          });
+        }
+        
+        campaignOptions.forEach(option => {
+          option.addEventListener('click', (e) => {
+            e.stopPropagation();
+            selectCampaign(option.dataset.value, option.textContent);
+          });
+        });
+        
+        // Close dropdown when clicking outside
+        document.addEventListener('click', () => {
+          closeDropdown();
+        });
+        
+        // Initialize
+        updateSelectedOption();
       }
 
       function updateDashboardData(campaign) {
