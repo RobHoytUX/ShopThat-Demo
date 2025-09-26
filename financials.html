@@ -66,8 +66,43 @@
         <h1>Kusama Campaign: Dashboard</h1>
       </div>
 
-      <!-- Top Row - Spend and Conversions -->
-      <div class="grid kpis-redesigned">
+      <!-- Top Row - Publishers Full Width -->
+      <div class="grid publishers-top">
+        <div class="card publishers-card-top">
+          <div class="card__header">
+            <h2>Publishers Metrics</h2>
+          </div>
+          <div class="publishers-content-top">
+            <div class="publishers-section highlighted">
+              <div class="section-title">Top Articles</div>
+              <div class="section-content">Vogue, WWD, InStyle</div>
+            </div>
+            <div class="publishers-section">
+              <div class="section-title">Highest Cost Articles</div>
+              <div class="section-content">$ 2</div>
+            </div>
+            <div class="publishers-section">
+              <div class="section-title">Highest Cost Keyword</div>
+              <div class="section-content">$ 0.50</div>
+            </div>
+            <div class="publishers-section">
+              <div class="section-title">Conversion For Internal Data</div>
+              <div class="section-content">2%</div>
+            </div>
+            <div class="publishers-section">
+              <div class="section-title">Conversion for External Data</div>
+              <div class="section-content">3%</div>
+            </div>
+            <div class="publishers-section highlighted">
+              <div class="section-title">Top Publisher Led Conversions</div>
+              <div class="section-content">Vogue, WWD, InStyle</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Second Row - Spend and Metrics -->
+      <div class="grid kpis-investor-style">
         <!-- Monthly Spend Circle (no card wrapper) -->
         <div class="spend-circle-standalone">
           <div class="spend-circle">
@@ -82,35 +117,41 @@
           </div>
         </div>
 
-        <!-- Conversions Metrics (redesigned) -->
-        <div class="card conversions-card-redesigned">
-          <div class="conversions-grid-clean">
-            <div class="conversion-metric-clean">
-              <div class="metric-title-clean">Publisher Led Conversions</div>
-              <div class="metric-value-clean">1000</div>
+        <!-- Conversions Metrics (RPV style) -->
+        <div class="rpv-section-1">
+          <div class="section-header">
+            <h3>Current Performance</h3>
+          </div>
+          <div class="rpv-metrics">
+            <div class="metric-item">
+              <div class="metric-label">Publisher Led Conversions</div>
+              <div class="metric-value rpv-green">1000</div>
             </div>
-            <div class="conversion-metric-clean">
-              <div class="metric-title-clean">Cost Per Conversion</div>
-              <div class="metric-value-clean">$1.25</div>
-              <div class="metric-subtitle-clean">1.5%</div>
+            <div class="metric-item">
+              <div class="metric-label">Cost Per Conversion</div>
+              <div class="metric-value">$1.25</div>
+              <div class="metric-unit">1.5% improvement</div>
             </div>
           </div>
         </div>
 
-        <!-- Chatbot Metrics (moved from bottom) -->
-        <div class="card chatbot-card-moved">
-          <div class="chatbot-content-clean">
-            <div class="chatbot-metric">
-              <div class="metric-title-clean">Keyword Click in Chatbot</div>
-              <div class="metric-value-huge">200,000</div>
+        <!-- Chatbot Metrics (RPV style) -->
+        <div class="rpv-section-3">
+          <div class="section-header">
+            <h3>Engagement Metrics</h3>
+          </div>
+          <div class="deals-list">
+            <div class="deal-item">
+              <div class="deal-companies">Keyword Click in Chatbot</div>
+              <div class="deal-amount">200,000</div>
             </div>
-            <div class="chatbot-metric">
-              <div class="metric-title-clean">Click Percentage</div>
-              <div class="metric-value-clean">20%</div>
+            <div class="deal-item">
+              <div class="deal-companies">Click Percentage</div>
+              <div class="deal-amount">20%</div>
             </div>
-            <div class="chatbot-metric">
-              <div class="metric-title-clean">Avg Cost</div>
-              <div class="metric-value-clean">$0.02</div>
+            <div class="deal-item">
+              <div class="deal-companies">Average Cost</div>
+              <div class="deal-amount">$0.02</div>
             </div>
           </div>
         </div>
@@ -157,41 +198,6 @@
         </div>
       </div>
 
-      <!-- Bottom Row - Publishers Full Width -->
-      <div class="grid publishers-fullwidth">
-        <!-- Publishers Metrics -->
-        <div class="card publishers-card-fullwidth">
-          <div class="card__header">
-            <h2>Publishers Metrics</h2>
-          </div>
-          <div class="publishers-content-fullwidth">
-            <div class="publishers-section highlighted">
-              <div class="section-title">Top Articles</div>
-              <div class="section-content">Vogue, WWD, InStyle</div>
-            </div>
-            <div class="publishers-section">
-              <div class="section-title">Highest Cost Articles</div>
-              <div class="section-content">$ 2</div>
-            </div>
-            <div class="publishers-section">
-              <div class="section-title">Highest Cost Keyword</div>
-              <div class="section-content">$ 0.50</div>
-            </div>
-            <div class="publishers-section">
-              <div class="section-title">Conversion For Internal Data</div>
-              <div class="section-content">2%</div>
-            </div>
-            <div class="publishers-section">
-              <div class="section-title">Conversion for External Data</div>
-              <div class="section-content">3%</div>
-            </div>
-            <div class="publishers-section highlighted">
-              <div class="section-title">Top Publisher Led Conversions</div>
-              <div class="section-content">Vogue, WWD, InStyle</div>
-            </div>
-          </div>
-        </div>
-      </div>
     </main>
     
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>

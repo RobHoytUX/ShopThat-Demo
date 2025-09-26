@@ -48,6 +48,8 @@
 }
 .kpis { grid-template-columns: 2fr 1fr; }
 .kpis-redesigned { grid-template-columns: auto 1fr 1fr; gap: 24px; align-items: start; }
+.publishers-top { grid-template-columns: 1fr; margin-bottom: 16px; }
+.kpis-investor-style { grid-template-columns: auto 1fr 1fr; gap: 24px; align-items: start; }
 .charts { grid-template-columns: 2fr 2fr 1.2fr; }
 .charts-fullwidth { grid-template-columns: 1fr 1fr; gap: 24px; }
 .lower { grid-template-columns: 1fr 1fr; }
@@ -1008,11 +1010,13 @@ svg#bubbleGraph { width: 100%; height: 75vh; display: block; padding-top: 68px; 
 @media (max-width: 1200px) {
   .kpis { grid-template-columns: repeat(2, minmax(0,1fr)); }
   .kpis-redesigned { grid-template-columns: 1fr; gap: 16px; }
+  .kpis-investor-style { grid-template-columns: 1fr; gap: 16px; }
   .charts { grid-template-columns: 1fr; }
   .charts-fullwidth { grid-template-columns: 1fr; }
   .lower { grid-template-columns: 1fr; }
   .publishers-fullwidth { grid-template-columns: 1fr; }
   .publishers-content-fullwidth { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
+  .publishers-content-top { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
   .toolbar { flex-wrap: wrap; gap:8px; }
   
   /* Stack RPV sections on smaller screens */
@@ -2268,6 +2272,13 @@ svg#bubbleGraph { width: 100%; height: 75vh; display: block; padding-top: 68px; 
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 16px;
+}
+
+/* Publishers Top Section */
+.publishers-content-top {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
 }
 
 /* Conversions Card */
