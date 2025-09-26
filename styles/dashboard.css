@@ -266,7 +266,7 @@
 .rpv-metrics { display: grid; gap: 16px; margin-bottom: 16px; }
 .metric-item { display: grid; gap: 4px; }
 .metric-label { font-size: 16px; color: #6b7280; font-weight: 500; }
-.metric-value { font-size: 32px; font-weight: 700; }
+.metric-value { font-size: 36px; font-weight: 700; color: #059669; }
 .metric-value.rpv-green { color: #059669; }
 .metric-value.ceiling-red { color: #dc2626; }
 .metric-unit { font-size: 12px; color: #9ca3af; }
@@ -326,7 +326,7 @@
   box-shadow: 0 4px 12px rgba(0,0,0,0.1); 
 }
 .deal-companies { font-size: 13px; font-weight: 600; color: #1e293b; }
-.deal-amount { font-size: 14px; font-weight: 700; color: #dc2626; }
+.deal-amount { font-size: 36px; font-weight: 700; color: #059669; }
 .deal-context { 
   text-align: center; 
   padding: 8px; 
@@ -1320,6 +1320,10 @@ svg#bubbleGraph { width: 100%; height: 75vh; display: block; padding-top: 68px; 
 .dark-mode .metric-label {
   color: #9ca3af;
 }
+.dark-mode .metric-value {
+  color: #10b981;
+  font-size: 36px;
+}
 .dark-mode .metric-value.rpv-green {
   color: #10b981;
 }
@@ -1378,7 +1382,8 @@ svg#bubbleGraph { width: 100%; height: 75vh; display: block; padding-top: 68px; 
   color: #e5e7eb;
 }
 .dark-mode .deal-amount {
-  color: #ef4444;
+  color: #10b981;
+  font-size: 36px;
 }
 .dark-mode .deal-context {
   background: rgba(16, 185, 129, 0.2);
