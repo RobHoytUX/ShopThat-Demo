@@ -69,7 +69,11 @@
             <option value="murakami">Murakami Campaign</option>
             <option value="core-values">Core Values Campaign</option>
           </select>
-          <span class="campaign-label">Dashboard</span>
+          <div class="campaign-arrow">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6,9 12,15 18,9"></polyline>
+            </svg>
+          </div>
         </div>
       </div>
 
@@ -258,12 +262,22 @@
       // Campaign switching functionality
       function initCampaignSwitcher() {
         const campaignSelect = document.getElementById('campaignSelect');
+        const campaignArrow = document.querySelector('.campaign-arrow');
         
         if (campaignSelect) {
           campaignSelect.addEventListener('change', (e) => {
             const selectedCampaign = e.target.value;
             updateDashboardData(selectedCampaign);
           });
+        }
+        
+        // Make arrow clickable to open dropdown
+        if (campaignArrow && campaignSelect) {
+          campaignArrow.addEventListener('click', () => {
+            campaignSelect.focus();
+            campaignSelect.click();
+          });
+          campaignArrow.style.pointerEvents = 'auto';
         }
       }
 
