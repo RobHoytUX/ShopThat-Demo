@@ -1,0 +1,4 @@
+beautifulsoup4
+faiss-cpu
+sentence-transformers
+yake

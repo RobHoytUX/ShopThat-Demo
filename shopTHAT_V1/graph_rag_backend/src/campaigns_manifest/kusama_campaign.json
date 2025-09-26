@@ -1,0 +1,223 @@
+{
+  "keywords": [
+    {"id": "kw_louis_vuitton", "name": "Louis Vuitton"},
+    {"id": "kw_history", "name": "History", "parent": "kw_louis_vuitton"},
+    {"id": "kw_products", "name": "Products", "parent": "kw_louis_vuitton"},
+    {"id": "kw_location", "name": "Location", "parent": "kw_louis_vuitton"},
+    {"id": "kw_travel_culture", "name": "Travel & Culture", "parent": "kw_louis_vuitton"},
+
+    {"id": "kw_new_york", "name": "New York", "parent": "kw_location"},
+    {"id": "kw_paris", "name": "Paris", "parent": "kw_location"},
+    {"id": "kw_london", "name": "London", "parent": "kw_location"},
+    {"id": "kw_st_tropez", "name": "St Tropez", "parent": "kw_location"},
+
+    {"id": "kw_ny_store", "name": "Store", "parent": "kw_new_york"},
+    {"id": "kw_ny_hotel", "name": "Hotel", "parent": "kw_new_york"},
+    {"id": "kw_ny_restaurant", "name": "Restaurant", "parent": "kw_new_york"},
+
+    {"id": "kw_paris_store", "name": "Store", "parent": "kw_paris"},
+    {"id": "kw_paris_hotel", "name": "Hotel", "parent": "kw_paris"},
+    {"id": "kw_paris_restaurant", "name": "Restaurant", "parent": "kw_paris"},
+
+    {"id": "kw_london_store", "name": "Store", "parent": "kw_london"},
+
+    {"id": "kw_stt_store", "name": "Store", "parent": "kw_st_tropez"},
+    {"id": "kw_stt_restaurant", "name": "Restaurant", "parent": "kw_st_tropez"},
+    {"id": "kw_fondation_lv", "name": "Fondation LV", "parent": "kw_travel_culture"},
+
+    {"id": "kw_kusama", "name": "Kusama"},
+    {"id": "kw_bio", "name": "Bio", "parent": "kw_kusama"},
+    {"id": "kw_art", "name": "Art", "parent": "kw_kusama"},
+    {"id": "kw_style", "name": "Style", "parent": "kw_art"},
+    {"id": "kw_exhibit", "name": "Exhibits", "parent": "kw_art"},
+    {"id": "kw_infinity_mirrors", "name": "Infinity Mirrors", "parent": "kw_style"},
+    {"id": "kw_polka_dots", "name": "Polka Dots", "parent": "kw_style"},
+    {"id": "kw_pumpkin", "name": "Pumpkin", "parent": "kw_style"},
+    {"id": "kw_victoria_miro", "name": "Victoria Miro", "parent": "kw_exhibit"},
+    {"id": "kw_david_zwirner", "name": "David Zwirner", "parent": "kw_exhibit"},
+    {"id": "kw_fondation_kusama", "name": "Fondation LV (Exhibit)", "parent": "kw_exhibit"},
+    {"id": "kw_kusama_museum", "name": "Kusama Museum", "parent": "kw_exhibit"},
+
+    {"id": "kw_talent", "name": "Talent"},
+    {"id": "kw_face", "name": "Face", "parent": "kw_talent"},
+    {"id": "kw_photographer", "name": "Photographer", "parent": "kw_talent"}
+  ],
+
+  "resources": [
+    {"id":"news_lv_tease","url":"https://luxferity.com/brand/louis-vuitton/news/louis-vuitton-teases-new-collaboration-world-acclaimed-japanese-artist-yayoi-kusama","title":"LV Teases Kusama Collab","type":"news","keywords":["kw_louis_vuitton","kw_kusama"]},
+    {"id":"news_galeriemagazine_auction","url":"https://galeriemagazine.com/louis-vuitton-yayoi-kusama-bag-auction/","title":"LV × Kusama Bag Auction","type":"news","keywords":["kw_louis_vuitton","kw_kusama"]},
+    {"id":"news_fondation_bio","url":"https://www.fondationlouisvuitton.fr/en/collection/artists/yayoi-kusama","title":"Kusama Artist Profile","type":"bio","keywords":["kw_bio"]},
+    {"id":"news_myartbroker_creating","url":"https://www.myartbroker.com/artist-yayoi-kusama/articles/creating-infinity-yayoi-kusama-louis-vuitton","title":"Creating Infinity Article","type":"news","keywords":["kw_kusama","kw_style"]},
+    {"id":"news_zoemagazine","url":"https://www.zoemagazine.net/190621-louis-vuitton-creating-infinity-with-yayoi-kusama/","title":"Creating Infinity Zoe","type":"news","keywords":["kw_kusama","kw_style"]},
+    {"id":"news_ft_kusama","url":"https://www.ft.com/content/198207f2-5f5e-441c-b033-7deee8a28feb","title":"FT Kusama Collab","type":"news","keywords":["kw_louis_vuitton","kw_kusama"]},
+    {"id":"news_lofficielph","url":"https://www.lofficielph.com/fashion/see-the-new-louis-vuitton-x-yayoi-kusama-collaboration-here","title":"L’Officiel PH Collab","type":"news","keywords":["kw_louis_vuitton","kw_kusama"]},
+    {"id":"news_highsnobiety","url":"https://www.highsnobiety.com/p/louis-vuitton-yayoi-kusama-2023/","title":"Highsnobiety Preview","type":"news","keywords":["kw_louis_vuitton","kw_kusama"]},
+    {"id":"news_harpersbazaar_2nd","url":"https://www.harpersbazaar.com/fashion/trends/a42411209/louis-vuitton-second-yayoi-kusama-collection/","title":"Second Kusama Collection","type":"news","keywords":["kw_louis_vuitton","kw_kusama"]},
+    {"id":"news_crfashionbook","url":"https://crfashionbook.com/louis-vuitton-and-yayoi-kusama-take-over-new-york-city/","title":"Kusama NYC Takeover","type":"news","keywords":["kw_louis_vuitton","kw_kusama","kw_new_york"]},
+    {"id":"news_timeout_tokyo","url":"https://www.timeout.com/tokyo/news/louis-vuitton-and-yayoi-kusama-pop-up-store-opens-in-harajuku-for-a-limited-time-010523","title":"Harajuku Pop-Up","type":"news","keywords":["kw_louis_vuitton","kw_kusama","kw_location"]},
+    {"id":"news_lofficiel_singapore","url":"https://www.lofficielsingapore.com/fashion/louis-vuitton-x-yayoi-kusama-collaboration-hoyeon-jung-nayeon-twice","title":"L’Officiel SG Collab","type":"news","keywords":["kw_louis_vuitton","kw_kusama"]},
+    {"id":"news_collateral","url":"https://www.collater.al/en/louis-vuitton-yayoi-kusama-collaboration-style/","title":"Collateral Style","type":"news","keywords":["kw_style"]},
+    {"id":"news_artbasel","url":"https://www.artbasel.com/stories/couture-canvas-visionary-collaborations-louis-vuitton-fusion-luxury-art-iconic-fashion","title":"Art Basel Collab","type":"news","keywords":["kw_louis_vuitton","kw_kusama"]},
+    {"id":"news_pariscapitale","url":"https://pariscapitale.com/en/luxury-paris/fashion/louis-vuitton-between-art-and-fashion/","title":"LV Between Art & Fashion","type":"news","keywords":["kw_louis_vuitton"]},
+    {"id":"news_lemonde","url":"https://www.lemonde.fr/en/culture/article/2023/01/15/louis-vuitton-celebrates-its-bountiful-art-alliances-from-miami-to-paris_6011638_30.html","title":"Le Monde Art Alliances","type":"news","keywords":["kw_louis_vuitton"]},
+    {"id":"news_fashiongonerogue","url":"https://www.fashiongonerogue.com/louis-vuitton-yayoi-kusama-campaign-gisele-bundchen/","title":"Gisele Kusama Campaign","type":"news","keywords":["kw_face","kw_kusama"]},
+    {"id":"news_people","url":"https://people.com/style/gisele-bundchen-stars-in-louis-vuitton-yayoi-kusama-campaign/","title":"People Gisele Campaign","type":"news","keywords":["kw_face"]},
+    {"id":"news_harpersbazaar_fr","url":"https://www.harpersbazaar.fr/mode/pois-pois-mon-pois-quand-louis-vuitton-invite-yayoi-kusama_80","title":"Harper’s Bazaar FR","type":"news","keywords":["kw_style"]},
+    {"id":"news_artnet","url":"https://news.artnet.com/art-world/yayoi-kusama-louis-vuitton-collaboration-2238734","title":"Artnet Collab","type":"news","keywords":["kw_kusama"]},
+
+    {
+      "id":"shop_neverfull_mm",
+      "url":"https://eu.louisvuitton.com/eng-e1/products/lv-x-tm-neverfull-mm-monogram-nvprod6350021v/M13263",
+      "title":"Neverfull MM",
+      "type":"shopping",
+      "keywords":[
+        "kw_products","kw_kusama",
+        "kw_art","kw_style","kw_exhibit",
+        "kw_infinity_mirrors","kw_polka_dots","kw_pumpkin",
+        "kw_victoria_miro","kw_david_zwirner","kw_fondation_kusama","kw_kusama_museum"
+      ]
+    },
+    {
+      "id":"shop_neverfull_inside",
+      "url":"https://eu.louisvuitton.com/eng-e1/products/lv-x-tm-neverfull-inside-out-bb-monogram-denim-nvprod6350027v/M14997",
+      "title":"Neverfull Inside-Out BB",
+      "type":"shopping",
+      "keywords":[
+        "kw_products","kw_kusama",
+        "kw_art","kw_style","kw_exhibit",
+        "kw_infinity_mirrors","kw_polka_dots","kw_pumpkin",
+        "kw_victoria_miro","kw_david_zwirner","kw_fondation_kusama","kw_kusama_museum"
+      ]
+    },
+    {"id":"shop_neverfull_gm","url":"https://eu.louisvuitton.com/eng-e1/products/neverfull-gm-mon-monogram-monogram-nvprod6140088v/P01923?personalizationId=M4PTZ4KQ","title":"Neverfull GM","type":"shopping","keywords":["kw_products"]},
+    {"id":"shop_speedy_soft","url":"https://eu.louisvuitton.com/eng-e1/products/lv-x-tm-speedy-soft-bandouliere-30-autres-toiles-monogram-nvprod6350025v/M14238","title":"Speedy Soft 30","type":"shopping","keywords":["kw_products"]},
+    {"id":"shop_speedy_25","url":"https://eu.louisvuitton.com/eng-e1/products/lv-x-tm-speedy-bandouliere-25-autres-toiles-monogram-nvprod5940158v/M13085","title":"Speedy 25","type":"shopping","keywords":["kw_products"]},
+
+    {"id":"bio_asianews","url":"https://asianews.network/the-polka-dot-fantasy-world-of-yayoi-kusama/","title":"Polka-Dot Fantasy World","type":"bio","keywords":["kw_bio"]},
+    {"id":"bio_wikipedia_kusama","url":"https://en.wikipedia.org/wiki/Yayoi_Kusama","title":"Kusama Wikipedia","type":"bio","keywords":["kw_bio"]},
+    {"id":"bio_tate","url":"https://www.tate.org.uk/art/artists/yayoi-kusama-8094/introduction-yayoi-kusama","title":"Tate Introduction","type":"bio","keywords":["kw_bio"]},
+    {"id":"bio_davidzwirner","url":"https://www.davidzwirner.com/artists/yayoi-kusama","title":"David Zwirner Kusama","type":"bio","keywords":["kw_bio","kw_david_zwirner"]},
+    {"id":"bio_thebroad","url":"https://www.thebroad.org/art/yayoi-kusama","title":"The Broad Kusama","type":"bio","keywords":["kw_bio"]},
+
+    {"id":"exhibit_infinity_room","url":"https://www.fondationlouisvuitton.fr/en/collection/artworks/infinity-mirror-room","title":"Infinity Mirror Room","type":"exhibit","keywords":["kw_infinity_mirrors","kw_exhibit","kw_fondation_kusama"]},
+    {"id":"exhibit_vision_painting","url":"https://www.fondationlouisvuitton.fr/en/events/the-collection-of-the-fondation-a-vision-for-painting","title":"A Vision for Painting","type":"exhibit","keywords":["kw_exhibit"]},
+    {"id":"exhibit_moma_paris","url":"https://www.fondationlouisvuitton.fr/fr/evenements/etre-moderne-le-moma-a-paris","title":"Être Moderne: MoMA Paris","type":"exhibit","keywords":["kw_exhibit"]},
+
+    {"id":"event_nybg","url":"https://www.nybg.org/event/kusama/","title":"Kusama at NYBG","type":"event","keywords":["kw_exhibit","kw_new_york"]},
+    {"id":"news_artnet_nybg","url":"https://news.artnet.com/art-world/yayoi-kusama-new-york-botanical-garden-3-1957871","title":"Artnet Kusama NYBG","type":"news","keywords":["kw_new_york","kw_exhibit"]},
+    {"id":"news_dzwirner_nybg","url":"https://www.davidzwirner.com/yayoi-kusama-new-york-botanical-garden","title":"DZW NYBG","type":"news","keywords":["kw_new_york","kw_exhibit","kw_david_zwirner"]},
+    {"id":"news_nytimes_nybg","url":"https://www.nytimes.com/2021/04/09/arts/design/yayoi-kusama-botanical-garden-review.html","title":"NYT Kusama Review","type":"news","keywords":["kw_new_york","kw_exhibit"]},
+
+    {"id":"news_lvmh_57th","url":"https://www.lvmh.com/en/news-lvmh/louis-vuitton-unveils-a-new-cornerstone-of-retail-culture-and-gastronomy-on-57th-street-in-new-york","title":"LVMH 57th St","type":"news","keywords":["kw_new_york","kw_travel_culture"]},
+    {"id":"news_lv_mag_57th","url":"https://us.louisvuitton.com/eng-us/magazine/articles/57th-street-nyc#the-chocolaterie","title":"LV Magazine 57th St","type":"news","keywords":["kw_new_york","kw_travel_culture"]},
+    {"id":"news_designboom_nyc","url":"https://www.designboom.com/design/louis-vuitton-takashi-murakami-collection-nyc-pop-up-tokyo-capsule-hotels-01-08-2025/","title":"Designboom NYC Pop-Up","type":"news","keywords":["kw_new_york"]},
+    {"id":"news_modernlux_nyc","url":"https://www.modernluxury.com/louis-vuitton-murakami-soho/","title":"Modern Luxury Soho","type":"news","keywords":["kw_new_york"]},
+    {"id":"news_airmail_crafting","url":"https://airmail.news/arts-intel/events/louis-vuitton-crafting-dreams","title":"Airmail Crafting Dreams","type":"news","keywords":["kw_new_york"]},
+    {"id":"news_archpaper_flagship","url":"https://www.archpaper.com/2024/10/louis-vuitton-new-york-flagship-luxury-luggage/","title":"Archpaper Flagship","type":"news","keywords":["kw_new_york"]},
+    {"id":"news_elle_nyc","url":"https://www.elle.com/fashion/shopping/a62895459/louis-vuitton-nyc-flagship-store-2024/","title":"Elle NYC Store","type":"news","keywords":["kw_new_york"]},
+    {"id":"news_lofficielusa_store","url":"https://www.lofficielusa.com/fashion/louis-vuitton-five-floor-store-nyc-opening","title":"L’Officiel USA Store","type":"news","keywords":["kw_new_york"]},
+    {"id":"news_hypebeast_crafting","url":"https://hypebeast.com/2024/4/louis-vuitton-crafting-dreams-new-york-exhibition-info","title":"Hypebeast Crafting Dreams","type":"news","keywords":["kw_new_york"]},
+    {"id":"news_thecut_store","url":"https://www.thecut.com/article/inside-the-new-louis-vuitton-store-on-fifth-avenue.html","title":"The Cut Store Tour","type":"news","keywords":["kw_new_york"]},
+    {"id":"news_bof_tempflag","url":"https://www.businessoffashion.com/news/luxury/louis-vuitton-opens-temporary-nyc-flagship-store/","title":"BoF Temporary Flagship","type":"news","keywords":["kw_new_york"]},
+    {"id":"news_nytimes_row","url":"https://www.nytimes.com/2024/11/14/style/louis-vuitton-store-billionaires-row-nyc.html","title":"NYT Billionaires Row","type":"news","keywords":["kw_new_york"]},
+    {"id":"news_towncountry_temp","url":"https://www.townandcountrymag.com/style/a62918908/louis-vuitton-temporary-flagship-2024/","title":"Town & Country Flagship","type":"news","keywords":["kw_new_york"]},
+
+    {"id":"news_bonjourparis_experience","url":"https://bonjourparis.com/galleries/louis-vuittons-lv-dream-a-new-experience-in-paris/","title":"Bonjour Paris Experience","type":"news","keywords":["kw_paris"]},
+    {"id":"news_lv_chocolat","url":"https://us.louisvuitton.com/eng-us/magazine/articles/le-chocolat-maxime-frederic","title":"LV Le Chocolat","type":"news","keywords":["kw_paris"]},
+    {"id":"news_sortiraparis_champs","url":"https://www.sortiraparis.com/en/what-to-do-in-paris/shopping-fashion/articles/299836-louis-vuitton-to-open-a-new-address-on-the-champs-elysees","title":"Champs-Élysées Opening","type":"news","keywords":["kw_paris"]},
+    {"id":"news_wwd_hotel_champs","url":"https://wwd.com/fashion-news/designer-luxury/louis-vuitton-hotel-champs-elysees-paris-boutique-1235784272/","title":"WWD Hotel Champs","type":"news","keywords":["kw_paris"]},
+
+    {
+      "id":"shop_paris_cityguide",
+      "url":"https://eu.louisvuitton.com/eng-e1/products/city-guide-paris-nvprod5910010v/R09441",
+      "title":"Paris City Guide",
+      "type":"shopping",
+      "keywords":["kw_paris","kw_paris_store","kw_paris_hotel","kw_paris_restaurant"]
+    },
+    {
+      "id":"shop_vivienne_parisienne",
+      "url":"https://eu.louisvuitton.com/eng-e1/products/vivienne-parisienne-nvprod5380052v/GI1045",
+      "title":"Vivienne Parisienne",
+      "type":"shopping",
+      "keywords":["kw_paris","kw_paris_store","kw_paris_hotel","kw_paris_restaurant"]
+    },
+    {
+      "id":"shop_citybook_paris",
+      "url":"https://eu.louisvuitton.com/eng-e1/products/city-book-paris-english-version-nvprod5590042v/R09400",
+      "title":"City Book Paris",
+      "type":"shopping",
+      "keywords":["kw_paris","kw_paris_store","kw_paris_hotel","kw_paris_restaurant"]
+    },
+    {
+      "id":"shop_mylv_paris_cap",
+      "url":"https://eu.louisvuitton.com/eng-e1/products/my-lv-paris-cap-s00-nvprod5440013v/M7591M",
+      "title":"My LV Paris Cap",
+      "type":"shopping",
+      "keywords":["kw_paris","kw_paris_store","kw_paris_hotel","kw_paris_restaurant"]
+    },
+
+    {"id":"news_luxurydaily_sttropez","url":"https://www.luxurydaily.com/louis-vuitton-revives-michelin-starred-restaurant-in-saint-tropez/#...","title":"St Tropez Restaurant Revival","type":"news","keywords":["kw_st_tropez"]},
+    {"id":"news_hauteliving_sttropez","url":"https://hauteliving.com/2025/05/louis-vuitton-reopens-michelin-starred-arnaud-donckele-maxime-frederic-restaurant-in-saint-tropez/771002/","title":"Hauteliving St Tropez","type":"news","keywords":["kw_st_tropez"]},
+    {"id":"news_elitetraveler_sttropez","url":"https://elitetraveler.com/finest-dining/restaurants-finest-dining/louis-vuitton-restaurant-saint-tropez","title":"Elitetraveler St Tropez","type":"news","keywords":["kw_st_tropez"]},
+    {"id":"news_hero_sttropez","url":"https://hero-magazine.com/article/277732/eat-at-louis-vuittons-michelin-starred-saint-tropez-restaurant","title":"Hero St Tropez Restaurant","type":"news","keywords":["kw_st_tropez"]},
+    {"id":"news_culturedmag_sttropez","url":"https://www.culturedmag.com/article/2024/07/10/saint-tropez-bangkok-louis-vuitton-chef","title":"Bangkok Chef in St Tropez","type":"news","keywords":["kw_st_tropez"]},
+    {"id":"news_fashionnetwork_sttropez","url":"https://be.fashionnetwork.com/en-be/news/Vuitton-reopens-summer-restaurant-in-saint-tropez,1730508.html","title":"Fashionnetwork St Tropez","type":"news","keywords":["kw_st_tropez"]},
+
+    {
+      "id":"shop_sttropez_pass",
+      "url":"https://eu.louisvuitton.com/eng-e1/products/saint-tropez-beach-pass-bag-charm-s00-nvprod6280001v/M02836",
+      "title":"St Tropez Beach Pass",
+      "type":"shopping",
+      "keywords":["kw_st_tropez","kw_stt_store","kw_stt_restaurant"]
+    },
+    {
+      "id":"shop_patch_bikini_bottoms",
+      "url":"https://eu.louisvuitton.com/eng-e1/products/travel-patch-bikini-bottoms-nvprod6340062v/1AHGL3",
+      "title":"Patch Bikini Bottoms",
+      "type":"shopping",
+      "keywords":["kw_st_tropez","kw_stt_store","kw_stt_restaurant"]
+    },
+    {
+      "id":"shop_patch_bikini_top",
+      "url":"https://eu.louisvuitton.com/eng-e1/products/travel-patch-bikini-top-nvprod6340060v/1AHGKV",
+      "title":"Patch Bikini Top",
+      "type":"shopping",
+      "keywords":["kw_st_tropez","kw_stt_store","kw_stt_restaurant"]
+    },
+    {
+      "id":"shop_denim_skirt",
+      "url":"https://eu.louisvuitton.com/eng-e1/products/monogram-fil-coupe-denim-skirt-nvprod6440130v/1AHHWE",
+      "title":"Denim Skirt",
+      "type":"shopping",
+      "keywords":["kw_st_tropez","kw_stt_store","kw_stt_restaurant"]
+    },
+    {
+      "id":"shop_scarf_tshirt",
+      "url":"https://eu.louisvuitton.com/eng-e1/products/scarf-print-t-shirt-nvprod6440107v/1AHJIL",
+      "title":"Scarf Print T-Shirt",
+      "type":"shopping",
+      "keywords":["kw_st_tropez","kw_stt_store","kw_stt_restaurant"]
+    },
+
+    {"id":"news_lv_history","url":"https://eu.louisvuitton.com/eng-e1/magazine/articles/a-legendary-history","title":"LV Legendary History","type":"news","keywords":["kw_history"]},
+    {"id":"news_lv_wikipedia","url":"https://en.wikipedia.org/wiki/Louis_Vuitton_(designer)","title":"Louis Vuitton Wikipedia","type":"news","keywords":["kw_history"]},
+    {"id":"news_madison_history","url":"https://madisonavenuecouture.com/blogs/news/the-history-of-louis-vuitton","title":"History of LV","type":"news","keywords":["kw_history"]},
+    {"id":"news_britannica_history","url":"https://www.britannica.com/biography/Louis-Vuitton-designer","title":"Britannica History","type":"news","keywords":["kw_history"]},
+    {"id":"news_wwd_history","url":"https://wwd.com/pop-culture/culture-news/feature/louis-vuitton-history-1235926365/","title":"WWD History","type":"news","keywords":["kw_history"]},
+
+    {"id":"shop_pyramide","url":"https://eu.louisvuitton.com/eng-e1/products/pyramide-bisten-50-80-monogram-macassar-nvprod5840034v/M13167","title":"Pyramide Bisten","type":"shopping","keywords":["kw_history"]},
+    {"id":"shop_courrier_lozine","url":"https://eu.louisvuitton.com/eng-e1/products/lv-x-tm-courrier-lozine-110-autres-toiles-monogram-nvprod5940052v/M13217","title":"Courrier Lozine","type":"shopping","keywords":["kw_history"]},
+    {"id":"shop_malle_courrier","url":"https://eu.louisvuitton.com/eng-e1/products/malle-courrier-110-cuivre-high-end-leathers-nvprod4620066v/M10312","title":"Malle Courrier","type":"shopping","keywords":["kw_history"]},
+
+    {"id":"exhibit_fondation_kusama_page","url":"https://www.fondationlouisvuitton.fr/en/events/yayoi-kusama","title":"Fondation LV Kusama Exhibit","type":"exhibit","keywords":["kw_fondation_kusama"]},
+    {"id":"exhibit_kusama_museum_page","url":"https://yayoikusamamuseum.jp/en/","title":"Yayoi Kusama Museum (Official)","type":"exhibit","keywords":["kw_kusama_museum"]},
+    {"id":"exhibit_victoria_miro_kusama","url":"https://www.victoria-miro.com/exhibitions/543/","title":"Victoria Miro – Kusama Show","type":"exhibit","keywords":["kw_victoria_miro"]},
+    {"id":"exhibit_david_zwirner_kusama","url":"https://www.davidzwirner.com/exhibitions/yayoi-kusama","title":"David Zwirner – Kusama Exhibit","type":"exhibit","keywords":["kw_david_zwirner"]}
+  ],
+
+  "talents": [
+    {"id":"talent_gisele","name":"Gisele Bündchen","role":"Face","url":"https://en.wikipedia.org/wiki/Gisele_B%C3%BCndchen","keywords":["kw_face","kw_talent"]},
+    {"id":"talent_karlie","name":"Karlie Kloss","role":"Face","url":"https://en.wikipedia.org/wiki/Karlie_Kloss","keywords":["kw_face","kw_talent"]},
+    {"id":"talent_steven","name":"Steven Meisel","role":"Photographer","url":"https://en.wikipedia.org/wiki/Steven_Meisel","keywords":["kw_photographer","kw_talent"]}
+  ]
+}

@@ -1,0 +1,27 @@
+.switch-root {
+  width: 36px;
+  height: 20px;
+  border-radius: 9999px;
+  background: #d1d5db;
+  display: flex;
+  align-items: center;
+  padding: 2px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.switch-root.checked {
+  background: #111827; /* dark color for ON state */
+}
+
+.switch-thumb {
+  height: 16px;
+  width: 16px;
+  background: white;
+  border-radius: 9999px;
+  transition: transform 0.3s ease;
+}
+
+.switch-root.checked .switch-thumb {
+  transform: translateX(16px);
+}
