@@ -117,7 +117,6 @@ console.log('Document ready state:', document.readyState);
 
   // Function to analyze node hierarchy and assign colors
   function analyzeNodeHierarchy(nodes, links) {
-    const connectionMap = new Map();
     const nodeConnections = new Map();
     
     // Initialize connection counts
@@ -138,47 +137,57 @@ console.log('Document ready state:', document.readyState);
       }
     });
     
-    // Find top-level nodes (most connected)
-    const connectionCounts = Array.from(nodeConnections.entries())
-      .map(([id, connections]) => ({ id, count: connections.size }))
-      .sort((a, b) => b.count - a.count);
-    
-    const maxConnections = connectionCounts[0]?.count || 0;
-    const topLevelThreshold = Math.max(1, Math.ceil(maxConnections * 0.7)); // Top 70% of max connections
-    
-    const topLevelNodes = new Set(
-      connectionCounts
-        .filter(item => item.count >= topLevelThreshold && item.count > 0)
-        .map(item => item.id)
-    );
-    
-    // Find nodes connected to top-level nodes
-    const connectedToTopLevel = new Set();
-    links.forEach(link => {
-      const sourceId = typeof link.source === 'object' ? link.source.id : link.source;
-      const targetId = typeof link.target === 'object' ? link.target.id : link.target;
-      
-      if (topLevelNodes.has(sourceId) && !topLevelNodes.has(targetId)) {
-        connectedToTopLevel.add(targetId);
-      }
-      if (topLevelNodes.has(targetId) && !topLevelNodes.has(sourceId)) {
-        connectedToTopLevel.add(sourceId);
-      }
-    });
-    
-    // Assign hierarchical colors
+    // Assign hierarchical colors based on manually set group/level or auto-detection
     return nodes.map(node => {
       const connectionCount = nodeConnections.get(node.id)?.size || 0;
       let hierarchyColor;
       
-      if (topLevelNodes.has(node.id)) {
-        hierarchyColor = colorScheme.topLevel;
-      } else if (connectedToTopLevel.has(node.id)) {
-        hierarchyColor = colorScheme.connected;
-      } else if (connectionCount === 0) {
-        hierarchyColor = colorScheme.isolated;
+      // Use manually assigned group/level if available
+      if (node.group) {
+        switch(node.group) {
+          case 1: hierarchyColor = colorScheme.topLevel; break;
+          case 2: hierarchyColor = colorScheme.connected; break;
+          case 3: hierarchyColor = colorScheme.secondary; break;
+          case 4: hierarchyColor = colorScheme.isolated; break;
+          default: hierarchyColor = colorScheme.topLevel; break;
+        }
       } else {
-        hierarchyColor = colorScheme.secondary;
+        // Fallback to automatic detection if no manual level set
+        const connectionCounts = Array.from(nodeConnections.entries())
+          .map(([id, connections]) => ({ id, count: connections.size }))
+          .sort((a, b) => b.count - a.count);
+        
+        const maxConnections = connectionCounts[0]?.count || 0;
+        const topLevelThreshold = Math.max(1, Math.ceil(maxConnections * 0.7));
+        
+        const topLevelNodes = new Set(
+          connectionCounts
+            .filter(item => item.count >= topLevelThreshold && item.count > 0)
+            .map(item => item.id)
+        );
+        
+        const connectedToTopLevel = new Set();
+        links.forEach(link => {
+          const sourceId = typeof link.source === 'object' ? link.source.id : link.source;
+          const targetId = typeof link.target === 'object' ? link.target.id : link.target;
+          
+          if (topLevelNodes.has(sourceId) && !topLevelNodes.has(targetId)) {
+            connectedToTopLevel.add(targetId);
+          }
+          if (topLevelNodes.has(targetId) && !topLevelNodes.has(sourceId)) {
+            connectedToTopLevel.add(sourceId);
+          }
+        });
+        
+        if (topLevelNodes.has(node.id)) {
+          hierarchyColor = colorScheme.topLevel;
+        } else if (connectedToTopLevel.has(node.id)) {
+          hierarchyColor = colorScheme.connected;
+        } else if (connectionCount === 0) {
+          hierarchyColor = colorScheme.isolated;
+        } else {
+          hierarchyColor = colorScheme.secondary;
+        }
       }
       
       return {
@@ -272,7 +281,18 @@ console.log('Document ready state:', document.readyState);
 
   // Function to determine node level
   function getNodeLevel(node, nodes, links) {
-    const connectionMap = new Map();
+    // Use manually assigned group/level if available
+    if (node.group) {
+      switch(node.group) {
+        case 1: return 'topLevel';
+        case 2: return 'connected';
+        case 3: return 'secondary';
+        case 4: return 'isolated';
+        default: return 'topLevel';
+      }
+    }
+    
+    // Fallback to automatic detection if no manual level set
     const nodeConnections = new Map();
     
     // Initialize connection counts
