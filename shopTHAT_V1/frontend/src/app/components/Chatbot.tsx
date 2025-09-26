@@ -156,7 +156,7 @@ useEffect(() => {
     }
   };
 
-  const campaignTitle = titleCase(slug.replace(/_/g, ' '));
+  const campaignTitle = slug ? titleCase(slug.replace(/_/g, ' ')) : 'Campaign';
   const shouldShowFullChatbot = hovered || isExpanded;
 
   return (

@@ -38,8 +38,11 @@ export default function AdminDashboardPage() {
       .then(res => res.json())
       .then((json: DashboardData) => {
         setData(json);
-        setLeftToggles(json.toggles.left);
-        setRightToggles(json.toggles.right);
+        setLeftToggles(json.toggles?.left || []);
+        setRightToggles(json.toggles?.right || []);
+      })
+      .catch(err => {
+        console.error('Failed to load admin data:', err);
       });
   }, []);
 
@@ -49,7 +52,7 @@ export default function AdminDashboardPage() {
     side === 'left' ? setLeftToggles(updated) : setRightToggles(updated);
   };
 
-  if (!data) return <div>Loading...</div>;
+  if (!data) return <div style={{ padding: '24px', textAlign: 'center' }}>Loading admin dashboard...</div>;
 
   if (activeTab === 'Internals') {
     return (
