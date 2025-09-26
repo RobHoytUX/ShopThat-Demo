@@ -124,12 +124,12 @@
           </div>
         </div>
 
-        <!-- Conversions Metrics (RPV style) -->
-        <div class="rpv-section-1">
+        <!-- Combined Performance & Engagement Metrics -->
+        <div class="rpv-section-combined">
           <div class="section-header">
-            <h3>Current Performance</h3>
+            <h3>Performance & Engagement Metrics</h3>
           </div>
-          <div class="rpv-metrics">
+          <div class="combined-metrics">
             <div class="metric-item">
               <div class="metric-label">Publisher Led Conversions</div>
               <div class="metric-value rpv-green">1000</div>
@@ -139,26 +139,17 @@
               <div class="metric-value">$1.25</div>
               <div class="metric-unit">1.5% improvement</div>
             </div>
-          </div>
-        </div>
-
-        <!-- Chatbot Metrics (RPV style) -->
-        <div class="rpv-section-3">
-          <div class="section-header">
-            <h3>Engagement Metrics</h3>
-          </div>
-          <div class="deals-list">
-            <div class="deal-item">
-              <div class="deal-companies">Keyword Click in Chatbot</div>
-              <div class="deal-amount">200,000</div>
+            <div class="metric-item">
+              <div class="metric-label">Keyword Click in Chatbot</div>
+              <div class="metric-value">200,000</div>
             </div>
-            <div class="deal-item">
-              <div class="deal-companies">Click Percentage</div>
-              <div class="deal-amount">20%</div>
+            <div class="metric-item">
+              <div class="metric-label">Click Percentage</div>
+              <div class="metric-value">20%</div>
             </div>
-            <div class="deal-item">
-              <div class="deal-companies">Average Cost</div>
-              <div class="deal-amount">$0.02</div>
+            <div class="metric-item">
+              <div class="metric-label">Average Cost</div>
+              <div class="metric-value">$0.02</div>
             </div>
           </div>
         </div>
@@ -284,22 +275,24 @@
         const spendAmount = document.querySelector('.spend-amount');
         if (spendAmount) spendAmount.textContent = data.spend;
 
-        // Update performance metrics
-        const conversionsValue = document.querySelector('.rpv-metrics .metric-value.rpv-green');
-        if (conversionsValue) conversionsValue.textContent = data.conversions;
-
-        const costValue = document.querySelector('.rpv-metrics .metric-value:not(.rpv-green)');
-        if (costValue) costValue.textContent = data.costPerConversion;
-
-        const improvementUnit = document.querySelector('.metric-unit');
-        if (improvementUnit) improvementUnit.textContent = data.improvement + ' improvement';
-
-        // Update engagement metrics
-        const dealItems = document.querySelectorAll('.deals-list .deal-item');
-        if (dealItems.length >= 3) {
-          dealItems[0].querySelector('.deal-amount').textContent = data.chatbotClicks;
-          dealItems[1].querySelector('.deal-amount').textContent = data.clickPercentage;
-          dealItems[2].querySelector('.deal-amount').textContent = data.avgCost;
+        // Update combined performance & engagement metrics
+        const combinedMetrics = document.querySelectorAll('.combined-metrics .metric-item');
+        if (combinedMetrics.length >= 5) {
+          // Publisher Led Conversions
+          combinedMetrics[0].querySelector('.metric-value').textContent = data.conversions;
+          
+          // Cost Per Conversion
+          combinedMetrics[1].querySelector('.metric-value').textContent = data.costPerConversion;
+          combinedMetrics[1].querySelector('.metric-unit').textContent = data.improvement + ' improvement';
+          
+          // Keyword Click in Chatbot
+          combinedMetrics[2].querySelector('.metric-value').textContent = data.chatbotClicks;
+          
+          // Click Percentage
+          combinedMetrics[3].querySelector('.metric-value').textContent = data.clickPercentage;
+          
+          // Average Cost
+          combinedMetrics[4].querySelector('.metric-value').textContent = data.avgCost;
         }
 
         // Update publishers data
