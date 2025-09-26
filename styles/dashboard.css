@@ -49,7 +49,13 @@
 .kpis { grid-template-columns: 2fr 1fr; }
 .kpis-redesigned { grid-template-columns: auto 1fr 1fr; gap: 24px; align-items: start; }
 .publishers-top { grid-template-columns: 1fr; margin-bottom: 16px; }
-.kpis-investor-style { grid-template-columns: auto 1fr 1fr; gap: 24px; align-items: start; }
+.kpis-investor-style { grid-template-columns: auto 1fr 1fr; gap: 24px; align-items: stretch; }
+.kpis-investor-style .rpv-section-1,
+.kpis-investor-style .rpv-section-3 {
+  min-height: 200px;
+  display: flex;
+  flex-direction: column;
+}
 .charts { grid-template-columns: 2fr 2fr 1.2fr; }
 .charts-fullwidth { grid-template-columns: 1fr 1fr; gap: 24px; }
 .lower { grid-template-columns: 1fr 1fr; }
@@ -2142,8 +2148,8 @@ svg#bubbleGraph { width: 100%; height: 75vh; display: block; padding-top: 68px; 
 }
 
 .spend-circle {
-  width: 200px;
-  height: 200px;
+  width: 240px;
+  height: 240px;
   border-radius: 50%;
   background: linear-gradient(135deg, #6366f1, #8b5cf6);
   display: flex;
@@ -2164,7 +2170,7 @@ svg#bubbleGraph { width: 100%; height: 75vh; display: block; padding-top: 68px; 
 }
 
 .spend-amount {
-  font-size: 32px;
+  font-size: 36px;
   font-weight: 700;
   color: white;
   margin-bottom: 8px;
@@ -2356,9 +2362,9 @@ svg#bubbleGraph { width: 100%; height: 75vh; display: block; padding-top: 68px; 
 }
 
 .publishers-section .section-content {
-  font-size: 14px;
+  font-size: 18px;
   color: #111827;
-  font-weight: 600;
+  font-weight: 700;
 }
 
 /* Chatbot Card */
