@@ -34,17 +34,26 @@ export default function Chatbot() {
   const [isVisible, setIsVisible] = useState(true);
   const [hovered, setHovered] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
-  // No scroll idle timeout needed in V1 variant
+  const scrollIdleTimeoutRef = useRef<number | null>(null);
 
 useEffect(() => {
   const handleScroll = () => {
-    // Keep toggle visible during scroll; only collapse hover state
-    setIsVisible(true);
+    setIsVisible(false);
     setHovered(false);
+    if (scrollIdleTimeoutRef.current !== null) {
+      window.clearTimeout(scrollIdleTimeoutRef.current);
+    }
+    scrollIdleTimeoutRef.current = window.setTimeout(() => {
+      setIsVisible(true);
+    }, 250);
   };
+
   window.addEventListener('scroll', handleScroll, { passive: true });
   return () => {
     window.removeEventListener('scroll', handleScroll);
+    if (scrollIdleTimeoutRef.current !== null) {
+      window.clearTimeout(scrollIdleTimeoutRef.current);
+    }
   };
 }, []);
 

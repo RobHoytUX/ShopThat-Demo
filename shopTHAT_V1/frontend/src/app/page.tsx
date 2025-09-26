@@ -9,7 +9,8 @@ import CampaignCard from '@/components/CampaignCard';
 
 // Helper: "core_value_campaign" → "Core Value Campaign"
 function slugToTitle(slug: string) {
-  return slug
+  const value = String(slug ?? '');
+  return value
     .split(/[_-]/g)
     .map(w => w.charAt(0).toUpperCase() + w.slice(1))
     .join(' ');
@@ -29,9 +30,15 @@ export default function HomePage() {
       })
       .then((data: any[]) => {
         const keys = Array.isArray(data)
-          ? data.map((item: any) => (typeof item === 'string' ? item : item?.key)).filter(Boolean)
+          ? data
+              .map((item: any) =>
+                typeof item === 'string'
+                  ? item
+                  : item?.key ?? item?.slug ?? item?.id ?? null
+              )
+              .filter((v: any): v is string => typeof v === 'string' && v.length > 0)
           : [];
-        setSlugs(keys as string[]);
+        setSlugs(keys);
         setError(null);
       })
       .catch(err => {
