@@ -61,9 +61,16 @@
     </header>
 
     <main id="main" class="dashboard" role="main">
-      <!-- Page Title -->
+      <!-- Page Title with Campaign Switcher -->
       <div class="page-header">
-        <h1>Kusama Campaign: Dashboard</h1>
+        <div class="campaign-selector">
+          <select id="campaignSelect" class="campaign-dropdown">
+            <option value="kusama">Kusama Campaign</option>
+            <option value="murakami">Murakami Campaign</option>
+            <option value="core-values">Core Values Campaign</option>
+          </select>
+          <span class="campaign-label">Dashboard</span>
+        </div>
       </div>
 
       <!-- Top Row - Publishers Full Width -->
@@ -202,6 +209,120 @@
     
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
+      // Campaign data
+      const campaignData = {
+        kusama: {
+          spend: '$20,000',
+          conversions: '1000',
+          costPerConversion: '$1.25',
+          improvement: '1.5%',
+          chatbotClicks: '200,000',
+          clickPercentage: '20%',
+          avgCost: '$0.02',
+          publishers: {
+            topArticles: 'Vogue, WWD, InStyle',
+            highestCost: '$ 2',
+            highestKeyword: '$ 0.50',
+            internalConversion: '2%',
+            externalConversion: '3%',
+            topConversions: 'Vogue, WWD, InStyle'
+          }
+        },
+        murakami: {
+          spend: '$15,000',
+          conversions: '850',
+          costPerConversion: '$1.76',
+          improvement: '2.1%',
+          chatbotClicks: '175,000',
+          clickPercentage: '18%',
+          avgCost: '$0.03',
+          publishers: {
+            topArticles: 'Elle, Harper\'s Bazaar, Vogue',
+            highestCost: '$ 1.8',
+            highestKeyword: '$ 0.45',
+            internalConversion: '1.8%',
+            externalConversion: '2.7%',
+            topConversions: 'Elle, Harper\'s Bazaar'
+          }
+        },
+        'core-values': {
+          spend: '$12,500',
+          conversions: '720',
+          costPerConversion: '$1.74',
+          improvement: '1.8%',
+          chatbotClicks: '150,000',
+          clickPercentage: '15%',
+          avgCost: '$0.025',
+          publishers: {
+            topArticles: 'Forbes, Business Week, WSJ',
+            highestCost: '$ 1.5',
+            highestKeyword: '$ 0.40',
+            internalConversion: '1.5%',
+            externalConversion: '2.2%',
+            topConversions: 'Forbes, Business Week'
+          }
+        }
+      };
+
+      // Campaign switching functionality
+      function initCampaignSwitcher() {
+        const campaignSelect = document.getElementById('campaignSelect');
+        
+        if (campaignSelect) {
+          campaignSelect.addEventListener('change', (e) => {
+            const selectedCampaign = e.target.value;
+            updateDashboardData(selectedCampaign);
+          });
+        }
+      }
+
+      function updateDashboardData(campaign) {
+        const data = campaignData[campaign];
+        if (!data) return;
+
+        // Update spend circle
+        const spendAmount = document.querySelector('.spend-amount');
+        if (spendAmount) spendAmount.textContent = data.spend;
+
+        // Update performance metrics
+        const conversionsValue = document.querySelector('.rpv-metrics .metric-value.rpv-green');
+        if (conversionsValue) conversionsValue.textContent = data.conversions;
+
+        const costValue = document.querySelector('.rpv-metrics .metric-value:not(.rpv-green)');
+        if (costValue) costValue.textContent = data.costPerConversion;
+
+        const improvementUnit = document.querySelector('.metric-unit');
+        if (improvementUnit) improvementUnit.textContent = data.improvement + ' improvement';
+
+        // Update engagement metrics
+        const dealItems = document.querySelectorAll('.deals-list .deal-item');
+        if (dealItems.length >= 3) {
+          dealItems[0].querySelector('.deal-amount').textContent = data.chatbotClicks;
+          dealItems[1].querySelector('.deal-amount').textContent = data.clickPercentage;
+          dealItems[2].querySelector('.deal-amount').textContent = data.avgCost;
+        }
+
+        // Update publishers data
+        const publisherSections = document.querySelectorAll('.publishers-section');
+        if (publisherSections.length >= 6) {
+          publisherSections[0].querySelector('.section-content').textContent = data.publishers.topArticles;
+          publisherSections[1].querySelector('.section-content').textContent = data.publishers.highestCost;
+          publisherSections[2].querySelector('.section-content').textContent = data.publishers.highestKeyword;
+          publisherSections[3].querySelector('.section-content').textContent = data.publishers.internalConversion;
+          publisherSections[4].querySelector('.section-content').textContent = data.publishers.externalConversion;
+          publisherSections[5].querySelector('.section-content').textContent = data.publishers.topConversions;
+        }
+
+        // Update charts if needed (placeholder for future enhancement)
+        updateCharts(campaign);
+      }
+
+      function updateCharts(campaign) {
+        // Placeholder for updating chart data based on selected campaign
+        // This could be enhanced to show different data sets for each campaign
+        console.log('Updating charts for campaign:', campaign);
+      }
+
       // Dark mode functionality
       function initDarkMode() {
         const darkModeToggle = document.getElementById('darkModeToggle');
@@ -342,10 +463,12 @@
       if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', () => {
           initDarkMode();
+          initCampaignSwitcher();
           initCharts();
         });
       } else {
         initDarkMode();
+        initCampaignSwitcher();
         initCharts();
       }
     </script>
