@@ -237,7 +237,7 @@
 
 // Chatbox widget
 (function(){
-  const API_BASE = 'http://localhost:8001';
+  const API_BASE = 'http://3.15.39.180';
   const DEFAULT_SLUG = 'kusama_campaign';
 
   const styles = `
@@ -283,6 +283,17 @@
   .chatbot-msg{max-width:80%;padding:10px 12px;border-radius:16px;line-height:1.35;font-size:14px;word-wrap:break-word;white-space:pre-wrap;position:relative;transition:opacity 200ms ease}
   .chatbot-msg-user{align-self:flex-end;background:rgba(0,0,0,0.78);color:#fff;border-radius:30px 30px 6px 30px;margin-right:8px}
   .chatbot-msg-bot{align-self:flex-start;background:#f2f2f2;color:#111;border-radius:30px 30px 30px 6px}
+  .chatbot-images{background:transparent;padding:8px;border-radius:12px;display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-start}
+  .chatbot-images img{border-radius:8px;transition:transform 0.2s ease}
+  .chatbot-images img:hover{transform:scale(1.05)}
+  .chatbot-thinking{align-self:flex-start;background:#f2f2f2;color:#111;border-radius:30px 30px 30px 6px;padding:10px 16px;display:flex;align-items:center;gap:8px}
+  .chatbot-thinking-text{font-size:14px;color:#666}
+  .chatbot-dots{display:flex;gap:2px}
+  .chatbot-dots span{width:4px;height:4px;background:#666;border-radius:50%;animation:bounce 1.4s infinite ease-in-out both}
+  .chatbot-dots span:nth-child(1){animation-delay:-0.32s}
+  .chatbot-dots span:nth-child(2){animation-delay:-0.16s}
+  .chatbot-dots span:nth-child(3){animation-delay:0s}
+  @keyframes bounce{0%,80%,100%{transform:scale(0)}40%{transform:scale(1)}}
   .chatbot-msg.is-fading{opacity:0}
   .chatbot-input{display:flex;gap:8px;width:100%;padding-top:8px}
   .chatbot-input input{flex:1;min-width:0;padding:12px 8px 12px 20px;border-radius:50px;border:1px solid #ccc}
@@ -291,6 +302,8 @@
   .chatbot-input input:focus{outline:none;box-shadow:none;border-color:#ccc}
   .chatbot-input button{width:40px;height:40px;border-radius:50%;border:0;background:#000;color:#fff;cursor:pointer;display:grid;place-items:center;padding:0}
   .chatbot-input button[disabled]{background:rgba(0,0,0,0.15);color:#666;cursor:not-allowed;border:1px solid rgba(0,0,0,0.1)}
+  .no-keywords-message{text-align:center;padding:16px 12px;color:#666;font-size:13px;font-style:italic;background:rgba(255,255,255,0.5);border-radius:12px;margin:8px 0}
+  .error-message{text-align:center;padding:16px 12px;color:#d32f2f;font-size:13px;background:rgba(255,235,238,0.8);border-radius:12px;margin:8px 0;border:1px solid rgba(211,47,47,0.3)}
   @media (max-width:600px){.chatbot-box{width:90vw}}
   `;
 
@@ -419,7 +432,7 @@
 
     function preferredCompactWidth(){
       const w1 = measureChipRowWidth(options);
-      const w2 = !detailsWrap.hasAttribute('hidden') ? measureChipRowWidth(detailsWrap) : measureChipRowWidth(presets);
+      const w2 = measureChipRowWidth(presets);
       const needed = Math.max(COMPACT_W, w1, w2);
       return Math.min(FULL_W, needed);
     }
@@ -468,67 +481,23 @@
       setInputsEnabled(true);
       input.value = label;
       input.focus();
-    }
-
-    // Add three static chips labeled "keyword"
-    const baseChips = ['keyword','keyword','keyword'];
-    const chipEls = baseChips.map((lbl, i) => {
-      const b = createEl('button', { type: 'button' }, [document.createTextNode(lbl)]);
-      if (i === 1) {
-        const badge = createEl('span', { class: 'chip-badge' }, [document.createTextNode('5')]);
-        b.appendChild(badge);
+      
+      // Track keyword usage in ShopThatData system
+      if (window.ShopThatData) {
+        window.ShopThatData.trackKeywordUsage(label, 'chatbot-selection');
+        
+        // Add message to current chat session
+        if (currentSessionId) {
+          window.ShopThatData.addChatMessage(currentSessionId, label, 'user', [label]);
+        }
       }
-      b.addEventListener('click', ()=> onKeywordSelect(lbl));
-      presets.appendChild(b);
-      return b;
-    });
-
-    // Secondary 5 keywords
-    const detailLabels = ['detail one','detail two','detail three','detail four','detail five'];
-    const detailsWrap = createEl('div', { class: 'chatbot-presets chatbot-presets--details' });
-    const detailEls = detailLabels.map(lbl => {
-      const b = createEl('button', { type: 'button' }, [document.createTextNode(titleCase(lbl))]);
-      b.addEventListener('click', ()=> onKeywordSelect(titleCase(lbl)));
-      detailsWrap.appendChild(b);
-      return b;
-    });
-    detailsWrap.setAttribute('hidden','');
-    header.appendChild(detailsWrap);
-
-    function showDetails(){
-      backBtn.removeAttribute('hidden');
-      // Fade out base chips in place
-      chipEls.forEach(el => { el.classList.add('is-fade-out'); });
-      // After fade, swap content: hide base container, show details taking its place
-      setTimeout(()=>{
-        presets.setAttribute('hidden','');
-        detailsWrap.removeAttribute('hidden');
-        // Initial state for fade-in
-        detailEls.forEach(el => { el.style.opacity = '0'; el.style.transform = 'translateY(4px)'; });
-        requestAnimationFrame(()=>{
-          detailEls.forEach(el => { el.style.transition = 'opacity 150ms ease, transform 150ms ease'; el.style.opacity = '1'; el.style.transform = 'translateY(0)'; });
-        });
-      }, 160);
     }
 
-    function showBase(){
-      backBtn.setAttribute('hidden','');
-      // Fade out details quickly, then restore base chips in same spot
-      detailEls.forEach(el => { el.style.opacity = '0'; el.style.transform = 'translateY(4px)'; });
-      setTimeout(()=>{
-        detailsWrap.setAttribute('hidden','');
-        presets.removeAttribute('hidden');
-        chipEls.forEach(el => { el.classList.remove('is-fade-out'); });
-      }, 150);
-    }
+    // Remove hardcoded mock keywords - now using ShopThatData system above
 
-    // Middle chip opens details
-    if (chipEls[1]) chipEls[1].addEventListener('click', (e)=>{
-      // Only transition to details; leave input enabling to user if desired
-      showDetails();
-    });
-
-    backBtn.addEventListener('click', showBase);
+    // Details functionality removed since we're using ShopThatData keywords directly
+    // The back button is no longer needed since there are no detail views
+    backBtn.setAttribute('hidden','');
 
     box.appendChild(refreshBtn); box.appendChild(backBtn); box.appendChild(header); box.appendChild(messages); box.appendChild(inputW);
     wrapper.appendChild(toggle); wrapper.appendChild(box);
@@ -537,34 +506,56 @@
     let slug = DEFAULT_SLUG;
     let enabled = [];
     let disabled = [];
+    let currentSessionId = null;
+    
+    // Initialize chat session tracking
+    if (window.ShopThatData) {
+      currentSessionId = window.ShopThatData.startChatSession();
+    }
 
-    try {
-      const campaigns = await fetchJSON(`${API_BASE}/api/campaigns`);
-      const keys = Array.isArray(campaigns)
-        ? campaigns.map(it => typeof it === 'string' ? it : (it?.key || it?.slug || it?.id)).filter(Boolean)
-        : [];
-      if (keys.length) slug = String(keys[0]);
+    // Use ShopThatData system for keywords instead of API
+    function loadKeywordsFromSharedData() {
+      if (window.ShopThatData) {
+        const keywords = window.ShopThatData.getKeywords();
+        enabled = keywords.map(k => k.name);
+        disabled = [];
 
-      const config = await fetchJSON(`${API_BASE}/api/campaigns/${slug}`);
-      const kwResp = await Promise.all(keys.map(k => fetchJSON(`${API_BASE}/api/campaigns/${k}/keywords`).catch(()=>[])));
-      const allMap = {};
-      kwResp.forEach((kw, i) => { allMap[keys[i]] = Array.isArray(kw) ? kw : (Array.isArray(kw?.keywords) ? kw.keywords : (Array.isArray(kw?.data) ? kw.data : [])); });
+        title.textContent = 'Hello!';
+        options.replaceChildren();
+        
+        if (enabled.length > 0) {
+          enabled.forEach(kw => {
+            const label = titleCase(kw);
+            const b = createEl('button', { type: 'button' }, [document.createTextNode(label)]);
+            b.addEventListener('click', ()=> onKeywordSelect(label));
+            options.appendChild(b);
+          });
+        } else {
+          // Show message when no keywords available
+          const noKeywordsMsg = createEl('div', { class: 'no-keywords-message' }, [
+            document.createTextNode('No keywords available. Add keywords in the Keywords Manager.')
+          ]);
+          options.appendChild(noKeywordsMsg);
+        }
+      } else {
+        title.textContent = 'Hello!';
+        options.replaceChildren();
+        const errorMsg = createEl('div', { class: 'error-message' }, [
+          document.createTextNode('Keywords system not available.')
+        ]);
+        options.appendChild(errorMsg);
+      }
+    }
 
-      enabled = Array.isArray(config?.keywords) ? config.keywords.filter(t=>t.enabled).map(t=>t.name) : [];
-      const others = [];
-      Object.entries(allMap).forEach(([k, arr]) => { if (k !== slug) others.push(...(Array.isArray(arr)?arr:[])); });
-      disabled = others;
+    // Load keywords from shared data
+    loadKeywordsFromSharedData();
 
-      title.textContent = 'Hello!';
-      options.replaceChildren();
-      enabled.forEach(kw => {
-        const label = titleCase(kw);
-        const b = createEl('button', { type: 'button' }, [document.createTextNode(label)]);
-        b.addEventListener('click', ()=> onKeywordSelect(label));
-        options.appendChild(b);
+    // Listen for keyword changes from other pages
+    if (window.ShopThatData) {
+      window.ShopThatData.on('keywords', () => {
+        loadKeywordsFromSharedData();
+        ensureSizeForContent();
       });
-    } catch (e) {
-      title.textContent = 'Hello!';
     }
 
     function ensureSizeForContent(){
@@ -594,33 +585,160 @@
       if (sender !== 'user') refreshBtn.removeAttribute('hidden');
       ensureSizeForContent();
     }
+
+    function displayImages(imageUrls) {
+      if (!imageUrls || !Array.isArray(imageUrls) || imageUrls.length === 0) return;
+      
+      const imageContainer = createEl('div', { class: 'chatbot-msg chatbot-msg-bot chatbot-images' });
+      imageUrls.forEach(imageUrl => {
+        const img = createEl('img', { 
+          src: imageUrl, 
+          alt: 'Related image',
+          style: 'max-width: 200px; max-height: 200px; border-radius: 8px; margin: 4px; cursor: pointer;'
+        });
+        img.addEventListener('click', () => {
+          window.open(imageUrl, '_blank');
+        });
+        img.addEventListener('error', () => {
+          img.style.display = 'none';
+        });
+        imageContainer.appendChild(img);
+      });
+      
+      messages.appendChild(imageContainer);
+      messages.scrollTop = messages.scrollHeight;
+      ensureSizeForContent();
+    }
+
+    let thinkingIndicator = null;
+
+    function showThinking() {
+      if (thinkingIndicator) return; // Already showing
+      
+      thinkingIndicator = createEl('div', { class: 'chatbot-thinking' });
+      const thinkingText = createEl('span', { class: 'chatbot-thinking-text', text: 'Thinking' });
+      const dots = createEl('div', { class: 'chatbot-dots' });
+      
+      // Create three animated dots
+      for (let i = 0; i < 3; i++) {
+        const dot = createEl('span');
+        dots.appendChild(dot);
+      }
+      
+      thinkingIndicator.appendChild(thinkingText);
+      thinkingIndicator.appendChild(dots);
+      messages.appendChild(thinkingIndicator);
+      messages.scrollTop = messages.scrollHeight;
+      ensureSizeForContent();
+    }
+
+    function hideThinking() {
+      if (thinkingIndicator) {
+        thinkingIndicator.remove();
+        thinkingIndicator = null;
+        ensureSizeForContent();
+      }
+    }
     // removed expand/collapse control; default size reflects previous expanded state
 
     async function send(){
       const txt = (input.value||'').trim();
       if (!txt) return;
+      
+      // Track keyword usage from user message
+      if (window.ShopThatData) {
+        const keywordsFound = window.ShopThatData.extractKeywordsFromText(txt);
+        if (currentSessionId && keywordsFound.length > 0) {
+          window.ShopThatData.addChatMessage(currentSessionId, txt, 'user', keywordsFound);
+        }
+      }
+      
       addMessage('user', txt);
       input.value = '';
       // After first send, keep inputs enabled for continued conversation
       if (!hasSelectedKeyword) setInputsEnabled(true);
+      
+      // Show thinking indicator
+      showThinking();
+      
       try {
-        const res = await fetch(`${API_BASE}/api/chat`, {
+        const res = await fetch(`${API_BASE}/chat`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ message: txt, enabled, disabled })
+          body: JSON.stringify({ message: txt })
         });
         if (!res.ok) throw new Error('HTTP '+res.status);
         const d = await res.json();
-        addMessage('bot', String(d?.response||'No response'));
+        
+        // Hide thinking indicator before showing response
+        hideThinking();
+        
+        const botResponse = String(d?.answer||'No response');
+        addMessage('bot', botResponse);
+        
+        // Handle image URLs if provided
+        if (d?.image_urls && Array.isArray(d.image_urls) && d.image_urls.length > 0) {
+          displayImages(d.image_urls);
+        }
+        
+        // Track keywords from bot response
+        if (window.ShopThatData) {
+          const botKeywords = window.ShopThatData.extractKeywordsFromText(botResponse);
+          if (currentSessionId && botKeywords.length > 0) {
+            window.ShopThatData.addChatMessage(currentSessionId, botResponse, 'bot', botKeywords);
+          }
+        }
+        
         // ensure refresh visible after bot message
         refreshBtn.removeAttribute('hidden');
       } catch (e) {
+        // Hide thinking indicator on error too
+        hideThinking();
         addMessage('bot', '❗ Failed to fetch response');
       }
     }
 
     sendBtn.addEventListener('click', send);
     input.addEventListener('keydown', (e)=>{ if (e.key === 'Enter'){ e.preventDefault(); send(); }});
+
+    // Health check functionality
+    async function checkHealth() {
+      try {
+        const res = await fetch(`${API_BASE}/health`);
+        if (res.ok) {
+          const data = await res.json();
+          console.log('Health check successful:', data);
+          return true;
+        }
+        throw new Error('Health check failed');
+      } catch (e) {
+        console.error('Health check error:', e);
+        return false;
+      }
+    }
+
+    // Search functionality
+    async function searchQuery(query) {
+      try {
+        const encodedQuery = encodeURIComponent(query);
+        const res = await fetch(`${API_BASE}/search?q=${encodedQuery}`);
+        if (!res.ok) throw new Error('HTTP '+res.status);
+        const data = await res.json();
+        return data;
+      } catch (e) {
+        console.error('Search error:', e);
+        return null;
+      }
+    }
+
+    // Perform initial health check when chatbot opens
+    function performHealthCheck() {
+      checkHealth().then(isHealthy => {
+        if (!isHealthy) {
+          addMessage('bot', '⚠️ Backend service is currently unavailable. Some features may not work properly.');
+        }
+      });
+    }
 
     let expanded = false;
 
@@ -673,8 +791,15 @@
       scheduleAnalysis();
       // On open, determine size based on current content
       ensureSizeForContent();
+      // Perform health check when opening
+      performHealthCheck();
     }
     function closeBox(){
+      // End chat session when closing
+      if (window.ShopThatData && currentSessionId) {
+        window.ShopThatData.endChatSession(currentSessionId);
+      }
+      
       // Fade out, then actually hide after transition ends
       box.classList.add('is-scroll-hidden');
       setTimeout(()=>{
@@ -697,6 +822,10 @@
         el.classList.add('is-fading');
       });
       refreshBtn.classList.add('is-fading');
+      
+      // Clear thinking indicator immediately
+      hideThinking();
+      
       // Wait for fade then clear
       setTimeout(() => {
         messages.replaceChildren();
@@ -711,29 +840,7 @@
       }, 220);
     });
 
-    // Hide the open chat box while the user is actively scrolling and
-    // fade it back in shortly after scrolling stops. The floating button
-    // remains available so the user can still close/open manually.
-    let scrollHideTimeout = null;
-    let isTemporarilyHidden = false;
-
-    function hideOnScroll(){
-      if (!expanded || box.hasAttribute('hidden')) return;
-      if (!isTemporarilyHidden){
-        isTemporarilyHidden = true;
-        box.classList.add('is-scroll-hidden');
-      }
-      if (scrollHideTimeout) clearTimeout(scrollHideTimeout);
-      scrollHideTimeout = setTimeout(()=>{
-        // Reveal immediately after scrolling stops
-        if (expanded && !box.hasAttribute('hidden')){
-          box.classList.remove('is-scroll-hidden');
-          isTemporarilyHidden = false;
-        }
-      }, 160); // small debounce for a natural feel
-    }
-
-    window.addEventListener('scroll', hideOnScroll, { passive: true });
+    // Scroll-based hide/show functionality removed - chatbot stays visible when open
 
     // =====================
     // Visible image → bag keywords
@@ -834,76 +941,15 @@
     function clearChildren(el){ while (el.firstChild) el.removeChild(el.firstChild); }
 
     function renderCampaignOptions(payload){
-      options.replaceChildren();
-      const items = [];
-      if (payload?.campaign?.name) items.push({ label: payload.campaign.name, type: 'campaign' });
-      if (payload?.designer?.name) items.push({ label: payload.designer.name, type: 'designer' });
-      items.forEach(({label}) => {
-        const b = createEl('button', { type: 'button' }, [document.createTextNode(titleCase(label))]);
-        b.addEventListener('click', ()=> onKeywordSelect(titleCase(label)));
-        options.appendChild(b);
-      });
-      ensureSizeForContent();
+      // Instead of using image analysis keywords, use ShopThatData keywords
+      loadKeywordsFromSharedData();
     }
 
-    function renderDetails(bag){
-      detailsWrap.removeAttribute('hidden');
-      clearChildren(detailsWrap);
-      const kw = Array.isArray(bag?.keywords) ? bag.keywords : [];
-      const attrs = bag?.attributes || {};
-      const flat = new Set(kw.concat(
-        (attrs.material||[]), (attrs.pattern||[]), (attrs.color||[]), (attrs.hardware||[]), (attrs.style||[]), (attrs.collection||[])
-      ).filter(Boolean));
-      Array.from(flat).slice(0, 12).forEach(lbl => {
-        const b = createEl('button', { type: 'button' }, [document.createTextNode(titleCase(lbl))]);
-        b.addEventListener('click', ()=> onKeywordSelect(titleCase(lbl)));
-        detailsWrap.appendChild(b);
-      });
-      ensureSizeForContent();
-    }
-
-    function showDetailsView(){
-      backBtn.removeAttribute('hidden');
-      presets.setAttribute('hidden','');
-      detailsWrap.removeAttribute('hidden');
-      // Recompute size to accommodate details chips if needed
-      requestAnimationFrame(()=> ensureSizeForContent());
-    }
-    function showBaseView(){
-      backBtn.setAttribute('hidden','');
-      detailsWrap.setAttribute('hidden','');
-      presets.removeAttribute('hidden');
-      // Recompute size to shrink back to base chips width
-      requestAnimationFrame(()=> ensureSizeForContent());
-    }
-
-    backBtn.removeEventListener('click', showBase); // replace old handler if any
-    backBtn.addEventListener('click', showBaseView);
+    // Removed detail view functions since we're using ShopThatData keywords directly
 
     function renderBagChips(payload){
-      clearChildren(presets);
-      const bags = Array.isArray(payload?.bags) ? payload.bags : [];
-      bags.forEach((bag, idx) => {
-        const label = assembleBagLabel(bag) || `Bag ${idx+1}`;
-        const b = createEl('button', { type: 'button' }, [document.createTextNode(label)]);
-        if (Array.isArray(bag?.keywords) && bag.keywords.length) {
-          const badge = createEl('span', { class: 'chip-badge' }, [document.createTextNode(String(Math.min(9, bag.keywords.length)))]);
-          b.appendChild(badge);
-        }
-        b.addEventListener('click', ()=>{
-          selectedBagIndex = idx;
-          renderDetails(bag);
-          showDetailsView();
-          onKeywordSelect(label);
-        });
-        presets.appendChild(b);
-      });
-      if (!bags.length){
-        const b = createEl('button', { type: 'button' }, [document.createTextNode('No bag detected')]);
-        b.addEventListener('click', ()=> onKeywordSelect('Bag'));
-        presets.appendChild(b);
-      }
-      ensureSizeForContent();
+      // Don't render bag chips since we're using ShopThatData keywords
+      // Keep presets area clear for our keyword system
     }
 
     async function analyzeCurrentView(){
