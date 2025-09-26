@@ -63,18 +63,51 @@
     </header>
 
     <main id="main" class="keywords" role="main">
-      <section class="toolbar" aria-label="Filters">
+      <section class="toolbar" aria-label="Graph controls">
         <div class="toolbar__left">
+          <div class="control-group">
+            <label class="sr-only" for="kwFilter">Filter keywords</label>
+            <input id="kwFilter" class="input input--compact" type="search" placeholder="Search keywords" />
+            <button type="button" id="resetKw" class="btn btn--secondary">Reset</button>
+          </div>
         </div>
-        <div class="toolbar__right" role="group" aria-label="Graph controls">
-          <label class="sr-only" for="kwFilter">Filter keywords</label>
-          <input id="kwFilter" class="input" type="search" placeholder="Search keywords" />
-          <button type="button" id="resetKw" class="chip">Reset</button>
-          <button class="chip" id="zoomIn" aria-label="Zoom in">＋</button>
-          <button class="chip" id="zoomOut" aria-label="Zoom out">−</button>
-          <button class="chip" id="fit" aria-label="Fit to screen">Fit</button>
-          <button class="chip" id="openNeo4j" aria-label="Open Neo4j panel">Neo4j</button>
-          <a class="btn btn--primary" href="/keywords-manage.html" aria-label="Manage Keywords">Manage Keywords</a>
+        <div class="toolbar__right">
+          <div class="control-group" role="group" aria-label="Zoom controls">
+            <button class="btn btn--secondary" id="zoomOut" aria-label="Zoom out">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="11" cy="11" r="8"></circle>
+                <path d="M8 11h6"></path>
+              </svg>
+            </button>
+            <button class="btn btn--secondary" id="fit" aria-label="Fit to screen">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
+              </svg>
+            </button>
+            <button class="btn btn--secondary" id="zoomIn" aria-label="Zoom in">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="11" cy="11" r="8"></circle>
+                <path d="M11 8v6m-3-3h6"></path>
+              </svg>
+            </button>
+          </div>
+          <div class="control-group">
+            <button class="btn btn--secondary" id="openNeo4j" aria-label="Open Neo4j panel">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                <polyline points="3.27,6.96 12,12.01 20.73,6.96"></polyline>
+                <line x1="12" y1="22.08" x2="12" y2="12"></line>
+              </svg>
+              Neo4j
+            </button>
+            <a class="btn btn--primary" href="/keywords-manage.html" aria-label="Manage Keywords">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 20h9"></path>
+                <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+              </svg>
+              Manage Keywords
+            </a>
+          </div>
         </div>
       </section>
       <div class="graph-legend">
