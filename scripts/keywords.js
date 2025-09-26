@@ -213,7 +213,7 @@ console.log('Document ready state:', document.readyState);
     textSel.attr('dy', `${-(lineNumber * lineHeight)/2}em`);
   }
 
-  const gLinks = svg.append('g').attr('stroke', '#d9d9ef').attr('stroke-width', 1.2);
+  const gLinks = svg.append('g').attr('stroke', '#d9d9ef').attr('stroke-width', 2.5);
   const gNodes = svg.append('g');
   const zoom = d3.zoom().scaleExtent([0.5, 3]).on('zoom', (ev)=>{
     gNodes.attr('transform', ev.transform);
