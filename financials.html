@@ -86,19 +86,19 @@
             </div>
             <div class="publishers-section">
               <div class="section-title">Highest Cost Articles</div>
-              <div class="section-content">$ 2</div>
+              <div class="section-content numeric">$ 2</div>
             </div>
             <div class="publishers-section">
               <div class="section-title">Highest Cost Keyword</div>
-              <div class="section-content">$ 0.50</div>
+              <div class="section-content numeric">$ 0.50</div>
             </div>
             <div class="publishers-section">
               <div class="section-title">Conversion For Internal Data</div>
-              <div class="section-content">2%</div>
+              <div class="section-content numeric">2%</div>
             </div>
             <div class="publishers-section">
               <div class="section-title">Conversion for External Data</div>
-              <div class="section-content">3%</div>
+              <div class="section-content numeric">3%</div>
             </div>
             <div class="publishers-section highlighted">
               <div class="section-title">Top Publisher Led Conversions</div>
@@ -305,11 +305,30 @@
         // Update publishers data
         const publisherSections = document.querySelectorAll('.publishers-section');
         if (publisherSections.length >= 6) {
+          // Top Articles (text only - no numeric class)
           publisherSections[0].querySelector('.section-content').textContent = data.publishers.topArticles;
-          publisherSections[1].querySelector('.section-content').textContent = data.publishers.highestCost;
-          publisherSections[2].querySelector('.section-content').textContent = data.publishers.highestKeyword;
-          publisherSections[3].querySelector('.section-content').textContent = data.publishers.internalConversion;
-          publisherSections[4].querySelector('.section-content').textContent = data.publishers.externalConversion;
+          
+          // Highest Cost Articles (numeric)
+          const highestCostEl = publisherSections[1].querySelector('.section-content');
+          highestCostEl.textContent = data.publishers.highestCost;
+          highestCostEl.classList.add('numeric');
+          
+          // Highest Cost Keyword (numeric)
+          const highestKeywordEl = publisherSections[2].querySelector('.section-content');
+          highestKeywordEl.textContent = data.publishers.highestKeyword;
+          highestKeywordEl.classList.add('numeric');
+          
+          // Internal Conversion (numeric)
+          const internalEl = publisherSections[3].querySelector('.section-content');
+          internalEl.textContent = data.publishers.internalConversion;
+          internalEl.classList.add('numeric');
+          
+          // External Conversion (numeric)
+          const externalEl = publisherSections[4].querySelector('.section-content');
+          externalEl.textContent = data.publishers.externalConversion;
+          externalEl.classList.add('numeric');
+          
+          // Top Conversions (text only - no numeric class)
           publisherSections[5].querySelector('.section-content').textContent = data.publishers.topConversions;
         }
 

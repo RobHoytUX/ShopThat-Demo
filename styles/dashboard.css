@@ -2392,9 +2392,13 @@ svg#bubbleGraph { width: 100%; height: 75vh; display: block; padding-top: 68px; 
 }
 
 .publishers-section .section-content {
-  font-size: 36px;
+  font-size: 18px;
   color: #111827;
   font-weight: 700;
+}
+
+.publishers-section .section-content.numeric {
+  font-size: 36px;
 }
 
 /* Chatbot Card */
@@ -2465,6 +2469,10 @@ svg#bubbleGraph { width: 100%; height: 75vh; display: block; padding-top: 68px; 
 
 .dark-mode .publishers-section .section-content {
   color: #f9fafb;
+  font-size: 18px;
+}
+
+.dark-mode .publishers-section .section-content.numeric {
   font-size: 36px;
 }
 
