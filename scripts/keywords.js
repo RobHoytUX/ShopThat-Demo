@@ -401,39 +401,49 @@ console.log('Document ready state:', document.readyState);
 
   // Function to determine which nodes should be visible in default mode
   function getDefaultVisibleNodes(nodes, links) {
-    const nodeConnections = new Map();
-    
-    // Initialize connection counts
-    nodes.forEach(node => {
-      nodeConnections.set(node.id, new Set());
-    });
-    
-    // Count connections for each node
-    links.forEach(link => {
-      const sourceId = typeof link.source === 'object' ? link.source.id : link.source;
-      const targetId = typeof link.target === 'object' ? link.target.id : link.target;
-      
-      if (nodeConnections.has(sourceId)) {
-        nodeConnections.get(sourceId).add(targetId);
-      }
-      if (nodeConnections.has(targetId)) {
-        nodeConnections.get(targetId).add(sourceId);
-      }
-    });
-    
-    // Find top-level nodes (most connected) and isolated nodes
-    const connectionCounts = Array.from(nodeConnections.entries())
-      .map(([id, connections]) => ({ id, count: connections.size }));
-    
-    const maxConnections = Math.max(...connectionCounts.map(item => item.count));
-    const topLevelThreshold = Math.max(1, Math.ceil(maxConnections * 0.7)); // Top 70% of max connections
-    
     const visibleNodeIds = new Set();
     
-    connectionCounts.forEach(({ id, count }) => {
-      // Show top-level nodes (highly connected) or isolated nodes (no connections)
-      if (count >= topLevelThreshold || count === 0) {
-        visibleNodeIds.add(id);
+    nodes.forEach(node => {
+      // Show nodes based on manually assigned levels or auto-detection
+      if (node.group) {
+        // If manual level assigned, show Top Level (1) and Isolated (4) nodes
+        if (node.group === 1 || node.group === 4) {
+          visibleNodeIds.add(node.id);
+        }
+      } else {
+        // Fallback to automatic detection for nodes without manual levels
+        const nodeConnections = new Map();
+        
+        // Initialize connection counts
+        nodes.forEach(n => {
+          nodeConnections.set(n.id, new Set());
+        });
+        
+        // Count connections for each node
+        links.forEach(link => {
+          const sourceId = typeof link.source === 'object' ? link.source.id : link.source;
+          const targetId = typeof link.target === 'object' ? link.target.id : link.target;
+          
+          if (nodeConnections.has(sourceId)) {
+            nodeConnections.get(sourceId).add(targetId);
+          }
+          if (nodeConnections.has(targetId)) {
+            nodeConnections.get(targetId).add(sourceId);
+          }
+        });
+        
+        const connectionCounts = Array.from(nodeConnections.entries())
+          .map(([id, connections]) => ({ id, count: connections.size }));
+        
+        const maxConnections = Math.max(...connectionCounts.map(item => item.count));
+        const topLevelThreshold = Math.max(1, Math.ceil(maxConnections * 0.7));
+        
+        const nodeConnectionCount = nodeConnections.get(node.id)?.size || 0;
+        
+        // Show top-level nodes (highly connected) or isolated nodes (no connections)
+        if (nodeConnectionCount >= topLevelThreshold || nodeConnectionCount === 0) {
+          visibleNodeIds.add(node.id);
+        }
       }
     });
     
