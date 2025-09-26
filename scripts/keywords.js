@@ -215,7 +215,7 @@ console.log('Document ready state:', document.readyState);
 
   const gLinks = svg.append('g').attr('stroke', '#d9d9ef').attr('stroke-width', 2.5);
   const gNodes = svg.append('g');
-  const zoom = d3.zoom().scaleExtent([0.5, 3]).on('zoom', (ev)=>{
+  const zoom = d3.zoom().scaleExtent([0.3, 3]).on('zoom', (ev)=>{
     gNodes.attr('transform', ev.transform);
     gLinks.attr('transform', ev.transform);
   });
@@ -529,12 +529,12 @@ console.log('Document ready state:', document.readyState);
     const svgWidth = svg.node().clientWidth;
     const svgHeight = svg.node().clientHeight;
     
-    // Calculate scale to fit with padding
-    const padding = 80;
+    // Calculate scale to fit with padding - zoom out more to show all nodes
+    const padding = 120; // Increased padding for better margins
     const scale = Math.min(
       (svgWidth - padding * 2) / width,
       (svgHeight - padding * 2) / height,
-      1.5 // Maximum scale to prevent too much zooming
+      1.2 // Reduced maximum scale to zoom out more
     );
     
     // Calculate translation to center
@@ -543,7 +543,7 @@ console.log('Document ready state:', document.readyState);
     
     const transform = d3.zoomIdentity
       .translate(translateX, translateY)
-      .scale(Math.max(scale, 0.5)); // Minimum scale
+      .scale(Math.max(scale, 0.4)); // Reduced minimum scale to allow more zoom out
     
     svg.transition()
       .duration(750)
