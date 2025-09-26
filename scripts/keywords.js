@@ -239,12 +239,14 @@ console.log('Document ready state:', document.readyState);
     }
   }
 
-  const centerForce = d3.forceCenter(0, 0);
+  const centerForce = d3.forceCenter(400, 300); // Initialize with default center
   const sim = d3.forceSimulation(graphNodes)
-    .force('link', d3.forceLink(graphLinks).id(d => d.id).distance(160).strength(0.08))
-    .force('charge', d3.forceManyBody().strength(-200))
+    .force('link', d3.forceLink(graphLinks).id(d => d.id).distance(120).strength(0.1))
+    .force('charge', d3.forceManyBody().strength(-300))
     .force('center', centerForce)
-    .force('collision', d3.forceCollide().radius(d => radius(d.value)+4));
+    .force('collision', d3.forceCollide().radius(d => radius(d.value)+8))
+    .force('x', d3.forceX().strength(0.1))
+    .force('y', d3.forceY().strength(0.1));
 
   function rescaleForDrawer(){
     const openDetails = detailsDrawer.getAttribute('aria-hidden') === 'false';
@@ -436,9 +438,21 @@ console.log('Document ready state:', document.readyState);
       openDrawer(d);
     });
 
+    // Initialize new nodes with positions near center
+    const w = svg.node().clientWidth || 800;
+    const h = svg.node().clientHeight || 500;
+    hierarchicalNodes.forEach(d => {
+      if (!d.x || !d.y) {
+        d.x = w/2 + (Math.random() - 0.5) * 100;
+        d.y = h/2 + (Math.random() - 0.5) * 100;
+        d.vx = 0;
+        d.vy = 0;
+      }
+    });
+    
     sim.nodes(hierarchicalNodes);
     sim.force('link').links(graphLinks);
-    sim.alpha(0.9).restart();
+    sim.alpha(0.5).restart();
     
     // Reset to default visibility mode when new data is loaded
     selectedNodeId = null;
@@ -453,8 +467,8 @@ console.log('Document ready state:', document.readyState);
       // Fit nodes to screen
       setTimeout(() => {
         fitNodesToScreen();
-      }, 500);
-    }, 1000);
+      }, 1000);
+    }, 500);
   }
 
   function resize(){
@@ -462,9 +476,19 @@ console.log('Document ready state:', document.readyState);
     const w = canvasEl?.clientWidth || 800; // Fallback width
     const h = Math.max(window.innerHeight * 0.75, 500); // Increased height
     console.log('Resize called with dimensions:', { w, h });
-    svg.attr('viewBox', `0 0 ${w} ${h}`).attr('width', w).attr('height', h);
+    
+    // Set proper viewBox and dimensions
+    svg.attr('viewBox', `0 0 ${w} ${h}`)
+       .attr('width', w)
+       .attr('height', h);
+    
+    // Update center forces
     centerForce.x(w/2).y(h/2);
-    sim.alpha(0.5).restart();
+    sim.force('x', d3.forceX(w/2).strength(0.1));
+    sim.force('y', d3.forceY(h/2).strength(0.1));
+    
+    // Restart simulation gently
+    sim.alpha(0.3).restart();
     rescaleForDrawer();
   }
 
@@ -473,20 +497,32 @@ console.log('Document ready state:', document.readyState);
     const visibleNodes = hierarchicalNodes.filter(d => {
       const nodeEl = node.filter(n => n.id === d.id);
       const opacity = nodeEl.style('opacity');
-      return opacity === '' || parseFloat(opacity) > 0.5; // Consider nodes with high opacity as visible
+      return (opacity === '' || parseFloat(opacity) > 0.5) && d.x !== undefined && d.y !== undefined;
     });
     
-    if (visibleNodes.length === 0) return;
+    if (visibleNodes.length === 0) {
+      console.log('No visible nodes to fit');
+      return;
+    }
     
     const bounds = {
-      minX: d3.min(visibleNodes, d => (d.x || 0) - radius(d.value)),
-      maxX: d3.max(visibleNodes, d => (d.x || 0) + radius(d.value)),
-      minY: d3.min(visibleNodes, d => (d.y || 0) - radius(d.value)),
-      maxY: d3.max(visibleNodes, d => (d.y || 0) + radius(d.value))
+      minX: d3.min(visibleNodes, d => d.x - radius(d.value)),
+      maxX: d3.max(visibleNodes, d => d.x + radius(d.value)),
+      minY: d3.min(visibleNodes, d => d.y - radius(d.value)),
+      maxY: d3.max(visibleNodes, d => d.y + radius(d.value))
     };
     
     const width = bounds.maxX - bounds.minX;
     const height = bounds.maxY - bounds.minY;
+    
+    // Handle edge case where all nodes are at the same position
+    if (width === 0 || height === 0) {
+      svg.transition()
+        .duration(750)
+        .call(zoom.transform, d3.zoomIdentity);
+      return;
+    }
+    
     const centerX = (bounds.minX + bounds.maxX) / 2;
     const centerY = (bounds.minY + bounds.maxY) / 2;
     
@@ -494,11 +530,11 @@ console.log('Document ready state:', document.readyState);
     const svgHeight = svg.node().clientHeight;
     
     // Calculate scale to fit with padding
-    const padding = 50;
+    const padding = 80;
     const scale = Math.min(
       (svgWidth - padding * 2) / width,
       (svgHeight - padding * 2) / height,
-      2 // Maximum scale
+      1.5 // Maximum scale to prevent too much zooming
     );
     
     // Calculate translation to center
@@ -507,7 +543,7 @@ console.log('Document ready state:', document.readyState);
     
     const transform = d3.zoomIdentity
       .translate(translateX, translateY)
-      .scale(scale);
+      .scale(Math.max(scale, 0.5)); // Minimum scale
     
     svg.transition()
       .duration(750)
@@ -531,20 +567,31 @@ console.log('Document ready state:', document.readyState);
       });
       
       resize();
-      // Force a restart of the simulation to ensure nodes are visible
-      sim.alpha(1).restart();
       
-      // Apply default filtering after simulation settles
+      // Initialize nodes with random positions near center to prevent flying off
+      const w = svg.node().clientWidth || 800;
+      const h = svg.node().clientHeight || 500;
+      hierarchicalNodes.forEach(d => {
+        d.x = w/2 + (Math.random() - 0.5) * 100;
+        d.y = h/2 + (Math.random() - 0.5) * 100;
+        d.vx = 0; // Reset velocity
+        d.vy = 0;
+      });
+      
+      // Start simulation with lower alpha to prevent nodes from flying
+      sim.alpha(0.5).restart();
+      
+      // Apply default filtering after a short delay
       setTimeout(() => {
         const defaultVisible = getDefaultVisibleNodes(hierarchicalNodes, graphLinks);
         updateNodeVisibility(defaultVisible);
         updateModeIndicator();
         
-        // Fit nodes to screen after filtering
+        // Fit nodes to screen after they settle
         setTimeout(() => {
           fitNodesToScreen();
-        }, 500);
-      }, 1000);
+        }, 1000);
+      }, 500);
       
       console.log('Graph nodes in simulation:', sim.nodes().length);
       console.log('Graph links in simulation:', sim.force('link').links().length);
