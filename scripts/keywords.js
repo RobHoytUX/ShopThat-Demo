@@ -762,6 +762,28 @@ console.log('Document ready state:', document.readyState);
     });
   }
 
+  // Listen for custom events from Manage Keywords page
+  window.addEventListener('keywordsUpdated', (event) => {
+    const { keywords, connections } = event.detail;
+    
+    // Update graph data with new keywords and connections
+    graphNodes = keywords.map(node => ({
+      id: node.id || node.name,
+      group: node.group || 1,
+      value: node.value || 50
+    }));
+    
+    graphLinks = connections.slice();
+    
+    // Update the visualization
+    setGraphData(graphNodes, graphLinks);
+    
+    console.log('Keywords page updated from Manage Keywords:', { 
+      keywords: graphNodes.length, 
+      connections: graphLinks.length 
+    });
+  });
+
   // Function to refresh data from shared storage
   function refreshFromSharedData() {
     if (window.ShopThatData) {

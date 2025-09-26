@@ -111,7 +111,9 @@
         // Remove connections involving this keyword
         const conns = loadConnections().filter(c => c.source !== keyword && c.target !== keyword);
         saveConnections(conns);
-        arr.splice(i,1); save(arr); render();
+        arr.splice(i,1); save(arr); 
+        notifyKeywordsUpdate();
+        render();
       });
     });
 
@@ -124,6 +126,7 @@
           !(c.source === connectionData.target && c.target === connectionData.source)
         );
         saveConnections(conns);
+        notifyKeywordsUpdate();
         render();
       });
     });
@@ -150,6 +153,7 @@
         if (!exists) {
           conns.push({ source: sourceKeyword, target: targetKeyword });
           saveConnections(conns);
+          notifyKeywordsUpdate();
         }
         input.value = '';
         render();
@@ -167,10 +171,25 @@
         if (keyword) {
           keyword.group = newLevel;
           save(keywords);
+          notifyKeywordsUpdate();
           render(); // Re-render to update the level indicator
         }
       });
     });
+  }
+
+  // Function to notify other pages of keyword updates
+  function notifyKeywordsUpdate() {
+    // Trigger custom event for real-time updates
+    window.dispatchEvent(new CustomEvent('keywordsUpdated', {
+      detail: { keywords: load(), connections: loadConnections() }
+    }));
+    
+    // Also update shared data system if available
+    if (window.ShopThatData) {
+      window.ShopThatData.emit('keywords', load());
+      window.ShopThatData.emit('connections', loadConnections());
+    }
   }
 
   // Search functionality
@@ -218,6 +237,7 @@
       const selectedLevel = level ? parseInt(level.value) : 1;
       arr.push({ id: n, name: n, value: 50, group: selectedLevel });
       save(arr); 
+      notifyKeywordsUpdate();
       name.value=''; 
       if (level) level.value = '1'; // Reset to default
       render();
@@ -225,7 +245,9 @@
 
     clear && clear.addEventListener('click', ()=>{ 
       if (confirm('Are you sure you want to clear all keywords and connections?')) {
-        save([]); saveConnections([]); render(); 
+        save([]); saveConnections([]); 
+        notifyKeywordsUpdate();
+        render(); 
       }
     });
     
