@@ -215,11 +215,29 @@ console.log('Document ready state:', document.readyState);
 
   const gLinks = svg.append('g').attr('stroke', '#d9d9ef').attr('stroke-width', 1.2);
   const gNodes = svg.append('g');
-  const zoom = d3.zoom().scaleExtent([0.5, 2]).on('zoom', (ev)=>{
+  const zoom = d3.zoom().scaleExtent([0.5, 3]).on('zoom', (ev)=>{
     gNodes.attr('transform', ev.transform);
     gLinks.attr('transform', ev.transform);
   });
   svg.call(zoom);
+
+  // State management for node visibility
+  let selectedNodeId = null;
+  let visibilityMode = 'default'; // 'default', 'connections'
+  const modeIndicator = document.getElementById('modeIndicator');
+
+  // Function to update mode indicator
+  function updateModeIndicator() {
+    if (modeIndicator) {
+      if (visibilityMode === 'default') {
+        modeIndicator.innerHTML = '<span>Mode: Default View (Top Level & Isolated)</span>';
+        modeIndicator.style.color = '#6366F1';
+      } else if (visibilityMode === 'connections') {
+        modeIndicator.innerHTML = `<span>Mode: Connections for "${selectedNodeId}"</span>`;
+        modeIndicator.style.color = '#5B21B6';
+      }
+    }
+  }
 
   const centerForce = d3.forceCenter(0, 0);
   const sim = d3.forceSimulation(graphNodes)
@@ -270,9 +288,113 @@ console.log('Document ready state:', document.readyState);
   
   console.log('Total nodes created:', node.size());
 
-  node.on('click', (_, d) => openDrawer(d));
+  node.on('click', (_, d) => {
+    handleNodeClick(d);
+    openDrawer(d);
+  });
 
   sim.on('tick', ticked);
+
+  // Function to determine which nodes should be visible in default mode
+  function getDefaultVisibleNodes(nodes, links) {
+    const nodeConnections = new Map();
+    
+    // Initialize connection counts
+    nodes.forEach(node => {
+      nodeConnections.set(node.id, new Set());
+    });
+    
+    // Count connections for each node
+    links.forEach(link => {
+      const sourceId = typeof link.source === 'object' ? link.source.id : link.source;
+      const targetId = typeof link.target === 'object' ? link.target.id : link.target;
+      
+      if (nodeConnections.has(sourceId)) {
+        nodeConnections.get(sourceId).add(targetId);
+      }
+      if (nodeConnections.has(targetId)) {
+        nodeConnections.get(targetId).add(sourceId);
+      }
+    });
+    
+    // Find top-level nodes (most connected) and isolated nodes
+    const connectionCounts = Array.from(nodeConnections.entries())
+      .map(([id, connections]) => ({ id, count: connections.size }));
+    
+    const maxConnections = Math.max(...connectionCounts.map(item => item.count));
+    const topLevelThreshold = Math.max(1, Math.ceil(maxConnections * 0.7)); // Top 70% of max connections
+    
+    const visibleNodeIds = new Set();
+    
+    connectionCounts.forEach(({ id, count }) => {
+      // Show top-level nodes (highly connected) or isolated nodes (no connections)
+      if (count >= topLevelThreshold || count === 0) {
+        visibleNodeIds.add(id);
+      }
+    });
+    
+    return visibleNodeIds;
+  }
+
+  // Function to get connected nodes for a specific node
+  function getConnectedNodes(nodeId, links) {
+    const connected = new Set([nodeId]); // Include the clicked node itself
+    
+    links.forEach(link => {
+      const sourceId = typeof link.source === 'object' ? link.source.id : link.source;
+      const targetId = typeof link.target === 'object' ? link.target.id : link.target;
+      
+      if (sourceId === nodeId) {
+        connected.add(targetId);
+      }
+      if (targetId === nodeId) {
+        connected.add(sourceId);
+      }
+    });
+    
+    return connected;
+  }
+
+  // Function to handle node clicks and update visibility
+  function handleNodeClick(clickedNode) {
+    if (visibilityMode === 'default') {
+      // Switch to connections mode for this node
+      selectedNodeId = clickedNode.id;
+      visibilityMode = 'connections';
+      const connectedNodeIds = getConnectedNodes(clickedNode.id, graphLinks);
+      updateNodeVisibility(connectedNodeIds);
+      updateModeIndicator();
+    } else if (visibilityMode === 'connections') {
+      if (selectedNodeId === clickedNode.id) {
+        // Clicking the same node - return to default mode
+        selectedNodeId = null;
+        visibilityMode = 'default';
+        const defaultVisible = getDefaultVisibleNodes(hierarchicalNodes, graphLinks);
+        updateNodeVisibility(defaultVisible);
+        updateModeIndicator();
+      } else {
+        // Clicking a different node - show its connections
+        selectedNodeId = clickedNode.id;
+        const connectedNodeIds = getConnectedNodes(clickedNode.id, graphLinks);
+        updateNodeVisibility(connectedNodeIds);
+        updateModeIndicator();
+      }
+    }
+  }
+
+  // Function to update node and link visibility
+  function updateNodeVisibility(visibleNodeIds) {
+    // Update node visibility
+    node.style('opacity', d => visibleNodeIds.has(d.id) ? 1 : 0.1)
+        .style('pointer-events', d => visibleNodeIds.has(d.id) ? 'all' : 'none');
+    
+    // Update link visibility - only show links between visible nodes
+    link.style('opacity', l => {
+      const sourceId = typeof l.source === 'object' ? l.source.id : l.source;
+      const targetId = typeof l.target === 'object' ? l.target.id : l.target;
+      return (visibleNodeIds.has(sourceId) && visibleNodeIds.has(targetId)) ? 1 : 0.05;
+    });
+  }
 
   function setGraphData(newNodes, newLinks){
     graphNodes = newNodes || [];
@@ -309,22 +431,87 @@ console.log('Document ready state:', document.readyState);
     node.select('circle')
       .attr('fill', d => d.hierarchyColor || colorScheme.isolated);
     
-    node.on('click', (_, d) => openDrawer(d));
+    node.on('click', (_, d) => {
+      handleNodeClick(d);
+      openDrawer(d);
+    });
 
     sim.nodes(hierarchicalNodes);
     sim.force('link').links(graphLinks);
     sim.alpha(0.9).restart();
+    
+    // Reset to default visibility mode when new data is loaded
+    selectedNodeId = null;
+    visibilityMode = 'default';
+    
+    // Apply default filtering after simulation settles
+    setTimeout(() => {
+      const defaultVisible = getDefaultVisibleNodes(hierarchicalNodes, graphLinks);
+      updateNodeVisibility(defaultVisible);
+      updateModeIndicator();
+      
+      // Fit nodes to screen
+      setTimeout(() => {
+        fitNodesToScreen();
+      }, 500);
+    }, 1000);
   }
 
   function resize(){
     const canvasEl = container.querySelector('.keywords__canvas');
     const w = canvasEl?.clientWidth || 800; // Fallback width
-    const h = Math.max(window.innerHeight * 0.7, 400); // Minimum height
+    const h = Math.max(window.innerHeight * 0.75, 500); // Increased height
     console.log('Resize called with dimensions:', { w, h });
     svg.attr('viewBox', `0 0 ${w} ${h}`).attr('width', w).attr('height', h);
     centerForce.x(w/2).y(h/2);
     sim.alpha(0.5).restart();
     rescaleForDrawer();
+  }
+
+  // Function to fit all visible nodes within the viewport
+  function fitNodesToScreen() {
+    const visibleNodes = hierarchicalNodes.filter(d => {
+      const nodeEl = node.filter(n => n.id === d.id);
+      const opacity = nodeEl.style('opacity');
+      return opacity === '' || parseFloat(opacity) > 0.5; // Consider nodes with high opacity as visible
+    });
+    
+    if (visibleNodes.length === 0) return;
+    
+    const bounds = {
+      minX: d3.min(visibleNodes, d => (d.x || 0) - radius(d.value)),
+      maxX: d3.max(visibleNodes, d => (d.x || 0) + radius(d.value)),
+      minY: d3.min(visibleNodes, d => (d.y || 0) - radius(d.value)),
+      maxY: d3.max(visibleNodes, d => (d.y || 0) + radius(d.value))
+    };
+    
+    const width = bounds.maxX - bounds.minX;
+    const height = bounds.maxY - bounds.minY;
+    const centerX = (bounds.minX + bounds.maxX) / 2;
+    const centerY = (bounds.minY + bounds.maxY) / 2;
+    
+    const svgWidth = svg.node().clientWidth;
+    const svgHeight = svg.node().clientHeight;
+    
+    // Calculate scale to fit with padding
+    const padding = 50;
+    const scale = Math.min(
+      (svgWidth - padding * 2) / width,
+      (svgHeight - padding * 2) / height,
+      2 // Maximum scale
+    );
+    
+    // Calculate translation to center
+    const translateX = svgWidth / 2 - centerX * scale;
+    const translateY = svgHeight / 2 - centerY * scale;
+    
+    const transform = d3.zoomIdentity
+      .translate(translateX, translateY)
+      .scale(scale);
+    
+    svg.transition()
+      .duration(750)
+      .call(zoom.transform, transform);
   }
   
   // Ensure resize is called after DOM is ready and elements have dimensions
@@ -346,6 +533,18 @@ console.log('Document ready state:', document.readyState);
       resize();
       // Force a restart of the simulation to ensure nodes are visible
       sim.alpha(1).restart();
+      
+      // Apply default filtering after simulation settles
+      setTimeout(() => {
+        const defaultVisible = getDefaultVisibleNodes(hierarchicalNodes, graphLinks);
+        updateNodeVisibility(defaultVisible);
+        updateModeIndicator();
+        
+        // Fit nodes to screen after filtering
+        setTimeout(() => {
+          fitNodesToScreen();
+        }, 500);
+      }, 1000);
       
       console.log('Graph nodes in simulation:', sim.nodes().length);
       console.log('Graph links in simulation:', sim.force('link').links().length);
@@ -407,12 +606,28 @@ console.log('Document ready state:', document.readyState);
     });
   }
   filterInput && filterInput.addEventListener('input', (e)=> applyFilter(e.target.value));
-  resetBtn && resetBtn.addEventListener('click', ()=>{ filterInput && (filterInput.value=''); applyFilter(''); closeDrawer(); svg.transition().duration(250).call(zoom.transform, d3.zoomIdentity); });
+  resetBtn && resetBtn.addEventListener('click', ()=>{ 
+    filterInput && (filterInput.value=''); 
+    applyFilter(''); 
+    closeDrawer(); 
+    
+    // Reset to default visibility mode
+    selectedNodeId = null;
+    visibilityMode = 'default';
+    const defaultVisible = getDefaultVisibleNodes(hierarchicalNodes, graphLinks);
+    updateNodeVisibility(defaultVisible);
+    updateModeIndicator();
+    
+    // Fit to default nodes
+    setTimeout(() => {
+      fitNodesToScreen();
+    }, 100);
+  });
 
   // Zoom controls
   zoomIn && zoomIn.addEventListener('click', ()=> svg.transition().duration(200).call(zoom.scaleBy, 1.2));
   zoomOut && zoomOut.addEventListener('click', ()=> svg.transition().duration(200).call(zoom.scaleBy, 0.8));
-  fitBtn && fitBtn.addEventListener('click', ()=> svg.transition().duration(250).call(zoom.transform, d3.zoomIdentity));
+  fitBtn && fitBtn.addEventListener('click', fitNodesToScreen);
 
   // Neo4j integration
   const neo4jUriEl = document.getElementById('neo4jUri');
