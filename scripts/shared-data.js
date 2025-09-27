@@ -302,15 +302,15 @@
         // Initialize with new keyword data
         const defaultKeywords = [
           { name: 'Yayoi Kusama', value: 90, group: 1, cost: 20000 },
-          { name: 'Pharrell', value: 75, group: 1, cost: 5000 },
-          { name: 'Infinity Mirrors', value: 85, group: 1, cost: 15000 },
-          { name: 'Painted Dots', value: 65, group: 1, cost: 3000 },
           { name: 'Louis Vuitton', value: 80, group: 1, cost: 2000 },
-          { name: 'Pumpkins', value: 60, group: 1, cost: 2000 },
+          { name: 'Pharrell', value: 75, group: 2, cost: 5000 },
+          { name: 'Infinity Mirrors', value: 85, group: 2, cost: 15000 },
+          { name: 'Painted Dots', value: 65, group: 2, cost: 3000 },
+          { name: 'Pumpkins', value: 60, group: 2, cost: 2000 },
           { name: 'Gisele Bundchen', value: 70, group: 2, cost: 2000 },
-          { name: 'MoMa', value: 45, group: 2, cost: 370 },
-          { name: 'FeiFei Sun', value: 35, group: 2, cost: 150 },
-          { name: 'Central Park', value: 40, group: 2, cost: 150 }
+          { name: 'MoMa', value: 45, group: 3, cost: 370 },
+          { name: 'FeiFei Sun', value: 35, group: 3, cost: 150 },
+          { name: 'Central Park', value: 40, group: 3, cost: 150 }
         ];
         
         defaultKeywords.forEach(keyword => this.addKeyword(keyword));
