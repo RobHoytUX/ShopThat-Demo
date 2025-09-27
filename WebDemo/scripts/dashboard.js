@@ -44,22 +44,33 @@
     if (!body) return;
     body.replaceChildren();
     
-    // Get keywords from ShopThatData system
-    const keywords = window.ShopThatData ? window.ShopThatData.getKeywords() : [];
+    // Data exactly matching the screenshot
+    const topKeywordsData = [
+      { name: 'Yayoi Kusama', revenue: 14000, engagement: 30 },
+      { name: 'Pharrell', revenue: 2000, engagement: 15 },
+      { name: 'Infinity Mirrors', revenue: 500, engagement: 10 },
+      { name: 'Painted Dots', revenue: 1000, engagement: 20 },
+      { name: 'Louis Vuitton', revenue: 850, engagement: 25 },
+      { name: 'Pumpkins', revenue: 450, engagement: 22 },
+      { name: 'Gisele Bundchen', revenue: 1000, engagement: 30 },
+      { name: 'MoMa', revenue: 370, engagement: 12 },
+      { name: 'FeiFei Sun', revenue: 1150, engagement: 25 },
+      { name: 'Central Park', revenue: 150, engagement: 23 }
+    ];
     
-    // Filter and sort keywords
-    const filteredKeywords = keywords
+    // Filter keywords based on search term
+    const filteredKeywords = topKeywordsData
       .filter(k => k.name.toLowerCase().includes(filterTerm.toLowerCase()))
-      .sort((a, b) => (b.uses || 0) - (a.uses || 0))
+      .sort((a, b) => b.revenue - a.revenue) // Sort by revenue descending
       .slice(0, 10); // Show top 10
     
-    // Populate table with keywords (single row per keyword now)
+    // Populate table with keywords
     filteredKeywords.forEach(keyword => {
       const tr = document.createElement('tr');
       tr.innerHTML = `
         <td>${keyword.name}</td>
-        <td>${keyword.uses || 0}</td>
-        <td>$${keyword.totalCost ? keyword.totalCost.toLocaleString() : keyword.cost ? keyword.cost.toLocaleString() : '0'}</td>
+        <td>$${keyword.revenue.toLocaleString()}</td>
+        <td>${keyword.engagement}%</td>
       `;
       body.appendChild(tr);
     });
