@@ -26,9 +26,17 @@ This web demo presents the core features and functionality of the ShopTHAT platf
 
 ## Getting Started
 
-1. Open `index.html` in your web browser
-2. Navigate through the different sections using the sidebar menu
-3. Explore the various features and functionalities
+### Live Demo
+🌐 **[Access Live Demo](https://shopthat-webdemo.netlify.app)** *(URL will be available after deployment)*
+
+### Local Development
+1. Clone this repository
+2. Open `index.html` in your web browser
+3. Navigate through the different sections using the sidebar menu
+4. Explore the various features and functionalities
+
+### Deployment
+This demo is configured for automatic deployment via Netlify from the GitHub repository.
 
 ## Demo Pages
 
