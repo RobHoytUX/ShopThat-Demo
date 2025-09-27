@@ -414,12 +414,15 @@
 .lower .card canvas { display: block; width: 100% !important; height: auto !important; aspect-ratio: 16 / 9; }
 
 /* Keywords Page */
-.keywords { --drawer-w: 360px; padding: 16px; display: grid; gap: 16px; grid-column: 2 / -1; grid-row: 2; height: calc(100vh - 64px); overflow: auto; grid-template-columns: 1fr; }
+.keywords { --drawer-w: 360px; padding: 8px 16px 16px 16px; display: grid; gap: 4px; grid-column: 2 / -1; grid-row: 2; height: calc(100vh - 64px); overflow: auto; grid-template-columns: 1fr; }
 .keywords.drawer-open { grid-template-columns: 1fr; }
-.keywords .toolbar { width: 100%; margin: 0; transition: transform .25s ease; }
+.keywords .toolbar { width: 100%; margin: -8px 0 0 0; transition: transform .25s ease; }
 .neo4j-panel { display: grid; grid-template-columns: 1fr; gap: 8px; margin-top: 8px; }
 .neo4j-panel .btn { width: fit-content; }
-.keywords__canvas { background: #fff; border: 1px solid #e8e8ef; border-radius: 16px; margin: 8px 0 16px 0; width: 100%; transition: transform .25s ease; position: relative; }
+
+/* Hide Neo4j button on Keywords page */
+.keywords #openNeo4j { display: none; }
+.keywords__canvas { background: #fff; border: 1px solid #e8e8ef; border-radius: 16px; margin: 0 0 16px 0; width: 100%; transition: transform .25s ease; position: relative; }
 .keywords.drawer-open .toolbar { margin-left: 20px; margin-right: 380px; }
 .keywords.drawer-open .keywords__canvas { margin: 8px 400px 16px 20px; border-right: 20px solid transparent; }
 .drawer { background: #fff; border: 1px solid #e8e8ef; border-right: none; border-radius: 16px 0 0 16px; transform: translateX(100%); transition: transform .25s ease; position: fixed; right: 0; top: 0; width: 360px; height: 100vh; overflow: auto; z-index: 20; margin: 0; }
