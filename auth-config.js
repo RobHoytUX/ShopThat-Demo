@@ -7,8 +7,8 @@ const DEMO_CONFIG = {
     
     // Demo credentials (change these!)
     credentials: {
-        username: 'stakeholder',
-        password: 'demo2024'
+        username: 'shopthat',
+        password: 'demo2025'
     },
     
     // Session timeout (in minutes)
