@@ -295,8 +295,9 @@
     // Initialize with default data if empty
     initialize() {
       const keywords = this.getKeywords();
-      // Force reinitialize with new data - remove this condition to always reset
-      if (keywords.length === 0 || !keywords.find(k => k.name === 'Pharrell')) {
+      // Force reinitialize with correct node levels - updated Jan 2025
+      if (keywords.length === 0 || !keywords.find(k => k.name === 'Pharrell') || 
+          (keywords.find(k => k.name === 'Pharrell') && keywords.find(k => k.name === 'Pharrell').group === 1)) {
         // Clear existing data first
         this.clearData();
         // Initialize with new keyword data
