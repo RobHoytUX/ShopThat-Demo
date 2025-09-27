@@ -1,0 +1,609 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>shopThat — Internals</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles/main.css?v=1">
+    <link rel="stylesheet" href="styles/dashboard.css?v=1">
+  </head>
+  <body class="app app--internals">
+    <aside class="sidebar" aria-label="Primary">
+      <div class="sidebar__brand">
+        <span>shopThat</span>
+      </div>
+      <div class="sidebar__campaign-btn">
+        <a href="/campaigns.html" class="btn btn--primary btn--campaign">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/>
+            <path d="M12 8v8M8 12h8"/>
+          </svg>
+          Campaigns
+        </a>
+      </div>
+      <nav class="sidebar__nav">
+        <a href="/dashboard.html">Dashboard</a>
+        <a href="/keywords.html">Keywords</a>
+        <a class="is-active" href="/internals.html">Internals</a>
+        <a href="/publishers.html">Publishers</a>
+        <a href="/open-source.html" aria-disabled="true">Open source</a>
+        <a href="/products.html">Products</a>
+        <a href="/financials.html">Financials</a>
+        <a href="/settings.html" aria-disabled="true">Settings</a>
+        <a href="#" id="signOutLink">Sign Out</a>
+      </nav>
+    </aside>
+
+    <header class="appbar" role="banner">
+      <div class="appbar__inner">
+        <h1 class="appbar__title">Internals</h1>
+        <div class="appbar__search">
+          <input type="search" placeholder="Search here..." aria-label="Search" />
+        </div>
+        <div class="appbar__account">
+          <span class="locale">Eng (US)</span>
+          <button class="icon-btn" aria-label="Notifications" title="Notifications">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9"/>
+              <path d="M13.73 21a2 2 0 01-3.46 0"/>
+            </svg>
+          </button>
+          <button class="icon-btn" id="darkModeToggle" aria-label="Toggle dark mode" title="Toggle dark mode">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="12" cy="12" r="5"/>
+              <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+            </svg>
+          </button>
+          <div class="avatar" role="img" aria-label="Person, Admin"></div>
+        </div>
+      </div>
+    </header>
+
+    <main id="main" class="dashboard" role="main">
+      <!-- Document Analytics Section -->
+      <section class="card document-analytics">
+        <div class="card__header">
+          <h2>Document Analytics & Performance</h2>
+          <div class="card__actions">
+            <select class="select--styled" id="analyticsTimeframe">
+              <option value="7d">Last 7 days</option>
+              <option value="30d" selected>Last 30 days</option>
+              <option value="90d">Last 90 days</option>
+            </select>
+          </div>
+        </div>
+        
+        <div class="rpv-three-column-layout">
+          <!-- Section 1: Current Performance -->
+          <div class="rpv-section-1">
+            <div class="section-header">
+              <h3>Current Performance</h3>
+            </div>
+            <div class="rpv-metrics">
+              <div class="metric-item">
+                <span class="metric-label">Total Documents</span>
+                <span class="metric-value rpv-green">1,247</span>
+                <span class="metric-unit">indexed articles</span>
+              </div>
+              <div class="metric-item">
+                <span class="metric-label">Document Views</span>
+                <span class="metric-value rpv-green">12,890</span>
+                <span class="metric-unit">this month</span>
+              </div>
+            </div>
+            <div class="rpv-progress">
+              <div class="progress-bar">
+                <div class="progress-fill" style="width: 78%"></div>
+              </div>
+              <span class="progress-text">78% of monthly view target reached</span>
+            </div>
+          </div>
+          
+          <!-- Section 2: Usage Benchmarks -->
+          <div class="rpv-section-2">
+            <div class="section-header">
+              <h3>Usage Benchmarks</h3>
+            </div>
+            <div class="benchmark-metrics">
+              <div class="metric-item">
+                <span class="metric-label">Avg. Session Time</span>
+                <span class="metric-value traditional-gray">4m 32s</span>
+                <span class="metric-unit">per session</span>
+              </div>
+              <div class="metric-item">
+                <span class="metric-label">Search Queries</span>
+                <span class="metric-value ai-deals-red">3,456</span>
+                <span class="metric-unit">this month</span>
+              </div>
+            </div>
+            <div class="improvement-indicator">
+              <span class="improvement-text">12.5% increase over traditional content systems</span>
+            </div>
+          </div>
+          
+          <!-- Section 3: Top Performing Documents -->
+          <div class="rpv-section-3">
+            <div class="section-header">
+              <h3>Top Performing Documents</h3>
+            </div>
+            <div class="deals-list">
+              <div class="deal-item">
+                <div class="deal-companies">Kusama Press Release</div>
+                <div class="deal-amount">2,340 views</div>
+              </div>
+              <div class="deal-item">
+                <div class="deal-companies">Louis Vuitton History</div>
+                <div class="deal-amount">1,890 views</div>
+              </div>
+              <div class="deal-item">
+                <div class="deal-companies">Fondation Louis Vuitton</div>
+                <div class="deal-amount">1,567 views</div>
+              </div>
+            </div>
+            <div class="deal-context">
+              <span class="context-text">These documents drive 67% of total engagement</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Internal Documents Section -->
+      <section class="card internals-documents">
+        <div class="card__header">
+          <h2>Top Internal Documents</h2>
+          <div class="card__actions">
+            <button class="gallery-nav-btn" id="gallery-prev" aria-label="Previous documents">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <polyline points="15,18 9,12 15,6"></polyline>
+              </svg>
+            </button>
+            <button class="gallery-nav-btn" id="gallery-next" aria-label="Next documents">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <polyline points="9,18 15,12 9,6"></polyline>
+              </svg>
+            </button>
+            <button class="btn btn--secondary" onclick="refreshDocuments()">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="23 4 23 10 17 10"></polyline>
+                <polyline points="1 20 1 14 7 14"></polyline>
+                <path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.64A9 9 0 0 1 3.51 15"></path>
+              </svg>
+              Refresh
+            </button>
+          </div>
+        </div>
+        <div class="document-gallery">
+          <div class="document-item" data-doc="louis-vuitton-history">
+            <div class="document-preview">
+              <div class="document-type-badge">History</div>
+              <img src="assets/lv-history.png" alt="Louis Vuitton history" />
+            </div>
+            <div class="document-details">
+              <div>
+                <div class="document-title">Louis Vuitton History</div>
+                <div class="document-meta">
+                  <div class="document-accessed">Last accessed: 2 hours ago</div>
+                </div>
+              </div>
+              <div class="document-metrics">
+                <div class="metric-small">
+                  <span class="metric-small-label">Views</span>
+                  <span class="metric-small-value positive">1,890</span>
+                </div>
+                <div class="metric-small">
+                  <span class="metric-small-label">Avg. Time</span>
+                  <span class="metric-small-value neutral">6m 12s</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="document-item" data-doc="kusama-press-release">
+            <div class="document-preview">
+              <div class="document-type-badge">Press</div>
+              <img src="assets/kusama-pressrelease.png" alt="Louis Vuitton Renews Collaboration with Yayoi Kusama" />
+            </div>
+            <div class="document-details">
+              <div>
+                <div class="document-title">Kusama Press Release</div>
+                <div class="document-meta">
+                  <div class="document-accessed">Last accessed: 5 hours ago</div>
+                </div>
+              </div>
+              <div class="document-metrics">
+                <div class="metric-small">
+                  <span class="metric-small-label">Views</span>
+                  <span class="metric-small-value positive">2,340</span>
+                </div>
+                <div class="metric-small">
+                  <span class="metric-small-label">Avg. Time</span>
+                  <span class="metric-small-value neutral">4m 45s</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="document-item" data-doc="kusama-book">
+            <div class="document-preview">
+              <div class="document-type-badge">Catalog</div>
+              <img src="assets/kusama-book.png" alt="Yayoi Kusama: Infinity Mirrors Exhibition Catalog" />
+            </div>
+            <div class="document-details">
+              <div>
+                <div class="document-title">Kusama Book</div>
+                <div class="document-meta">
+                  <div class="document-accessed">Last accessed: 1 day ago</div>
+                </div>
+              </div>
+              <div class="document-metrics">
+                <div class="metric-small">
+                  <span class="metric-small-label">Views</span>
+                  <span class="metric-small-value positive">1,234</span>
+                </div>
+                <div class="metric-small">
+                  <span class="metric-small-label">Avg. Time</span>
+                  <span class="metric-small-value positive">8m 20s</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="document-item" data-doc="foundation-louis-vuitton">
+            <div class="document-preview">
+              <div class="document-type-badge">Guide</div>
+              <img src="assets/foundation-lv-png.png" alt="Architecture and Contemporary Art Foundation" />
+            </div>
+            <div class="document-details">
+              <div>
+                <div class="document-title">Fondation Louis Vuitton</div>
+                <div class="document-meta">
+                  <div class="document-accessed">Last accessed: 3 days ago</div>
+                </div>
+              </div>
+              <div class="document-metrics">
+                <div class="metric-small">
+                  <span class="metric-small-label">Views</span>
+                  <span class="metric-small-value positive">1,567</span>
+                </div>
+                <div class="metric-small">
+                  <span class="metric-small-label">Avg. Time</span>
+                  <span class="metric-small-value neutral">5m 30s</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Keywords Performance Section -->
+      <section class="card keywords-performance-combined">
+        <div class="card__header">
+          <h2>Keywords Performance</h2>
+          <div class="card__actions">
+            <div class="card__tabs">
+              <button class="tab-btn active" data-tab="usage">Usage</button>
+              <button class="tab-btn" data-tab="revenue">Revenue</button>
+            </div>
+          </div>
+        </div>
+        <div class="card__content">
+          <div class="tab-content active" id="usage-content">
+            <div class="keywords-performance-grid">
+              <div class="keyword-performance-item">
+                <div class="keyword-performance-header">
+                  <h3 class="keyword-performance-name">Kusama</h3>
+                  <span class="keyword-performance-rank">#1</span>
+                </div>
+                <div class="keyword-performance-metrics">
+                  <div class="keyword-metric">
+                    <span class="keyword-metric-label">Usage</span>
+                    <span class="keyword-metric-value usage">1,247</span>
+                    <span class="keyword-metric-secondary">uses this month</span>
+                  </div>
+                  <div class="keyword-metric">
+                    <span class="keyword-metric-label">Cost</span>
+                    <span class="keyword-metric-value cost">$311.75</span>
+                    <span class="keyword-metric-secondary">total spent</span>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="keyword-performance-item">
+                <div class="keyword-performance-header">
+                  <h3 class="keyword-performance-name">Louis Vuitton Cafe</h3>
+                  <span class="keyword-performance-rank">#2</span>
+                </div>
+                <div class="keyword-performance-metrics">
+                  <div class="keyword-metric">
+                    <span class="keyword-metric-label">Usage</span>
+                    <span class="keyword-metric-value usage">892</span>
+                    <span class="keyword-metric-secondary">uses this month</span>
+                  </div>
+                  <div class="keyword-metric">
+                    <span class="keyword-metric-label">Cost</span>
+                    <span class="keyword-metric-value cost">$223.00</span>
+                    <span class="keyword-metric-secondary">total spent</span>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="keyword-performance-item">
+                <div class="keyword-performance-header">
+                  <h3 class="keyword-performance-name">Fondation Louis Vuitton</h3>
+                  <span class="keyword-performance-rank">#3</span>
+                </div>
+                <div class="keyword-performance-metrics">
+                  <div class="keyword-metric">
+                    <span class="keyword-metric-label">Usage</span>
+                    <span class="keyword-metric-value usage">734</span>
+                    <span class="keyword-metric-secondary">uses this month</span>
+                  </div>
+                  <div class="keyword-metric">
+                    <span class="keyword-metric-label">Cost</span>
+                    <span class="keyword-metric-value cost">$183.50</span>
+                    <span class="keyword-metric-secondary">total spent</span>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="keyword-performance-item">
+                <div class="keyword-performance-header">
+                  <h3 class="keyword-performance-name">Cafe Carlyle</h3>
+                  <span class="keyword-performance-rank">#4</span>
+                </div>
+                <div class="keyword-performance-metrics">
+                  <div class="keyword-metric">
+                    <span class="keyword-metric-label">Usage</span>
+                    <span class="keyword-metric-value usage">567</span>
+                    <span class="keyword-metric-secondary">uses this month</span>
+                  </div>
+                  <div class="keyword-metric">
+                    <span class="keyword-metric-label">Cost</span>
+                    <span class="keyword-metric-value cost">$141.75</span>
+                    <span class="keyword-metric-secondary">total spent</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="tab-content" id="revenue-content">
+            <div class="keywords-performance-grid">
+              <div class="keyword-performance-item">
+                <div class="keyword-performance-header">
+                  <h3 class="keyword-performance-name">Kusama</h3>
+                  <span class="keyword-performance-rank">#1</span>
+                </div>
+                <div class="keyword-performance-metrics">
+                  <div class="keyword-metric">
+                    <span class="keyword-metric-label">Revenue</span>
+                    <span class="keyword-metric-value revenue">$45,230</span>
+                    <span class="keyword-metric-secondary">this month</span>
+                  </div>
+                  <div class="keyword-metric">
+                    <span class="keyword-metric-label">Growth</span>
+                    <span class="keyword-metric-value trend">+12.3%</span>
+                    <span class="keyword-metric-secondary">vs last month</span>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="keyword-performance-item">
+                <div class="keyword-performance-header">
+                  <h3 class="keyword-performance-name">Bag Capucines</h3>
+                  <span class="keyword-performance-rank">#2</span>
+                </div>
+                <div class="keyword-performance-metrics">
+                  <div class="keyword-metric">
+                    <span class="keyword-metric-label">Revenue</span>
+                    <span class="keyword-metric-value revenue">$32,180</span>
+                    <span class="keyword-metric-secondary">this month</span>
+                  </div>
+                  <div class="keyword-metric">
+                    <span class="keyword-metric-label">Growth</span>
+                    <span class="keyword-metric-value trend">+8.7%</span>
+                    <span class="keyword-metric-secondary">vs last month</span>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="keyword-performance-item">
+                <div class="keyword-performance-header">
+                  <h3 class="keyword-performance-name">Psychedelic Flowers</h3>
+                  <span class="keyword-performance-rank">#3</span>
+                </div>
+                <div class="keyword-performance-metrics">
+                  <div class="keyword-metric">
+                    <span class="keyword-metric-label">Revenue</span>
+                    <span class="keyword-metric-value revenue">$28,950</span>
+                    <span class="keyword-metric-secondary">this month</span>
+                  </div>
+                  <div class="keyword-metric">
+                    <span class="keyword-metric-label">Growth</span>
+                    <span class="keyword-metric-value trend">+15.2%</span>
+                    <span class="keyword-metric-secondary">vs last month</span>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="keyword-performance-item">
+                <div class="keyword-performance-header">
+                  <h3 class="keyword-performance-name">Painted Dots</h3>
+                  <span class="keyword-performance-rank">#4</span>
+                </div>
+                <div class="keyword-performance-metrics">
+                  <div class="keyword-metric">
+                    <span class="keyword-metric-label">Revenue</span>
+                    <span class="keyword-metric-value revenue">$21,470</span>
+                    <span class="keyword-metric-secondary">this month</span>
+                  </div>
+                  <div class="keyword-metric">
+                    <span class="keyword-metric-label">Growth</span>
+                    <span class="keyword-metric-value trend">+6.1%</span>
+                    <span class="keyword-metric-secondary">vs last month</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+    
+    <script>
+      // Dark mode functionality
+      function initDarkMode() {
+        const darkModeToggle = document.getElementById('darkModeToggle');
+        const body = document.body;
+        
+        // Check for saved dark mode preference
+        const isDarkMode = localStorage.getItem('darkMode') === 'true';
+        if (isDarkMode) {
+          body.classList.add('dark-mode');
+        }
+        
+        // Toggle dark mode
+        if (darkModeToggle) {
+          darkModeToggle.addEventListener('click', () => {
+            body.classList.toggle('dark-mode');
+            const isNowDark = body.classList.contains('dark-mode');
+            localStorage.setItem('darkMode', isNowDark);
+          });
+        }
+      }
+
+      // Internals page functionality
+      function refreshDocuments() {
+        const button = event.target.closest('button');
+        const icon = button.querySelector('svg');
+        
+        // Add spinning animation
+        icon.style.animation = 'spin 1s linear';
+        button.disabled = true;
+        
+        // Simulate refresh
+        setTimeout(() => {
+          icon.style.animation = '';
+          button.disabled = false;
+          
+          // Update last accessed times
+          const accessedElements = document.querySelectorAll('.doc-accessed');
+          accessedElements.forEach(el => {
+            el.textContent = 'Last accessed: Just now';
+          });
+        }, 1000);
+      }
+
+      // Document gallery functionality
+      function initDocumentGallery() {
+        const documentItems = document.querySelectorAll('.document-gallery .document-item');
+        const gallery = document.querySelector('.document-gallery');
+        const prevBtn = document.getElementById('gallery-prev');
+        const nextBtn = document.getElementById('gallery-next');
+        
+        // Document click handlers
+        documentItems.forEach(item => {
+          item.addEventListener('click', () => {
+            const docType = item.dataset.doc;
+            const docTitle = item.querySelector('.document-title').textContent;
+            console.log('Opening document from gallery:', docType);
+            
+            // Add click animation
+            item.style.transform = 'translateY(-4px) scale(0.98)';
+            setTimeout(() => {
+              // Reset transform
+              item.style.transform = '';
+            }, 150);
+            
+            // In a real app, this would open the document
+            alert(`Opening ${docTitle}...`);
+          });
+        });
+        
+        // Gallery navigation
+        if (gallery && prevBtn && nextBtn) {
+          const scrollAmount = 420; // Width of one card plus gap
+          
+          // Update button states based on scroll position
+          function updateButtons() {
+            const isAtStart = gallery.scrollLeft <= 0;
+            const isAtEnd = gallery.scrollLeft >= gallery.scrollWidth - gallery.clientWidth - 1;
+            
+            prevBtn.disabled = isAtStart;
+            nextBtn.disabled = isAtEnd;
+          }
+          
+          // Initial button state
+          updateButtons();
+          
+          // Update buttons on scroll
+          gallery.addEventListener('scroll', updateButtons);
+          
+          // Previous button click
+          prevBtn.addEventListener('click', () => {
+            gallery.scrollBy({
+              left: -scrollAmount,
+              behavior: 'smooth'
+            });
+          });
+          
+          // Next button click
+          nextBtn.addEventListener('click', () => {
+            gallery.scrollBy({
+              left: scrollAmount,
+              behavior: 'smooth'
+            });
+          });
+        }
+      }
+
+
+      // Add CSS for spin animation
+      const style = document.createElement('style');
+      style.textContent = `
+        @keyframes spin {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+      `;
+      document.head.appendChild(style);
+      
+      // Tab functionality for Keywords Performance
+      function initKeywordsTabs() {
+        const tabBtns = document.querySelectorAll('.tab-btn');
+        const tabContents = document.querySelectorAll('.tab-content');
+        
+        tabBtns.forEach(btn => {
+          btn.addEventListener('click', () => {
+            const targetTab = btn.dataset.tab;
+            
+            // Remove active class from all tabs and content
+            tabBtns.forEach(b => b.classList.remove('active'));
+            tabContents.forEach(c => c.classList.remove('active'));
+            
+            // Add active class to clicked tab and corresponding content
+            btn.classList.add('active');
+            document.getElementById(`${targetTab}-content`).classList.add('active');
+          });
+        });
+      }
+
+      // Initialize when DOM is ready
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', () => {
+          initDarkMode();
+          initDocumentGallery();
+          initKeywordsTabs();
+        });
+      } else {
+        initDarkMode();
+        initDocumentGallery();
+        initKeywordsTabs();
+      }
+    </script>
+    <script src="scripts/auth.js"></script>
+  </body>
+</html>

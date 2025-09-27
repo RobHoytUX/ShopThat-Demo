@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>shopThat — Manage Keywords</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles/main.css?v=1">
+    <link rel="stylesheet" href="styles/dashboard.css?v=1">
+  </head>
+  <body class="app app--keywords">
+    <aside class="sidebar" aria-label="Primary">
+      <div class="sidebar__brand"><img src="assets/logo.svg" alt="shopThat" /><span>shopThat</span></div>
+      <nav class="sidebar__nav">
+        <a href="/dashboard.html">Dashboard</a>
+        <a class="is-active" href="/keywords.html">Keywords</a>
+        <a href="/internals.html">Internals</a>
+        <a href="/publishers.html">Publishers</a>
+        <a href="/open-source.html" aria-disabled="true">Open source</a>
+        <a href="/products.html">Products</a>
+        <a href="/financials.html">Financials</a>
+        <a href="/settings.html" aria-disabled="true">Settings</a>
+        <a href="#" aria-disabled="true">Sign Out</a>
+      </nav>
+    </aside>
+
+    <header class="appbar" role="banner">
+      <div class="appbar__inner">
+        <h1 class="appbar__title">
+          <span class="appbar__title-row">Manage Keywords
+            <a class="icon-btn icon-btn--sm" id="backBtn" aria-label="Back" title="Back">←</a>
+          </span>
+        </h1>
+        <div></div>
+        <div class="appbar__account">
+          <span class="locale">Eng (US)</span>
+          <button class="icon-btn" aria-label="Notifications" title="Notifications">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9"/>
+              <path d="M13.73 21a2 2 0 01-3.46 0"/>
+            </svg>
+          </button>
+          <button class="icon-btn" id="darkModeToggle" aria-label="Toggle dark mode" title="Toggle dark mode">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="12" cy="12" r="5"/>
+              <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+            </svg>
+          </button>
+          <div class="avatar" role="img" aria-label="Person, Admin"></div>
+        </div>
+      </div>
+    </header>
+
+    <main id="main" class="keywords" role="main">
+      <section class="toolbar" aria-label="Keyword management controls">
+        <div class="toolbar__left">
+          <div class="control-group">
+            <label class="sr-only" for="mk-search">Search keywords</label>
+            <input id="mk-search" class="input input--compact" type="search" placeholder="Search keywords" />
+            <button type="button" id="mk-search-clear" class="btn btn--secondary">Clear</button>
+          </div>
+        </div>
+        <div class="toolbar__right">
+          <div class="control-group">
+            <label class="sr-only" for="mk-name">Keyword name</label>
+            <input id="mk-name" class="input input--compact" type="text" placeholder="Add new keyword" />
+            <label class="sr-only" for="mk-level">Keyword level</label>
+            <select id="mk-level" class="select select--compact">
+              <option value="1">Top Level</option>
+              <option value="2">Connected</option>
+              <option value="3">Secondary</option>
+              <option value="4">Isolated</option>
+            </select>
+            <button id="mk-add" class="btn btn--primary" type="button">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="16"></line>
+                <line x1="8" y1="12" x2="16" y2="12"></line>
+              </svg>
+              Add Keyword
+            </button>
+          </div>
+          <div class="control-group">
+            <button id="mk-clear" class="btn btn--secondary" type="button">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="3,6 5,6 21,6"></polyline>
+                <path d="M19,6v14a2,2,0,0,1-2,2H7a2,2,0,0,1-2-2V6m3,0V4a2,2,0,0,1,2-2h4a2,2,0,0,1,2,2v2"></path>
+              </svg>
+              Clear All
+            </button>
+            <a class="btn btn--primary" href="/keywords.html">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                <circle cx="12" cy="12" r="3"></circle>
+              </svg>
+              View Graph
+            </a>
+          </div>
+        </div>
+      </section>
+      <div class="keywords-gallery">
+        <div id="mk-list" class="keywords-grid"></div>
+      </div>
+    </main>
+
+    <script src="scripts/shared-data.js"></script>
+    <script src="scripts/keywords-manage.js" defer></script>
+    <script>
+      // Back button functionality
+      document.addEventListener('DOMContentLoaded', function() {
+        const backBtn = document.getElementById('backBtn');
+        if (backBtn) {
+          backBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            // Check if user came from keywords.html or dashboard.html
+            const referrer = document.referrer;
+            if (referrer.includes('/keywords.html')) {
+              window.location.href = '/keywords.html';
+            } else {
+              // Default to dashboard if came from dashboard or direct access
+              window.location.href = '/dashboard.html';
+            }
+          });
+        }
+        
+        // Dark mode functionality
+        const darkModeToggle = document.getElementById('darkModeToggle');
+        const body = document.body;
+        
+        // Check for saved dark mode preference
+        const isDarkMode = localStorage.getItem('darkMode') === 'true';
+        if (isDarkMode) {
+          body.classList.add('dark-mode');
+        }
+        
+        // Toggle dark mode
+        if (darkModeToggle) {
+          darkModeToggle.addEventListener('click', () => {
+            body.classList.toggle('dark-mode');
+            const isNowDark = body.classList.contains('dark-mode');
+            localStorage.setItem('darkMode', isNowDark);
+          });
+        }
+      });
+    </script>
+  </body>
+  </html>
+
+

@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>shopThat — Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles/main.css?v=1">
+    <link rel="stylesheet" href="styles/dashboard.css?v=1">
+  </head>
+  <body class="app app--dashboard">
+    <aside class="sidebar" aria-label="Primary">
+      <div class="sidebar__brand">
+        <span>shopThat</span>
+      </div>
+      <div class="sidebar__campaign-btn">
+        <a href="/campaigns.html" class="btn btn--primary btn--campaign">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/>
+            <path d="M12 8v8M8 12h8"/>
+          </svg>
+          Campaigns
+        </a>
+      </div>
+      <nav class="sidebar__nav">
+        <a class="is-active" href="/dashboard.html">Dashboard</a>
+        <a href="/keywords.html">Keywords</a>
+        <a href="/internals.html">Internals</a>
+        <a href="/publishers.html">Publishers</a>
+        <a href="/open-source.html" aria-disabled="true">Open source</a>
+        <a href="/products.html">Products</a>
+        <a href="/financials.html">Financials</a>
+        <a href="/settings.html" aria-disabled="true">Settings</a>
+        <a href="#" id="signOutLink">Sign Out</a>
+      </nav>
+    </aside>
+
+    <header class="appbar" role="banner">
+      <div class="appbar__inner">
+        <h1 class="appbar__title">Dashboard</h1>
+        <div class="appbar__search">
+          <input type="search" placeholder="Search here..." aria-label="Search" />
+        </div>
+        <div class="appbar__account">
+          <span class="locale">Eng (US)</span>
+          <button class="icon-btn" aria-label="Notifications" title="Notifications">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9"/>
+              <path d="M13.73 21a2 2 0 01-3.46 0"/>
+            </svg>
+          </button>
+          <button class="icon-btn" id="darkModeToggle" aria-label="Toggle dark mode" title="Toggle dark mode">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="12" cy="12" r="5"/>
+              <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+            </svg>
+          </button>
+          <div class="avatar" role="img" aria-label="Person, Admin"></div>
+        </div>
+      </div>
+    </header>
+
+    <main id="main" class="dashboard" role="main">
+      <section class="toolbar" aria-label="Filters">
+        <div class="toolbar__left">
+          <div class="demo-toggle">
+            <label class="toggle-switch">
+              <input type="checkbox" id="investorMode" />
+              <span class="toggle-slider"></span>
+              <span class="toggle-label">Investor Demo Mode</span>
+            </label>
+          </div>
+          <label class="sr-only" for="range">Time range</label>
+          <select id="range" class="select select--styled">
+            <option value="week">This Week</option>
+            <option value="month" selected>This Month</option>
+            <option value="quarter">Last 3 Months</option>
+            <option value="year">Year to date</option>
+          </select>
+          <button type="button" id="resetDashboard" class="btn btn--secondary" aria-label="Reset filters">Reset</button>
+        </div>
+        <div class="toolbar__right">
+        </div>
+      </section>
+      <!-- RPV and Industry Context Section -->
+      <section class="grid rpv-section" aria-label="Revenue and Industry Context">
+        <article class="card rpv-card">
+          <div class="card__header">
+            <h2>Revenue Per View (RPV) & Industry Context</h2>
+            <button class="icon-btn icon-btn--sm" id="rpv-info" aria-label="RPV Information" title="View RPV Details">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"/>
+                <path d="m9,9 0,0a3,3 0 1,1 6,0c0,2 -3,3 -3,3"/>
+                <path d="M12,17 L12.01,17"/>
+              </svg>
+            </button>
+          </div>
+          
+          <div class="rpv-three-column-layout">
+            <!-- Section 1: Current RPV Data -->
+            <div class="rpv-section-1">
+              <div class="section-header">
+                <h3>Current Performance</h3>
+              </div>
+              <div class="rpv-metrics">
+                <div class="metric-item">
+                  <span class="metric-label">Average RPV</span>
+                  <span class="metric-value rpv-green">$0.25</span>
+                  <span class="metric-unit">per article use</span>
+                </div>
+                <div class="metric-item">
+                  <span class="metric-label">Payment Ceiling</span>
+                  <span class="metric-value ceiling-red">$3,000</span>
+                  <span class="metric-unit">per article</span>
+                </div>
+              </div>
+              <div class="rpv-progress">
+                <div class="progress-bar">
+                  <div class="progress-fill" style="width: 8.33%"></div>
+                </div>
+                <span class="progress-text">$250 of $3,000 ceiling reached</span>
+              </div>
+            </div>
+            
+            <!-- Section 2: Industry Benchmarks -->
+            <div class="rpv-section-2">
+              <div class="section-header">
+                <h3>Industry Benchmarks</h3>
+              </div>
+              <!-- Default view: text-based benchmarks -->
+              <div class="benchmark-stats default-benchmarks">
+                <div class="benchmark-item traditional">
+                  <span class="benchmark-label">Traditional RPV $0.0002 ($5-50 per mille)</span>
+                </div>
+                <div class="benchmark-item ai-deals">
+                  <span class="benchmark-label">AI Publisher Deals $3,000 avg per article/year</span>
+                </div>
+              </div>
+              <!-- Investor Demo Mode view: metric-style layout -->
+              <div class="benchmark-metrics investor-benchmarks" style="display: none;">
+                <div class="metric-item">
+                  <span class="metric-label">Traditional RPV</span>
+                  <span class="metric-value traditional-gray">$0.0002</span>
+                  <span class="metric-unit">($5-50 per mille)</span>
+                </div>
+                <div class="metric-item">
+                  <span class="metric-label">AI Publisher Deals</span>
+                  <span class="metric-value ai-deals-red">$3,000</span>
+                  <span class="metric-unit">avg per article/year</span>
+                </div>
+              </div>
+              <div class="improvement-indicator">
+                <span class="improvement-text">1,250x increase over traditional</span>
+              </div>
+            </div>
+            
+            <!-- Section 3: Recent Major Deals -->
+            <div class="rpv-section-3">
+              <div class="section-header">
+                <h3>Recent Major Deals</h3>
+              </div>
+              <div class="deals-list">
+                <div class="deal-item">
+                  <span class="deal-companies">Apple + OpenAI → CondeNast</span>
+                  <span class="deal-amount">$50M multi-year</span>
+                </div>
+                <div class="deal-item">
+                  <span class="deal-companies">Meta AI → Publishers</span>
+                  <span class="deal-amount">$1-5M each</span>
+                </div>
+                <div class="deal-item">
+                  <span class="deal-companies">Google AI → Content Partners</span>
+                  <span class="deal-amount">Similar structures</span>
+                </div>
+              </div>
+              <div class="deal-context">
+                <span class="context-text">These deals justify our $0.25/use model</span>
+              </div>
+            </div>
+          </div>
+        </article>
+      </section>
+
+      <section class="grid kpis" aria-label="Sales summary">
+        <article class="card top-keywords">
+          <div class="card__header">
+            <h2>Top keywords</h2>
+            <div class="card__actions">
+              <label class="sr-only" for="kwSearch">Filter top keywords</label>
+              <input id="kwSearch" class="input input--compact" type="search" placeholder="Filter keywords" />
+              <a class="btn btn--primary" href="/keywords.html" id="view-keywords">View keywords</a>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead><tr><th>Keyword name</th><th>Revenue</th><th>Engagement</th></tr></thead>
+              <tbody id="top-keywords-body"></tbody>
+            </table>
+          </div>
+        </article>
+        <article class="card quick-chatbot-card" style="padding-top: 2px !important;">
+          <div class="card__header" style="margin-bottom: 4px !important;"><h2 style="margin: -48px 0 0 0 !important; padding: 0 !important;">Quick chatbot overview</h2></div>
+          <ul class="stats" id="bot-overview" style="margin-top: -32px !important;"></ul>
+        </article>
+      </section>
+
+      <section class="grid charts">
+        <article class="card">
+          <div class="card__header"><h2>Revenue vs. data spend</h2></div>
+          <canvas id="barChart" height="120"></canvas>
+        </article>
+        <article class="card">
+          <div class="card__header"><h2>Revenue trends</h2></div>
+          <canvas id="lineChart" height="120"></canvas>
+        </article>
+        <article class="card card--categories">
+          <div class="card__header"><h2>Categories spend</h2></div>
+          <canvas id="categoriesChart"></canvas>
+        </article>
+      </section>
+
+      <section class="grid lower">
+        <article class="card">
+          <div class="card__header">
+            <h2>Document access</h2>
+            <div class="card__tabs">
+              <button class="tab-btn active" data-tab="trending">Trending Articles</button>
+              <button class="tab-btn" data-tab="new-content">New Content</button>
+            </div>
+          </div>
+          <div class="card__content">
+            <div class="tab-content active" id="trending-articles">
+              <div class="articles-list"></div>
+            </div>
+            <div class="tab-content" id="new-content-articles">
+              <div class="articles-list"></div>
+            </div>
+          </div>
+        </article>
+        <article class="card ecommerce-section">
+          <div class="card__header">
+            <h2 style="margin: -60px 0 0 0 !important; padding: 0 !important;">E-Commerce</h2>
+            <div class="card__actions" style="margin: -52px 0 0 0 !important; padding: 0 !important;">
+              <div class="chip">Louis Vuitton Campaign</div>
+            </div>
+          </div>
+          <div class="ecommerce-products" id="ecommerce-products" style="margin: -42px 0 0 0 !important; padding: 0 !important;">
+            <!-- Products will be populated by JavaScript -->
+          </div>
+        </article>
+      </section>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script src="scripts/shared-data.js"></script>
+    <script src="scripts/dashboard.js" defer></script>
+    <script src="scripts/auth.js"></script>
+  </body>
+</html>
+
+
