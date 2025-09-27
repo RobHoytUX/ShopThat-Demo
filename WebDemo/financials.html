@@ -19,7 +19,7 @@
         <a href="/dashboard.html">Dashboard</a>
         <a href="/keywords.html">Keywords</a>
         <a href="/internals.html">Internals</a>
-        <a href="/publishers.html" aria-disabled="true">Publishers</a>
+        <a href="/publishers.html">Publishers</a>
         <a href="/open-source.html" aria-disabled="true">Open source</a>
         <a href="/products.html">Products</a>
         <a class="is-active" href="/financials.html">Financials</a>
@@ -73,9 +73,9 @@
         </div>
       </div>
 
-      <!-- First Row - Spend and Metrics -->
-      <div class="grid kpis-investor-style">
-        <!-- Monthly Spend Circle (no card wrapper) -->
+      <!-- First Row - Spend Circle and Performance Metrics -->
+      <div class="financials-top-row">
+        <!-- Monthly Spend Circle -->
         <div class="spend-circle-standalone">
           <div class="spend-circle">
             <div class="spend-amount">$20,000</div>
@@ -89,71 +89,152 @@
           </div>
         </div>
 
-        <!-- Combined Performance & Engagement Metrics -->
-        <div class="rpv-section-combined">
-          <div class="section-header">
-            <h3>Performance & Engagement Metrics</h3>
+        <!-- Performance & Engagement Metrics Card -->
+        <div class="card performance-metrics-card">
+          <div class="card__header">
+            <h2>Performance & Engagement Metrics</h2>
           </div>
-          <div class="combined-metrics">
-            <div class="metric-item">
-              <div class="metric-label">Publisher Led Conversions</div>
-              <div class="metric-value rpv-green">1000</div>
+          <div class="rpv-three-column-layout performance-metrics-grid">
+            <!-- Column 1: Conversions -->
+            <div class="rpv-section-1">
+              <div class="rpv-metrics">
+                <div class="metric-item">
+                  <span class="metric-label">Publisher Led Conversions</span>
+                  <span class="metric-value rpv-green">1000</span>
+                  <span class="metric-unit">conversions</span>
+                </div>
+                <div class="metric-item">
+                  <span class="metric-label">Cost Per Conversion</span>
+                  <span class="metric-value">$1.25</span>
+                  <span class="metric-unit">1.5% improvement</span>
+                </div>
+              </div>
             </div>
-            <div class="metric-item">
-              <div class="metric-label">Cost Per Conversion</div>
-              <div class="metric-value">$1.25</div>
-              <div class="metric-unit">1.5% improvement</div>
+            
+            <!-- Column 2: Engagement -->
+            <div class="rpv-section-2">
+              <div class="benchmark-metrics">
+                <div class="metric-item">
+                  <span class="metric-label">Keyword Click in Chatbot</span>
+                  <span class="metric-value ai-deals-red">200,000</span>
+                  <span class="metric-unit">total clicks</span>
+                </div>
+                <div class="metric-item">
+                  <span class="metric-label">Click Percentage</span>
+                  <span class="metric-value traditional-gray">20%</span>
+                  <span class="metric-unit">click rate</span>
+                </div>
+              </div>
             </div>
-            <div class="metric-item">
-              <div class="metric-label">Keyword Click in Chatbot</div>
-              <div class="metric-value">200,000</div>
-            </div>
-            <div class="metric-item">
-              <div class="metric-label">Click Percentage</div>
-              <div class="metric-value">20%</div>
-            </div>
-            <div class="metric-item">
-              <div class="metric-label">Average Cost</div>
-              <div class="metric-value">$0.02</div>
+            
+            <!-- Column 3: Cost -->
+            <div class="rpv-section-1">
+              <div class="rpv-metrics">
+                <div class="metric-item">
+                  <span class="metric-label">Average Cost</span>
+                  <span class="metric-value rpv-green">$0.02</span>
+                  <span class="metric-unit">per click</span>
+                </div>
+              </div>
+              <div class="improvement-indicator">
+                <span class="improvement-text">Cost per click optimization active</span>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Second Row - Publishers Full Width -->
-      <div class="grid publishers-top">
-        <div class="card publishers-card-top">
-          <div class="card__header">
-            <h2>Publishers Metrics</h2>
+      <!-- Second Row - Publishers Metrics -->
+      <section class="card publishers-metrics">
+        <div class="card__header">
+          <h2>Publishers Metrics</h2>
+        </div>
+        <div class="keywords-performance-grid">
+          <div class="keyword-performance-item highlighted-metric">
+            <div class="keyword-performance-header">
+              <h3 class="keyword-performance-name">Top Articles</h3>
+              <span class="keyword-performance-rank">Featured</span>
+            </div>
+            <div class="keyword-performance-metrics">
+              <div class="keyword-metric">
+                <span class="keyword-metric-label">Publishers</span>
+                <span class="keyword-metric-value">Vogue, WWD, InStyle</span>
+                <span class="keyword-metric-secondary">leading sources</span>
+              </div>
+            </div>
           </div>
-          <div class="publishers-content-top">
-            <div class="publishers-section highlighted">
-              <div class="section-title">Top Articles</div>
-              <div class="section-content">Vogue, WWD, InStyle</div>
+          
+          <div class="keyword-performance-item">
+            <div class="keyword-performance-header">
+              <h3 class="keyword-performance-name">Highest Cost Articles</h3>
+              <span class="keyword-performance-rank">Cost</span>
             </div>
-            <div class="publishers-section">
-              <div class="section-title">Highest Cost Articles</div>
-              <div class="section-content numeric">$ 2</div>
+            <div class="keyword-performance-metrics">
+              <div class="keyword-metric">
+                <span class="keyword-metric-label">Amount</span>
+                <span class="keyword-metric-value cost">$2</span>
+                <span class="keyword-metric-secondary">per article</span>
+              </div>
             </div>
-            <div class="publishers-section">
-              <div class="section-title">Highest Cost Keyword</div>
-              <div class="section-content numeric">$ 0.50</div>
+          </div>
+          
+          <div class="keyword-performance-item">
+            <div class="keyword-performance-header">
+              <h3 class="keyword-performance-name">Highest Cost Keyword</h3>
+              <span class="keyword-performance-rank">Cost</span>
             </div>
-            <div class="publishers-section">
-              <div class="section-title">Conversion For Internal Data</div>
-              <div class="section-content numeric">2%</div>
+            <div class="keyword-performance-metrics">
+              <div class="keyword-metric">
+                <span class="keyword-metric-label">Amount</span>
+                <span class="keyword-metric-value cost">$0.50</span>
+                <span class="keyword-metric-secondary">per keyword</span>
+              </div>
             </div>
-            <div class="publishers-section">
-              <div class="section-title">Conversion for External Data</div>
-              <div class="section-content numeric">3%</div>
+          </div>
+          
+          <div class="keyword-performance-item">
+            <div class="keyword-performance-header">
+              <h3 class="keyword-performance-name">Internal Data Conversion</h3>
+              <span class="keyword-performance-rank">Rate</span>
             </div>
-            <div class="publishers-section highlighted">
-              <div class="section-title">Top Publisher Led Conversions</div>
-              <div class="section-content">Vogue, WWD, InStyle</div>
+            <div class="keyword-performance-metrics">
+              <div class="keyword-metric">
+                <span class="keyword-metric-label">Conversion</span>
+                <span class="keyword-metric-value usage">2%</span>
+                <span class="keyword-metric-secondary">internal sources</span>
+              </div>
+            </div>
+          </div>
+          
+          <div class="keyword-performance-item">
+            <div class="keyword-performance-header">
+              <h3 class="keyword-performance-name">External Data Conversion</h3>
+              <span class="keyword-performance-rank">Rate</span>
+            </div>
+            <div class="keyword-performance-metrics">
+              <div class="keyword-metric">
+                <span class="keyword-metric-label">Conversion</span>
+                <span class="keyword-metric-value usage">3%</span>
+                <span class="keyword-metric-secondary">external sources</span>
+              </div>
+            </div>
+          </div>
+          
+          <div class="keyword-performance-item highlighted-metric">
+            <div class="keyword-performance-header">
+              <h3 class="keyword-performance-name">Top Conversions</h3>
+              <span class="keyword-performance-rank">Leaders</span>
+            </div>
+            <div class="keyword-performance-metrics">
+              <div class="keyword-metric">
+                <span class="keyword-metric-label">Publishers</span>
+                <span class="keyword-metric-value">Vogue, WWD, InStyle</span>
+                <span class="keyword-metric-secondary">conversion leaders</span>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      </section>
 
       <!-- Charts Row (full width) -->
       <div class="grid charts-fullwidth">
@@ -332,54 +413,49 @@
         const spendAmount = document.querySelector('.spend-amount');
         if (spendAmount) spendAmount.textContent = data.spend;
 
-        // Update combined performance & engagement metrics
-        const combinedMetrics = document.querySelectorAll('.combined-metrics .metric-item');
-        if (combinedMetrics.length >= 5) {
+        // Update performance & engagement metrics in the new card structure
+        const performanceMetrics = document.querySelectorAll('.performance-metrics-grid .metric-item');
+        if (performanceMetrics.length >= 5) {
           // Publisher Led Conversions
-          combinedMetrics[0].querySelector('.metric-value').textContent = data.conversions;
+          performanceMetrics[0].querySelector('.metric-value').textContent = data.conversions;
           
           // Cost Per Conversion
-          combinedMetrics[1].querySelector('.metric-value').textContent = data.costPerConversion;
-          combinedMetrics[1].querySelector('.metric-unit').textContent = data.improvement + ' improvement';
+          performanceMetrics[1].querySelector('.metric-value').textContent = data.costPerConversion;
+          performanceMetrics[1].querySelector('.metric-unit').textContent = data.improvement + ' improvement';
           
           // Keyword Click in Chatbot
-          combinedMetrics[2].querySelector('.metric-value').textContent = data.chatbotClicks;
+          performanceMetrics[2].querySelector('.metric-value').textContent = data.chatbotClicks;
           
           // Click Percentage
-          combinedMetrics[3].querySelector('.metric-value').textContent = data.clickPercentage;
+          performanceMetrics[3].querySelector('.metric-value').textContent = data.clickPercentage;
           
-          // Average Cost
-          combinedMetrics[4].querySelector('.metric-value').textContent = data.avgCost;
+          // Average Cost - this is now in the metric-value element
+          const avgCostElement = document.querySelector('.performance-metrics-grid .rpv-section-1:last-child .metric-value');
+          if (avgCostElement) {
+            avgCostElement.textContent = data.avgCost;
+          }
         }
 
-        // Update publishers data
-        const publisherSections = document.querySelectorAll('.publishers-section');
-        if (publisherSections.length >= 6) {
-          // Top Articles (text only - no numeric class)
-          publisherSections[0].querySelector('.section-content').textContent = data.publishers.topArticles;
+        // Update publishers data in the new card structure
+        const publisherCards = document.querySelectorAll('.publishers-metrics .keyword-performance-item');
+        if (publisherCards.length >= 6) {
+          // Top Articles
+          publisherCards[0].querySelector('.keyword-metric-value').textContent = data.publishers.topArticles;
           
-          // Highest Cost Articles (numeric)
-          const highestCostEl = publisherSections[1].querySelector('.section-content');
-          highestCostEl.textContent = data.publishers.highestCost;
-          highestCostEl.classList.add('numeric');
+          // Highest Cost Articles
+          publisherCards[1].querySelector('.keyword-metric-value').textContent = data.publishers.highestCost;
           
-          // Highest Cost Keyword (numeric)
-          const highestKeywordEl = publisherSections[2].querySelector('.section-content');
-          highestKeywordEl.textContent = data.publishers.highestKeyword;
-          highestKeywordEl.classList.add('numeric');
+          // Highest Cost Keyword
+          publisherCards[2].querySelector('.keyword-metric-value').textContent = data.publishers.highestKeyword;
           
-          // Internal Conversion (numeric)
-          const internalEl = publisherSections[3].querySelector('.section-content');
-          internalEl.textContent = data.publishers.internalConversion;
-          internalEl.classList.add('numeric');
+          // Internal Conversion
+          publisherCards[3].querySelector('.keyword-metric-value').textContent = data.publishers.internalConversion;
           
-          // External Conversion (numeric)
-          const externalEl = publisherSections[4].querySelector('.section-content');
-          externalEl.textContent = data.publishers.externalConversion;
-          externalEl.classList.add('numeric');
+          // External Conversion
+          publisherCards[4].querySelector('.keyword-metric-value').textContent = data.publishers.externalConversion;
           
-          // Top Conversions (text only - no numeric class)
-          publisherSections[5].querySelector('.section-content').textContent = data.publishers.topConversions;
+          // Top Conversions
+          publisherCards[5].querySelector('.keyword-metric-value').textContent = data.publishers.topConversions;
         }
 
         // Update charts if needed (placeholder for future enhancement)
