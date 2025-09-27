@@ -54,7 +54,617 @@
     </header>
 
     <main id="main" class="dashboard" role="main">
-      
+      <!-- Top Paid Publishers Section -->
+      <section class="card publishers-metrics">
+        <div class="card__header">
+          <h2>Top Paid Publishers</h2>
+          <div class="card__actions">
+            <select class="select--styled" id="publishersTimeframe">
+              <option value="7d">Last 7 days</option>
+              <option value="30d" selected>Last 30 days</option>
+              <option value="90d">Last 90 days</option>
+            </select>
+          </div>
+        </div>
+        
+        <div class="keywords-performance-grid">
+          <div class="keyword-performance-item">
+            <div class="keyword-performance-header">
+              <h3 class="keyword-performance-name">Conde Nast</h3>
+              <span class="keyword-performance-rank">#1</span>
+            </div>
+            <div class="keyword-performance-metrics">
+              <div class="keyword-metric">
+                <span class="keyword-metric-label">Articles Used</span>
+                <span class="keyword-metric-value usage">2,847</span>
+                <span class="keyword-metric-secondary">this month</span>
+              </div>
+              <div class="keyword-metric">
+                <span class="keyword-metric-label">Total Paid</span>
+                <span class="keyword-metric-value cost">$711.75</span>
+                <span class="keyword-metric-secondary">this month</span>
+              </div>
+            </div>
+          </div>
+          
+          <div class="keyword-performance-item">
+            <div class="keyword-performance-header">
+              <h3 class="keyword-performance-name">David Zwirner</h3>
+              <span class="keyword-performance-rank">#2</span>
+            </div>
+            <div class="keyword-performance-metrics">
+              <div class="keyword-metric">
+                <span class="keyword-metric-label">Articles Used</span>
+                <span class="keyword-metric-value usage">1,923</span>
+                <span class="keyword-metric-secondary">this month</span>
+              </div>
+              <div class="keyword-metric">
+                <span class="keyword-metric-label">Total Paid</span>
+                <span class="keyword-metric-value cost">$480.75</span>
+                <span class="keyword-metric-secondary">this month</span>
+              </div>
+            </div>
+          </div>
+          
+          <div class="keyword-performance-item">
+            <div class="keyword-performance-header">
+              <h3 class="keyword-performance-name">Penske</h3>
+              <span class="keyword-performance-rank">#3</span>
+            </div>
+            <div class="keyword-performance-metrics">
+              <div class="keyword-metric">
+                <span class="keyword-metric-label">Articles Used</span>
+                <span class="keyword-metric-value usage">1,567</span>
+                <span class="keyword-metric-secondary">this month</span>
+              </div>
+              <div class="keyword-metric">
+                <span class="keyword-metric-label">Total Paid</span>
+                <span class="keyword-metric-value cost">$391.75</span>
+                <span class="keyword-metric-secondary">this month</span>
+              </div>
+            </div>
+          </div>
+          
+          <div class="keyword-performance-item">
+            <div class="keyword-performance-header">
+              <h3 class="keyword-performance-name">Meredith DotDash</h3>
+              <span class="keyword-performance-rank">#4</span>
+            </div>
+            <div class="keyword-performance-metrics">
+              <div class="keyword-metric">
+                <span class="keyword-metric-label">Articles Used</span>
+                <span class="keyword-metric-value usage">1,234</span>
+                <span class="keyword-metric-secondary">this month</span>
+              </div>
+              <div class="keyword-metric">
+                <span class="keyword-metric-label">Total Paid</span>
+                <span class="keyword-metric-value cost">$308.50</span>
+                <span class="keyword-metric-secondary">this month</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Top Grossing Publishers Section -->
+      <section class="card publishers-metrics">
+        <div class="card__header">
+          <h2>Top Grossing Publishers</h2>
+          <div class="card__actions">
+            <div class="card__tabs">
+              <button class="tab-btn active" data-tab="revenue">Revenue</button>
+              <button class="tab-btn" data-tab="growth">Growth</button>
+            </div>
+          </div>
+        </div>
+        
+        <div class="card__content">
+          <div class="tab-content active" id="revenue-content">
+            <div class="keywords-performance-grid">
+              <div class="keyword-performance-item">
+                <div class="keyword-performance-header">
+                  <h3 class="keyword-performance-name">MeredithDotDash</h3>
+                  <span class="keyword-performance-rank">#1</span>
+                </div>
+                <div class="keyword-performance-metrics">
+                  <div class="keyword-metric">
+                    <span class="keyword-metric-label">Revenue</span>
+                    <span class="keyword-metric-value revenue">$89,230</span>
+                    <span class="keyword-metric-secondary">this month</span>
+                  </div>
+                  <div class="keyword-metric">
+                    <span class="keyword-metric-label">Articles</span>
+                    <span class="keyword-metric-value usage">3,247</span>
+                    <span class="keyword-metric-secondary">published</span>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="keyword-performance-item">
+                <div class="keyword-performance-header">
+                  <h3 class="keyword-performance-name">Hearst</h3>
+                  <span class="keyword-performance-rank">#2</span>
+                </div>
+                <div class="keyword-performance-metrics">
+                  <div class="keyword-metric">
+                    <span class="keyword-metric-label">Revenue</span>
+                    <span class="keyword-metric-value revenue">$67,180</span>
+                    <span class="keyword-metric-secondary">this month</span>
+                  </div>
+                  <div class="keyword-metric">
+                    <span class="keyword-metric-label">Articles</span>
+                    <span class="keyword-metric-value usage">2,890</span>
+                    <span class="keyword-metric-secondary">published</span>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="keyword-performance-item">
+                <div class="keyword-performance-header">
+                  <h3 class="keyword-performance-name">CondeNast</h3>
+                  <span class="keyword-performance-rank">#3</span>
+                </div>
+                <div class="keyword-performance-metrics">
+                  <div class="keyword-metric">
+                    <span class="keyword-metric-label">Revenue</span>
+                    <span class="keyword-metric-value revenue">$52,950</span>
+                    <span class="keyword-metric-secondary">this month</span>
+                  </div>
+                  <div class="keyword-metric">
+                    <span class="keyword-metric-label">Articles</span>
+                    <span class="keyword-metric-value usage">2,234</span>
+                    <span class="keyword-metric-secondary">published</span>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="keyword-performance-item">
+                <div class="keyword-performance-header">
+                  <h3 class="keyword-performance-name">Penske</h3>
+                  <span class="keyword-performance-rank">#4</span>
+                </div>
+                <div class="keyword-performance-metrics">
+                  <div class="keyword-metric">
+                    <span class="keyword-metric-label">Revenue</span>
+                    <span class="keyword-metric-value revenue">$41,470</span>
+                    <span class="keyword-metric-secondary">this month</span>
+                  </div>
+                  <div class="keyword-metric">
+                    <span class="keyword-metric-label">Articles</span>
+                    <span class="keyword-metric-value usage">1,890</span>
+                    <span class="keyword-metric-secondary">published</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="tab-content" id="growth-content">
+            <div class="keywords-performance-grid">
+              <div class="keyword-performance-item">
+                <div class="keyword-performance-header">
+                  <h3 class="keyword-performance-name">CondeNast</h3>
+                  <span class="keyword-performance-rank">#1</span>
+                </div>
+                <div class="keyword-performance-metrics">
+                  <div class="keyword-metric">
+                    <span class="keyword-metric-label">Growth</span>
+                    <span class="keyword-metric-value trend">+24.3%</span>
+                    <span class="keyword-metric-secondary">vs last month</span>
+                  </div>
+                  <div class="keyword-metric">
+                    <span class="keyword-metric-label">New Articles</span>
+                    <span class="keyword-metric-value usage">+547</span>
+                    <span class="keyword-metric-secondary">this month</span>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="keyword-performance-item">
+                <div class="keyword-performance-header">
+                  <h3 class="keyword-performance-name">Hearst</h3>
+                  <span class="keyword-performance-rank">#2</span>
+                </div>
+                <div class="keyword-performance-metrics">
+                  <div class="keyword-metric">
+                    <span class="keyword-metric-label">Growth</span>
+                    <span class="keyword-metric-value trend">+18.7%</span>
+                    <span class="keyword-metric-secondary">vs last month</span>
+                  </div>
+                  <div class="keyword-metric">
+                    <span class="keyword-metric-label">New Articles</span>
+                    <span class="keyword-metric-value usage">+423</span>
+                    <span class="keyword-metric-secondary">this month</span>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="keyword-performance-item">
+                <div class="keyword-performance-header">
+                  <h3 class="keyword-performance-name">Penske</h3>
+                  <span class="keyword-performance-rank">#3</span>
+                </div>
+                <div class="keyword-performance-metrics">
+                  <div class="keyword-metric">
+                    <span class="keyword-metric-label">Growth</span>
+                    <span class="keyword-metric-value trend">+15.2%</span>
+                    <span class="keyword-metric-secondary">vs last month</span>
+                  </div>
+                  <div class="keyword-metric">
+                    <span class="keyword-metric-label">New Articles</span>
+                    <span class="keyword-metric-value usage">+289</span>
+                    <span class="keyword-metric-secondary">this month</span>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="keyword-performance-item">
+                <div class="keyword-performance-header">
+                  <h3 class="keyword-performance-name">MeredithDotDash</h3>
+                  <span class="keyword-performance-rank">#4</span>
+                </div>
+                <div class="keyword-performance-metrics">
+                  <div class="keyword-metric">
+                    <span class="keyword-metric-label">Growth</span>
+                    <span class="keyword-metric-value trend">+12.1%</span>
+                    <span class="keyword-metric-secondary">vs last month</span>
+                  </div>
+                  <div class="keyword-metric">
+                    <span class="keyword-metric-label">New Articles</span>
+                    <span class="keyword-metric-value usage">+234</span>
+                    <span class="keyword-metric-secondary">this month</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Top Paid Articles Section -->
+      <section class="card internals-documents">
+        <div class="card__header">
+          <h2>Top Paid Articles</h2>
+          <div class="card__actions">
+            <button class="gallery-nav-btn" id="articles-prev" aria-label="Previous articles">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <polyline points="15,18 9,12 15,6"></polyline>
+              </svg>
+            </button>
+            <button class="gallery-nav-btn" id="articles-next" aria-label="Next articles">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <polyline points="9,18 15,12 9,6"></polyline>
+              </svg>
+            </button>
+            <button class="btn btn--secondary" onclick="refreshArticles()">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="23 4 23 10 17 10"></polyline>
+                <polyline points="1 20 1 14 7 14"></polyline>
+                <path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.64A9 9 0 0 1 3.51 15"></path>
+              </svg>
+              Refresh
+            </button>
+          </div>
+        </div>
+        <div class="document-gallery">
+          <div class="document-item" data-doc="ft-article">
+            <div class="document-preview">
+              <div class="document-type-badge">Financial Times</div>
+              <img src="assets/foundation-lv-png.png" alt="Luxury Market Analysis" />
+            </div>
+            <div class="document-details">
+              <div>
+                <div class="document-title">Luxury Market Analysis</div>
+                <div class="document-meta">
+                  <div class="document-accessed">Publisher: Financial Times</div>
+                </div>
+              </div>
+              <div class="document-metrics">
+                <div class="metric-small">
+                  <span class="metric-small-label">Usage</span>
+                  <span class="metric-small-value positive">2,340</span>
+                </div>
+                <div class="metric-small">
+                  <span class="metric-small-label">Revenue</span>
+                  <span class="metric-small-value positive">$585.00</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="document-item" data-doc="lemonde-article">
+            <div class="document-preview">
+              <div class="document-type-badge">Le Monde</div>
+              <img src="assets/lv-art.avif" alt="Louis Vuitton Art Alliances" />
+            </div>
+            <div class="document-details">
+              <div>
+                <div class="document-title">Louis Vuitton Art Alliances</div>
+                <div class="document-meta">
+                  <div class="document-accessed">Publisher: Le Monde</div>
+                </div>
+              </div>
+              <div class="document-metrics">
+                <div class="metric-small">
+                  <span class="metric-small-label">Usage</span>
+                  <span class="metric-small-value positive">1,890</span>
+                </div>
+                <div class="metric-small">
+                  <span class="metric-small-label">Revenue</span>
+                  <span class="metric-small-value positive">$472.50</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="document-item" data-doc="zwirner-article">
+            <div class="document-preview">
+              <div class="document-type-badge">David Zwirner</div>
+              <img src="assets/kusama-book.png" alt="Yayoi Kusama Exhibition" />
+            </div>
+            <div class="document-details">
+              <div>
+                <div class="document-title">Yayoi Kusama Exhibition</div>
+                <div class="document-meta">
+                  <div class="document-accessed">Publisher: David Zwirner</div>
+                </div>
+              </div>
+              <div class="document-metrics">
+                <div class="metric-small">
+                  <span class="metric-small-label">Usage</span>
+                  <span class="metric-small-value positive">1,567</span>
+                </div>
+                <div class="metric-small">
+                  <span class="metric-small-label">Revenue</span>
+                  <span class="metric-small-value positive">$391.75</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Top Grossing Articles Section -->
+      <section class="card internals-documents">
+        <div class="card__header">
+          <h2>Top Grossing Articles</h2>
+          <div class="card__actions">
+            <button class="gallery-nav-btn" id="grossing-prev" aria-label="Previous articles">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <polyline points="15,18 9,12 15,6"></polyline>
+              </svg>
+            </button>
+            <button class="gallery-nav-btn" id="grossing-next" aria-label="Next articles">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <polyline points="9,18 15,12 9,6"></polyline>
+              </svg>
+            </button>
+          </div>
+        </div>
+        <div class="document-gallery">
+          <div class="document-item" data-doc="gisele-article">
+            <div class="document-preview">
+              <div class="document-type-badge">People.com</div>
+              <img src="assets/gb-lv.webp" alt="Gisele Bundchen Louis Vuitton Campaign" />
+            </div>
+            <div class="document-details">
+              <div>
+                <div class="document-title">Gisele Bundchen LV Campaign</div>
+                <div class="document-meta">
+                  <div class="document-accessed">Publisher: People.com</div>
+                </div>
+              </div>
+              <div class="document-metrics">
+                <div class="metric-small">
+                  <span class="metric-small-label">Views</span>
+                  <span class="metric-small-value positive">45,230</span>
+                </div>
+                <div class="metric-small">
+                  <span class="metric-small-label">Revenue</span>
+                  <span class="metric-small-value positive">$11,307.50</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="document-item" data-doc="sortir-article">
+            <div class="document-preview">
+              <div class="document-type-badge">Sortir à Paris</div>
+              <img src="assets/et.jpeg" alt="Paris Fashion Shopping Guide" />
+            </div>
+            <div class="document-details">
+              <div>
+                <div class="document-title">Paris Fashion Shopping Guide</div>
+                <div class="document-meta">
+                  <div class="document-accessed">Publisher: Sortir à Paris</div>
+                </div>
+              </div>
+              <div class="document-metrics">
+                <div class="metric-small">
+                  <span class="metric-small-label">Views</span>
+                  <span class="metric-small-value positive">32,180</span>
+                </div>
+                <div class="metric-small">
+                  <span class="metric-small-label">Revenue</span>
+                  <span class="metric-small-value positive">$8,045.00</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Top Paid Keywords Section -->
+      <section class="card keywords-performance-combined">
+        <div class="card__header">
+          <h2>Top Paid Keywords</h2>
+        </div>
+        <div class="card__content">
+          <div class="keywords-performance-grid">
+            <div class="keyword-performance-item">
+              <div class="keyword-performance-header">
+                <h3 class="keyword-performance-name">Yayoi Kusama</h3>
+                <span class="keyword-performance-rank">#1</span>
+              </div>
+              <div class="keyword-performance-metrics">
+                <div class="keyword-metric">
+                  <span class="keyword-metric-label">Usage</span>
+                  <span class="keyword-metric-value usage">3,247</span>
+                  <span class="keyword-metric-secondary">uses this month</span>
+                </div>
+                <div class="keyword-metric">
+                  <span class="keyword-metric-label">Cost</span>
+                  <span class="keyword-metric-value cost">$811.75</span>
+                  <span class="keyword-metric-secondary">total spent</span>
+                </div>
+              </div>
+            </div>
+            
+            <div class="keyword-performance-item">
+              <div class="keyword-performance-header">
+                <h3 class="keyword-performance-name">Infinity Mirrors</h3>
+                <span class="keyword-performance-rank">#2</span>
+              </div>
+              <div class="keyword-performance-metrics">
+                <div class="keyword-metric">
+                  <span class="keyword-metric-label">Usage</span>
+                  <span class="keyword-metric-value usage">2,192</span>
+                  <span class="keyword-metric-secondary">uses this month</span>
+                </div>
+                <div class="keyword-metric">
+                  <span class="keyword-metric-label">Cost</span>
+                  <span class="keyword-metric-value cost">$548.00</span>
+                  <span class="keyword-metric-secondary">total spent</span>
+                </div>
+              </div>
+            </div>
+            
+            <div class="keyword-performance-item">
+              <div class="keyword-performance-header">
+                <h3 class="keyword-performance-name">Painted Dots</h3>
+                <span class="keyword-performance-rank">#3</span>
+              </div>
+              <div class="keyword-performance-metrics">
+                <div class="keyword-metric">
+                  <span class="keyword-metric-label">Usage</span>
+                  <span class="keyword-metric-value usage">1,834</span>
+                  <span class="keyword-metric-secondary">uses this month</span>
+                </div>
+                <div class="keyword-metric">
+                  <span class="keyword-metric-label">Cost</span>
+                  <span class="keyword-metric-value cost">$458.50</span>
+                  <span class="keyword-metric-secondary">total spent</span>
+                </div>
+              </div>
+            </div>
+            
+            <div class="keyword-performance-item">
+              <div class="keyword-performance-header">
+                <h3 class="keyword-performance-name">Louis Vuitton</h3>
+                <span class="keyword-performance-rank">#4</span>
+              </div>
+              <div class="keyword-performance-metrics">
+                <div class="keyword-metric">
+                  <span class="keyword-metric-label">Usage</span>
+                  <span class="keyword-metric-value usage">1,567</span>
+                  <span class="keyword-metric-secondary">uses this month</span>
+                </div>
+                <div class="keyword-metric">
+                  <span class="keyword-metric-label">Cost</span>
+                  <span class="keyword-metric-value cost">$391.75</span>
+                  <span class="keyword-metric-secondary">total spent</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Top Grossing Keywords Section -->
+      <section class="card keywords-performance-combined">
+        <div class="card__header">
+          <h2>Top Grossing Keywords</h2>
+        </div>
+        <div class="card__content">
+          <div class="keywords-performance-grid">
+            <div class="keyword-performance-item">
+              <div class="keyword-performance-header">
+                <h3 class="keyword-performance-name">Yayoi Kusama</h3>
+                <span class="keyword-performance-rank">#1</span>
+              </div>
+              <div class="keyword-performance-metrics">
+                <div class="keyword-metric">
+                  <span class="keyword-metric-label">Revenue</span>
+                  <span class="keyword-metric-value revenue">$67,230</span>
+                  <span class="keyword-metric-secondary">this month</span>
+                </div>
+                <div class="keyword-metric">
+                  <span class="keyword-metric-label">Growth</span>
+                  <span class="keyword-metric-value trend">+18.3%</span>
+                  <span class="keyword-metric-secondary">vs last month</span>
+                </div>
+              </div>
+            </div>
+            
+            <div class="keyword-performance-item">
+              <div class="keyword-performance-header">
+                <h3 class="keyword-performance-name">Gisele Bundchen</h3>
+                <span class="keyword-performance-rank">#2</span>
+              </div>
+              <div class="keyword-performance-metrics">
+                <div class="keyword-metric">
+                  <span class="keyword-metric-label">Revenue</span>
+                  <span class="keyword-metric-value revenue">$45,180</span>
+                  <span class="keyword-metric-secondary">this month</span>
+                </div>
+                <div class="keyword-metric">
+                  <span class="keyword-metric-label">Growth</span>
+                  <span class="keyword-metric-value trend">+24.7%</span>
+                  <span class="keyword-metric-secondary">vs last month</span>
+                </div>
+              </div>
+            </div>
+            
+            <div class="keyword-performance-item">
+              <div class="keyword-performance-header">
+                <h3 class="keyword-performance-name">Louis Vuitton</h3>
+                <span class="keyword-performance-rank">#3</span>
+              </div>
+              <div class="keyword-performance-metrics">
+                <div class="keyword-metric">
+                  <span class="keyword-metric-label">Revenue</span>
+                  <span class="keyword-metric-value revenue">$38,950</span>
+                  <span class="keyword-metric-secondary">this month</span>
+                </div>
+                <div class="keyword-metric">
+                  <span class="keyword-metric-label">Growth</span>
+                  <span class="keyword-metric-value trend">+15.2%</span>
+                  <span class="keyword-metric-secondary">vs last month</span>
+                </div>
+              </div>
+            </div>
+            
+            <div class="keyword-performance-item">
+              <div class="keyword-performance-header">
+                <h3 class="keyword-performance-name">Painted Dots</h3>
+                <span class="keyword-performance-rank">#4</span>
+              </div>
+              <div class="keyword-performance-metrics">
+                <div class="keyword-metric">
+                  <span class="keyword-metric-label">Revenue</span>
+                  <span class="keyword-metric-value revenue">$29,470</span>
+                  <span class="keyword-metric-secondary">this month</span>
+                </div>
+                <div class="keyword-metric">
+                  <span class="keyword-metric-label">Growth</span>
+                  <span class="keyword-metric-value trend">+12.1%</span>
+                  <span class="keyword-metric-secondary">vs last month</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
     </main>
     
     <script>
@@ -78,12 +688,143 @@
           });
         }
       }
+
+      // Publishers page functionality
+      function refreshArticles() {
+        const button = event.target.closest('button');
+        const icon = button.querySelector('svg');
+        
+        // Add spinning animation
+        icon.style.animation = 'spin 1s linear';
+        button.disabled = true;
+        
+        // Simulate refresh
+        setTimeout(() => {
+          icon.style.animation = '';
+          button.disabled = false;
+          
+          // Update last accessed times
+          const accessedElements = document.querySelectorAll('.document-accessed');
+          accessedElements.forEach(el => {
+            el.textContent = 'Last accessed: Just now';
+          });
+        }, 1000);
+      }
+
+      // Document gallery functionality
+      function initDocumentGallery() {
+        const documentItems = document.querySelectorAll('.document-gallery .document-item');
+        const galleries = document.querySelectorAll('.document-gallery');
+        
+        // Document click handlers
+        documentItems.forEach(item => {
+          item.addEventListener('click', () => {
+            const docType = item.dataset.doc;
+            const docTitle = item.querySelector('.document-title').textContent;
+            console.log('Opening document from gallery:', docType);
+            
+            // Add click animation
+            item.style.transform = 'translateY(-4px) scale(0.98)';
+            setTimeout(() => {
+              // Reset transform
+              item.style.transform = '';
+            }, 150);
+            
+            // In a real app, this would open the document
+            alert(`Opening ${docTitle}...`);
+          });
+        });
+        
+        // Gallery navigation for each gallery
+        galleries.forEach(gallery => {
+          const prevBtn = gallery.parentElement.querySelector('[id$="-prev"]');
+          const nextBtn = gallery.parentElement.querySelector('[id$="-next"]');
+          
+          if (gallery && prevBtn && nextBtn) {
+            const scrollAmount = 420; // Width of one card plus gap
+            
+            // Update button states based on scroll position
+            function updateButtons() {
+              const isAtStart = gallery.scrollLeft <= 0;
+              const isAtEnd = gallery.scrollLeft >= gallery.scrollWidth - gallery.clientWidth - 1;
+              
+              prevBtn.disabled = isAtStart;
+              nextBtn.disabled = isAtEnd;
+            }
+            
+            // Initial button state
+            updateButtons();
+            
+            // Update buttons on scroll
+            gallery.addEventListener('scroll', updateButtons);
+            
+            // Previous button click
+            prevBtn.addEventListener('click', () => {
+              gallery.scrollBy({
+                left: -scrollAmount,
+                behavior: 'smooth'
+              });
+            });
+            
+            // Next button click
+            nextBtn.addEventListener('click', () => {
+              gallery.scrollBy({
+                left: scrollAmount,
+                behavior: 'smooth'
+              });
+            });
+          }
+        });
+      }
+
+      // Tab functionality for Publishers sections
+      function initPublishersTabs() {
+        const tabBtns = document.querySelectorAll('.tab-btn');
+        const tabContents = document.querySelectorAll('.tab-content');
+        
+        tabBtns.forEach(btn => {
+          btn.addEventListener('click', () => {
+            const targetTab = btn.dataset.tab;
+            const parentCard = btn.closest('.card');
+            
+            // Remove active class from all tabs and content in this card
+            const cardTabBtns = parentCard.querySelectorAll('.tab-btn');
+            const cardTabContents = parentCard.querySelectorAll('.tab-content');
+            
+            cardTabBtns.forEach(b => b.classList.remove('active'));
+            cardTabContents.forEach(c => c.classList.remove('active'));
+            
+            // Add active class to clicked tab and corresponding content
+            btn.classList.add('active');
+            const targetContent = parentCard.querySelector(`#${targetTab}-content`);
+            if (targetContent) {
+              targetContent.classList.add('active');
+            }
+          });
+        });
+      }
+
+      // Add CSS for spin animation
+      const style = document.createElement('style');
+      style.textContent = `
+        @keyframes spin {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+      `;
+      document.head.appendChild(style);
       
       // Initialize when DOM is ready
       if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initDarkMode);
+        document.addEventListener('DOMContentLoaded', () => {
+          initDarkMode();
+          initDocumentGallery();
+          initPublishersTabs();
+        });
       } else {
         initDarkMode();
+        initDocumentGallery();
+        initPublishersTabs();
       }
     </script>
   </body>
