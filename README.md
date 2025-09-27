@@ -40,7 +40,7 @@ This web demo presents the core features and functionality of the ShopTHAT platf
 ### Deployment
 This demo is configured for automatic deployment via Netlify from the GitHub repository.
 
-**Repository:** `https://github.com/[your-username]/ShopThat-Demo`
+**Repository:** `https://github.com/obsidiancube/ShopThat-Demo`
 
 ## Demo Pages
 
