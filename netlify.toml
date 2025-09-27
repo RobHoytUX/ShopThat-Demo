@@ -1,17 +1,6 @@
 [build]
-  # Since this is a static site, no build command needed
+  # Static site - no build command needed
   publish = "."
-
-[build.environment]
-  # No environment variables needed for static site
-
-[[redirects]]
-  # Handle client-side routing - redirect all requests to index.html
-  from = "/*"
-  to = "/index.html"
-  status = 200
-  conditions = {Role = ["admin"], Country = ["US"]}
-  force = false
 
 # Security headers
 [[headers]]
