@@ -57,7 +57,7 @@
       <!-- Document Analytics Section -->
       <section class="card document-analytics">
         <div class="card__header">
-          <h2>Document Analytics</h2>
+          <h2>Document Analytics & Performance</h2>
           <div class="card__actions">
             <select class="select--styled" id="analyticsTimeframe">
               <option value="7d">Last 7 days</option>
@@ -66,26 +66,77 @@
             </select>
           </div>
         </div>
-        <div class="analytics-grid">
-          <div class="analytics-metric">
-            <div class="metric-label">Total Documents</div>
-            <div class="metric-value">1,247</div>
-            <div class="metric-change positive">+23 this month</div>
+        
+        <div class="rpv-three-column-layout">
+          <!-- Section 1: Current Performance -->
+          <div class="rpv-section-1">
+            <div class="section-header">
+              <h3>Current Performance</h3>
+            </div>
+            <div class="rpv-metrics">
+              <div class="metric-item">
+                <span class="metric-label">Total Documents</span>
+                <span class="metric-value rpv-green">1,247</span>
+                <span class="metric-unit">indexed articles</span>
+              </div>
+              <div class="metric-item">
+                <span class="metric-label">Document Views</span>
+                <span class="metric-value rpv-green">12,890</span>
+                <span class="metric-unit">this month</span>
+              </div>
+            </div>
+            <div class="rpv-progress">
+              <div class="progress-bar">
+                <div class="progress-fill" style="width: 78%"></div>
+              </div>
+              <span class="progress-text">78% of monthly view target reached</span>
+            </div>
           </div>
-          <div class="analytics-metric">
-            <div class="metric-label">Document Views</div>
-            <div class="metric-value">12,890</div>
-            <div class="metric-change positive">+8.2%</div>
+          
+          <!-- Section 2: Usage Benchmarks -->
+          <div class="rpv-section-2">
+            <div class="section-header">
+              <h3>Usage Benchmarks</h3>
+            </div>
+            <div class="benchmark-metrics">
+              <div class="metric-item">
+                <span class="metric-label">Avg. Session Time</span>
+                <span class="metric-value traditional-gray">4m 32s</span>
+                <span class="metric-unit">per session</span>
+              </div>
+              <div class="metric-item">
+                <span class="metric-label">Search Queries</span>
+                <span class="metric-value ai-deals-red">3,456</span>
+                <span class="metric-unit">this month</span>
+              </div>
+            </div>
+            <div class="improvement-indicator">
+              <span class="improvement-text">12.5% increase over traditional content systems</span>
+            </div>
           </div>
-          <div class="analytics-metric">
-            <div class="metric-label">Search Queries</div>
-            <div class="metric-value">3,456</div>
-            <div class="metric-change positive">+12.5%</div>
-          </div>
-          <div class="analytics-metric">
-            <div class="metric-label">Avg. Session Time</div>
-            <div class="metric-value">4m 32s</div>
-            <div class="metric-change negative">-2.1%</div>
+          
+          <!-- Section 3: Top Performing Documents -->
+          <div class="rpv-section-3">
+            <div class="section-header">
+              <h3>Top Performing Documents</h3>
+            </div>
+            <div class="deals-list">
+              <div class="deal-item">
+                <div class="deal-companies">Kusama Press Release</div>
+                <div class="deal-amount">2,340 views</div>
+              </div>
+              <div class="deal-item">
+                <div class="deal-companies">Louis Vuitton History</div>
+                <div class="deal-amount">1,890 views</div>
+              </div>
+              <div class="deal-item">
+                <div class="deal-companies">Fondation Louis Vuitton</div>
+                <div class="deal-amount">1,567 views</div>
+              </div>
+            </div>
+            <div class="deal-context">
+              <span class="context-text">These documents drive 67% of total engagement</span>
+            </div>
           </div>
         </div>
       </section>
@@ -95,6 +146,16 @@
         <div class="card__header">
           <h2>Top Internal Documents</h2>
           <div class="card__actions">
+            <button class="gallery-nav-btn" id="gallery-prev" aria-label="Previous documents">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <polyline points="15,18 9,12 15,6"></polyline>
+              </svg>
+            </button>
+            <button class="gallery-nav-btn" id="gallery-next" aria-label="Next documents">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <polyline points="9,18 15,12 9,6"></polyline>
+              </svg>
+            </button>
             <button class="btn btn--secondary" onclick="refreshDocuments()">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <polyline points="23 4 23 10 17 10"></polyline>
@@ -105,34 +166,105 @@
             </button>
           </div>
         </div>
-        <div class="gallery-vertical">
-          <div class="document-card" data-doc="louis-vuitton-history">
-            <div class="doc-title">Louis Vuitton history</div>
-            <div class="doc-image">
+        <div class="document-gallery">
+          <div class="document-item" data-doc="louis-vuitton-history">
+            <div class="document-preview">
+              <div class="document-type-badge">History</div>
               <img src="assets/lv-history.png" alt="Louis Vuitton history" />
             </div>
-            <div class="doc-accessed">Last accessed: 2 hours ago</div>
+            <div class="document-details">
+              <div>
+                <div class="document-title">Louis Vuitton History</div>
+                <div class="document-meta">
+                  <div class="document-accessed">Last accessed: 2 hours ago</div>
+                </div>
+              </div>
+              <div class="document-metrics">
+                <div class="metric-small">
+                  <span class="metric-small-label">Views</span>
+                  <span class="metric-small-value positive">1,890</span>
+                </div>
+                <div class="metric-small">
+                  <span class="metric-small-label">Avg. Time</span>
+                  <span class="metric-small-value neutral">6m 12s</span>
+                </div>
+              </div>
+            </div>
           </div>
-          <div class="document-card" data-doc="kusama-press-release">
-            <div class="doc-title">Kusama Press Release</div>
-            <div class="doc-image">
+          
+          <div class="document-item" data-doc="kusama-press-release">
+            <div class="document-preview">
+              <div class="document-type-badge">Press</div>
               <img src="assets/kusama-pressrelease.png" alt="Louis Vuitton Renews Collaboration with Yayoi Kusama" />
             </div>
-            <div class="doc-accessed">Last accessed: 5 hours ago</div>
+            <div class="document-details">
+              <div>
+                <div class="document-title">Kusama Press Release</div>
+                <div class="document-meta">
+                  <div class="document-accessed">Last accessed: 5 hours ago</div>
+                </div>
+              </div>
+              <div class="document-metrics">
+                <div class="metric-small">
+                  <span class="metric-small-label">Views</span>
+                  <span class="metric-small-value positive">2,340</span>
+                </div>
+                <div class="metric-small">
+                  <span class="metric-small-label">Avg. Time</span>
+                  <span class="metric-small-value neutral">4m 45s</span>
+                </div>
+              </div>
+            </div>
           </div>
-          <div class="document-card" data-doc="kusama-book">
-            <div class="doc-title">Kusama Book</div>
-            <div class="doc-image">
+          
+          <div class="document-item" data-doc="kusama-book">
+            <div class="document-preview">
+              <div class="document-type-badge">Catalog</div>
               <img src="assets/kusama-book.png" alt="Yayoi Kusama: Infinity Mirrors Exhibition Catalog" />
             </div>
-            <div class="doc-accessed">Last accessed: 1 day ago</div>
+            <div class="document-details">
+              <div>
+                <div class="document-title">Kusama Book</div>
+                <div class="document-meta">
+                  <div class="document-accessed">Last accessed: 1 day ago</div>
+                </div>
+              </div>
+              <div class="document-metrics">
+                <div class="metric-small">
+                  <span class="metric-small-label">Views</span>
+                  <span class="metric-small-value positive">1,234</span>
+                </div>
+                <div class="metric-small">
+                  <span class="metric-small-label">Avg. Time</span>
+                  <span class="metric-small-value positive">8m 20s</span>
+                </div>
+              </div>
+            </div>
           </div>
-          <div class="document-card" data-doc="foundation-louis-vuitton">
-            <div class="doc-title">Fondation Louis Vuitton</div>
-            <div class="doc-image">
+          
+          <div class="document-item" data-doc="foundation-louis-vuitton">
+            <div class="document-preview">
+              <div class="document-type-badge">Guide</div>
               <img src="assets/foundation-lv-png.png" alt="Architecture and Contemporary Art Foundation" />
             </div>
-            <div class="doc-accessed">Last accessed: 3 days ago</div>
+            <div class="document-details">
+              <div>
+                <div class="document-title">Fondation Louis Vuitton</div>
+                <div class="document-meta">
+                  <div class="document-accessed">Last accessed: 3 days ago</div>
+                </div>
+              </div>
+              <div class="document-metrics">
+                <div class="metric-small">
+                  <span class="metric-small-label">Views</span>
+                  <span class="metric-small-value positive">1,567</span>
+                </div>
+                <div class="metric-small">
+                  <span class="metric-small-label">Avg. Time</span>
+                  <span class="metric-small-value neutral">5m 30s</span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -150,72 +282,160 @@
         </div>
         <div class="card__content">
           <div class="tab-content active" id="usage-content">
-            <div class="keywords-list">
-              <div class="keyword-item">
-                <div class="keyword-name">Kusama</div>
-                <div class="keyword-stats">
-                  <span class="usage-count">1,247 uses</span>
-                  <span class="cost-value">$311.75</span>
+            <div class="keywords-performance-grid">
+              <div class="keyword-performance-item">
+                <div class="keyword-performance-header">
+                  <h3 class="keyword-performance-name">Kusama</h3>
+                  <span class="keyword-performance-rank">#1</span>
+                </div>
+                <div class="keyword-performance-metrics">
+                  <div class="keyword-metric">
+                    <span class="keyword-metric-label">Usage</span>
+                    <span class="keyword-metric-value usage">1,247</span>
+                    <span class="keyword-metric-secondary">uses this month</span>
+                  </div>
+                  <div class="keyword-metric">
+                    <span class="keyword-metric-label">Cost</span>
+                    <span class="keyword-metric-value cost">$311.75</span>
+                    <span class="keyword-metric-secondary">total spent</span>
+                  </div>
                 </div>
               </div>
-              <div class="keyword-item">
-                <div class="keyword-name">Louis Vuitton Cafe</div>
-                <div class="keyword-stats">
-                  <span class="usage-count">892 uses</span>
-                  <span class="cost-value">$223.00</span>
+              
+              <div class="keyword-performance-item">
+                <div class="keyword-performance-header">
+                  <h3 class="keyword-performance-name">Louis Vuitton Cafe</h3>
+                  <span class="keyword-performance-rank">#2</span>
+                </div>
+                <div class="keyword-performance-metrics">
+                  <div class="keyword-metric">
+                    <span class="keyword-metric-label">Usage</span>
+                    <span class="keyword-metric-value usage">892</span>
+                    <span class="keyword-metric-secondary">uses this month</span>
+                  </div>
+                  <div class="keyword-metric">
+                    <span class="keyword-metric-label">Cost</span>
+                    <span class="keyword-metric-value cost">$223.00</span>
+                    <span class="keyword-metric-secondary">total spent</span>
+                  </div>
                 </div>
               </div>
-              <div class="keyword-item">
-                <div class="keyword-name">Fondation Louis Vuitton</div>
-                <div class="keyword-stats">
-                  <span class="usage-count">734 uses</span>
-                  <span class="cost-value">$183.50</span>
+              
+              <div class="keyword-performance-item">
+                <div class="keyword-performance-header">
+                  <h3 class="keyword-performance-name">Fondation Louis Vuitton</h3>
+                  <span class="keyword-performance-rank">#3</span>
+                </div>
+                <div class="keyword-performance-metrics">
+                  <div class="keyword-metric">
+                    <span class="keyword-metric-label">Usage</span>
+                    <span class="keyword-metric-value usage">734</span>
+                    <span class="keyword-metric-secondary">uses this month</span>
+                  </div>
+                  <div class="keyword-metric">
+                    <span class="keyword-metric-label">Cost</span>
+                    <span class="keyword-metric-value cost">$183.50</span>
+                    <span class="keyword-metric-secondary">total spent</span>
+                  </div>
                 </div>
               </div>
-              <div class="keyword-item">
-                <div class="keyword-name">Cafe Carlyle (city guide)</div>
-                <div class="keyword-stats">
-                  <span class="usage-count">567 uses</span>
-                  <span class="cost-value">$141.75</span>
+              
+              <div class="keyword-performance-item">
+                <div class="keyword-performance-header">
+                  <h3 class="keyword-performance-name">Cafe Carlyle</h3>
+                  <span class="keyword-performance-rank">#4</span>
                 </div>
-              </div>
-              <div class="keyword-item">
-                <div class="keyword-name">MoMa (city guide)</div>
-                <div class="keyword-stats">
-                  <span class="usage-count">423 uses</span>
-                  <span class="cost-value">$105.75</span>
+                <div class="keyword-performance-metrics">
+                  <div class="keyword-metric">
+                    <span class="keyword-metric-label">Usage</span>
+                    <span class="keyword-metric-value usage">567</span>
+                    <span class="keyword-metric-secondary">uses this month</span>
+                  </div>
+                  <div class="keyword-metric">
+                    <span class="keyword-metric-label">Cost</span>
+                    <span class="keyword-metric-value cost">$141.75</span>
+                    <span class="keyword-metric-secondary">total spent</span>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
+          
           <div class="tab-content" id="revenue-content">
-            <div class="grossing-keywords-list">
-              <div class="grossing-keyword-item">
-                <div class="keyword-name">Kusama</div>
-                <div class="keyword-revenue">
-                  <span class="revenue-amount">$45,230</span>
-                  <span class="revenue-trend positive">+12.3%</span>
+            <div class="keywords-performance-grid">
+              <div class="keyword-performance-item">
+                <div class="keyword-performance-header">
+                  <h3 class="keyword-performance-name">Kusama</h3>
+                  <span class="keyword-performance-rank">#1</span>
+                </div>
+                <div class="keyword-performance-metrics">
+                  <div class="keyword-metric">
+                    <span class="keyword-metric-label">Revenue</span>
+                    <span class="keyword-metric-value revenue">$45,230</span>
+                    <span class="keyword-metric-secondary">this month</span>
+                  </div>
+                  <div class="keyword-metric">
+                    <span class="keyword-metric-label">Growth</span>
+                    <span class="keyword-metric-value trend">+12.3%</span>
+                    <span class="keyword-metric-secondary">vs last month</span>
+                  </div>
                 </div>
               </div>
-              <div class="grossing-keyword-item">
-                <div class="keyword-name">Bag Capucines</div>
-                <div class="keyword-revenue">
-                  <span class="revenue-amount">$32,180</span>
-                  <span class="revenue-trend positive">+8.7%</span>
+              
+              <div class="keyword-performance-item">
+                <div class="keyword-performance-header">
+                  <h3 class="keyword-performance-name">Bag Capucines</h3>
+                  <span class="keyword-performance-rank">#2</span>
+                </div>
+                <div class="keyword-performance-metrics">
+                  <div class="keyword-metric">
+                    <span class="keyword-metric-label">Revenue</span>
+                    <span class="keyword-metric-value revenue">$32,180</span>
+                    <span class="keyword-metric-secondary">this month</span>
+                  </div>
+                  <div class="keyword-metric">
+                    <span class="keyword-metric-label">Growth</span>
+                    <span class="keyword-metric-value trend">+8.7%</span>
+                    <span class="keyword-metric-secondary">vs last month</span>
+                  </div>
                 </div>
               </div>
-              <div class="grossing-keyword-item">
-                <div class="keyword-name">Psychedelic Flowers</div>
-                <div class="keyword-revenue">
-                  <span class="revenue-amount">$28,950</span>
-                  <span class="revenue-trend positive">+15.2%</span>
+              
+              <div class="keyword-performance-item">
+                <div class="keyword-performance-header">
+                  <h3 class="keyword-performance-name">Psychedelic Flowers</h3>
+                  <span class="keyword-performance-rank">#3</span>
+                </div>
+                <div class="keyword-performance-metrics">
+                  <div class="keyword-metric">
+                    <span class="keyword-metric-label">Revenue</span>
+                    <span class="keyword-metric-value revenue">$28,950</span>
+                    <span class="keyword-metric-secondary">this month</span>
+                  </div>
+                  <div class="keyword-metric">
+                    <span class="keyword-metric-label">Growth</span>
+                    <span class="keyword-metric-value trend">+15.2%</span>
+                    <span class="keyword-metric-secondary">vs last month</span>
+                  </div>
                 </div>
               </div>
-              <div class="grossing-keyword-item">
-                <div class="keyword-name">Painted Dots</div>
-                <div class="keyword-revenue">
-                  <span class="revenue-amount">$21,470</span>
-                  <span class="revenue-trend positive">+6.1%</span>
+              
+              <div class="keyword-performance-item">
+                <div class="keyword-performance-header">
+                  <h3 class="keyword-performance-name">Painted Dots</h3>
+                  <span class="keyword-performance-rank">#4</span>
+                </div>
+                <div class="keyword-performance-metrics">
+                  <div class="keyword-metric">
+                    <span class="keyword-metric-label">Revenue</span>
+                    <span class="keyword-metric-value revenue">$21,470</span>
+                    <span class="keyword-metric-secondary">this month</span>
+                  </div>
+                  <div class="keyword-metric">
+                    <span class="keyword-metric-label">Growth</span>
+                    <span class="keyword-metric-value trend">+6.1%</span>
+                    <span class="keyword-metric-secondary">vs last month</span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -270,25 +490,65 @@
 
       // Document gallery functionality
       function initDocumentGallery() {
-        const documentCards = document.querySelectorAll('.gallery-vertical .document-card');
+        const documentItems = document.querySelectorAll('.document-gallery .document-item');
+        const gallery = document.querySelector('.document-gallery');
+        const prevBtn = document.getElementById('gallery-prev');
+        const nextBtn = document.getElementById('gallery-next');
         
-        documentCards.forEach(card => {
-          card.addEventListener('click', () => {
-            const docType = card.dataset.doc;
-            const docTitle = card.querySelector('.doc-title').textContent;
+        // Document click handlers
+        documentItems.forEach(item => {
+          item.addEventListener('click', () => {
+            const docType = item.dataset.doc;
+            const docTitle = item.querySelector('.document-title').textContent;
             console.log('Opening document from gallery:', docType);
             
             // Add click animation
-            card.style.transform = 'translateY(-4px) scale(0.98)';
+            item.style.transform = 'translateY(-4px) scale(0.98)';
             setTimeout(() => {
               // Reset transform
-              card.style.transform = '';
+              item.style.transform = '';
             }, 150);
             
             // In a real app, this would open the document
             alert(`Opening ${docTitle}...`);
           });
         });
+        
+        // Gallery navigation
+        if (gallery && prevBtn && nextBtn) {
+          const scrollAmount = 420; // Width of one card plus gap
+          
+          // Update button states based on scroll position
+          function updateButtons() {
+            const isAtStart = gallery.scrollLeft <= 0;
+            const isAtEnd = gallery.scrollLeft >= gallery.scrollWidth - gallery.clientWidth - 1;
+            
+            prevBtn.disabled = isAtStart;
+            nextBtn.disabled = isAtEnd;
+          }
+          
+          // Initial button state
+          updateButtons();
+          
+          // Update buttons on scroll
+          gallery.addEventListener('scroll', updateButtons);
+          
+          // Previous button click
+          prevBtn.addEventListener('click', () => {
+            gallery.scrollBy({
+              left: -scrollAmount,
+              behavior: 'smooth'
+            });
+          });
+          
+          // Next button click
+          nextBtn.addEventListener('click', () => {
+            gallery.scrollBy({
+              left: scrollAmount,
+              behavior: 'smooth'
+            });
+          });
+        }
       }
 
 
