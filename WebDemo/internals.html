@@ -15,6 +15,15 @@
       <div class="sidebar__brand">
         <span>shopThat</span>
       </div>
+      <div class="sidebar__campaign-btn">
+        <a href="/campaigns.html" class="btn btn--primary btn--campaign">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/>
+            <path d="M12 8v8M8 12h8"/>
+          </svg>
+          New Campaign
+        </a>
+      </div>
       <nav class="sidebar__nav">
         <a href="/dashboard.html">Dashboard</a>
         <a href="/keywords.html">Keywords</a>
@@ -24,7 +33,7 @@
         <a href="/products.html">Products</a>
         <a href="/financials.html">Financials</a>
         <a href="/settings.html" aria-disabled="true">Settings</a>
-        <a href="#" aria-disabled="true">Sign Out</a>
+        <a href="#" id="signOutLink">Sign Out</a>
       </nav>
     </aside>
 
@@ -595,5 +604,6 @@
         initKeywordsTabs();
       }
     </script>
+    <script src="scripts/auth.js"></script>
   </body>
 </html>

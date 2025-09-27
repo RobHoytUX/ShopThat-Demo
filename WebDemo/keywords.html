@@ -16,6 +16,15 @@
         <img src="assets/logo.svg" alt="shopThat" />
         <span>shopThat</span>
       </div>
+      <div class="sidebar__campaign-btn">
+        <a href="/campaigns.html" class="btn btn--primary btn--campaign">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/>
+            <path d="M12 8v8M8 12h8"/>
+          </svg>
+          New Campaign
+        </a>
+      </div>
       <nav class="sidebar__nav">
         <a href="/dashboard.html">Dashboard</a>
         <a class="is-active" href="/keywords.html">Keywords</a>
@@ -25,7 +34,7 @@
         <a href="/products.html">Products</a>
         <a href="/financials.html">Financials</a>
         <a href="/settings.html" aria-disabled="true">Settings</a>
-        <a href="#" aria-disabled="true">Sign Out</a>
+        <a href="#" id="signOutLink">Sign Out</a>
       </nav>
     </aside>
     <header class="appbar">
@@ -210,6 +219,7 @@
     <script src="https://cdn.jsdelivr.net/npm/neo4j-driver-lite@5.23.0/lib/browser/neo4j-web.min.js"></script>
     <script src="scripts/shared-data.js"></script>
     <script src="scripts/keywords.js" defer></script>
+    <script src="scripts/auth.js"></script>
   </body>
 </html>
 

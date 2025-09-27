@@ -1,0 +1,1167 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>shopThat — Campaigns</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles/main.css?v=1">
+    <link rel="stylesheet" href="styles/dashboard.css?v=1">
+    <style>
+      /* Campaign-specific styles */
+      .campaigns-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 24px;
+      }
+
+      .upload-area {
+        border: 2px dashed #d1d5db;
+        border-radius: 16px;
+        padding: 48px 24px;
+        text-align: center;
+        background: #f9fafb;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .upload-area.dragover {
+        border-color: #6366f1;
+        background: #f0f9ff;
+        transform: scale(1.02);
+      }
+
+      .upload-area.uploading {
+        border-color: #6366f1;
+        background: #f0f9ff;
+      }
+
+      .upload-icon {
+        width: 64px;
+        height: 64px;
+        margin: 0 auto 16px;
+        color: #6b7280;
+        transition: color 0.3s ease;
+      }
+
+      .upload-area.dragover .upload-icon,
+      .upload-area.uploading .upload-icon {
+        color: #6366f1;
+      }
+
+      .upload-title {
+        font-size: 18px;
+        font-weight: 600;
+        color: #374151;
+        margin-bottom: 8px;
+      }
+
+      .upload-subtitle {
+        color: #6b7280;
+        font-size: 14px;
+        margin-bottom: 16px;
+      }
+
+      .upload-formats {
+        font-size: 12px;
+        color: #9ca3af;
+      }
+
+      .file-size-limit {
+        font-size: 11px;
+        color: #ef4444;
+        margin-top: 4px;
+      }
+
+      .file-input {
+        display: none;
+      }
+
+      /* Progress indicator */
+      .progress-container {
+        display: none;
+        padding: 24px;
+        background: #fff;
+        border-radius: 16px;
+        border: 1px solid #e5e7eb;
+        margin-top: 24px;
+      }
+
+      .progress-container.active {
+        display: block;
+      }
+
+      .progress-steps {
+        display: grid;
+        grid-template-columns: repeat(6, 1fr);
+        gap: 8px;
+        margin-bottom: 24px;
+        position: relative;
+      }
+
+      .progress-steps::before {
+        content: '';
+        position: absolute;
+        top: 16px;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: #e5e7eb;
+        z-index: 1;
+      }
+
+      .progress-line {
+        position: absolute;
+        top: 16px;
+        left: 0;
+        height: 2px;
+        background: #6366f1;
+        z-index: 2;
+        width: 0%;
+        transition: width 0.5s ease;
+      }
+
+      .progress-step {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        position: relative;
+        z-index: 3;
+      }
+
+      .progress-step-circle {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: #e5e7eb;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 8px;
+        transition: all 0.3s ease;
+      }
+
+      .progress-step.active .progress-step-circle {
+        background: #6366f1;
+        color: #fff;
+      }
+
+      .progress-step.completed .progress-step-circle {
+        background: #10b981;
+        color: #fff;
+      }
+
+      .progress-step-label {
+        font-size: 12px;
+        color: #6b7280;
+        text-align: center;
+        font-weight: 500;
+      }
+
+      .progress-step.active .progress-step-label {
+        color: #6366f1;
+        font-weight: 600;
+      }
+
+      .progress-step.completed .progress-step-label {
+        color: #10b981;
+        font-weight: 600;
+      }
+
+      /* Keyword selection */
+      .keyword-selection {
+        display: none;
+        margin-top: 24px;
+      }
+
+      .keyword-selection.active {
+        display: block;
+      }
+
+      .keyword-controls {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+        gap: 12px;
+      }
+
+      .keyword-search {
+        flex: 1;
+        min-width: 200px;
+        padding: 8px 12px;
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        font-size: 14px;
+      }
+
+      .keyword-filters {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+
+      .filter-btn {
+        padding: 6px 12px;
+        border: 1px solid #d1d5db;
+        background: #fff;
+        border-radius: 6px;
+        font-size: 12px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+
+      .filter-btn.active {
+        background: #6366f1;
+        border-color: #6366f1;
+        color: #fff;
+      }
+
+      .bulk-actions {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 16px;
+      }
+
+      .bulk-btn {
+        padding: 6px 12px;
+        border: 1px solid #d1d5db;
+        background: #f9fafb;
+        border-radius: 6px;
+        font-size: 12px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+
+      .bulk-btn:hover {
+        background: #f3f4f6;
+      }
+
+      .keyword-categories {
+        margin-bottom: 24px;
+      }
+
+      .keyword-category {
+        margin-bottom: 20px;
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        overflow: hidden;
+      }
+
+      .category-header {
+        background: #f9fafb;
+        padding: 12px 16px;
+        cursor: pointer;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid #e5e7eb;
+      }
+
+      .category-header:hover {
+        background: #f3f4f6;
+      }
+
+      .category-title {
+        font-weight: 600;
+        font-size: 14px;
+        color: #374151;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .category-badge {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+      }
+
+      .category-badge.people { background: #3b82f6; }
+      .category-badge.places { background: #10b981; }
+      .category-badge.products { background: #f59e0b; }
+      .category-badge.organizations { background: #8b5cf6; }
+      .category-badge.events { background: #ef4444; }
+      .category-badge.topics { background: #6b7280; }
+
+      .category-count {
+        font-size: 12px;
+        color: #6b7280;
+        background: #e5e7eb;
+        padding: 2px 8px;
+        border-radius: 12px;
+      }
+
+      .category-content {
+        padding: 16px;
+        display: none;
+      }
+
+      .category-content.expanded {
+        display: block;
+      }
+
+      .keyword-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        gap: 12px;
+      }
+
+      .keyword-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px;
+        background: #f9fafb;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        position: relative;
+      }
+
+      .keyword-item:hover {
+        background: #f3f4f6;
+        border-color: #d1d5db;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      }
+
+      .keyword-item.selected {
+        background: #eff6ff;
+        border-color: #6366f1;
+        box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.1);
+      }
+
+      .keyword-checkbox {
+        width: 16px;
+        height: 16px;
+        accent-color: #6366f1;
+      }
+
+      .keyword-content {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+
+      .keyword-text {
+        font-size: 14px;
+        color: #374151;
+        font-weight: 500;
+      }
+
+      .keyword-meta {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 11px;
+        color: #6b7280;
+      }
+
+      .keyword-frequency {
+        background: #f3f4f6;
+        padding: 2px 6px;
+        border-radius: 4px;
+      }
+
+      .keyword-relevance {
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-weight: 600;
+      }
+
+      .keyword-relevance.high {
+        background: #dcfce7;
+        color: #166534;
+      }
+
+      .keyword-relevance.medium {
+        background: #fef3c7;
+        color: #92400e;
+      }
+
+      .keyword-relevance.low {
+        background: #fee2e2;
+        color: #991b1b;
+      }
+
+      .keyword-confidence {
+        margin-left: auto;
+        font-size: 12px;
+        color: #6b7280;
+        background: #e5e7eb;
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-weight: 600;
+      }
+
+      /* Action buttons */
+      .campaign-actions {
+        display: none;
+        gap: 12px;
+        margin-top: 24px;
+      }
+
+      .campaign-actions.active {
+        display: flex;
+      }
+
+      /* Campaign list */
+      .campaigns-list {
+        margin-top: 48px;
+      }
+
+      .campaign-card {
+        background: #fff;
+        border: 1px solid #e5e7eb;
+        border-radius: 16px;
+        padding: 20px;
+        margin-bottom: 16px;
+        transition: all 0.2s ease;
+      }
+
+      .campaign-card:hover {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        transform: translateY(-2px);
+      }
+
+      .campaign-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 12px;
+      }
+
+      .campaign-name {
+        font-size: 18px;
+        font-weight: 600;
+        color: #374151;
+        margin: 0;
+      }
+
+      .campaign-status {
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+      }
+
+      .campaign-status.active {
+        background: #dcfce7;
+        color: #166534;
+      }
+
+      .campaign-status.draft {
+        background: #fef3c7;
+        color: #92400e;
+      }
+
+      .campaign-meta {
+        display: flex;
+        gap: 24px;
+        font-size: 14px;
+        color: #6b7280;
+        margin-bottom: 12px;
+      }
+
+      .campaign-keywords {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+      }
+
+      .campaign-keyword-tag {
+        background: #f3f4f6;
+        color: #374151;
+        padding: 4px 8px;
+        border-radius: 6px;
+        font-size: 12px;
+        font-weight: 500;
+      }
+
+      /* Dark mode styles */
+      .dark-mode .upload-area {
+        background: #374151;
+        border-color: #4b5563;
+      }
+
+      .dark-mode .upload-area.dragover,
+      .dark-mode .upload-area.uploading {
+        background: #1e3a8a;
+        border-color: #6366f1;
+      }
+
+      .dark-mode .upload-title {
+        color: #f9fafb;
+      }
+
+      .dark-mode .upload-subtitle {
+        color: #9ca3af;
+      }
+
+      .dark-mode .progress-container {
+        background: #1f2937;
+        border-color: #374151;
+      }
+
+      .dark-mode .keyword-item {
+        background: #374151;
+        border-color: #4b5563;
+      }
+
+      .dark-mode .keyword-item:hover {
+        background: #4b5563;
+      }
+
+      .dark-mode .keyword-item.selected {
+        background: #1e3a8a;
+        border-color: #6366f1;
+      }
+
+      .dark-mode .keyword-text {
+        color: #f9fafb;
+      }
+
+      .dark-mode .campaign-card {
+        background: #1f2937;
+        border-color: #374151;
+      }
+
+      .dark-mode .campaign-name {
+        color: #f9fafb;
+      }
+
+      .dark-mode .campaign-keyword-tag {
+        background: #374151;
+        color: #e5e7eb;
+      }
+    </style>
+  </head>
+  <body class="app app--campaigns">
+    <aside class="sidebar" aria-label="Primary">
+      <div class="sidebar__brand">
+        <span>shopThat</span>
+      </div>
+      <div class="sidebar__campaign-btn">
+        <a href="/campaigns.html" class="btn btn--primary btn--campaign">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/>
+            <path d="M12 8v8M8 12h8"/>
+          </svg>
+          New Campaign
+        </a>
+      </div>
+      <nav class="sidebar__nav">
+        <a href="/dashboard.html">Dashboard</a>
+        <a href="/keywords.html">Keywords</a>
+        <a href="/internals.html">Internals</a>
+        <a href="/publishers.html">Publishers</a>
+        <a href="/open-source.html" aria-disabled="true">Open source</a>
+        <a href="/products.html">Products</a>
+        <a href="/financials.html">Financials</a>
+        <a class="is-active" href="/campaigns.html">Campaigns</a>
+        <a href="/settings.html" aria-disabled="true">Settings</a>
+        <a href="#" id="signOutLink">Sign Out</a>
+      </nav>
+    </aside>
+
+    <header class="appbar" role="banner">
+      <div class="appbar__inner">
+        <h1 class="appbar__title">Campaigns</h1>
+        <div class="appbar__search">
+          <input type="search" placeholder="Search campaigns..." aria-label="Search" />
+        </div>
+        <div class="appbar__account">
+          <span class="locale">Eng (US)</span>
+          <button class="icon-btn" aria-label="Notifications" title="Notifications">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9"/>
+              <path d="M13.73 21a2 2 0 01-3.46 0"/>
+            </svg>
+          </button>
+          <button class="icon-btn" id="darkModeToggle" aria-label="Toggle dark mode" title="Toggle dark mode">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="12" cy="12" r="5"/>
+              <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+            </svg>
+          </button>
+          <div class="avatar" role="img" aria-label="Person, Admin"></div>
+        </div>
+      </div>
+    </header>
+
+    <main id="main" class="dashboard" role="main">
+      <!-- New Campaign Section -->
+      <section class="card">
+        <div class="campaigns-header">
+          <h2>Create New Campaign</h2>
+        </div>
+        
+        <!-- File Upload Area -->
+        <div class="upload-area" id="uploadArea">
+          <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+            <polyline points="17,8 12,3 7,8"/>
+            <line x1="12" y1="3" x2="12" y2="15"/>
+          </svg>
+          <h3 class="upload-title">Upload Document for Campaign</h3>
+          <p class="upload-subtitle">Drag and drop your document here, or click to browse</p>
+          <p class="upload-formats">Supports: PDF, DOC, DOCX, XLS, XLSX, TXT, HTML</p>
+          <p class="file-size-limit">Maximum file size: 50MB per document</p>
+          <input type="file" id="fileInput" class="file-input" accept=".pdf,.doc,.docx,.xls,.xlsx,.txt,.html" multiple />
+        </div>
+
+        <!-- Progress Indicator -->
+        <div class="progress-container" id="progressContainer">
+          <div class="progress-steps">
+            <div class="progress-line" id="progressLine"></div>
+            <div class="progress-step" id="step1">
+              <div class="progress-step-circle">1</div>
+              <div class="progress-step-label">Upload & Process</div>
+            </div>
+            <div class="progress-step" id="step2">
+              <div class="progress-step-circle">2</div>
+              <div class="progress-step-label">AI Extraction</div>
+            </div>
+            <div class="progress-step" id="step3">
+              <div class="progress-step-circle">3</div>
+              <div class="progress-step-label">Select Keywords</div>
+            </div>
+            <div class="progress-step" id="step4">
+              <div class="progress-step-circle">4</div>
+              <div class="progress-step-label">Generate Campaign</div>
+            </div>
+            <div class="progress-step" id="step5">
+              <div class="progress-step-circle">5</div>
+              <div class="progress-step-label">Scan Database</div>
+            </div>
+            <div class="progress-step" id="step6">
+              <div class="progress-step-circle">6</div>
+              <div class="progress-step-label">Create Dashboard</div>
+            </div>
+          </div>
+          
+          <div class="progress-status" id="progressStatus">
+            <p>Uploading document...</p>
+          </div>
+        </div>
+
+        <!-- Keyword Selection -->
+        <div class="keyword-selection" id="keywordSelection">
+          <h3>Interactive Keyword Selection Interface</h3>
+          <p style="color: #6b7280; margin-bottom: 20px;">AI has extracted and categorized keywords from your document. Select the ones you want to include in your campaign.</p>
+          
+          <!-- Search and Filter Controls -->
+          <div class="keyword-controls">
+            <input type="text" class="keyword-search" id="keywordSearch" placeholder="Search keywords...">
+            <div class="keyword-filters">
+              <button class="filter-btn active" data-filter="all">All</button>
+              <button class="filter-btn" data-filter="people">People</button>
+              <button class="filter-btn" data-filter="places">Places</button>
+              <button class="filter-btn" data-filter="products">Products</button>
+              <button class="filter-btn" data-filter="organizations">Organizations</button>
+              <button class="filter-btn" data-filter="events">Events</button>
+              <button class="filter-btn" data-filter="topics">Topics</button>
+            </div>
+          </div>
+
+          <!-- Bulk Selection Tools -->
+          <div class="bulk-actions">
+            <button class="bulk-btn" id="selectHighPriority">Select All High Priority</button>
+            <button class="bulk-btn" id="selectByCategory">Select All by Category</button>
+            <button class="bulk-btn" id="selectAll">Select All</button>
+            <button class="bulk-btn" id="clearAll">Clear All</button>
+          </div>
+
+          <!-- Categorized Keywords -->
+          <div class="keyword-categories" id="keywordCategories">
+            <!-- Categories will be populated by JavaScript -->
+          </div>
+
+          <!-- Manual Addition -->
+          <div style="margin-top: 20px; padding: 16px; background: #f9fafb; border-radius: 12px; border: 1px solid #e5e7eb;">
+            <h4 style="margin: 0 0 12px 0; font-size: 14px; color: #374151;">Add Custom Keywords</h4>
+            <div style="display: flex; gap: 8px;">
+              <input type="text" id="customKeyword" placeholder="Enter custom keyword..." style="flex: 1; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;">
+              <button class="btn btn--secondary" id="addCustomKeyword">Add</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="campaign-actions" id="campaignActions">
+          <button class="btn btn--primary" id="createCampaignBtn">Create Campaign</button>
+          <button class="btn btn--secondary" id="startOverBtn">Start Over</button>
+          <button class="btn btn--secondary" id="cancelBtn">Cancel</button>
+        </div>
+      </section>
+
+      <!-- Existing Campaigns -->
+      <section class="campaigns-list">
+        <h2>Your Campaigns</h2>
+        
+        <div class="campaign-card">
+          <div class="campaign-header">
+            <h3 class="campaign-name">Yayoi Kusama x Louis Vuitton Campaign</h3>
+            <span class="campaign-status active">Active</span>
+          </div>
+          <div class="campaign-meta">
+            <span>Created: March 15, 2024</span>
+            <span>Last Modified: March 20, 2024</span>
+            <span>Performance: High</span>
+          </div>
+          <div class="campaign-keywords">
+            <span class="campaign-keyword-tag">Yayoi Kusama</span>
+            <span class="campaign-keyword-tag">Louis Vuitton</span>
+            <span class="campaign-keyword-tag">Infinity Mirrors</span>
+            <span class="campaign-keyword-tag">Painted Dots</span>
+            <span class="campaign-keyword-tag">Psychedelic Flowers</span>
+            <span class="campaign-keyword-tag">Art Collaboration</span>
+          </div>
+        </div>
+
+        <div class="campaign-card">
+          <div class="campaign-header">
+            <h3 class="campaign-name">Fashion Week Spring 2024</h3>
+            <span class="campaign-status draft">Draft</span>
+          </div>
+          <div class="campaign-meta">
+            <span>Created: March 10, 2024</span>
+            <span>Last Modified: March 12, 2024</span>
+            <span>Status: Pending Review</span>
+          </div>
+          <div class="campaign-keywords">
+            <span class="campaign-keyword-tag">Fashion Week</span>
+            <span class="campaign-keyword-tag">Spring 2024</span>
+            <span class="campaign-keyword-tag">Runway</span>
+            <span class="campaign-keyword-tag">Designer</span>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <script src="scripts/auth.js"></script>
+    <script>
+      // Comprehensive keyword database by category
+      const extractedKeywords = {
+        people: [
+          { text: 'Yayoi Kusama', confidence: 95, frequency: 47, relevance: 'high' },
+          { text: 'Bernard Arnault', confidence: 88, frequency: 12, relevance: 'high' },
+          { text: 'Nicolas Ghesquière', confidence: 82, frequency: 8, relevance: 'medium' },
+          { text: 'Frank Gehry', confidence: 76, frequency: 5, relevance: 'medium' }
+        ],
+        places: [
+          { text: 'Fondation Louis Vuitton', confidence: 92, frequency: 23, relevance: 'high' },
+          { text: 'Paris', confidence: 89, frequency: 31, relevance: 'high' },
+          { text: 'Tokyo', confidence: 78, frequency: 15, relevance: 'medium' },
+          { text: 'New York', confidence: 72, frequency: 9, relevance: 'medium' }
+        ],
+        products: [
+          { text: 'Capucines Bag', confidence: 94, frequency: 28, relevance: 'high' },
+          { text: 'Pochette Accessoires', confidence: 91, frequency: 22, relevance: 'high' },
+          { text: 'Christopher Backpack', confidence: 85, frequency: 18, relevance: 'high' },
+          { text: 'Archlight Sneaker', confidence: 79, frequency: 14, relevance: 'medium' },
+          { text: 'Infinity Dots Collection', confidence: 87, frequency: 25, relevance: 'high' }
+        ],
+        organizations: [
+          { text: 'Louis Vuitton', confidence: 96, frequency: 52, relevance: 'high' },
+          { text: 'LVMH', confidence: 84, frequency: 16, relevance: 'high' },
+          { text: 'Gagosian Gallery', confidence: 73, frequency: 7, relevance: 'medium' },
+          { text: 'David Zwirner Gallery', confidence: 69, frequency: 4, relevance: 'low' }
+        ],
+        events: [
+          { text: 'Collaboration Launch', confidence: 90, frequency: 19, relevance: 'high' },
+          { text: 'Fashion Week Paris', confidence: 86, frequency: 11, relevance: 'high' },
+          { text: 'Art Basel', confidence: 74, frequency: 6, relevance: 'medium' },
+          { text: 'Venice Biennale', confidence: 68, frequency: 3, relevance: 'low' }
+        ],
+        topics: [
+          { text: 'Contemporary Art', confidence: 88, frequency: 34, relevance: 'high' },
+          { text: 'Luxury Fashion', confidence: 93, frequency: 41, relevance: 'high' },
+          { text: 'Artistic Collaboration', confidence: 85, frequency: 26, relevance: 'high' },
+          { text: 'Pop Art', confidence: 79, frequency: 17, relevance: 'medium' },
+          { text: 'Minimalism', confidence: 71, frequency: 8, relevance: 'medium' },
+          { text: 'Avant-garde', confidence: 67, frequency: 5, relevance: 'low' }
+        ]
+      };
+
+      // DOM elements
+      const uploadArea = document.getElementById('uploadArea');
+      const fileInput = document.getElementById('fileInput');
+      const progressContainer = document.getElementById('progressContainer');
+      const progressLine = document.getElementById('progressLine');
+      const progressStatus = document.getElementById('progressStatus');
+      const keywordSelection = document.getElementById('keywordSelection');
+      const keywordGrid = document.getElementById('keywordGrid');
+      const campaignActions = document.getElementById('campaignActions');
+
+      // File upload handling
+      uploadArea.addEventListener('click', () => fileInput.click());
+      uploadArea.addEventListener('dragover', handleDragOver);
+      uploadArea.addEventListener('dragleave', handleDragLeave);
+      uploadArea.addEventListener('drop', handleDrop);
+      fileInput.addEventListener('change', handleFileSelect);
+
+      function handleDragOver(e) {
+        e.preventDefault();
+        uploadArea.classList.add('dragover');
+      }
+
+      function handleDragLeave(e) {
+        e.preventDefault();
+        uploadArea.classList.remove('dragover');
+      }
+
+      function handleDrop(e) {
+        e.preventDefault();
+        uploadArea.classList.remove('dragover');
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+          processFile(files[0]);
+        }
+      }
+
+      function handleFileSelect(e) {
+        const file = e.target.files[0];
+        if (file) {
+          processFile(file);
+        }
+      }
+
+      function processFile(file) {
+        // Validate file
+        if (!validateFile(file)) return;
+
+        // Start processing
+        uploadArea.classList.add('uploading');
+        progressContainer.classList.add('active');
+        
+        // Phase 1: Document Upload & Processing
+        setActiveStep(1);
+        progressStatus.innerHTML = '<p>📄 Uploading and parsing document content...</p>';
+        
+        setTimeout(() => {
+          setCompletedStep(1);
+          setActiveStep(2);
+          progressStatus.innerHTML = '<p>🤖 AI analyzing document for semantic meaning and extracting entities...</p>';
+          
+          setTimeout(() => {
+            setCompletedStep(2);
+            setActiveStep(3);
+            progressStatus.innerHTML = '<p>🏷️ Categorizing keywords by type and relevance...</p>';
+            showKeywordSelection();
+            
+            setTimeout(() => {
+              setCompletedStep(3);
+              // Phase 3 continues with user interaction
+            }, 1000);
+          }, 2500);
+        }, 2000);
+      }
+
+      function validateFile(file) {
+        const maxSize = 50 * 1024 * 1024; // 50MB
+        const allowedTypes = [
+          'application/pdf', 
+          'application/msword', 
+          'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 
+          'application/vnd.ms-excel', 
+          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 
+          'text/plain',
+          'text/html'
+        ];
+        
+        if (file.size > maxSize) {
+          alert('File size must be less than 50MB');
+          return false;
+        }
+        
+        if (!allowedTypes.includes(file.type)) {
+          alert('Please upload a valid document file (PDF, DOC, DOCX, XLS, XLSX, TXT, HTML)');
+          return false;
+        }
+        
+        return true;
+      }
+
+      function setActiveStep(stepNumber) {
+        document.getElementById(`step${stepNumber}`).classList.add('active');
+        updateProgressLine(stepNumber);
+      }
+
+      function setCompletedStep(stepNumber) {
+        const step = document.getElementById(`step${stepNumber}`);
+        step.classList.remove('active');
+        step.classList.add('completed');
+        step.querySelector('.progress-step-circle').innerHTML = '✓';
+      }
+
+      function updateProgressLine(stepNumber) {
+        const progressPercentage = ((stepNumber - 1) / 5) * 100;
+        progressLine.style.width = `${progressPercentage}%`;
+      }
+
+      function showKeywordSelection() {
+        keywordSelection.classList.add('active');
+        campaignActions.classList.add('active');
+        populateKeywordCategories();
+        initializeKeywordControls();
+      }
+
+      function populateKeywordCategories() {
+        const categoriesContainer = document.getElementById('keywordCategories');
+        categoriesContainer.innerHTML = '';
+
+        Object.keys(extractedKeywords).forEach(categoryKey => {
+          const keywords = extractedKeywords[categoryKey];
+          const categoryDiv = document.createElement('div');
+          categoryDiv.className = 'keyword-category';
+          
+          categoryDiv.innerHTML = `
+            <div class="category-header" onclick="toggleCategory('${categoryKey}')">
+              <div class="category-title">
+                <div class="category-badge ${categoryKey}"></div>
+                ${categoryKey.charAt(0).toUpperCase() + categoryKey.slice(1)}
+              </div>
+              <div class="category-count">${keywords.length}</div>
+            </div>
+            <div class="category-content expanded" id="category-${categoryKey}">
+              <div class="keyword-grid">
+                ${keywords.map((keyword, index) => `
+                  <div class="keyword-item ${keyword.relevance === 'high' ? 'selected' : ''}" data-category="${categoryKey}" data-relevance="${keyword.relevance}">
+                    <input type="checkbox" class="keyword-checkbox" id="${categoryKey}-${index}" ${keyword.relevance === 'high' ? 'checked' : ''}>
+                    <div class="keyword-content">
+                      <div class="keyword-text">${keyword.text}</div>
+                      <div class="keyword-meta">
+                        <span class="keyword-frequency">Used ${keyword.frequency}x</span>
+                        <span class="keyword-relevance ${keyword.relevance}">${keyword.relevance} priority</span>
+                      </div>
+                    </div>
+                    <span class="keyword-confidence">${keyword.confidence}%</span>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          `;
+          
+          categoriesContainer.appendChild(categoryDiv);
+        });
+
+        // Add click handlers for keyword items
+        document.querySelectorAll('.keyword-item').forEach(item => {
+          item.addEventListener('click', (e) => {
+            if (e.target.type !== 'checkbox') {
+              const checkbox = item.querySelector('input');
+              checkbox.checked = !checkbox.checked;
+            }
+            item.classList.toggle('selected', item.querySelector('input').checked);
+          });
+        });
+      }
+
+      function toggleCategory(categoryKey) {
+        const content = document.getElementById(`category-${categoryKey}`);
+        content.classList.toggle('expanded');
+      }
+
+      // Action buttons
+      document.getElementById('createCampaignBtn').addEventListener('click', createCampaign);
+      document.getElementById('startOverBtn').addEventListener('click', startOver);
+      document.getElementById('cancelBtn').addEventListener('click', cancel);
+
+      function initializeKeywordControls() {
+        // Search functionality
+        document.getElementById('keywordSearch').addEventListener('input', filterKeywords);
+        
+        // Filter buttons
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            e.target.classList.add('active');
+            filterKeywords();
+          });
+        });
+
+        // Bulk actions
+        document.getElementById('selectHighPriority').addEventListener('click', () => {
+          document.querySelectorAll('[data-relevance="high"] input').forEach(cb => {
+            cb.checked = true;
+            cb.closest('.keyword-item').classList.add('selected');
+          });
+        });
+
+        document.getElementById('selectAll').addEventListener('click', () => {
+          document.querySelectorAll('.keyword-checkbox').forEach(cb => {
+            cb.checked = true;
+            cb.closest('.keyword-item').classList.add('selected');
+          });
+        });
+
+        document.getElementById('clearAll').addEventListener('click', () => {
+          document.querySelectorAll('.keyword-checkbox').forEach(cb => {
+            cb.checked = false;
+            cb.closest('.keyword-item').classList.remove('selected');
+          });
+        });
+
+        // Custom keyword addition
+        document.getElementById('addCustomKeyword').addEventListener('click', addCustomKeyword);
+      }
+
+      function filterKeywords() {
+        const searchTerm = document.getElementById('keywordSearch').value.toLowerCase();
+        const activeFilter = document.querySelector('.filter-btn.active').dataset.filter;
+        
+        document.querySelectorAll('.keyword-item').forEach(item => {
+          const text = item.querySelector('.keyword-text').textContent.toLowerCase();
+          const category = item.dataset.category;
+          
+          const matchesSearch = text.includes(searchTerm);
+          const matchesFilter = activeFilter === 'all' || category === activeFilter;
+          
+          item.style.display = matchesSearch && matchesFilter ? 'flex' : 'none';
+        });
+      }
+
+      function addCustomKeyword() {
+        const input = document.getElementById('customKeyword');
+        const keyword = input.value.trim();
+        
+        if (!keyword) return;
+        
+        // Add to topics category
+        const topicsGrid = document.querySelector('#category-topics .keyword-grid');
+        const keywordItem = document.createElement('div');
+        keywordItem.className = 'keyword-item';
+        keywordItem.dataset.category = 'topics';
+        keywordItem.dataset.relevance = 'medium';
+        
+        const keywordId = `custom-${Date.now()}`;
+        keywordItem.innerHTML = `
+          <input type="checkbox" class="keyword-checkbox" id="${keywordId}" checked>
+          <div class="keyword-content">
+            <div class="keyword-text">${keyword}</div>
+            <div class="keyword-meta">
+              <span class="keyword-frequency">Custom</span>
+              <span class="keyword-relevance medium">manual</span>
+            </div>
+          </div>
+          <span class="keyword-confidence">N/A</span>
+        `;
+        
+        keywordItem.classList.add('selected');
+        keywordItem.addEventListener('click', (e) => {
+          if (e.target.type !== 'checkbox') {
+            const checkbox = keywordItem.querySelector('input');
+            checkbox.checked = !checkbox.checked;
+          }
+          keywordItem.classList.toggle('selected', keywordItem.querySelector('input').checked);
+        });
+        
+        topicsGrid.appendChild(keywordItem);
+        input.value = '';
+      }
+
+      function createCampaign() {
+        const selectedKeywords = Array.from(document.querySelectorAll('.keyword-checkbox:checked'))
+          .map(checkbox => {
+            return {
+              text: checkbox.closest('.keyword-item').querySelector('.keyword-text').textContent,
+              category: checkbox.closest('.keyword-item').dataset.category
+            };
+          });
+
+        if (selectedKeywords.length === 0) {
+          alert('Please select at least one keyword for your campaign.');
+          return;
+        }
+
+        // Continue to Phase 4
+        setActiveStep(4);
+        progressStatus.innerHTML = '<p>🚀 Generating campaign interface and setting up automation...</p>';
+        
+        setTimeout(() => {
+          setCompletedStep(4);
+          setActiveStep(5);
+          progressStatus.innerHTML = '<p>🔍 Scanning database and associating relevant articles...</p>';
+          
+          setTimeout(() => {
+            setCompletedStep(5);
+            setActiveStep(6);
+            progressStatus.innerHTML = '<p>📊 Creating campaign dashboard and analytics...</p>';
+            
+            setTimeout(() => {
+              setCompletedStep(6);
+              progressStatus.innerHTML = '<p>✅ Campaign created successfully!</p>';
+              
+              // Show success message
+              alert(`🎉 Campaign created successfully with ${selectedKeywords.length} keywords!\n\n📋 Selected keywords:\n${selectedKeywords.map(k => `• ${k.text} (${k.category})`).join('\n')}\n\n🚀 Your campaign is now live and scanning for relevant content!`);
+              
+              // Reset the form
+              setTimeout(startOver, 2000);
+            }, 1500);
+          }, 2000);
+        }, 1500);
+      }
+
+      function startOver() {
+        uploadArea.classList.remove('uploading');
+        progressContainer.classList.remove('active');
+        keywordSelection.classList.remove('active');
+        campaignActions.classList.remove('active');
+        
+        // Reset progress steps
+        document.querySelectorAll('.progress-step').forEach(step => {
+          step.classList.remove('active', 'completed');
+          step.querySelector('.progress-step-circle').innerHTML = step.querySelector('.progress-step-circle').innerHTML.replace('✓', step.id.slice(-1));
+        });
+        
+        progressLine.style.width = '0%';
+        fileInput.value = '';
+      }
+
+      function cancel() {
+        if (confirm('Are you sure you want to cancel? All progress will be lost.')) {
+          startOver();
+        }
+      }
+
+      // Dark mode functionality
+      function initDarkMode() {
+        const darkModeToggle = document.getElementById('darkModeToggle');
+        const body = document.body;
+        
+        // Check for saved dark mode preference
+        const isDarkMode = localStorage.getItem('darkMode') === 'true';
+        if (isDarkMode) {
+          body.classList.add('dark-mode');
+        }
+        
+        // Toggle dark mode
+        if (darkModeToggle) {
+          darkModeToggle.addEventListener('click', () => {
+            body.classList.toggle('dark-mode');
+            const isNowDark = body.classList.contains('dark-mode');
+            localStorage.setItem('darkMode', isNowDark);
+          });
+        }
+      }
+
+      // Initialize when DOM is ready
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initDarkMode);
+      } else {
+        initDarkMode();
+      }
+    </script>
+  </body>
+</html>
+
