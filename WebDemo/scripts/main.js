@@ -141,11 +141,16 @@
     };
     video.addEventListener('canplay', onReady, { once: true });
     
-    // Show CTA button when video ends
+    // Show CTA button 1 second before video ends
     const ctaButton = document.getElementById('hero-cta');
     if (ctaButton) {
-      video.addEventListener('ended', () => {
-        ctaButton.classList.add('is-visible');
+      let buttonShown = false;
+      
+      video.addEventListener('timeupdate', () => {
+        if (!buttonShown && video.duration && video.currentTime >= video.duration - 1) {
+          ctaButton.classList.add('is-visible');
+          buttonShown = true;
+        }
       });
       
       // Add click handler to scroll to next section
