@@ -242,6 +242,34 @@
 
   const styles = `
   .chatbot-wrapper{position:fixed;bottom:104px;right:20px;z-index:999}
+  .image-gallery-wrapper{position:fixed;bottom:20px;left:20px;z-index:998;width:562.5px;opacity:0;transform:translateY(8px);pointer-events:none;transition:opacity 200ms ease,transform 200ms ease}
+  .image-gallery-wrapper.is-visible{opacity:1;transform:translateY(0);pointer-events:auto}
+  .image-gallery-wrapper[hidden]{display:none}
+  .image-gallery{background:linear-gradient(135deg,rgba(255,255,255,0.95),rgba(255,255,255,0.9));border:1px solid rgba(0,0,0,0.1);border-radius:12px;padding:12px;box-shadow:0 8px 32px rgba(0,0,0,0.12);backdrop-filter:blur(16px) saturate(180%);-webkit-backdrop-filter:blur(16px) saturate(180%);position:relative}
+  .image-gallery-track{display:flex;gap:8px;overflow-x:auto;overflow-y:hidden;scroll-behavior:smooth;scrollbar-width:none;-webkit-overflow-scrolling:touch;padding:4px 40px;margin:0 -40px}
+  .image-gallery-track::-webkit-scrollbar{display:none}
+  .image-gallery-item{flex:0 0 auto;width:120px;height:120px;border-radius:8px;overflow:hidden;cursor:grab;position:relative;transition:transform 200ms ease,box-shadow 200ms ease}
+  .image-gallery-item:active{cursor:grabbing}
+  .image-gallery-item:hover{transform:scale(1.05);box-shadow:0 4px 16px rgba(0,0,0,0.2)}
+  .image-gallery-item img{width:100%;height:100%;object-fit:cover;pointer-events:none;user-select:none;-webkit-user-drag:none}
+  .image-gallery-item.is-dragging{opacity:0.5;transform:scale(0.95)}
+  .gallery-nav-btn{position:absolute;top:50%;transform:translateY(-50%);width:32px;height:32px;border-radius:50%;border:1px solid rgba(0,0,0,0.2);background:rgba(255,255,255,0.98);display:grid;place-items:center;cursor:pointer;z-index:10;transition:all 200ms ease;color:#111}
+  .gallery-nav-btn:hover{background:rgba(255,255,255,1);transform:translateY(-50%) scale(1.1)}
+  .gallery-nav-btn:active{transform:translateY(-50%) scale(0.95)}
+  .gallery-nav-btn.is-disabled{opacity:0.3;pointer-events:none}
+  .gallery-nav-btn--prev{left:4px}
+  .gallery-nav-btn--next{right:4px}
+  .gallery-nav-btn svg{width:16px;height:16px}
+  .chatbot-input.drag-over{background:rgba(74,144,226,0.1);border-color:#4A90E2}
+  .chatbot-map-container{display:none;width:100%;height:400px;border-radius:8px;overflow:hidden;margin-bottom:16px;position:relative;z-index:1}
+  .chatbot-map-container.is-visible{display:block}
+  .chatbot-product-gallery{display:none;width:100%;height:120px;margin-bottom:16px;overflow-x:auto;overflow-y:visible;white-space:nowrap;scrollbar-width:thin;padding-bottom:4px}
+  .chatbot-product-gallery.is-visible{display:block}
+  .chatbot-header[hidden],.chatbot-messages[hidden],.chatbot-input[hidden]{display:none !important}
+  .chatbot-product-gallery::-webkit-scrollbar{height:6px}
+  .chatbot-product-gallery::-webkit-scrollbar-track{background:rgba(0,0,0,0.06);border-radius:3px}
+  .chatbot-product-gallery::-webkit-scrollbar-thumb{background:rgba(0,0,0,0.25);border-radius:3px}
+  .chatbot-product-item{display:inline-block;width:100px;height:100px;background:linear-gradient(135deg,rgba(200,200,200,0.3),rgba(150,150,150,0.3));border:1px solid rgba(0,0,0,0.1);border-radius:8px;margin-right:8px;vertical-align:top}
   .chatbot-toggle{background:#000;color:#fff;border-radius:50%;cursor:pointer;position:absolute;bottom:-80px;right:8px;border:0;outline:none;box-shadow:none;display:grid;place-items:center;width:56px;height:56px;padding:0}
   .chatbot-toggle:focus{outline:none}
   .chatbot-toggle img{width:24px;height:24px;filter:brightness(0) invert(1)}
@@ -259,11 +287,25 @@
   .chatbot-box.chatbot-box--compact{width:281.25px;height:390.625px}
   .chatbot-box.is-scroll-hidden{opacity:0; transform: translateY(8px); pointer-events:none}
   .chatbot-box[hidden]{display:none !important}
-  .chatbot-refresh{position:absolute;top:20px;right:8px;width:32px;height:32px;border-radius:16px;border:1px solid rgba(0,0,0,0.2);background:rgba(255,255,255,0.95);display:grid;place-items:center;color:#111;cursor:pointer;transition:opacity 200ms ease}
+  .chatbot-refresh{position:absolute;top:20px;right:8px;width:32px;height:32px;border-radius:16px;border:1px solid rgba(0,0,0,0.2);background:rgba(255,255,255,0.95);display:grid;place-items:center;color:#111;cursor:pointer;transition:opacity 200ms ease;z-index:10}
   .chatbot-refresh[hidden]{display:none}
   .chatbot-refresh.is-fading{opacity:0;pointer-events:none}
-  .chatbot-back{position:absolute;top:20px;left:8px;width:24px;height:24px;border:0;background:transparent;color:#111;cursor:pointer;display:grid;place-items:center}
+  .chatbot-back{position:absolute;top:20px;left:8px;width:24px;height:24px;border:0;background:transparent;color:#111;cursor:pointer;display:grid;place-items:center;z-index:10}
   .chatbot-back[hidden]{display:none}
+  .chatbot-sort{position:absolute;top:20px;left:8px;width:32px;height:32px;border-radius:50%;border:1px solid rgba(0,0,0,0.2);background:rgba(255,255,255,0.95);display:grid;place-items:center;color:#111;cursor:pointer;transition:background 200ms ease;z-index:10}
+  .chatbot-sort:hover{background:rgba(255,255,255,1)}
+  .chatbot-sort[hidden]{display:none}
+  .chatbot-nav{position:fixed;bottom:104px;right:598.5px;width:56px;background:linear-gradient(135deg,rgba(255,255,255,0.95),rgba(255,255,255,0.9));border:1px solid rgba(0,0,0,0.1);border-radius:28px;padding:16px 0;display:flex;flex-direction:column;align-items:center;gap:8px;box-shadow:0 4px 24px rgba(0,0,0,0.12);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);opacity:0;transform:translateX(-8px);pointer-events:none;transition:opacity 200ms ease,transform 200ms ease}
+  .chatbot-nav.is-visible{opacity:1;transform:translateX(0);pointer-events:auto}
+  .chatbot-nav.is-disabled{opacity:0.5}
+  .chatbot-nav.is-disabled .chatbot-nav-item{pointer-events:none;cursor:not-allowed;opacity:0.6}
+  .chatbot-nav[hidden]{display:none}
+  .chatbot-nav-item{width:40px;height:40px;display:grid;place-items:center;border-radius:20px;border:1px solid rgba(0,0,0,0.2);background:rgba(255,255,255,0.95);cursor:pointer;transition:all 200ms ease;color:#232323}
+  .chatbot-nav-item:hover{background:rgba(240,245,255,0.95);transform:scale(1.05)}
+  .chatbot-nav-item.is-active{background:linear-gradient(135deg,#4A90E2,#357ABD);border:1px solid rgba(74,144,226,0.3);color:#fff}
+  .chatbot-nav-item.is-active svg{stroke:#fff}
+  .chatbot-nav-item svg{width:24px;height:24px}
+  .chatbot-nav-separator{width:32px;height:1px;background:rgba(0,0,0,0.1);margin:4px 0}
   .chatbot-header{text-align:center;padding-top:8px}
   .chatbot-title{font-size:21px;font-weight:600;margin:0 0 8px}
   .chatbot-sub{font-size:15px;color:#232323;margin:0 0 8px;font-weight:600}
@@ -385,6 +427,208 @@
     backPath.setAttribute('stroke-width','1.5');
     backIcon.appendChild(backPath);
     backBtn.appendChild(backIcon);
+    const sortBtn = createEl('button', { class: 'chatbot-sort', title: 'Sort options', type: 'button' });
+    const sortIcon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    sortIcon.setAttribute('xmlns','http://www.w3.org/2000/svg');
+    sortIcon.setAttribute('viewBox','0 0 24 24');
+    sortIcon.setAttribute('fill','none');
+    sortIcon.setAttribute('stroke','currentColor');
+    sortIcon.setAttribute('width','18');
+    sortIcon.setAttribute('height','18');
+    sortIcon.setAttribute('stroke-width','1.5');
+    const sortPath = document.createElementNS('http://www.w3.org/2000/svg','path');
+    sortPath.setAttribute('d','M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25H12');
+    sortPath.setAttribute('stroke-linecap','round');
+    sortPath.setAttribute('stroke-linejoin','round');
+    sortIcon.appendChild(sortPath);
+    sortBtn.appendChild(sortIcon);
+    
+    // Create navigation menu
+    const chatbotNav = createEl('div', { class: 'chatbot-nav' });
+    let navVisible = false;
+    
+    // Helper function to create nav icons
+    function createNavIcon(iconType) {
+      const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+      svg.setAttribute('viewBox', '0 0 24 24');
+      svg.setAttribute('fill', 'none');
+      svg.setAttribute('stroke', '#232323');
+      svg.setAttribute('stroke-width', '1.5');
+      svg.setAttribute('stroke-linecap', 'round');
+      svg.setAttribute('stroke-linejoin', 'round');
+      
+      const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      
+      switch(iconType) {
+        case 'user':
+          path.setAttribute('d', 'M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z');
+          break;
+        case 'book':
+          path.setAttribute('d', 'M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25');
+          break;
+        case 'globe':
+          const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+          circle.setAttribute('cx', '11.5');
+          circle.setAttribute('cy', '11.5');
+          circle.setAttribute('r', '9.5');
+          svg.appendChild(circle);
+          path.setAttribute('d', 'M11.5 2.5c0 0-3 4.5-3 9s3 9 3 9m0-18c0 0 3 4.5 3 9s-3 9-3 9m-9.5-9h18M3.5 6.5h16m-17 9h18');
+          break;
+        case 'map':
+          path.setAttribute('d', 'M9 6.75V15m6-6v8.25m.503 3.498 4.875-2.437c.381-.19.622-.58.622-1.006V4.82c0-.836-.88-1.38-1.628-1.006l-3.869 1.934c-.317.159-.69.159-1.006 0L9.503 3.252a1.125 1.125 0 0 0-1.006 0L3.622 5.689C3.24 5.88 3 6.27 3 6.695V19.18c0 .836.88 1.38 1.628 1.006l3.869-1.934c.317-.159.69-.159 1.006 0l4.994 2.497c.317.158.69.158 1.006 0Z');
+          break;
+        case 'heart':
+          path.setAttribute('d', 'M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z');
+          break;
+        case 'grid':
+          path.setAttribute('d', 'M3.75 6A2.25 2.25 0 0 1 6 3.75h2.25A2.25 2.25 0 0 1 10.5 6v2.25a2.25 2.25 0 0 1-2.25 2.25H6a2.25 2.25 0 0 1-2.25-2.25V6ZM3.75 15.75A2.25 2.25 0 0 1 6 13.5h2.25a2.25 2.25 0 0 1 2.25 2.25V18a2.25 2.25 0 0 1-2.25 2.25H6A2.25 2.25 0 0 1 3.75 18v-2.25ZM13.5 6a2.25 2.25 0 0 1 2.25-2.25H18A2.25 2.25 0 0 1 20.25 6v2.25A2.25 2.25 0 0 1 18 10.5h-2.25a2.25 2.25 0 0 1-2.25-2.25V6ZM13.5 15.75a2.25 2.25 0 0 1 2.25-2.25H18a2.25 2.25 0 0 1 2.25 2.25V18A2.25 2.25 0 0 1 18 20.25h-2.25A2.25 2.25 0 0 1 13.5 18v-2.25Z');
+          break;
+      }
+      
+      svg.appendChild(path);
+      return svg;
+    }
+    
+    // Create nav items
+    const navItems = [
+      { icon: 'user', id: 'nav-user', title: 'Chat', view: 'chat', active: true, closeNav: true },
+      { icon: 'book', id: 'nav-library', title: 'Library', view: 'library', closeNav: false },
+      { icon: 'globe', id: 'nav-search', title: 'Search', view: 'search', closeNav: false },
+      { icon: 'map', id: 'nav-map', title: 'Map', view: 'map', closeNav: false },
+      { icon: 'heart', id: 'nav-favorites', title: 'Favorites', view: 'favorites', closeNav: false },
+      { icon: 'grid', id: 'nav-grid', title: 'Grid View', view: 'grid', closeNav: true }
+    ];
+    
+    let currentView = 'chat'; // Default view
+    
+    navItems.forEach((item, index) => {
+      // Add separator after first item and before last item
+      if (index === 1 || index === navItems.length - 1) {
+        const separator = createEl('div', { class: 'chatbot-nav-separator' });
+        chatbotNav.appendChild(separator);
+      }
+      
+      const navItem = createEl('button', { 
+        class: item.active ? 'chatbot-nav-item is-active' : 'chatbot-nav-item',
+        id: item.id,
+        title: item.title,
+        type: 'button'
+      });
+      navItem.appendChild(createNavIcon(item.icon));
+      
+      // Add click handler directly to the nav item
+      navItem.addEventListener('click', () => {
+        // Special handling for grid icon - open new tab
+        if (item.view === 'grid') {
+          window.open('/homepage', '_blank');
+          // Close nav after opening new tab
+          navVisible = false;
+          chatbotNav.classList.remove('is-visible');
+          return;
+        }
+        
+        // Remove active class from all items in the nav
+        chatbotNav.querySelectorAll('.chatbot-nav-item').forEach(i => i.classList.remove('is-active'));
+        // Add active class to clicked item
+        navItem.classList.add('is-active');
+        
+        // Switch view
+        currentView = item.view;
+        switchChatbotView(currentView);
+        
+        // Close nav if specified
+        if (item.closeNav) {
+          navVisible = false;
+          chatbotNav.classList.remove('is-visible');
+        }
+      });
+      
+      chatbotNav.appendChild(navItem);
+    });
+    
+    // Leaflet map instance
+    let leafletMap = null;
+    
+    // Function to initialize Leaflet map
+    function initializeMap() {
+      if (leafletMap) return; // Already initialized
+      
+      // Wait a bit for the container to be visible
+      setTimeout(() => {
+        if (typeof L !== 'undefined') {
+          // Initialize map centered on Paris (Louis Vuitton HQ)
+          leafletMap = L.map('chatbot-map').setView([48.8566, 2.3522], 13);
+          
+          // Add OpenStreetMap tiles
+          L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+            maxZoom: 19
+          }).addTo(leafletMap);
+          
+          // Add sample markers for Louis Vuitton stores
+          const stores = [
+            { lat: 48.8698, lng: 2.3075, name: 'Louis Vuitton Champs-Élysées' },
+            { lat: 48.8606, lng: 2.3376, name: 'Louis Vuitton Place Vendôme' },
+            { lat: 48.8529, lng: 2.3368, name: 'Louis Vuitton Saint-Germain' }
+          ];
+          
+          stores.forEach(store => {
+            L.marker([store.lat, store.lng])
+              .bindPopup(`<b>${store.name}</b>`)
+              .addTo(leafletMap);
+          });
+          
+          // Fix map display issues
+          setTimeout(() => {
+            if (leafletMap) {
+              leafletMap.invalidateSize();
+            }
+          }, 100);
+        }
+      }, 100);
+    }
+    
+    // Function to switch chatbot views
+    function switchChatbotView(view) {
+      // Hide/show different sections based on view
+      if (view === 'chat') {
+        // Show chatbot interface ONLY - chat view is the only one with input
+        header.removeAttribute('hidden');
+        messages.removeAttribute('hidden');
+        inputW.removeAttribute('hidden');
+        mapContainer.classList.remove('is-visible');
+        productGallery.classList.remove('is-visible');
+      } else if (view === 'map') {
+        // Show map view with product gallery - NO CHAT MESSAGES OR INPUT
+        header.setAttribute('hidden', '');
+        messages.setAttribute('hidden', '');
+        inputW.setAttribute('hidden', ''); // Hide input in map view
+        mapContainer.classList.add('is-visible');
+        productGallery.classList.add('is-visible');
+        
+        // Initialize map if not already done
+        initializeMap();
+      } else {
+        // For other views (library, search, favorites), hide all chat elements including input
+        header.setAttribute('hidden', '');
+        messages.setAttribute('hidden', '');
+        inputW.setAttribute('hidden', '');
+        mapContainer.classList.remove('is-visible');
+        productGallery.classList.remove('is-visible');
+      }
+    }
+    
+    // Create map and product gallery containers
+    const mapContainer = createEl('div', { class: 'chatbot-map-container', id: 'chatbot-map' });
+    const productGallery = createEl('div', { class: 'chatbot-product-gallery' });
+    
+    // Create placeholder product items
+    for (let i = 0; i < 8; i++) {
+      const productItem = createEl('div', { class: 'chatbot-product-item' });
+      productGallery.appendChild(productItem);
+    }
+    
     const options = createEl('div', { class: 'chatbot-options' });
     const messages= createEl('div', { class: 'chatbot-messages' });
     const inputW  = createEl('div', { class: 'chatbot-input' });
@@ -407,11 +651,27 @@
     inputW.appendChild(input); inputW.appendChild(sendBtn);
     header.appendChild(logo); header.appendChild(title); header.appendChild(sub); header.appendChild(presets); header.appendChild(options);
     // Sizing constants and helpers
-    const FULL_W = 562.5; const FULL_H = 795.25; // slightly taller to ensure input isn't clipped
-    const COMPACT_W = 281.25; const COMPACT_H = 406.625; // maintain proportion with added paddings
+    const FULL_W = 562.5;
+    const COMPACT_W = 281.25;
+    const COMPACT_H = 406.625; // maintain proportion with added paddings
+    const CHATBOT_BOTTOM = 104; // px from bottom of viewport
+    const GALLERY_HEIGHT = 144; // approximate height of gallery
+    const GALLERY_GAP = 16; // gap between gallery and chatbot
+    const TOP_PADDING = 20; // minimum padding from top of viewport
+    
+    // Calculate max chatbot height to ensure gallery doesn't go off-screen
+    function getMaxChatbotHeight() {
+      const viewportHeight = window.innerHeight;
+      // Available space = viewport - chatbot bottom - gallery height - gap - top padding
+      const maxHeight = viewportHeight - CHATBOT_BOTTOM - GALLERY_HEIGHT - GALLERY_GAP - TOP_PADDING;
+      return Math.max(400, maxHeight); // Minimum 400px for usability
+    }
+    
     function setBoxSize(widthPx, heightPx){
+      const maxHeight = getMaxChatbotHeight();
+      const constrainedHeight = Math.min(heightPx, maxHeight);
       box.style.width = widthPx + 'px';
-      box.style.height = heightPx + 'px';
+      box.style.height = constrainedHeight + 'px';
     }
     // Initial compact size with glass background intact
     box.classList.add('chatbot-box--compact');
@@ -450,15 +710,19 @@
 
     function updateBoxSizeForState(){
       const hasBot = Array.from(messages.children).some(el => el.classList.contains('chatbot-msg-bot'));
+      const maxHeight = getMaxChatbotHeight();
+      
       if (hasBot){
         box.classList.remove('chatbot-box--compact');
         const minH = computeMinHeight();
-        setBoxSize(FULL_W, Math.max(FULL_H, minH));
+        const targetHeight = Math.min(maxHeight, Math.max(minH, 600)); // Default to 600px when expanded
+        setBoxSize(FULL_W, targetHeight);
       } else {
         const w = preferredCompactWidth();
         box.classList.add('chatbot-box--compact');
         const minH = computeMinHeight();
-        setBoxSize(w, Math.max(COMPACT_H, minH));
+        const targetHeight = Math.max(COMPACT_H, minH);
+        setBoxSize(w, targetHeight);
       }
       // Ensure top controls are always visible: scroll container to top and keep padding
       box.scrollTop = 0;
@@ -499,8 +763,19 @@
     // The back button is no longer needed since there are no detail views
     backBtn.setAttribute('hidden','');
 
-    box.appendChild(refreshBtn); box.appendChild(backBtn); box.appendChild(header); box.appendChild(messages); box.appendChild(inputW);
-    wrapper.appendChild(toggle); wrapper.appendChild(box);
+    box.appendChild(refreshBtn); box.appendChild(backBtn); box.appendChild(sortBtn); box.appendChild(header); box.appendChild(mapContainer); box.appendChild(productGallery); box.appendChild(messages); box.appendChild(inputW);
+    
+    // Navigation toggle functionality
+    sortBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      console.log('Sort button clicked! Current navVisible:', navVisible);
+      navVisible = !navVisible;
+      console.log('New navVisible:', navVisible);
+      chatbotNav.classList.toggle('is-visible', navVisible);
+      console.log('Nav classList:', chatbotNav.classList.toString());
+    });
+    wrapper.appendChild(toggle); wrapper.appendChild(box); wrapper.appendChild(chatbotNav);
     document.body.appendChild(wrapper);
 
     let slug = DEFAULT_SLUG;
@@ -793,12 +1068,21 @@
       ensureSizeForContent();
       // Perform health check when opening
       performHealthCheck();
+      // Show gallery when chatbot opens
+      toggleGallery(true);
     }
     function closeBox(){
       // End chat session when closing
       if (window.ShopThatData && currentSessionId) {
         window.ShopThatData.endChatSession(currentSessionId);
       }
+      
+      // Close nav if it's open
+      navVisible = false;
+      chatbotNav.classList.remove('is-visible');
+      
+      // Hide gallery when chatbot closes
+      toggleGallery(false);
       
       // Fade out, then actually hide after transition ends
       box.classList.add('is-scroll-hidden');
@@ -972,9 +1256,251 @@
     // Observe images and trigger analysis on scroll when chat is open
     observeImages();
     window.addEventListener('scroll', ()=>{ if (expanded) scheduleAnalysis(); }, { passive: true });
+
+    // =====================
+    // Image Gallery Component
+    // =====================
+    const galleryWrapper = createEl('div', { class: 'image-gallery-wrapper', hidden: '' });
+    const gallery = createEl('div', { class: 'image-gallery' });
+    const galleryTrack = createEl('div', { class: 'image-gallery-track' });
+    
+    // Create navigation arrows
+    function createArrowIcon(direction) {
+      const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+      svg.setAttribute('viewBox', '0 0 24 24');
+      svg.setAttribute('fill', 'none');
+      svg.setAttribute('stroke', 'currentColor');
+      svg.setAttribute('stroke-width', '2');
+      svg.setAttribute('stroke-linecap', 'round');
+      svg.setAttribute('stroke-linejoin', 'round');
+      const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      path.setAttribute('d', direction === 'left' ? 'M15 18l-6-6 6-6' : 'M9 18l6-6-6-6');
+      svg.appendChild(path);
+      return svg;
+    }
+    
+    const prevBtn = createEl('button', { class: 'gallery-nav-btn gallery-nav-btn--prev', type: 'button', 'aria-label': 'Previous images' });
+    prevBtn.appendChild(createArrowIcon('left'));
+    const nextBtn = createEl('button', { class: 'gallery-nav-btn gallery-nav-btn--next', type: 'button', 'aria-label': 'Next images' });
+    nextBtn.appendChild(createArrowIcon('right'));
+    
+    gallery.appendChild(prevBtn);
+    gallery.appendChild(galleryTrack);
+    gallery.appendChild(nextBtn);
+    galleryWrapper.appendChild(gallery);
+    document.body.appendChild(galleryWrapper);
+    
+    // Populate gallery with visible images from webpage
+    function populateGallery() {
+      galleryTrack.replaceChildren();
+      
+      // Get all visible images from the page (excluding chatbot and gallery images)
+      const pageImages = Array.from(document.querySelectorAll('img'))
+        .filter(img => {
+          // Exclude chatbot images, gallery images, logo, etc.
+          if (img.closest('.chatbot-wrapper')) return false;
+          if (img.closest('.image-gallery-wrapper')) return false;
+          if (img.closest('.lv-header')) return false;
+          if (img.src.includes('louis-vuitton.svg')) return false;
+          if (img.src.includes('logo.svg')) return false;
+          
+          // Check if image is visible
+          const rect = img.getBoundingClientRect();
+          const isVisible = rect.width > 0 && rect.height > 0;
+          return isVisible && img.src;
+        });
+      
+      // Create gallery items
+      pageImages.forEach((img, index) => {
+        const galleryItem = createEl('div', { 
+          class: 'image-gallery-item',
+          draggable: 'true',
+          'data-image-src': img.src,
+          'data-image-index': String(index)
+        });
+        
+        const galleryImg = createEl('img', { 
+          src: img.src,
+          alt: img.alt || 'Product image',
+          draggable: 'false'
+        });
+        
+        galleryItem.appendChild(galleryImg);
+        galleryTrack.appendChild(galleryItem);
+        
+        // Add drag event listeners
+        galleryItem.addEventListener('dragstart', handleDragStart);
+        galleryItem.addEventListener('dragend', handleDragEnd);
+      });
+      
+      updateNavigationButtons();
+    }
+    
+    // Drag and drop functionality
+    let draggedItem = null;
+    let draggedImageSrc = null;
+    
+    function handleDragStart(e) {
+      draggedItem = e.currentTarget;
+      draggedImageSrc = draggedItem.getAttribute('data-image-src');
+      draggedItem.classList.add('is-dragging');
+      
+      // Set drag data
+      e.dataTransfer.effectAllowed = 'copy';
+      e.dataTransfer.setData('text/plain', draggedImageSrc);
+      
+      // Create a custom drag image
+      const dragImage = draggedItem.querySelector('img');
+      if (dragImage) {
+        e.dataTransfer.setDragImage(dragImage, 60, 60);
+      }
+    }
+    
+    function handleDragEnd(e) {
+      if (draggedItem) {
+        draggedItem.classList.remove('is-dragging');
+      }
+      draggedItem = null;
+      draggedImageSrc = null;
+    }
+    
+    // Add drop zone handling to chatbot input area
+    inputW.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'copy';
+      inputW.classList.add('drag-over');
+    });
+    
+    inputW.addEventListener('dragleave', (e) => {
+      inputW.classList.remove('drag-over');
+    });
+    
+    inputW.addEventListener('drop', async (e) => {
+      e.preventDefault();
+      inputW.classList.remove('drag-over');
+      
+      const imageSrc = e.dataTransfer.getData('text/plain');
+      if (!imageSrc) return;
+      
+      // Open side navigation in disabled state
+      navVisible = true;
+      chatbotNav.classList.add('is-visible', 'is-disabled');
+      
+      // Add user message showing they dropped an image
+      addMessage('user', '📸 [Image dropped]');
+      
+      // Enable input if not already enabled
+      setInputsEnabled(true);
+      hasSelectedKeyword = true;
+      
+      // Show thinking indicator
+      showThinking();
+      
+      // Send the image to the AI for analysis
+      try {
+        const res = await fetch(`${API_BASE}/chat`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            message: 'What product is in this image?',
+            image_url: imageSrc
+          })
+        });
+        
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const data = await res.json();
+        
+        hideThinking();
+        
+        // Enable navigation after AI responds
+        chatbotNav.classList.remove('is-disabled');
+        
+        const botResponse = String(data?.answer || 'I can see the image. How can I help you with this product?');
+        addMessage('bot', botResponse);
+        
+        // Track in ShopThatData if available
+        if (window.ShopThatData && currentSessionId) {
+          window.ShopThatData.addChatMessage(currentSessionId, '📸 Image dropped', 'user', []);
+          const botKeywords = window.ShopThatData.extractKeywordsFromText(botResponse);
+          window.ShopThatData.addChatMessage(currentSessionId, botResponse, 'bot', botKeywords);
+        }
+        
+        refreshBtn.removeAttribute('hidden');
+      } catch (e) {
+        hideThinking();
+        
+        // Enable navigation even on error
+        chatbotNav.classList.remove('is-disabled');
+        
+        addMessage('bot', '❗ Failed to analyze image. Please try asking about this product in text form.');
+      }
+    });
+    
+    // Gallery navigation
+    function updateNavigationButtons() {
+      const scrollLeft = galleryTrack.scrollLeft;
+      const scrollWidth = galleryTrack.scrollWidth;
+      const clientWidth = galleryTrack.clientWidth;
+      
+      // Disable prev button at start
+      if (scrollLeft <= 0) {
+        prevBtn.classList.add('is-disabled');
+      } else {
+        prevBtn.classList.remove('is-disabled');
+      }
+      
+      // Disable next button at end
+      if (scrollLeft + clientWidth >= scrollWidth - 5) {
+        nextBtn.classList.add('is-disabled');
+      } else {
+        nextBtn.classList.remove('is-disabled');
+      }
+    }
+    
+    prevBtn.addEventListener('click', () => {
+      const scrollAmount = 250;
+      galleryTrack.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+      setTimeout(updateNavigationButtons, 300);
+    });
+    
+    nextBtn.addEventListener('click', () => {
+      const scrollAmount = 250;
+      galleryTrack.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+      setTimeout(updateNavigationButtons, 300);
+    });
+    
+    galleryTrack.addEventListener('scroll', () => {
+      updateNavigationButtons();
+    }, { passive: true });
+    
+    // Show/hide gallery with chatbot
+    function toggleGallery(show) {
+      if (show) {
+        galleryWrapper.removeAttribute('hidden');
+        populateGallery();
+        requestAnimationFrame(() => {
+          galleryWrapper.classList.add('is-visible');
+        });
+      } else {
+        galleryWrapper.classList.remove('is-visible');
+        setTimeout(() => {
+          galleryWrapper.setAttribute('hidden', '');
+        }, 200);
+      }
+    }
+    
+    // Repopulate gallery when scrolling (to update with newly visible images)
+    let galleryUpdateDebounce = null;
+    window.addEventListener('scroll', () => {
+      if (!expanded) return;
+      if (galleryUpdateDebounce) clearTimeout(galleryUpdateDebounce);
+      galleryUpdateDebounce = setTimeout(() => {
+        populateGallery();
+      }, 500);
+    }, { passive: true });
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initChatbot);
   else initChatbot();
 })();
-
