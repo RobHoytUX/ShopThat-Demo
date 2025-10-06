@@ -140,6 +140,22 @@
       if (hero) hero.classList.add('hero--video-ready');
     };
     video.addEventListener('canplay', onReady, { once: true });
+    
+    // Show CTA button when video ends
+    const ctaButton = document.getElementById('hero-cta');
+    if (ctaButton) {
+      video.addEventListener('ended', () => {
+        ctaButton.classList.add('is-visible');
+      });
+      
+      // Add click handler to scroll to next section
+      ctaButton.addEventListener('click', () => {
+        const interlude = document.querySelector('.interlude');
+        if (interlude) {
+          interlude.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      });
+    }
   }
 
   // Parallax effect disabled for banner-style hero
