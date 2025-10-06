@@ -64,7 +64,7 @@ button { font: inherit; }
 .hero__media + .hero__content { padding-block: 0; }
 .hero__cta { 
   position: absolute; 
-  top: 32%; 
+  top: 30%; 
   left: 50%; 
   transform: translate(-50%, -50%); 
   z-index: 3;

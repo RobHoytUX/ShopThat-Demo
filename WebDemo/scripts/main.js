@@ -141,13 +141,13 @@
     };
     video.addEventListener('canplay', onReady, { once: true });
     
-    // Show CTA button 1 second before video ends
+    // Show CTA button 2 seconds before video ends
     const ctaButton = document.getElementById('hero-cta');
     if (ctaButton) {
       let buttonShown = false;
       
       video.addEventListener('timeupdate', () => {
-        if (!buttonShown && video.duration && video.currentTime >= video.duration - 1) {
+        if (!buttonShown && video.duration && video.currentTime >= video.duration - 2) {
           ctaButton.classList.add('is-visible');
           buttonShown = true;
         }
