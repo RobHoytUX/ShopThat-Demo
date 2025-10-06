@@ -142,40 +142,8 @@
     video.addEventListener('canplay', onReady, { once: true });
   }
 
-  // Parallax effect for hero background and text
-  (function setupParallax(){
-    const hero = document.querySelector('.hero');
-    const bg = document.querySelector('.hero__fallback');
-    const content = document.querySelector('.hero__content');
-    if (!hero || !bg || !content) return;
-    let ticking = false;
-    const onScroll = () => {
-      if (ticking) return; ticking = true;
-      requestAnimationFrame(() => {
-        const rect = hero.getBoundingClientRect();
-        const viewportH = window.innerHeight || document.documentElement.clientHeight;
-        const progress = Math.min(1, Math.max(0, (viewportH - rect.top) / (viewportH + rect.height)));
-        const eased = Math.pow(progress, 1.25);
-        const bgOffset = Math.round((eased * -700)); // extreme background drift
-        const textOffset = Math.round(eased * 280);  // stronger text motion
-        bg.style.backgroundPosition = `center calc(50% ${bgOffset}px)`;
-        // center hero content between header bottom and hero bottom by tracking heights
-        const header = document.querySelector('.lv-header');
-        const headerH = header ? header.getBoundingClientRect().height : 72;
-        const contentInner = content.querySelector('.hero__content-inner');
-        if (contentInner) {
-          const innerH = contentInner.getBoundingClientRect().height;
-          document.documentElement.style.setProperty('--header-h', headerH + 'px');
-          document.documentElement.style.setProperty('--content-h', innerH + 'px');
-        }
-        content.style.transform = `translateY(${textOffset}px)`;
-        ticking = false;
-      });
-    };
-    window.addEventListener('scroll', onScroll, { passive: true });
-    window.addEventListener('resize', onScroll);
-    onScroll();
-  })();
+  // Parallax effect disabled for banner-style hero
+  // (Parallax was designed for full-screen hero and doesn't work well with banner layout)
 
   // Mobile nav toggle
   if (burger) {

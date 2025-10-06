@@ -50,7 +50,7 @@ button { font: inherit; }
 .lv-search-icon::after { content: ""; position: absolute; width: 6px; height: 2px; background: #111; right: -4px; bottom: -2px; transform: rotate(45deg); transform-origin: center; border-radius: 1px; }
 
 /* Hero */
-.hero { position: relative; min-height: 100vh; display: grid; place-items: center; }
+.hero { position: relative; min-height: 400px; height: 50vh; max-height: 600px; display: grid; place-items: center; overflow: hidden; }
 .hero__content { display: grid; place-items: center; align-content: center; }
 .hero__content-inner { display: grid; place-items: center; }
 .hero__media { position: absolute; inset: 0; overflow: hidden; }
@@ -61,7 +61,7 @@ button { font: inherit; }
 .hero__content::before { content: none; }
 .hero__title { font-family: 'Poppins', ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji"; font-size: clamp(36px, 7vw, 70px); font-weight: 300; letter-spacing: 0.01em; margin: 0 16px; color: #111; text-shadow: none; }
 .hero__subtitle { font-size: clamp(14px, 2vw, 22px); margin-top: 8px; color: #111; text-shadow: none; opacity: 1; }
-.hero__media + .hero__content { padding-block: calc((100vh - var(--header-h, 72px) - var(--content-h, 0px)) / 2); }
+.hero__media + .hero__content { padding-block: 0; }
 
 /* Sections */
 .section-intro { max-width: 1200px; margin: 64px auto 24px; padding: 0 20px; }
@@ -155,7 +155,7 @@ button { font: inherit; }
   .stories__grid { max-width: 1280px; }
   .carousel__viewport { max-width: 1600px; }
   .carousel__track { grid-auto-columns: 70%; }
-  .hero { min-height: 92vh; }
+  .hero { min-height: 400px; height: 50vh; max-height: 600px; }
 }
 
 /* Mobile nav overlay */
@@ -167,5 +167,3 @@ button { font: inherit; }
   .lv-nav.is-open ul,
   .nav-open .lv-nav ul { flex-direction: column; gap: 16px; }
 }
-
-
