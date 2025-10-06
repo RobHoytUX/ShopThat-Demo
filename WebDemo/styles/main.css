@@ -50,7 +50,7 @@ button { font: inherit; }
 .lv-search-icon::after { content: ""; position: absolute; width: 6px; height: 2px; background: #111; right: -4px; bottom: -2px; transform: rotate(45deg); transform-origin: center; border-radius: 1px; }
 
 /* Hero */
-.hero { position: relative; min-height: 400px; height: 50vh; max-height: 600px; display: grid; place-items: center; overflow: hidden; }
+.hero { position: relative; min-height: 800px; height: 100vh; max-height: 1200px; display: grid; place-items: center; overflow: hidden; margin-top: 0; }
 .hero__content { display: grid; place-items: center; align-content: center; }
 .hero__content-inner { display: grid; place-items: center; }
 .hero__media { position: absolute; inset: 0; overflow: hidden; }
@@ -155,7 +155,7 @@ button { font: inherit; }
   .stories__grid { max-width: 1280px; }
   .carousel__viewport { max-width: 1600px; }
   .carousel__track { grid-auto-columns: 70%; }
-  .hero { min-height: 400px; height: 50vh; max-height: 600px; }
+  .hero { min-height: 800px; height: 100vh; max-height: 1200px; }
 }
 
 /* Mobile nav overlay */
