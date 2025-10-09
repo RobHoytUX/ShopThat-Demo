@@ -77,60 +77,178 @@
         </div>
       </section>
 
-      <!-- Full-bleed image band (moved directly after hero) -->
-      <section class="fullbleed" aria-label="Campaign Visual">
-        <figure class="fullbleed__figure">
-          <div class="fullbleed__media">
-            <img src="assets/kusamamain.png" alt="Campaign visual" />
-            <div class="fullbleed__overlay" aria-hidden="true"></div>
-            <button class="fullbleed__play" aria-label="Play video"></button>
+      <!-- Product Gallery with Tabs -->
+      <section class="product-gallery" aria-label="Product Gallery">
+        <!-- Tab Navigation -->
+        <div class="gallery-tabs" id="gallery-tabs">
+          <div class="gallery-tabs__inner">
+            <button class="gallery-tab active" data-tab="women">Women</button>
+            <button class="gallery-tab" data-tab="men">Men</button>
           </div>
-          
-        </figure>
-      </section>
-
-      <!-- Stories grid -->
-      <section id="stories" class="stories" aria-label="Stories">
-        <div class="section-intro">
-          <h2>Stories</h2>
-          <p>Discover portraits and moments from the campaign.</p>
         </div>
-        <div class="stories__grid">
-          <article class="story-card story-card--span-6">
-            <a class="story-card__link" href="#" aria-label="Open story 1">
-              <img src="assets/kusama2.png" alt="Portrait 1" loading="lazy" />
-              <div class="story-card__meta">
-                <h3>Portrait One</h3>
-                <p>Location — Year</p>
+
+        <!-- Category Navigation -->
+        <nav class="category-nav" id="category-nav">
+          <div class="category-nav__inner">
+            <a href="#" class="category-link active">Looks</a>
+            <a href="#" class="category-link">Leather Goods</a>
+            <a href="#" class="category-link">Small Leather Goods</a>
+            <a href="#" class="category-link">Ready to Wear</a>
+            <a href="#" class="category-link">Shoes</a>
+            <a href="#" class="category-link">Accessories</a>
+            <a href="#" class="category-link">Fragrances</a>
+            <a href="#" class="category-link">Art of Living</a>
+          </div>
+        </nav>
+
+        <!-- Product Grid -->
+        <div class="product-grid">
+          <article class="product-card">
+            <a href="#" class="product-card__link">
+              <div class="product-card__image">
+                <img src="assets/kusama1.png" alt="LV X YK KEEPALL 25" loading="lazy" />
+                <button class="product-card__wishlist" aria-label="Add to wishlist">
+                  <svg width="24" height="24" viewBox="0 0 24 24">
+                    <path d="M12 21s-6.5-4.2-9-7.7C1.3 11.1 2 7.8 5 6.6c2.1-.9 4.1.2 5 1.6 1-1.4 2.9-2.5 5-1.6 3 1.2 3.7 4.5 2 6.7-2.5 3.5-9 7.7-9 7.7z" fill="none" stroke="currentColor" stroke-width="2"/>
+                  </svg>
+                </button>
+              </div>
+              <div class="product-card__info">
+                <h3 class="product-card__title">LV X YK KEEPALL 25</h3>
+                <p class="product-card__model">M46406</p>
+                <p class="product-card__price">$2,980.00</p>
               </div>
             </a>
           </article>
-          <article class="story-card story-card--span-6">
-            <a class="story-card__link" href="#" aria-label="Open story 2">
-              <img src="assets/kusama3.png" alt="Portrait 2" loading="lazy" />
-              <div class="story-card__meta">
-                <h3>Portrait Two</h3>
-                <p>Location — Year</p>
+
+          <article class="product-card">
+            <a href="#" class="product-card__link">
+              <div class="product-card__image">
+                <img src="assets/kusama2.png" alt="LV X YK SAC PLAT" loading="lazy" />
+                <button class="product-card__wishlist" aria-label="Add to wishlist">
+                  <svg width="24" height="24" viewBox="0 0 24 24">
+                    <path d="M12 21s-6.5-4.2-9-7.7C1.3 11.1 2 7.8 5 6.6c2.1-.9 4.1.2 5 1.6 1-1.4 2.9-2.5 5-1.6 3 1.2 3.7 4.5 2 6.7-2.5 3.5-9 7.7-9 7.7z" fill="none" stroke="currentColor" stroke-width="2"/>
+                  </svg>
+                </button>
+              </div>
+              <div class="product-card__info">
+                <h3 class="product-card__title">LV X YK SAC PLAT</h3>
+                <p class="product-card__model">M46404</p>
+                <p class="product-card__price">$3,800.00</p>
               </div>
             </a>
           </article>
-          
-          
-          
+
+          <article class="product-card">
+            <a href="#" class="product-card__link">
+              <div class="product-card__image">
+                <img src="assets/kusama3.png" alt="LV X YK MINI SOFT TRUNK" loading="lazy" />
+                <button class="product-card__wishlist" aria-label="Add to wishlist">
+                  <svg width="24" height="24" viewBox="0 0 24 24">
+                    <path d="M12 21s-6.5-4.2-9-7.7C1.3 11.1 2 7.8 5 6.6c2.1-.9 4.1.2 5 1.6 1-1.4 2.9-2.5 5-1.6 3 1.2 3.7 4.5 2 6.7-2.5 3.5-9 7.7-9 7.7z" fill="none" stroke="currentColor" stroke-width="2"/>
+                  </svg>
+                </button>
+              </div>
+              <div class="product-card__info">
+                <h3 class="product-card__title">LV X YK MINI SOFT TRUNK</h3>
+                <p class="product-card__model">M81936</p>
+                <p class="product-card__price">$4,000.00</p>
+              </div>
+            </a>
+          </article>
+
+          <article class="product-card">
+            <a href="#" class="product-card__link">
+              <div class="product-card__image">
+                <img src="assets/kusama4.webp" alt="LV X YK KEEPALL 55" loading="lazy" />
+                <button class="product-card__wishlist" aria-label="Add to wishlist">
+                  <svg width="24" height="24" viewBox="0 0 24 24">
+                    <path d="M12 21s-6.5-4.2-9-7.7C1.3 11.1 2 7.8 5 6.6c2.1-.9 4.1.2 5 1.6 1-1.4 2.9-2.5 5-1.6 3 1.2 3.7 4.5 2 6.7-2.5 3.5-9 7.7-9 7.7z" fill="none" stroke="currentColor" stroke-width="2"/>
+                  </svg>
+                </button>
+              </div>
+              <div class="product-card__info">
+                <h3 class="product-card__title">LV X YK KEEPALL 55</h3>
+                <p class="product-card__model">M46401</p>
+                <p class="product-card__price">$3,650.00</p>
+              </div>
+            </a>
+          </article>
+
+          <article class="product-card">
+            <a href="#" class="product-card__link">
+              <div class="product-card__image">
+                <img src="assets/kusama1.png" alt="LV X YK Collection Item" loading="lazy" />
+                <button class="product-card__wishlist" aria-label="Add to wishlist">
+                  <svg width="24" height="24" viewBox="0 0 24 24">
+                    <path d="M12 21s-6.5-4.2-9-7.7C1.3 11.1 2 7.8 5 6.6c2.1-.9 4.1.2 5 1.6 1-1.4 2.9-2.5 5-1.6 3 1.2 3.7 4.5 2 6.7-2.5 3.5-9 7.7-9 7.7z" fill="none" stroke="currentColor" stroke-width="2"/>
+                  </svg>
+                </button>
+              </div>
+              <div class="product-card__info">
+                <h3 class="product-card__title">LV X YK BAG</h3>
+                <p class="product-card__model">M46402</p>
+                <p class="product-card__price">$2,750.00</p>
+              </div>
+            </a>
+          </article>
+
+          <article class="product-card">
+            <a href="#" class="product-card__link">
+              <div class="product-card__image">
+                <img src="assets/kusama2.png" alt="LV X YK Collection Item" loading="lazy" />
+                <button class="product-card__wishlist" aria-label="Add to wishlist">
+                  <svg width="24" height="24" viewBox="0 0 24 24">
+                    <path d="M12 21s-6.5-4.2-9-7.7C1.3 11.1 2 7.8 5 6.6c2.1-.9 4.1.2 5 1.6 1-1.4 2.9-2.5 5-1.6 3 1.2 3.7 4.5 2 6.7-2.5 3.5-9 7.7-9 7.7z" fill="none" stroke="currentColor" stroke-width="2"/>
+                  </svg>
+                </button>
+              </div>
+              <div class="product-card__info">
+                <h3 class="product-card__title">LV X YK TRUNK</h3>
+                <p class="product-card__model">M46405</p>
+                <p class="product-card__price">$4,200.00</p>
+              </div>
+            </a>
+          </article>
+
+          <article class="product-card">
+            <a href="#" class="product-card__link">
+              <div class="product-card__image">
+                <img src="assets/kusama3.png" alt="LV X YK Collection Item" loading="lazy" />
+                <button class="product-card__wishlist" aria-label="Add to wishlist">
+                  <svg width="24" height="24" viewBox="0 0 24 24">
+                    <path d="M12 21s-6.5-4.2-9-7.7C1.3 11.1 2 7.8 5 6.6c2.1-.9 4.1.2 5 1.6 1-1.4 2.9-2.5 5-1.6 3 1.2 3.7 4.5 2 6.7-2.5 3.5-9 7.7-9 7.7z" fill="none" stroke="currentColor" stroke-width="2"/>
+                  </svg>
+                </button>
+              </div>
+              <div class="product-card__info">
+                <h3 class="product-card__title">LV X YK POUCH</h3>
+                <p class="product-card__model">M46407</p>
+                <p class="product-card__price">$1,890.00</p>
+              </div>
+            </a>
+          </article>
+
+          <article class="product-card">
+            <a href="#" class="product-card__link">
+              <div class="product-card__image">
+                <img src="assets/kusama4.webp" alt="LV X YK Collection Item" loading="lazy" />
+                <button class="product-card__wishlist" aria-label="Add to wishlist">
+                  <svg width="24" height="24" viewBox="0 0 24 24">
+                    <path d="M12 21s-6.5-4.2-9-7.7C1.3 11.1 2 7.8 5 6.6c2.1-.9 4.1.2 5 1.6 1-1.4 2.9-2.5 5-1.6 3 1.2 3.7 4.5 2 6.7-2.5 3.5-9 7.7-9 7.7z" fill="none" stroke="currentColor" stroke-width="2"/>
+                  </svg>
+                </button>
+              </div>
+              <div class="product-card__info">
+                <h3 class="product-card__title">LV X YK BACKPACK</h3>
+                <p class="product-card__model">M46408</p>
+                <p class="product-card__price">$3,950.00</p>
+              </div>
+            </a>
+          </article>
         </div>
       </section>
 
-      
-
-      
-
-      <!-- About/Copy section -->
-      <section id="about" class="copy" aria-label="About the campaign">
-        <div class="copy__inner">
-          <h2>About</h2>
-          <p>The Core Values campaign is an ode to the spirit of travel and discovery.</p>
-        </div>
-      </section>
     </main>
 
     <footer class="lv-footer" role="contentinfo">

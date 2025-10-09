@@ -223,6 +223,16 @@
   const DEFAULT_SLUG = 'kusama_campaign';
 
   const styles = `
+  .chatbot-product-card{background:rgba(255,255,255,0.98);border-radius:16px;padding:16px;margin:8px 0;display:flex;gap:16px;align-items:center;box-shadow:0 2px 12px rgba(0,0,0,0.12);cursor:pointer;transition:all 200ms ease;align-self:flex-start;max-width:90%}
+  .chatbot-product-card:hover{transform:translateY(-2px);box-shadow:0 4px 20px rgba(0,0,0,0.18)}
+  .chatbot-product-card-image{width:100px;height:100px;border-radius:12px;object-fit:cover;flex-shrink:0}
+  .chatbot-product-card-info{flex:1;min-width:0}
+  .chatbot-product-card-title{font-size:15px;font-weight:600;color:#111;margin:0 0 6px;line-height:1.3}
+  .chatbot-product-card-model{font-size:13px;color:#666;margin:0 0 6px}
+  .chatbot-product-card-price{font-size:15px;font-weight:600;color:#111;margin:0}
+  .chatbot-product-card-link{display:inline-flex;align-items:center;gap:4px;font-size:12px;color:#4A90E2;margin-top:6px;text-decoration:none;transition:color 150ms ease}
+  .chatbot-product-card-link:hover{color:#357ABD}
+  .chatbot-product-card-link svg{width:14px;height:14px}
   .chatbot-wrapper{position:fixed;bottom:104px;right:20px;z-index:999}
   .image-gallery-wrapper{position:fixed;bottom:20px;left:20px;z-index:998;width:562.5px;opacity:0;transform:translateY(8px);pointer-events:none;transition:opacity 200ms ease,transform 200ms ease}
   .image-gallery-wrapper.is-visible{opacity:1;transform:translateY(0);pointer-events:auto}
@@ -620,7 +630,7 @@
         inputW.removeAttribute('hidden');
         mapContainer.classList.remove('is-visible');
         productGallery.classList.remove('is-visible');
-        // Restore chat messages if they exist
+        // Restore chat messages if they exist - DON'T clear them
       } else if (view === 'library') {
         // Show product list view (book icon) - NO INPUT
         header.setAttribute('hidden', '');
@@ -628,7 +638,7 @@
         inputW.setAttribute('hidden', '');
         mapContainer.classList.remove('is-visible');
         productGallery.classList.remove('is-visible');
-        // Render product list
+        // Render product list - DON'T clear existing messages
         renderProductListView();
       } else if (view === 'favorites') {
         // Show wishlist view (heart icon) - NO INPUT
@@ -637,7 +647,7 @@
         inputW.setAttribute('hidden', '');
         mapContainer.classList.remove('is-visible');
         productGallery.classList.remove('is-visible');
-        // Render wishlist
+        // Render wishlist - DON'T clear existing messages
         renderWishlistView();
       } else if (view === 'map') {
         // Show map view with product gallery - NO CHAT MESSAGES OR INPUT
@@ -646,7 +656,7 @@
         inputW.setAttribute('hidden', '');
         mapContainer.classList.add('is-visible');
         productGallery.classList.add('is-visible');
-        
+
         // Initialize map and render products
         initializeMap();
         renderMapView();
@@ -922,6 +932,70 @@
       });
       
       messages.appendChild(imageContainer);
+      messages.scrollTop = messages.scrollHeight;
+      ensureSizeForContent();
+    }
+
+    function displayProductCard(product) {
+      // Create product card element
+      const card = createEl('div', { class: 'chatbot-product-card' });
+      
+      // Product image
+      const img = createEl('img', { 
+        class: 'chatbot-product-card-image',
+        src: product.image,
+        alt: product.title
+      });
+      
+      // Product info container
+      const info = createEl('div', { class: 'chatbot-product-card-info' });
+      const title = createEl('div', { class: 'chatbot-product-card-title', text: product.title });
+      const model = createEl('div', { class: 'chatbot-product-card-model', text: product.model });
+      const price = createEl('div', { class: 'chatbot-product-card-price', text: product.price });
+      
+      // Create link to Louis Vuitton store
+      const link = createEl('a', { 
+        class: 'chatbot-product-card-link',
+        href: `https://us.louisvuitton.com/eng-us/search/${encodeURIComponent(product.model)}`,
+        target: '_blank',
+        rel: 'noopener noreferrer',
+        text: 'View on LV Store'
+      });
+      
+      // Add external link icon
+      const linkIcon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      linkIcon.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+      linkIcon.setAttribute('viewBox', '0 0 24 24');
+      linkIcon.setAttribute('fill', 'none');
+      linkIcon.setAttribute('stroke', 'currentColor');
+      linkIcon.setAttribute('stroke-width', '2');
+      linkIcon.setAttribute('stroke-linecap', 'round');
+      linkIcon.setAttribute('stroke-linejoin', 'round');
+      const iconPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      iconPath.setAttribute('d', 'M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14 21 3');
+      linkIcon.appendChild(iconPath);
+      link.appendChild(linkIcon);
+      
+      // Assemble product info
+      info.appendChild(title);
+      info.appendChild(model);
+      info.appendChild(price);
+      info.appendChild(link);
+      
+      // Assemble card
+      card.appendChild(img);
+      card.appendChild(info);
+      
+      // Make entire card clickable to open product page
+      card.addEventListener('click', (e) => {
+        // Don't trigger if clicking the link directly
+        if (e.target.tagName !== 'A') {
+          window.open(`https://us.louisvuitton.com/eng-us/search/${encodeURIComponent(product.model)}`, '_blank');
+        }
+      });
+      
+      // Add card to messages
+      messages.appendChild(card);
       messages.scrollTop = messages.scrollHeight;
       ensureSizeForContent();
     }
@@ -1456,25 +1530,25 @@
     // Render product list view (book icon)
     function renderProductListView() {
       messages.replaceChildren();
-      
+
       if (droppedProducts.length === 0) {
-        const emptyMsg = createEl('div', { 
+        const emptyMsg = createEl('div', {
           class: 'no-products-message',
-          text: 'No products yet. Drop images from the gallery to add products.' 
+          text: 'No products yet. Drop images from the gallery to add products.'
         });
         messages.appendChild(emptyMsg);
       } else {
         const grid = createEl('div', { class: 'product-list-grid' });
-        
+
         droppedProducts.forEach(product => {
           const card = createEl('div', { class: 'product-list-card' });
-          
+
           const img = createEl('img', { src: product.image, alt: product.title });
           const info = createEl('div', { class: 'product-list-info' });
           const title = createEl('h3', { class: 'product-list-title', text: product.title });
           const model = createEl('p', { class: 'product-list-model', text: product.model });
           const price = createEl('p', { class: 'product-list-price', text: product.price });
-          
+
           const heartBtn = createEl('button', { class: 'product-list-heart', 'aria-label': 'Add to wishlist' });
           const heartSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
           heartSvg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
@@ -1486,7 +1560,7 @@
           heartPath.setAttribute('d', 'M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z');
           heartSvg.appendChild(heartPath);
           heartBtn.appendChild(heartSvg);
-          
+
           heartBtn.addEventListener('click', () => {
             const index = wishlistProducts.findIndex(p => p.id === product.id);
             if (index > -1) {
@@ -1497,18 +1571,22 @@
               heartSvg.setAttribute('fill', 'currentColor');
             }
             updateWishlistBadge();
+            // Refresh wishlist view to show updated list
+            if (currentView === 'favorites') {
+              renderWishlistView();
+            }
           });
-          
+
           info.appendChild(title);
           info.appendChild(model);
           info.appendChild(price);
-          
+
           card.appendChild(img);
           card.appendChild(heartBtn);
           card.appendChild(info);
           grid.appendChild(card);
         });
-        
+
         messages.appendChild(grid);
       }
     }
@@ -1516,25 +1594,25 @@
     // Render wishlist view (heart icon)
     function renderWishlistView() {
       messages.replaceChildren();
-      
+
       if (wishlistProducts.length === 0) {
-        const emptyMsg = createEl('div', { 
+        const emptyMsg = createEl('div', {
           class: 'no-products-message',
-          text: 'No favorites yet. Add products to your wishlist from the product list.' 
+          text: 'No favorites yet. Add products to your wishlist from the product list.'
         });
         messages.appendChild(emptyMsg);
       } else {
         const grid = createEl('div', { class: 'product-list-grid' });
-        
+
         wishlistProducts.forEach(product => {
           const card = createEl('div', { class: 'product-list-card' });
-          
+
           const img = createEl('img', { src: product.image, alt: product.title });
           const info = createEl('div', { class: 'product-list-info' });
           const title = createEl('h3', { class: 'product-list-title', text: product.title });
           const model = createEl('p', { class: 'product-list-model', text: product.model });
           const price = createEl('p', { class: 'product-list-price', text: product.price });
-          
+
           const removeBtn = createEl('button', { class: 'product-list-heart is-active', 'aria-label': 'Remove from wishlist' });
           const heartSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
           heartSvg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
@@ -1546,7 +1624,7 @@
           heartPath.setAttribute('d', 'M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z');
           heartSvg.appendChild(heartPath);
           removeBtn.appendChild(heartSvg);
-          
+
           removeBtn.addEventListener('click', () => {
             const index = wishlistProducts.findIndex(p => p.id === product.id);
             if (index > -1) {
@@ -1555,17 +1633,17 @@
               updateWishlistBadge();
             }
           });
-          
+
           info.appendChild(title);
           info.appendChild(model);
           info.appendChild(price);
-          
+
           card.appendChild(img);
           card.appendChild(removeBtn);
           card.appendChild(info);
           grid.appendChild(card);
         });
-        
+
         messages.appendChild(grid);
       }
     }
@@ -1657,6 +1735,10 @@
           hideThinking();
           chatbotNav.classList.remove('is-disabled');
           
+          // Display product card FIRST
+          displayProductCard(productInfo);
+          
+          // Then display text response
           addMessage('bot', botResponse);
           
           // Store product with consistent naming from our database
@@ -1672,13 +1754,17 @@
           throw new Error('API failed');
         }
       } catch (e) {
-        // API failed, still add product with clean message
+        // API failed, still show product card and text
         hideThinking();
         chatbotNav.classList.remove('is-disabled');
         
-        droppedProducts.push(productInfo);
+        // Display product card FIRST
+        displayProductCard(productInfo);
         
+        // Then display text response
         addMessage('bot', `I've added this ${productInfo.title} to your product library. You can view it in the Library tab or see it on the map!`);
+        
+        droppedProducts.push(productInfo);
       }
       
       refreshBtn.removeAttribute('hidden');
