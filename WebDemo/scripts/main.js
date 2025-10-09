@@ -1421,19 +1421,34 @@
     const droppedProducts = [];
     const wishlistProducts = [];
     
-    // Extract product info from image and bot response
-    function extractProductInfo(imageSrc, botResponse) {
-      // Try to extract product details from bot response
-      const titleMatch = botResponse.match(/(?:LV X YK |Louis Vuitton )?([A-Z][A-Z\s&]+)/i);
-      const priceMatch = botResponse.match(/\$?([\d,]+\.?\d{0,2})/);
-      const modelMatch = botResponse.match(/\b(M\d{5})\b/i);
+    // Generate product info from image name/URL
+    function generateProductInfoFromImage(imgSrc) {
+      const filename = imgSrc.split('/').pop().split('?')[0];
+      const isKusama = /kusama/i.test(imgSrc);
+      
+      // Extract number from filename if present
+      const numberMatch = filename.match(/\d+/);
+      const productNum = numberMatch ? parseInt(numberMatch[0]) : Math.floor(Math.random() * 9) + 1;
+      
+      const products = [
+        { title: 'LV X YK KEEPALL 25', model: 'M46406', price: '$2,980.00' },
+        { title: 'LV X YK SAC PLAT', model: 'M46404', price: '$3,800.00' },
+        { title: 'LV X YK MINI SOFT TRUNK', model: 'M81936', price: '$4,000.00' },
+        { title: 'LV X YK KEEPALL 55', model: 'M46401', price: '$3,650.00' },
+        { title: 'LV X YK NEVERFULL MM', model: 'M46402', price: '$2,750.00' },
+        { title: 'LV X YK SPEEDY 25', model: 'M46403', price: '$2,900.00' },
+        { title: 'LV X YK COSMETIC POUCH', model: 'M46407', price: '$1,890.00' },
+        { title: 'LV X YK BACKPACK', model: 'M46408', price: '$3,950.00' }
+      ];
+      
+      const selectedProduct = products[productNum % products.length];
       
       return {
         id: Date.now() + Math.random(),
-        image: imageSrc,
-        title: titleMatch ? titleMatch[1].trim() : 'LV X YK Product',
-        price: priceMatch ? `$${priceMatch[1]}` : '$2,980.00',
-        model: modelMatch ? modelMatch[1] : 'M46406',
+        image: imgSrc,
+        title: selectedProduct.title,
+        price: selectedProduct.price,
+        model: selectedProduct.model,
         location: { lat: 48.8566 + (Math.random() - 0.5) * 0.02, lng: 2.3522 + (Math.random() - 0.5) * 0.02 }
       };
     }
@@ -1622,39 +1637,9 @@
       // Show thinking indicator
       showThinking();
       
-      // Generate product info from image name/URL for demo
-      function generateProductInfoFromImage(imgSrc) {
-        const filename = imgSrc.split('/').pop().split('?')[0];
-        const isKusama = /kusama/i.test(imgSrc);
-        
-        // Extract number from filename if present
-        const numberMatch = filename.match(/\d+/);
-        const productNum = numberMatch ? parseInt(numberMatch[0]) : Math.floor(Math.random() * 9) + 1;
-        
-        const products = [
-          { title: 'LV X YK KEEPALL 25', model: 'M46406', price: '$2,980.00' },
-          { title: 'LV X YK SAC PLAT', model: 'M46404', price: '$3,800.00' },
-          { title: 'LV X YK MINI SOFT TRUNK', model: 'M81936', price: '$4,000.00' },
-          { title: 'LV X YK KEEPALL 55', model: 'M46401', price: '$3,650.00' },
-          { title: 'LV X YK NEVERFULL MM', model: 'M46402', price: '$2,750.00' },
-          { title: 'LV X YK SPEEDY 25', model: 'M46403', price: '$2,900.00' },
-          { title: 'LV X YK COSMETIC POUCH', model: 'M46407', price: '$1,890.00' },
-          { title: 'LV X YK BACKPACK', model: 'M46408', price: '$3,950.00' }
-        ];
-        
-        const selectedProduct = products[productNum % products.length];
-        
-        return {
-          id: Date.now() + Math.random(),
-          image: imgSrc,
-          title: selectedProduct.title,
-          price: selectedProduct.price,
-          model: selectedProduct.model,
-          location: { lat: 48.8566 + (Math.random() - 0.5) * 0.02, lng: 2.3522 + (Math.random() - 0.5) * 0.02 }
-        };
-      }
+      // Try to get AI response, but always use product database for consistent info
+      const productInfo = generateProductInfoFromImage(imageSrc);
       
-      // Try to get AI response, but always create product even if API fails
       try {
         const res = await fetch(`${API_BASE}/chat`, {
           method: 'POST',
@@ -1674,8 +1659,7 @@
           
           addMessage('bot', botResponse);
           
-          // Extract and store product information from bot response
-          const productInfo = extractProductInfo(imageSrc, botResponse);
+          // Store product with consistent naming from our database
           droppedProducts.push(productInfo);
           
           // Track in ShopThatData if available
@@ -1688,11 +1672,10 @@
           throw new Error('API failed');
         }
       } catch (e) {
-        // API failed, generate product from image directly
+        // API failed, still add product with clean message
         hideThinking();
         chatbotNav.classList.remove('is-disabled');
         
-        const productInfo = generateProductInfoFromImage(imageSrc);
         droppedProducts.push(productInfo);
         
         addMessage('bot', `I've added this ${productInfo.title} to your product library. You can view it in the Library tab or see it on the map!`);
