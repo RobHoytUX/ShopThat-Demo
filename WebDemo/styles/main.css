@@ -1,5 +1,5 @@
 /* Interlude */
-.interlude { background: #fff; padding: 64px 20px; }
+.interlude { background: #fff; padding: 40px 20px; }
 .interlude__inner { max-width: 560px; margin: 0 auto; display: grid; place-items: center; }
 .interlude__text { text-align: center; font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji"; font-weight: 400; letter-spacing: 0.01em; line-height: 1.6; margin: 0; font-size: clamp(12px, 2.4vw, 18px); color: #111; }
 /* Ensure equal spacing around interlude by removing extra margin on following band */
