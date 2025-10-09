@@ -166,13 +166,14 @@ button { font: inherit; }
 }
 
 /* Gallery Tabs */
-.gallery-tabs { 
-  background: #fff; 
+.gallery-tabs {
+  background: #fff;
   border-bottom: 1px solid #e5e5e5;
   position: sticky;
   top: 73px;
   z-index: 95;
   transition: box-shadow 0.3s ease;
+  margin-top: 0;
 }
 .gallery-tabs.is-stuck {
   box-shadow: 0 2px 8px rgba(0,0,0,0.08);
