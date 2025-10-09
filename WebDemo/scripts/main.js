@@ -4,16 +4,9 @@
   const burger = document.querySelector('.lv-burger');
   const searchLink = document.querySelector('.lv-search-link');
   const nav = document.getElementById('nav');
-  let lastY = window.scrollY;
-  // Hide/reveal header on scroll like native LV behavior (approximation)
-  window.addEventListener('scroll', () => {
-    if (document.documentElement.classList.contains('nav-open')) return;
-    const y = window.scrollY;
-    const goingDown = y > lastY;
-    const shouldHide = goingDown && y > 120;
-    header.style.transform = shouldHide ? 'translateY(-100%)' : 'translateY(0)';
-    lastY = y;
-  }, { passive: true });
+  
+  // Keep header fixed at top - removed auto-hide behavior
+  // Header will remain visible and fixed at the top at all times
 
   // Carousel logic
   const track = document.getElementById('carousel-track') || document.querySelector('.carousel__track');
@@ -234,8 +227,8 @@
   .image-gallery-wrapper{position:fixed;bottom:20px;left:20px;z-index:998;width:562.5px;opacity:0;transform:translateY(8px);pointer-events:none;transition:opacity 200ms ease,transform 200ms ease}
   .image-gallery-wrapper.is-visible{opacity:1;transform:translateY(0);pointer-events:auto}
   .image-gallery-wrapper[hidden]{display:none}
-  .image-gallery{background:linear-gradient(135deg,rgba(255,255,255,0.95),rgba(255,255,255,0.9));border:1px solid rgba(0,0,0,0.1);border-radius:12px;padding:12px;box-shadow:0 8px 32px rgba(0,0,0,0.12);backdrop-filter:blur(16px) saturate(180%);-webkit-backdrop-filter:blur(16px) saturate(180%);position:relative}
-  .image-gallery-track{display:flex;gap:8px;overflow-x:auto;overflow-y:hidden;scroll-behavior:smooth;scrollbar-width:none;-webkit-overflow-scrolling:touch;padding:4px 40px;margin:0 -40px}
+  .image-gallery{background:linear-gradient(135deg,rgba(255,255,255,0.95),rgba(255,255,255,0.9));border:1px solid rgba(0,0,0,0.1);border-radius:12px;padding:12px 40px;box-shadow:0 8px 32px rgba(0,0,0,0.12);backdrop-filter:blur(16px) saturate(180%);-webkit-backdrop-filter:blur(16px) saturate(180%);position:relative;overflow:hidden}
+  .image-gallery-track{display:flex;gap:8px;overflow-x:auto;overflow-y:hidden;scroll-behavior:smooth;scrollbar-width:none;-webkit-overflow-scrolling:touch;padding:4px 0}
   .image-gallery-track::-webkit-scrollbar{display:none}
   .image-gallery-item{flex:0 0 auto;width:120px;height:120px;border-radius:8px;overflow:hidden;cursor:grab;position:relative;transition:transform 200ms ease,box-shadow 200ms ease}
   .image-gallery-item:active{cursor:grabbing}
@@ -333,8 +326,23 @@
   .chatbot-input input:focus{outline:none;box-shadow:none;border-color:#ccc}
   .chatbot-input button{width:40px;height:40px;border-radius:50%;border:0;background:#000;color:#fff;cursor:pointer;display:grid;place-items:center;padding:0}
   .chatbot-input button[disabled]{background:rgba(0,0,0,0.15);color:#666;cursor:not-allowed;border:1px solid rgba(0,0,0,0.1)}
-  .no-keywords-message{text-align:center;padding:16px 12px;color:#666;font-size:13px;font-style:italic;background:rgba(255,255,255,0.5);border-radius:12px;margin:8px 0}
+  .no-keywords-message,.no-products-message{text-align:center;padding:16px 12px;color:#666;font-size:13px;font-style:italic;background:rgba(255,255,255,0.5);border-radius:12px;margin:8px 0}
   .error-message{text-align:center;padding:16px 12px;color:#d32f2f;font-size:13px;background:rgba(255,235,238,0.8);border-radius:12px;margin:8px 0;border:1px solid rgba(211,47,47,0.3)}
+  .product-list-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;padding:8px;width:100%}
+  .product-list-card{background:rgba(255,255,255,0.95);border-radius:12px;overflow:hidden;position:relative;box-shadow:0 2px 8px rgba(0,0,0,0.1);transition:transform 0.2s ease,box-shadow 0.2s ease}
+  .product-list-card:hover{transform:translateY(-2px);box-shadow:0 4px 16px rgba(0,0,0,0.15)}
+  .product-list-card img{width:100%;height:150px;object-fit:cover;display:block}
+  .product-list-info{padding:12px}
+  .product-list-title{font-size:14px;font-weight:600;margin:0 0 4px;color:#111;line-height:1.3}
+  .product-list-model{font-size:12px;color:#666;margin:0 0 4px}
+  .product-list-price{font-size:14px;font-weight:600;color:#111;margin:0}
+  .product-list-heart{position:absolute;top:8px;right:8px;width:32px;height:32px;border-radius:50%;border:none;background:rgba(255,255,255,0.95);cursor:pointer;display:grid;place-items:center;transition:all 0.2s ease;z-index:2}
+  .product-list-heart:hover{background:#fff;transform:scale(1.1)}
+  .product-list-heart svg{width:18px;height:18px;color:#e74c3c}
+  .product-list-heart.is-active svg{fill:#e74c3c}
+  .nav-badge{position:absolute;top:-4px;right:-4px;background:#e74c3c;color:#fff;border-radius:10px;padding:0 6px;font-size:10px;line-height:18px;height:18px;min-width:18px;display:inline-grid;place-items:center;font-weight:600}
+  .chatbot-product-item--filled{background:transparent;border:1px solid rgba(0,0,0,0.15);position:relative;overflow:hidden}
+  .chatbot-product-item--filled img{width:100%;height:100%;object-fit:cover}
   @media (max-width:600px){.chatbot-box{width:90vw}}
   `;
 
@@ -555,7 +563,31 @@
             maxZoom: 19
           }).addTo(leafletMap);
           
-          // Add sample markers for Louis Vuitton stores
+          // Create custom LV icon
+          const lvIcon = L.divIcon({
+            className: 'custom-lv-marker',
+            html: `
+              <div style="
+                width: 40px;
+                height: 40px;
+                background: #000;
+                border-radius: 50%;
+                display: grid;
+                place-items: center;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+                border: 2px solid #fff;
+              ">
+                <img src="assets/louis-vuitton.svg" 
+                     style="width: 20px; height: 20px; filter: brightness(0) invert(1);" 
+                     alt="LV" />
+              </div>
+            `,
+            iconSize: [40, 40],
+            iconAnchor: [20, 40],
+            popupAnchor: [0, -40]
+          });
+          
+          // Add sample markers for Louis Vuitton stores with custom icon
           const stores = [
             { lat: 48.8698, lng: 2.3075, name: 'Louis Vuitton Champs-Élysées' },
             { lat: 48.8606, lng: 2.3376, name: 'Louis Vuitton Place Vendôme' },
@@ -563,7 +595,7 @@
           ];
           
           stores.forEach(store => {
-            L.marker([store.lat, store.lng])
+            L.marker([store.lat, store.lng], { icon: lvIcon })
               .bindPopup(`<b>${store.name}</b>`)
               .addTo(leafletMap);
           });
@@ -588,18 +620,38 @@
         inputW.removeAttribute('hidden');
         mapContainer.classList.remove('is-visible');
         productGallery.classList.remove('is-visible');
+        // Restore chat messages if they exist
+      } else if (view === 'library') {
+        // Show product list view (book icon) - NO INPUT
+        header.setAttribute('hidden', '');
+        messages.removeAttribute('hidden');
+        inputW.setAttribute('hidden', '');
+        mapContainer.classList.remove('is-visible');
+        productGallery.classList.remove('is-visible');
+        // Render product list
+        renderProductListView();
+      } else if (view === 'favorites') {
+        // Show wishlist view (heart icon) - NO INPUT
+        header.setAttribute('hidden', '');
+        messages.removeAttribute('hidden');
+        inputW.setAttribute('hidden', '');
+        mapContainer.classList.remove('is-visible');
+        productGallery.classList.remove('is-visible');
+        // Render wishlist
+        renderWishlistView();
       } else if (view === 'map') {
         // Show map view with product gallery - NO CHAT MESSAGES OR INPUT
         header.setAttribute('hidden', '');
         messages.setAttribute('hidden', '');
-        inputW.setAttribute('hidden', ''); // Hide input in map view
+        inputW.setAttribute('hidden', '');
         mapContainer.classList.add('is-visible');
         productGallery.classList.add('is-visible');
         
-        // Initialize map if not already done
+        // Initialize map and render products
         initializeMap();
+        renderMapView();
       } else {
-        // For other views (library, search, favorites), hide all chat elements including input
+        // For other views (search), hide all chat elements including input
         header.setAttribute('hidden', '');
         messages.setAttribute('hidden', '');
         inputW.setAttribute('hidden', '');
@@ -1365,6 +1417,190 @@
       inputW.classList.remove('drag-over');
     });
     
+    // Product storage
+    const droppedProducts = [];
+    const wishlistProducts = [];
+    
+    // Extract product info from image and bot response
+    function extractProductInfo(imageSrc, botResponse) {
+      // Try to extract product details from bot response
+      const titleMatch = botResponse.match(/(?:LV X YK |Louis Vuitton )?([A-Z][A-Z\s&]+)/i);
+      const priceMatch = botResponse.match(/\$?([\d,]+\.?\d{0,2})/);
+      const modelMatch = botResponse.match(/\b(M\d{5})\b/i);
+      
+      return {
+        id: Date.now() + Math.random(),
+        image: imageSrc,
+        title: titleMatch ? titleMatch[1].trim() : 'LV X YK Product',
+        price: priceMatch ? `$${priceMatch[1]}` : '$2,980.00',
+        model: modelMatch ? modelMatch[1] : 'M46406',
+        location: { lat: 48.8566 + (Math.random() - 0.5) * 0.02, lng: 2.3522 + (Math.random() - 0.5) * 0.02 }
+      };
+    }
+    
+    // Render product list view (book icon)
+    function renderProductListView() {
+      messages.replaceChildren();
+      
+      if (droppedProducts.length === 0) {
+        const emptyMsg = createEl('div', { 
+          class: 'no-products-message',
+          text: 'No products yet. Drop images from the gallery to add products.' 
+        });
+        messages.appendChild(emptyMsg);
+      } else {
+        const grid = createEl('div', { class: 'product-list-grid' });
+        
+        droppedProducts.forEach(product => {
+          const card = createEl('div', { class: 'product-list-card' });
+          
+          const img = createEl('img', { src: product.image, alt: product.title });
+          const info = createEl('div', { class: 'product-list-info' });
+          const title = createEl('h3', { class: 'product-list-title', text: product.title });
+          const model = createEl('p', { class: 'product-list-model', text: product.model });
+          const price = createEl('p', { class: 'product-list-price', text: product.price });
+          
+          const heartBtn = createEl('button', { class: 'product-list-heart', 'aria-label': 'Add to wishlist' });
+          const heartSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+          heartSvg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+          heartSvg.setAttribute('viewBox', '0 0 24 24');
+          heartSvg.setAttribute('fill', wishlistProducts.some(p => p.id === product.id) ? 'currentColor' : 'none');
+          heartSvg.setAttribute('stroke', 'currentColor');
+          heartSvg.setAttribute('stroke-width', '2');
+          const heartPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+          heartPath.setAttribute('d', 'M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z');
+          heartSvg.appendChild(heartPath);
+          heartBtn.appendChild(heartSvg);
+          
+          heartBtn.addEventListener('click', () => {
+            const index = wishlistProducts.findIndex(p => p.id === product.id);
+            if (index > -1) {
+              wishlistProducts.splice(index, 1);
+              heartSvg.setAttribute('fill', 'none');
+            } else {
+              wishlistProducts.push(product);
+              heartSvg.setAttribute('fill', 'currentColor');
+            }
+            updateWishlistBadge();
+          });
+          
+          info.appendChild(title);
+          info.appendChild(model);
+          info.appendChild(price);
+          
+          card.appendChild(img);
+          card.appendChild(heartBtn);
+          card.appendChild(info);
+          grid.appendChild(card);
+        });
+        
+        messages.appendChild(grid);
+      }
+    }
+    
+    // Render wishlist view (heart icon)
+    function renderWishlistView() {
+      messages.replaceChildren();
+      
+      if (wishlistProducts.length === 0) {
+        const emptyMsg = createEl('div', { 
+          class: 'no-products-message',
+          text: 'No favorites yet. Add products to your wishlist from the product list.' 
+        });
+        messages.appendChild(emptyMsg);
+      } else {
+        const grid = createEl('div', { class: 'product-list-grid' });
+        
+        wishlistProducts.forEach(product => {
+          const card = createEl('div', { class: 'product-list-card' });
+          
+          const img = createEl('img', { src: product.image, alt: product.title });
+          const info = createEl('div', { class: 'product-list-info' });
+          const title = createEl('h3', { class: 'product-list-title', text: product.title });
+          const model = createEl('p', { class: 'product-list-model', text: product.model });
+          const price = createEl('p', { class: 'product-list-price', text: product.price });
+          
+          const removeBtn = createEl('button', { class: 'product-list-heart is-active', 'aria-label': 'Remove from wishlist' });
+          const heartSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+          heartSvg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+          heartSvg.setAttribute('viewBox', '0 0 24 24');
+          heartSvg.setAttribute('fill', 'currentColor');
+          heartSvg.setAttribute('stroke', 'currentColor');
+          heartSvg.setAttribute('stroke-width', '2');
+          const heartPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+          heartPath.setAttribute('d', 'M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z');
+          heartSvg.appendChild(heartPath);
+          removeBtn.appendChild(heartSvg);
+          
+          removeBtn.addEventListener('click', () => {
+            const index = wishlistProducts.findIndex(p => p.id === product.id);
+            if (index > -1) {
+              wishlistProducts.splice(index, 1);
+              renderWishlistView();
+              updateWishlistBadge();
+            }
+          });
+          
+          info.appendChild(title);
+          info.appendChild(model);
+          info.appendChild(price);
+          
+          card.appendChild(img);
+          card.appendChild(removeBtn);
+          card.appendChild(info);
+          grid.appendChild(card);
+        });
+        
+        messages.appendChild(grid);
+      }
+    }
+    
+    // Update wishlist badge count
+    function updateWishlistBadge() {
+      const heartNavItem = document.getElementById('nav-favorites');
+      if (!heartNavItem) return;
+      
+      let badge = heartNavItem.querySelector('.nav-badge');
+      if (wishlistProducts.length > 0) {
+        if (!badge) {
+          badge = createEl('span', { class: 'nav-badge', text: String(wishlistProducts.length) });
+          heartNavItem.appendChild(badge);
+        } else {
+          badge.textContent = String(wishlistProducts.length);
+        }
+      } else if (badge) {
+        badge.remove();
+      }
+    }
+    
+    // Render map view with products
+    function renderMapView() {
+      productGallery.replaceChildren();
+      
+      if (droppedProducts.length === 0) {
+        // Show placeholder boxes
+        for (let i = 0; i < 8; i++) {
+          const placeholder = createEl('div', { class: 'chatbot-product-item' });
+          productGallery.appendChild(placeholder);
+        }
+      } else {
+        // Show actual products
+        droppedProducts.forEach(product => {
+          const item = createEl('div', { class: 'chatbot-product-item chatbot-product-item--filled' });
+          const img = createEl('img', { src: product.image, alt: product.title });
+          item.appendChild(img);
+          productGallery.appendChild(item);
+          
+          // Add marker to map if available
+          if (leafletMap && product.location) {
+            const marker = L.marker([product.location.lat, product.location.lng])
+              .bindPopup(`<b>${product.title}</b><br>${product.price}`)
+              .addTo(leafletMap);
+          }
+        });
+      }
+    }
+    
     inputW.addEventListener('drop', async (e) => {
       e.preventDefault();
       inputW.classList.remove('drag-over');
@@ -1386,7 +1622,39 @@
       // Show thinking indicator
       showThinking();
       
-      // Send the image to the AI for analysis
+      // Generate product info from image name/URL for demo
+      function generateProductInfoFromImage(imgSrc) {
+        const filename = imgSrc.split('/').pop().split('?')[0];
+        const isKusama = /kusama/i.test(imgSrc);
+        
+        // Extract number from filename if present
+        const numberMatch = filename.match(/\d+/);
+        const productNum = numberMatch ? parseInt(numberMatch[0]) : Math.floor(Math.random() * 9) + 1;
+        
+        const products = [
+          { title: 'LV X YK KEEPALL 25', model: 'M46406', price: '$2,980.00' },
+          { title: 'LV X YK SAC PLAT', model: 'M46404', price: '$3,800.00' },
+          { title: 'LV X YK MINI SOFT TRUNK', model: 'M81936', price: '$4,000.00' },
+          { title: 'LV X YK KEEPALL 55', model: 'M46401', price: '$3,650.00' },
+          { title: 'LV X YK NEVERFULL MM', model: 'M46402', price: '$2,750.00' },
+          { title: 'LV X YK SPEEDY 25', model: 'M46403', price: '$2,900.00' },
+          { title: 'LV X YK COSMETIC POUCH', model: 'M46407', price: '$1,890.00' },
+          { title: 'LV X YK BACKPACK', model: 'M46408', price: '$3,950.00' }
+        ];
+        
+        const selectedProduct = products[productNum % products.length];
+        
+        return {
+          id: Date.now() + Math.random(),
+          image: imgSrc,
+          title: selectedProduct.title,
+          price: selectedProduct.price,
+          model: selectedProduct.model,
+          location: { lat: 48.8566 + (Math.random() - 0.5) * 0.02, lng: 2.3522 + (Math.random() - 0.5) * 0.02 }
+        };
+      }
+      
+      // Try to get AI response, but always create product even if API fails
       try {
         const res = await fetch(`${API_BASE}/chat`, {
           method: 'POST',
@@ -1397,33 +1665,40 @@
           })
         });
         
-        if (!res.ok) throw new Error('HTTP ' + res.status);
-        const data = await res.json();
-        
-        hideThinking();
-        
-        // Enable navigation after AI responds
-        chatbotNav.classList.remove('is-disabled');
-        
-        const botResponse = String(data?.answer || 'I can see the image. How can I help you with this product?');
-        addMessage('bot', botResponse);
-        
-        // Track in ShopThatData if available
-        if (window.ShopThatData && currentSessionId) {
-          window.ShopThatData.addChatMessage(currentSessionId, '📸 Image dropped', 'user', []);
-          const botKeywords = window.ShopThatData.extractKeywordsFromText(botResponse);
-          window.ShopThatData.addChatMessage(currentSessionId, botResponse, 'bot', botKeywords);
+        if (res.ok) {
+          const data = await res.json();
+          const botResponse = String(data?.answer || 'This is a beautiful Louis Vuitton x Yayoi Kusama piece.');
+          
+          hideThinking();
+          chatbotNav.classList.remove('is-disabled');
+          
+          addMessage('bot', botResponse);
+          
+          // Extract and store product information from bot response
+          const productInfo = extractProductInfo(imageSrc, botResponse);
+          droppedProducts.push(productInfo);
+          
+          // Track in ShopThatData if available
+          if (window.ShopThatData && currentSessionId) {
+            window.ShopThatData.addChatMessage(currentSessionId, '📸 Image dropped', 'user', []);
+            const botKeywords = window.ShopThatData.extractKeywordsFromText(botResponse);
+            window.ShopThatData.addChatMessage(currentSessionId, botResponse, 'bot', botKeywords);
+          }
+        } else {
+          throw new Error('API failed');
         }
-        
-        refreshBtn.removeAttribute('hidden');
       } catch (e) {
+        // API failed, generate product from image directly
         hideThinking();
-        
-        // Enable navigation even on error
         chatbotNav.classList.remove('is-disabled');
         
-        addMessage('bot', '❗ Failed to analyze image. Please try asking about this product in text form.');
+        const productInfo = generateProductInfoFromImage(imageSrc);
+        droppedProducts.push(productInfo);
+        
+        addMessage('bot', `I've added this ${productInfo.title} to your product library. You can view it in the Library tab or see it on the map!`);
       }
+      
+      refreshBtn.removeAttribute('hidden');
     });
     
     // Gallery navigation
@@ -1492,4 +1767,81 @@
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initChatbot);
   else initChatbot();
+})();
+
+// Product Gallery Sticky Navigation and Tabs
+(function() {
+  const categoryNav = document.getElementById('category-nav');
+  const galleryTabs = document.querySelectorAll('.gallery-tab');
+  const categoryLinks = document.querySelectorAll('.category-link');
+  
+  if (!categoryNav) return;
+  
+  // Sticky navigation behavior
+  let lastScrollY = window.scrollY;
+  const header = document.querySelector('.lv-header');
+  const headerHeight = header ? header.offsetHeight : 73;
+  
+  function handleStickyNav() {
+    const navTop = categoryNav.getBoundingClientRect().top;
+    const scrollY = window.scrollY;
+    
+    // Add stuck class when nav reaches the header
+    if (navTop <= headerHeight) {
+      categoryNav.classList.add('is-stuck');
+    } else {
+      categoryNav.classList.remove('is-stuck');
+    }
+    
+    lastScrollY = scrollY;
+  }
+  
+  // Attach scroll listener
+  window.addEventListener('scroll', handleStickyNav, { passive: true });
+  
+  // Initial check
+  handleStickyNav();
+  
+  // Gallery tab switching
+  galleryTabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      // Remove active class from all tabs
+      galleryTabs.forEach(t => t.classList.remove('active'));
+      // Add active class to clicked tab
+      tab.classList.add('active');
+      
+      // Here you could add logic to filter products based on selected tab
+      const selectedTab = tab.getAttribute('data-tab');
+      console.log('Selected tab:', selectedTab);
+    });
+  });
+  
+  // Category link interactions
+  categoryLinks.forEach(link => {
+    link.addEventListener('click', (e) => {
+      e.preventDefault();
+      
+      // Remove active class from all links
+      categoryLinks.forEach(l => l.classList.remove('active'));
+      // Add active class to clicked link
+      link.classList.add('active');
+      
+      // Here you could add logic to filter products based on selected category
+      const categoryText = link.textContent;
+      console.log('Selected category:', categoryText);
+      
+      // Smooth scroll to product grid
+      const productGrid = document.querySelector('.product-grid');
+      if (productGrid) {
+        const gridTop = productGrid.getBoundingClientRect().top + window.scrollY - headerHeight - categoryNav.offsetHeight - 20;
+        window.scrollTo({
+          top: gridTop,
+          behavior: 'smooth'
+        });
+      }
+    });
+  });
+  
+  // Update sticky position on resize
+  window.addEventListener('resize', handleStickyNav, { passive: true });
 })();
