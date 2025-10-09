@@ -243,7 +243,7 @@
   .gallery-nav-btn--next{right:4px}
   .gallery-nav-btn svg{width:16px;height:16px}
   .chatbot-input.drag-over{background:rgba(74,144,226,0.1);border-color:#4A90E2}
-  .chatbot-map-container{display:none;width:100%;height:400px;border-radius:8px;overflow:hidden;margin-bottom:16px;position:relative;z-index:1}
+  .chatbot-map-container{display:none;width:100%;height:400px;border-radius:8px;overflow:hidden;margin:60px 0 16px 0;position:relative;z-index:1}
   .chatbot-map-container.is-visible{display:block}
   .chatbot-product-gallery{display:none;width:100%;height:120px;margin-bottom:16px;overflow-x:auto;overflow-y:visible;white-space:nowrap;scrollbar-width:thin;padding-bottom:4px}
   .chatbot-product-gallery.is-visible{display:block}
