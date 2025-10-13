@@ -149,26 +149,6 @@
       heroMedia.title = 'Click to skip video';
     }
     
-    // Show CTA button 1.5 seconds before video ends
-    const ctaButton = document.getElementById('hero-cta');
-    if (ctaButton) {
-      let buttonShown = false;
-      
-      video.addEventListener('timeupdate', () => {
-        if (!buttonShown && video.duration && video.currentTime >= video.duration - 1.5) {
-          ctaButton.classList.add('is-visible');
-          buttonShown = true;
-        }
-      });
-      
-      // Add click handler to scroll to product gallery
-      ctaButton.addEventListener('click', () => {
-        const productGallery = document.querySelector('.product-gallery');
-        if (productGallery) {
-          productGallery.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
-      });
-    }
   }
 
   // Parallax effect disabled for banner-style hero
@@ -1394,6 +1374,9 @@
     const gallery = createEl('div', { class: 'image-gallery' });
     const galleryTrack = createEl('div', { class: 'image-gallery-track' });
     
+    // Store gallery images separately
+    const galleryImages = [];
+    
     // Create navigation arrows
     function createArrowIcon(direction) {
       const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
@@ -1421,48 +1404,57 @@
     galleryWrapper.appendChild(gallery);
     document.body.appendChild(galleryWrapper);
     
-    // Populate gallery with visible images from webpage
-    function populateGallery() {
+    // Add image to gallery
+    function addToGallery(imageSrc, productData) {
+      // Check if image already exists
+      const exists = galleryImages.some(item => item.src === imageSrc);
+      if (exists) return;
+      
+      // Add to gallery array
+      galleryImages.push({
+        src: imageSrc,
+        productData: productData
+      });
+      
+      // Re-render gallery
+      renderGallery();
+    }
+    
+    // Populate gallery with favorited images
+    function renderGallery() {
       galleryTrack.replaceChildren();
       
-      // Get all visible images from the page (excluding chatbot and gallery images)
-      const pageImages = Array.from(document.querySelectorAll('img'))
-        .filter(img => {
-          // Exclude chatbot images, gallery images, logo, etc.
-          if (img.closest('.chatbot-wrapper')) return false;
-          if (img.closest('.image-gallery-wrapper')) return false;
-          if (img.closest('.lv-header')) return false;
-          if (img.src.includes('louis-vuitton.svg')) return false;
-          if (img.src.includes('logo.svg')) return false;
+      if (galleryImages.length === 0) {
+        // Show empty state message
+        const emptyMessage = createEl('div', {
+          style: 'text-align: center; padding: 48px 20px; color: #666; font-size: 14px; width: 100%;'
+        });
+        emptyMessage.textContent = 'Click the heart icon on any product to add it to your favorites!';
+        galleryTrack.appendChild(emptyMessage);
+      } else {
+        // Create gallery items from favorited images
+        galleryImages.forEach((item, index) => {
+          const galleryItem = createEl('div', { 
+            class: 'image-gallery-item',
+            draggable: 'true',
+            'data-image-src': item.src,
+            'data-image-index': String(index)
+          });
           
-          // Check if image is visible
-          const rect = img.getBoundingClientRect();
-          const isVisible = rect.width > 0 && rect.height > 0;
-          return isVisible && img.src;
+          const galleryImg = createEl('img', { 
+            src: item.src,
+            alt: item.productData?.title || 'Product image',
+            draggable: 'false'
+          });
+          
+          galleryItem.appendChild(galleryImg);
+          galleryTrack.appendChild(galleryItem);
+          
+          // Add drag event listeners
+          galleryItem.addEventListener('dragstart', handleDragStart);
+          galleryItem.addEventListener('dragend', handleDragEnd);
         });
-      
-      // Create gallery items
-      pageImages.forEach((img, index) => {
-        const galleryItem = createEl('div', { 
-          class: 'image-gallery-item',
-          draggable: 'true',
-          'data-image-src': img.src,
-          'data-image-index': String(index)
-        });
-        
-        const galleryImg = createEl('img', { 
-          src: img.src,
-          alt: img.alt || 'Product image',
-          draggable: 'false'
-        });
-        
-        galleryItem.appendChild(galleryImg);
-        galleryTrack.appendChild(galleryItem);
-        
-        // Add drag event listeners
-        galleryItem.addEventListener('dragstart', handleDragStart);
-        galleryItem.addEventListener('dragend', handleDragEnd);
-      });
+      }
       
       updateNavigationButtons();
     }
@@ -1826,7 +1818,7 @@
     function toggleGallery(show) {
       if (show) {
         galleryWrapper.removeAttribute('hidden');
-        populateGallery();
+        renderGallery();
         requestAnimationFrame(() => {
           galleryWrapper.classList.add('is-visible');
         });
@@ -1838,15 +1830,8 @@
       }
     }
     
-    // Repopulate gallery when scrolling (to update with newly visible images)
-    let galleryUpdateDebounce = null;
-    window.addEventListener('scroll', () => {
-      if (!expanded) return;
-      if (galleryUpdateDebounce) clearTimeout(galleryUpdateDebounce);
-      galleryUpdateDebounce = setTimeout(() => {
-        populateGallery();
-      }, 500);
-    }, { passive: true });
+    // Expose addToGallery function globally so product cards can access it
+    window.addProductToGallery = addToGallery;
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initChatbot);
@@ -1930,7 +1915,7 @@
   window.addEventListener('resize', handleStickyNav, { passive: true });
 })();
 
-// Product Card Wishlist Toggle
+// Product Card Wishlist Toggle and Gallery Integration
 (function() {
   const wishlistButtons = document.querySelectorAll('.product-card__wishlist');
   
@@ -1942,16 +1927,97 @@
       // Toggle active state
       button.classList.toggle('is-active');
       
-      // Optional: Store wishlist state in localStorage
+      // Get product data from card
       const productCard = button.closest('.product-card');
+      const productImg = productCard.querySelector('.product-card__image img');
       const productTitle = productCard.querySelector('.product-card__title')?.textContent;
+      const productModel = productCard.querySelector('.product-card__model')?.textContent;
+      const productPrice = productCard.querySelector('.product-card__price')?.textContent;
+      const imageSrc = productImg?.src;
       
       if (button.classList.contains('is-active')) {
         console.log('Added to wishlist:', productTitle);
-        // You can add localStorage logic here if needed
+        
+        // Add to gallery if function exists
+        if (typeof window.addProductToGallery === 'function' && imageSrc) {
+          window.addProductToGallery(imageSrc, {
+            title: productTitle,
+            model: productModel,
+            price: productPrice
+          });
+        }
       } else {
         console.log('Removed from wishlist:', productTitle);
+        // TODO: Could remove from gallery here if needed
       }
     });
   });
+  
+  // Enable drag and drop from product cards to gallery
+  const productImages = document.querySelectorAll('.product-card__image');
+  
+  productImages.forEach(imageContainer => {
+    const img = imageContainer.querySelector('img');
+    if (!img) return;
+    
+    // Make the image container draggable
+    imageContainer.setAttribute('draggable', 'true');
+    
+    imageContainer.addEventListener('dragstart', (e) => {
+      const productCard = imageContainer.closest('.product-card');
+      const productTitle = productCard.querySelector('.product-card__title')?.textContent;
+      const productModel = productCard.querySelector('.product-card__model')?.textContent;
+      const productPrice = productCard.querySelector('.product-card__price')?.textContent;
+      const imageSrc = img.src;
+      
+      // Set drag data
+      e.dataTransfer.effectAllowed = 'copy';
+      e.dataTransfer.setData('text/plain', imageSrc);
+      e.dataTransfer.setData('application/json', JSON.stringify({
+        src: imageSrc,
+        title: productTitle,
+        model: productModel,
+        price: productPrice
+      }));
+      
+      // Visual feedback
+      imageContainer.style.opacity = '0.5';
+    });
+    
+    imageContainer.addEventListener('dragend', (e) => {
+      imageContainer.style.opacity = '1';
+    });
+  });
+  
+  // Add drop zone to gallery wrapper
+  setTimeout(() => {
+    const galleryWrapper = document.querySelector('.image-gallery-wrapper');
+    if (!galleryWrapper) return;
+    
+    galleryWrapper.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'copy';
+      galleryWrapper.style.transform = 'translateY(-4px) scale(1.02)';
+      galleryWrapper.style.boxShadow = '0 12px 40px rgba(0,0,0,0.18)';
+    });
+    
+    galleryWrapper.addEventListener('dragleave', (e) => {
+      galleryWrapper.style.transform = '';
+      galleryWrapper.style.boxShadow = '';
+    });
+    
+    galleryWrapper.addEventListener('drop', (e) => {
+      e.preventDefault();
+      galleryWrapper.style.transform = '';
+      galleryWrapper.style.boxShadow = '';
+      
+      const imageSrc = e.dataTransfer.getData('text/plain');
+      const productDataStr = e.dataTransfer.getData('application/json');
+      
+      if (imageSrc && typeof window.addProductToGallery === 'function') {
+        const productData = productDataStr ? JSON.parse(productDataStr) : { title: 'Product' };
+        window.addProductToGallery(imageSrc, productData);
+      }
+    });
+  }, 1000);
 })();
