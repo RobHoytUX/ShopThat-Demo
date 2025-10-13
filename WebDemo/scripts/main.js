@@ -133,6 +133,21 @@
       if (hero) hero.classList.add('hero--video-ready');
     };
     video.addEventListener('canplay', onReady, { once: true });
+
+    // Make video area clickable to skip to end
+    const heroMedia = document.querySelector('.hero__media');
+    if (heroMedia) {
+      heroMedia.addEventListener('click', () => {
+        // Skip to end of video
+        if (video.duration && video.duration > 0) {
+          video.currentTime = video.duration - 0.1; // Skip to 0.1s before end
+        }
+      });
+
+      // Add visual indicator that video is clickable
+      heroMedia.style.cursor = 'pointer';
+      heroMedia.title = 'Click to skip video';
+    }
     
     // Show CTA button 1.5 seconds before video ends
     const ctaButton = document.getElementById('hero-cta');
@@ -146,11 +161,11 @@
         }
       });
       
-      // Add click handler to scroll to next section
+      // Add click handler to scroll to product gallery
       ctaButton.addEventListener('click', () => {
-        const interlude = document.querySelector('.interlude');
-        if (interlude) {
-          interlude.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        const productGallery = document.querySelector('.product-gallery');
+        if (productGallery) {
+          productGallery.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
       });
     }
@@ -1913,4 +1928,30 @@
   
   // Update sticky position on resize
   window.addEventListener('resize', handleStickyNav, { passive: true });
+})();
+
+// Product Card Wishlist Toggle
+(function() {
+  const wishlistButtons = document.querySelectorAll('.product-card__wishlist');
+  
+  wishlistButtons.forEach(button => {
+    button.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      
+      // Toggle active state
+      button.classList.toggle('is-active');
+      
+      // Optional: Store wishlist state in localStorage
+      const productCard = button.closest('.product-card');
+      const productTitle = productCard.querySelector('.product-card__title')?.textContent;
+      
+      if (button.classList.contains('is-active')) {
+        console.log('Added to wishlist:', productTitle);
+        // You can add localStorage logic here if needed
+      } else {
+        console.log('Removed from wishlist:', productTitle);
+      }
+    });
+  });
 })();
