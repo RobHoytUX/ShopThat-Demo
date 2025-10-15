@@ -63,6 +63,16 @@
           <div class="hero__content-inner">
           </div>
         </div>
+        
+        <!-- Chatbot Component -->
+        <div class="chatbot" id="chatbot">
+          <div class="chatbot__messages" id="chatbot-messages">
+            <!-- Messages will be dynamically added here -->
+          </div>
+          <div class="chatbot__keywords" id="chatbot-keywords">
+            <!-- Keyword bubbles will be dynamically added here -->
+          </div>
+        </div>
       </section>
 
       <!-- Interlude text block on white background -->
@@ -257,32 +267,306 @@
     <script src="scripts/shared-data.js"></script>
     <script src="scripts/main.js" defer></script>
     <script>
+      // Chatbot Conversation Flow
+      const chatbotConversations = {
+        initial: {
+          keywords: ['Kusama x LV', 'Kusama', 'Stores', 'Capucine Bag']
+        },
+        'kusama-x-lv': {
+          message: 'Experience the extraordinary collaboration between Yayoi Kusama and Louis Vuitton. This groundbreaking partnership brings together contemporary art and luxury craftsmanship in an unprecedented way.',
+          keywords: ['Campaign Content', 'Campaign Products']
+        },
+        'campaign-content': {
+          action: 'navigate-kusama-homepage',
+          notification: 'Drag and drop images into the gallery to explore the collection'
+        },
+        'campaign-products': {
+          keywords: ['Infinity Dots', 'Painted Dots', 'Psychedelic Flower']
+        },
+        'psychedelic-flower': {
+          message: 'The Psychedelic Flower collection features vibrant, organic patterns inspired by Kusama\'s iconic floral motifs. Each piece celebrates nature through bold color and imaginative design.',
+          products: [
+            { name: 'Psychedelic Flower Keepall', price: '$3,400', image: 'assets/kusama3.png' },
+            { name: 'Psychedelic Flower Pochette', price: '$2,100', image: 'assets/kusama3.png' },
+            { name: 'Psychedelic Flower Wallet', price: '$890', image: 'assets/kusama3.png' }
+          ]
+        },
+        'kusama': {
+          message: 'Yayoi Kusama is a renowned Japanese contemporary artist known for her immersive installations and signature polka dot patterns. Her work explores themes of infinity, self-obliteration, and the cosmos.',
+          keywords: ['Kusama Art', 'Kusama LV Campaign Content']
+        },
+        'kusama-art': {
+          action: 'navigate-kusama-homepage',
+          notification: 'Drag and drop images into the gallery to explore Kusama\'s artistic world'
+        },
+        'stores': {
+          message: 'Visit our Louis Vuitton stores to experience the Kusama collaboration in person.',
+          storeButtons: [
+            { name: '57th Street', location: 'New York' },
+            { name: 'SoHo', location: 'New York' }
+          ],
+          keywords: ['Store', 'Restaurants', 'Museums Galleries']
+        },
+        'capucine-bag': {
+          message: 'The Capucines bag, named after the Rue des Capucines where Louis Vuitton opened his first store in 1854, is a testament to exceptional savoir-faire. The Kusama edition reimagines this iconic silhouette with her distinctive artistic vision.',
+          products: [
+            { name: 'Capucines MM Infinity Dots', price: '$6,400', image: 'assets/kusama3.png' },
+            { name: 'Capucines PM Painted Dots', price: '$5,900', image: 'assets/kusama3.png' },
+            { name: 'Capucines Mini Psychedelic Flower', price: '$4,800', image: 'assets/kusama3.png' }
+          ]
+        }
+      };
+
+      // Chatbot State
+      let chatbotState = {
+        currentFlow: 'initial',
+        videoKeywordsShown: false
+      };
+
+      // Initialize Chatbot
+      function initChatbot() {
+        const video = document.getElementById('hero-video');
+        const chatbot = document.getElementById('chatbot');
+        const messagesContainer = document.getElementById('chatbot-messages');
+        const keywordsContainer = document.getElementById('chatbot-keywords');
+
+        // Video timeline keywords
+        if (video) {
+          video.addEventListener('timeupdate', () => {
+            if (!chatbotState.videoKeywordsShown) {
+              const currentTime = video.currentTime;
+              
+              // Show keywords progressively during video
+              if (currentTime >= 2 && currentTime < 4) {
+                showKeyword('Capucine Bag', true);
+              } else if (currentTime >= 4 && currentTime < 6) {
+                showKeyword('Kusama x LV', true);
+              } else if (currentTime >= 6 && currentTime < 8) {
+                showKeyword('Kusama', true);
+              } else if (currentTime >= 8) {
+                showKeyword('Store', true);
+              }
+            }
+          });
+
+          video.addEventListener('ended', () => {
+            // Show all initial keywords after video ends
+            chatbotState.videoKeywordsShown = true;
+            showInitialKeywords();
+          });
+        }
+
+        // If video doesn't autoplay or is not available, show initial keywords after delay
+        setTimeout(() => {
+          if (!chatbotState.videoKeywordsShown) {
+            showInitialKeywords();
+          }
+        }, 3000);
+      }
+
+      // Show single keyword (during video)
+      function showKeyword(keyword, isTemporary = false) {
+        const keywordsContainer = document.getElementById('chatbot-keywords');
+        
+        if (!isTemporary) {
+          keywordsContainer.innerHTML = '';
+        }
+        
+        const bubble = document.createElement('button');
+        bubble.className = 'chatbot__keyword animate-in';
+        bubble.textContent = keyword;
+        bubble.onclick = () => handleKeywordClick(keyword);
+        
+        keywordsContainer.appendChild(bubble);
+        
+        // Remove temporary keywords after a moment
+        if (isTemporary) {
+          setTimeout(() => {
+            if (!chatbotState.videoKeywordsShown && keywordsContainer.contains(bubble)) {
+              bubble.classList.add('fade-out');
+              setTimeout(() => bubble.remove(), 300);
+            }
+          }, 1500);
+        }
+      }
+
+      // Show initial keywords
+      function showInitialKeywords() {
+        const keywordsContainer = document.getElementById('chatbot-keywords');
+        keywordsContainer.innerHTML = '';
+        
+        const initialKeywords = chatbotConversations.initial.keywords;
+        initialKeywords.forEach((keyword, index) => {
+          setTimeout(() => {
+            const bubble = document.createElement('button');
+            bubble.className = 'chatbot__keyword animate-in';
+            bubble.textContent = keyword;
+            bubble.onclick = () => handleKeywordClick(keyword);
+            keywordsContainer.appendChild(bubble);
+          }, index * 200);
+        });
+      }
+
+      // Handle keyword click
+      function handleKeywordClick(keyword) {
+        const flowKey = keyword.toLowerCase().replace(/\s+/g, '-');
+        const flow = chatbotConversations[flowKey];
+        
+        if (!flow) {
+          console.warn('No flow found for:', flowKey);
+          return;
+        }
+
+        // Add message if exists
+        if (flow.message) {
+          addMessage(flow.message);
+        }
+
+        // Handle special actions
+        if (flow.action === 'navigate-kusama-homepage') {
+          setTimeout(() => {
+            showNotification(flow.notification);
+          }, 500);
+        }
+
+        // Show store buttons if exists
+        if (flow.storeButtons) {
+          showStoreButtons(flow.storeButtons);
+        }
+
+        // Show products if exists
+        if (flow.products) {
+          showProducts(flow.products);
+        }
+
+        // Show next keywords if exists
+        if (flow.keywords) {
+          setTimeout(() => {
+            showKeywords(flow.keywords);
+          }, 500);
+        }
+
+        chatbotState.currentFlow = flowKey;
+      }
+
+      // Add message to chatbot
+      function addMessage(message) {
+        const messagesContainer = document.getElementById('chatbot-messages');
+        const messageEl = document.createElement('div');
+        messageEl.className = 'chatbot__message animate-in';
+        messageEl.textContent = message;
+        messagesContainer.appendChild(messageEl);
+        
+        // Scroll to show message
+        setTimeout(() => {
+          messageEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }, 100);
+      }
+
+      // Show notification
+      function showNotification(text) {
+        const messagesContainer = document.getElementById('chatbot-messages');
+        const notificationEl = document.createElement('div');
+        notificationEl.className = 'chatbot__notification animate-in';
+        notificationEl.innerHTML = `
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <path d="M12 16v-4M12 8h.01"/>
+          </svg>
+          <span>${text}</span>
+        `;
+        messagesContainer.appendChild(notificationEl);
+      }
+
+      // Show keywords
+      function showKeywords(keywords) {
+        const keywordsContainer = document.getElementById('chatbot-keywords');
+        keywordsContainer.innerHTML = '';
+        
+        keywords.forEach((keyword, index) => {
+          setTimeout(() => {
+            const bubble = document.createElement('button');
+            bubble.className = 'chatbot__keyword animate-in';
+            bubble.textContent = keyword;
+            bubble.onclick = () => handleKeywordClick(keyword);
+            keywordsContainer.appendChild(bubble);
+          }, index * 150);
+        });
+      }
+
+      // Show store buttons
+      function showStoreButtons(stores) {
+        const keywordsContainer = document.getElementById('chatbot-keywords');
+        
+        stores.forEach((store, index) => {
+          setTimeout(() => {
+            const button = document.createElement('button');
+            button.className = 'chatbot__store-button animate-in';
+            button.innerHTML = `
+              <strong>${store.name}</strong>
+              <span>${store.location}</span>
+            `;
+            button.onclick = () => {
+              window.open(`https://www.google.com/maps/search/Louis+Vuitton+${encodeURIComponent(store.name)}+${encodeURIComponent(store.location)}`, '_blank');
+            };
+            keywordsContainer.appendChild(button);
+          }, index * 150);
+        });
+      }
+
+      // Show products
+      function showProducts(products) {
+        const messagesContainer = document.getElementById('chatbot-messages');
+        const productsContainer = document.createElement('div');
+        productsContainer.className = 'chatbot__products animate-in';
+        
+        products.forEach(product => {
+          const productCard = document.createElement('div');
+          productCard.className = 'chatbot__product-card';
+          productCard.innerHTML = `
+            <img src="${product.image}" alt="${product.name}" />
+            <div class="chatbot__product-info">
+              <h4>${product.name}</h4>
+              <p>${product.price}</p>
+              <button class="chatbot__product-btn">View Details</button>
+            </div>
+          `;
+          productsContainer.appendChild(productCard);
+        });
+        
+        messagesContainer.appendChild(productsContainer);
+        
+        setTimeout(() => {
+          productsContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }, 100);
+      }
+
       // Dark mode functionality
       function initDarkMode() {
         const darkModeToggle = document.getElementById('darkModeToggle');
         const body = document.body;
         
-        // Check for saved dark mode preference
-        const isDarkMode = localStorage.getItem('darkMode') === 'true';
-        if (isDarkMode) {
+        if (localStorage.getItem('darkMode') === 'true') {
           body.classList.add('dark-mode');
         }
         
-        // Toggle dark mode
         if (darkModeToggle) {
           darkModeToggle.addEventListener('click', () => {
             body.classList.toggle('dark-mode');
-            const isNowDark = body.classList.contains('dark-mode');
-            localStorage.setItem('darkMode', isNowDark);
+            localStorage.setItem('darkMode', body.classList.contains('dark-mode'));
           });
         }
       }
       
-      // Initialize when DOM is ready
+      // Initialize on DOM ready
       if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initDarkMode);
+        document.addEventListener('DOMContentLoaded', () => {
+          initDarkMode();
+          initChatbot();
+        });
       } else {
         initDarkMode();
+        initChatbot();
       }
     </script>
   </body>
