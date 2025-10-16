@@ -790,8 +790,8 @@
       input.value = label;
       input.focus();
       
-      // Special handling for "Kusama" keyword
-      if (label.toLowerCase() === 'kusama') {
+      // Special handling for "Kusama x LV Campaign" keyword
+      if (label.toLowerCase() === 'kusama x lv campaign') {
         // Populate gallery with Kusama images
         const kusamaImages = [
           { src: 'assets/kusama-gal1.jpg', title: 'Yayoi Kusama' },
