@@ -790,6 +790,35 @@
       input.value = label;
       input.focus();
       
+      // Special handling for "Kusama" keyword
+      if (label.toLowerCase() === 'kusama') {
+        // Populate gallery with Kusama images
+        const kusamaImages = [
+          { src: 'assets/kusama-gal1.jpg', title: 'Yayoi Kusama' },
+          { src: 'assets/kusama-gal2.jpg', title: 'Yayoi Kusama' },
+          { src: 'assets/kusama-gal3.jpg', title: 'Yayoi Kusama' },
+          { src: 'assets/kusama-gal4.jpg', title: 'Yayoi Kusama' }
+        ];
+        
+        // Clear existing gallery images
+        galleryImages.length = 0;
+        
+        // Add Kusama images to gallery
+        kusamaImages.forEach(img => {
+          if (typeof window.addProductToGallery === 'function') {
+            window.addProductToGallery(img.src, { title: img.title });
+          } else {
+            galleryImages.push({ src: img.src, productData: { title: img.title } });
+          }
+        });
+        
+        // Re-render gallery
+        renderGallery();
+        
+        // Add informational blurb about Kusama
+        addMessage('bot', 'Yayoi Kusama is a renowned Japanese contemporary artist known for her immersive installations and signature polka dot patterns. Her work explores themes of infinity, self-obliteration, and the cosmos. The Louis Vuitton x Yayoi Kusama collaboration celebrates her iconic artistic vision.');
+      }
+      
       // Track keyword usage in ShopThatData system
       if (window.ShopThatData) {
         window.ShopThatData.trackKeywordUsage(label, 'chatbot-selection');
