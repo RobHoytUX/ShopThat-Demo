@@ -792,28 +792,16 @@
       
       // Special handling for "Kusama x LV Campaign" keyword
       if (label.toLowerCase() === 'kusama x lv campaign') {
-        // Populate gallery with Kusama images
-        const kusamaImages = [
-          { src: 'assets/kusama-gal1.png', title: 'Yayoi Kusama' },
-          { src: 'assets/kusama-gal2.png', title: 'Yayoi Kusama' },
-          { src: 'assets/kusama-gal3.png', title: 'Yayoi Kusama' },
-          { src: 'assets/kusama-gal4.png', title: 'Yayoi Kusama' }
+        // Display Kusama images in the chatbot (below keywords, above blurb)
+        const kusamaImageUrls = [
+          'assets/kusama-gal1.png',
+          'assets/kusama-gal2.png',
+          'assets/kusama-gal3.png',
+          'assets/kusama-gal4.png'
         ];
         
-        // Clear existing gallery images
-        galleryImages.length = 0;
-        
-        // Add Kusama images to gallery
-        kusamaImages.forEach(img => {
-          if (typeof window.addProductToGallery === 'function') {
-            window.addProductToGallery(img.src, { title: img.title });
-          } else {
-            galleryImages.push({ src: img.src, productData: { title: img.title } });
-          }
-        });
-        
-        // Re-render gallery
-        renderGallery();
+        // Display images in chatbot messages (these will be draggable to gallery)
+        displayImages(kusamaImageUrls);
         
         // Add informational blurb about Kusama
         addMessage('bot', 'Yayoi Kusama is a renowned Japanese contemporary artist known for her immersive installations and signature polka dot patterns. Her work explores themes of infinity, self-obliteration, and the cosmos. The Louis Vuitton x Yayoi Kusama collaboration celebrates her iconic artistic vision.');
@@ -1081,18 +1069,42 @@
       
       const imageContainer = createEl('div', { class: 'chatbot-msg chatbot-msg-bot chatbot-images' });
       imageUrls.forEach(imageUrl => {
+        const imgWrapper = createEl('div', {
+          style: 'position: relative; display: inline-block;'
+        });
+        imgWrapper.setAttribute('draggable', 'true');
+        
         const img = createEl('img', { 
           src: imageUrl, 
           alt: 'Related image',
-          style: 'max-width: 200px; max-height: 200px; border-radius: 8px; margin: 4px; cursor: pointer;'
+          style: 'max-width: 200px; max-height: 200px; border-radius: 8px; margin: 4px; cursor: grab;'
         });
+        img.setAttribute('draggable', 'false'); // Prevent default image drag
+        
+        // Make wrapper draggable to gallery
+        imgWrapper.addEventListener('dragstart', (e) => {
+          e.dataTransfer.effectAllowed = 'copy';
+          e.dataTransfer.setData('text/plain', imageUrl);
+          e.dataTransfer.setData('application/json', JSON.stringify({
+            src: imageUrl,
+            title: 'Yayoi Kusama'
+          }));
+          imgWrapper.style.opacity = '0.5';
+        });
+        
+        imgWrapper.addEventListener('dragend', (e) => {
+          imgWrapper.style.opacity = '1';
+        });
+        
         img.addEventListener('click', () => {
           window.open(imageUrl, '_blank');
         });
         img.addEventListener('error', () => {
-          img.style.display = 'none';
+          imgWrapper.style.display = 'none';
         });
-        imageContainer.appendChild(img);
+        
+        imgWrapper.appendChild(img);
+        imageContainer.appendChild(imgWrapper);
       });
       
       messages.appendChild(imageContainer);
