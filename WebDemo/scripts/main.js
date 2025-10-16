@@ -233,6 +233,16 @@
   .image-gallery-wrapper.is-visible{opacity:1;transform:translateY(0);pointer-events:auto}
   .image-gallery-wrapper[hidden]{display:none}
   .image-gallery{background:linear-gradient(135deg,rgba(255,255,255,0.95),rgba(255,255,255,0.9));border:1px solid rgba(0,0,0,0.1);border-radius:12px;padding:12px 40px;box-shadow:0 8px 32px rgba(0,0,0,0.12);backdrop-filter:blur(16px) saturate(180%);-webkit-backdrop-filter:blur(16px) saturate(180%);position:relative;overflow:hidden}
+  .image-gallery-title{position:absolute;top:12px;left:12px;font-size:16px;font-weight:600;color:#111;pointer-events:none}
+  .product-modal{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:10000;backdrop-filter:blur(4px)}
+  .product-modal-content{background:#fff;border-radius:16px;padding:24px;max-width:400px;width:90%;max-height:80%;overflow:auto}
+  .product-modal-title{font-size:18px;font-weight:600;margin:0 0 16px;text-align:center}
+  .product-modal-close{position:absolute;top:16px;right:16px;width:32px;height:32px;border:none;background:transparent;cursor:pointer;border-radius:50%;display:flex;align-items:center;justify-content:center}
+  .product-modal-close:hover{background:rgba(0,0,0,0.1)}
+  .product-modal-card{text-align:center}
+  .product-modal-info{margin-top:16px}
+  .product-modal-info h3{margin:0 0 8px;font-size:18px;font-weight:600}
+  .product-modal-info p{margin:4px 0;color:#666;font-size:14px}
   .image-gallery-track{display:flex;gap:8px;overflow-x:auto;overflow-y:hidden;scroll-behavior:smooth;scrollbar-width:none;-webkit-overflow-scrolling:touch;padding:4px 0}
   .image-gallery-track::-webkit-scrollbar{display:none}
   .image-gallery-item{flex:0 0 auto;width:120px;height:120px;border-radius:8px;overflow:hidden;cursor:grab;position:relative;transition:transform 200ms ease,box-shadow 200ms ease}
@@ -447,6 +457,35 @@
     
     // Create navigation menu
     const chatbotNav = createEl('div', { class: 'chatbot-nav' });
+
+    // Create product detail modal (initially hidden)
+    const productModal = createEl('div', { class: 'product-modal', hidden: '' });
+    const productModalContent = createEl('div', { class: 'product-modal-content' });
+    const productModalTitle = createEl('div', { class: 'product-modal-title' }, [document.createTextNode('My Products')]);
+    const productModalClose = createEl('button', { class: 'product-modal-close', 'aria-label': 'Close' });
+    const productModalCloseIcon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    productModalCloseIcon.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+    productModalCloseIcon.setAttribute('viewBox', '0 0 24 24');
+    productModalCloseIcon.setAttribute('fill', 'none');
+    productModalCloseIcon.setAttribute('stroke', 'currentColor');
+    productModalCloseIcon.setAttribute('width', '24');
+    productModalCloseIcon.setAttribute('height', '24');
+    const closePath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    closePath.setAttribute('d', 'M6 18 18 6M6 6l12 12');
+    closePath.setAttribute('stroke-linecap', 'round');
+    closePath.setAttribute('stroke-linejoin', 'round');
+    closePath.setAttribute('stroke-width', '1.5');
+    productModalCloseIcon.appendChild(closePath);
+    productModalClose.appendChild(productModalCloseIcon);
+
+    productModalClose.addEventListener('click', () => {
+      productModal.setAttribute('hidden', '');
+    });
+
+    productModalContent.appendChild(productModalTitle);
+    productModalContent.appendChild(productModalClose);
+    productModal.appendChild(productModalContent);
+    document.body.appendChild(productModal);
     let navVisible = false;
     
     // Helper function to create nav icons
@@ -719,8 +758,9 @@
       box.style.width = widthPx + 'px';
       box.style.height = constrainedHeight + 'px';
     }
-    // Start in full expanded state instead of compact
-    setBoxSize(FULL_W, 600);
+    // Start in full expanded state with increased width
+    const INITIAL_W = 700; // Increased to fit 4 images side by side
+    setBoxSize(INITIAL_W, 600);
 
     function measureChipRowWidth(container){
       if (!container || container.hasAttribute('hidden') || !container.children.length) return 0;
@@ -792,7 +832,10 @@
       
       // Special handling for "Kusama x LV Campaign" keyword
       if (label.toLowerCase() === 'kusama x lv campaign') {
-        // Display Kusama images in the chatbot (below keywords, above blurb)
+        // Add informational blurb about Kusama FIRST (above images)
+        addMessage('bot', 'Yayoi Kusama is a renowned Japanese contemporary artist known for her immersive installations and signature polka dot patterns. Her work explores themes of infinity, self-obliteration, and the cosmos. The Louis Vuitton x Yayoi Kusama collaboration celebrates her iconic artistic vision.');
+        
+        // Display Kusama images in the chatbot (below blurb)
         const kusamaImageUrls = [
           'assets/kusama-gal1.png',
           'assets/kusama-gal2.png',
@@ -802,9 +845,6 @@
         
         // Display images in chatbot messages (these will be draggable to gallery)
         displayImages(kusamaImageUrls);
-        
-        // Add informational blurb about Kusama
-        addMessage('bot', 'Yayoi Kusama is a renowned Japanese contemporary artist known for her immersive installations and signature polka dot patterns. Her work explores themes of infinity, self-obliteration, and the cosmos. The Louis Vuitton x Yayoi Kusama collaboration celebrates her iconic artistic vision.');
       }
       
       // Track keyword usage in ShopThatData system
@@ -1074,10 +1114,10 @@
         });
         imgWrapper.setAttribute('draggable', 'true');
         
-        const img = createEl('img', { 
-          src: imageUrl, 
+        const img = createEl('img', {
+          src: imageUrl,
           alt: 'Related image',
-          style: 'max-width: 200px; max-height: 200px; border-radius: 8px; margin: 4px; cursor: grab;'
+          style: 'max-width: 120px; max-height: 120px; border-radius: 8px; margin: 4px; cursor: pointer;'
         });
         img.setAttribute('draggable', 'false'); // Prevent default image drag
         
@@ -1334,6 +1374,10 @@
     const galNextBtn = createEl('button', { class: 'gallery-nav-btn gallery-nav-btn--next', type: 'button', 'aria-label': 'Next images' });
     galNextBtn.appendChild(createArrowIcon('right'));
     
+    // Add title to gallery
+    const galleryTitle = createEl('div', { class: 'image-gallery-title' }, [document.createTextNode('My Media')]);
+    
+    gallery.appendChild(galleryTitle);
     gallery.appendChild(galPrevBtn);
     gallery.appendChild(galleryTrack);
     gallery.appendChild(galNextBtn);
@@ -1603,7 +1647,7 @@
     // Populate gallery with favorited images
     function renderGallery() {
       galleryTrack.replaceChildren();
-      
+
       if (galleryImages.length === 0) {
         // Show empty state message
         const emptyMessage = createEl('div', {
@@ -1614,29 +1658,65 @@
       } else {
         // Create gallery items from favorited images
         galleryImages.forEach((item, index) => {
-          const galleryItem = createEl('div', { 
+          const galleryItem = createEl('div', {
             class: 'image-gallery-item',
             draggable: 'true',
             'data-image-src': item.src,
             'data-image-index': String(index)
           });
-          
-          const galleryImg = createEl('img', { 
+
+          const galleryImg = createEl('img', {
             src: item.src,
             alt: item.productData?.title || 'Product image',
             draggable: 'false'
           });
-          
+
           galleryItem.appendChild(galleryImg);
           galleryTrack.appendChild(galleryItem);
-          
+
+          // Add click handler to open product modal
+          galleryItem.addEventListener('click', () => {
+            openProductModal(item);
+          });
+
           // Add drag event listeners
           galleryItem.addEventListener('dragstart', handleDragStart);
           galleryItem.addEventListener('dragend', handleDragEnd);
         });
       }
-      
+
       updateNavigationButtons();
+    }
+
+    // Function to open product modal
+    function openProductModal(item) {
+      productModal.removeAttribute('hidden');
+
+      // Clear previous content
+      productModalContent.replaceChildren();
+      productModalContent.appendChild(productModalTitle);
+      productModalContent.appendChild(productModalClose);
+
+      // Create product card
+      const productCard = createEl('div', { class: 'product-modal-card' });
+      const productImg = createEl('img', {
+        src: item.src,
+        alt: item.productData?.title || 'Product image',
+        style: 'width: 200px; height: 200px; object-fit: cover; border-radius: 8px; margin-bottom: 16px;'
+      });
+
+      const productInfo = createEl('div', { class: 'product-modal-info' });
+      const productTitle = createEl('h3', { text: item.productData?.title || 'Product Title' });
+      const productModel = createEl('p', { text: `Model: ${item.productData?.model || 'N/A'}` });
+      const productPrice = createEl('p', { text: `Price: ${item.productData?.price || 'N/A'}` });
+
+      productInfo.appendChild(productTitle);
+      productInfo.appendChild(productModel);
+      productInfo.appendChild(productPrice);
+
+      productCard.appendChild(productImg);
+      productCard.appendChild(productInfo);
+      productModalContent.appendChild(productCard);
     }
     
     // Drag and drop functionality
