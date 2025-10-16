@@ -5,11 +5,7 @@
 [build.environment]
   # No environment variables needed for static site
 
-[[redirects]]
-  # Handle client-side routing - redirect all requests to index.html
-  from = "/*"
-  to = "/index.html"
-  status = 200
+# No redirects needed for static site - removed to prevent 404 issues
 
 # Security headers
 [[headers]]
