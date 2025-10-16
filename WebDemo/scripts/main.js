@@ -388,12 +388,12 @@
       .replace(/`([^`]+)`/g,'$1');
   }
 
-  async function initChatbot(){
+    async function initChatbot(){
     injectStyles();
 
     const wrapper = createEl('div', { class: 'chatbot-wrapper', role: 'complementary', 'aria-label': 'Chatbot' });
-    const toggle  = createEl('button', { class: 'chatbot-toggle', 'aria-expanded': 'false', 'aria-controls': 'chatbot-box', title: 'Open chat' });
-    const box     = createEl('div', { class: 'chatbot-box', id: 'chatbot-box', hidden: '' });
+    const toggle  = createEl('button', { class: 'chatbot-toggle', 'aria-expanded': 'true', 'aria-controls': 'chatbot-box', title: 'Open chat' });
+    const box     = createEl('div', { class: 'chatbot-box', id: 'chatbot-box' });
     const header  = createEl('div', { class: 'chatbot-header' });
     const refreshBtn = createEl('button', { class: 'chatbot-refresh', title: 'Clear chat', hidden: '' });
     const refreshIcon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
@@ -675,7 +675,7 @@
       productGallery.appendChild(productItem);
     }
     
-    const options = createEl('div', { class: 'chatbot-options' });
+    const options = createEl('div', { class: 'chatbot-options', hidden: '' }); // Hide options - only use presets
     const messages= createEl('div', { class: 'chatbot-messages' });
     const inputW  = createEl('div', { class: 'chatbot-input' });
     const input   = createEl('input', { type: 'text', placeholder: 'Select a keyword to begin', 'aria-label': 'Message', disabled: '' });
@@ -719,9 +719,8 @@
       box.style.width = widthPx + 'px';
       box.style.height = constrainedHeight + 'px';
     }
-    // Initial compact size with glass background intact
-    box.classList.add('chatbot-box--compact');
-    setBoxSize(COMPACT_W, COMPACT_H);
+    // Start in full expanded state instead of compact
+    setBoxSize(FULL_W, 600);
 
     function measureChipRowWidth(container){
       if (!container || container.hasAttribute('hidden') || !container.children.length) return 0;
@@ -764,11 +763,10 @@
         const targetHeight = Math.min(maxHeight, Math.max(minH, 600)); // Default to 600px when expanded
         setBoxSize(FULL_W, targetHeight);
       } else {
-        const w = preferredCompactWidth();
-        box.classList.add('chatbot-box--compact');
+        // Always keep full width, just adjust height
         const minH = computeMinHeight();
-        const targetHeight = Math.max(COMPACT_H, minH);
-        setBoxSize(w, targetHeight);
+        const targetHeight = Math.max(600, minH);
+        setBoxSize(FULL_W, targetHeight);
       }
       // Ensure top controls are always visible: scroll container to top and keep padding
       box.scrollTop = 0;
@@ -833,6 +831,19 @@
     if (window.ShopThatData) {
       currentSessionId = window.ShopThatData.startChatSession();
     }
+    
+    // Declare these variables early to avoid initialization errors
+    const keywordsCache = new Map(); // imageUrl -> payload
+    let analyzeDebounce = null;
+    let selectedBagIndex = 0;
+    const visibleImageRatios = new Map(); // img -> ratio
+    
+    // Product storage - declare early
+    const droppedProducts = [];
+    const wishlistProducts = [];
+    
+    // Gallery images - declare early
+    const galleryImages = [];
 
     // Use ShopThatData system for keywords instead of API
     function loadKeywordsFromSharedData() {
@@ -868,13 +879,142 @@
       }
     }
 
-    // Load keywords from shared data
-    loadKeywordsFromSharedData();
+    // Function to generate keywords one by one with animation
+    function startKeywordGeneration() {
+      console.log('Starting keyword generation...');
+      
+      // Set title text
+      title.textContent = 'Hello!';
+      
+      if (!window.ShopThatData) {
+        console.warn('ShopThatData not available, using fallback keywords');
+        // Show default keywords as fallback
+        const defaultKeywords = [
+          { name: 'Yayoi Kusama' },
+          { name: 'Pharrell' },
+          { name: 'Infinity Mirrors' },
+          { name: 'Painted Dots' }
+        ];
+        showKeywordsAnimated(defaultKeywords);
+        return;
+      }
+      
+      const keywords = window.ShopThatData.getKeywords();
+      console.log('Retrieved keywords:', keywords);
+      
+      // Clear any existing keywords
+      presets.replaceChildren();
+      
+      if (keywords.length === 0) {
+        console.warn('No keywords available, using fallback');
+        // Show default keywords as fallback
+        const defaultKeywords = [
+          { name: 'Yayoi Kusama' },
+          { name: 'Pharrell' },
+          { name: 'Infinity Mirrors' },
+          { name: 'Painted Dots' }
+        ];
+        showKeywordsAnimated(defaultKeywords);
+        return;
+      }
+      
+      // Limit to 4 keywords
+      const keywordsToShow = keywords.slice(0, 4);
+      showKeywordsAnimated(keywordsToShow);
+    }
+    
+    // Helper function to cycle through all keywords then show final 4
+    function showKeywordsAnimated(allKeywords) {
+      // Get all keywords from ShopThatData
+      const cycleKeywords = window.ShopThatData ? window.ShopThatData.getKeywords() : allKeywords;
+      
+      // Final 4 keywords to end with
+      const finalKeywords = ['Kusama x LV Campaign', 'Kusama', 'Stores', 'Capucines Bag'];
+      
+      let cycleIndex = 0;
+      let isInCyclePhase = true;
+      
+      // Function to cycle through keywords
+      function cycleNextKeyword() {
+        if (isInCyclePhase && cycleIndex < cycleKeywords.length) {
+          const kw = cycleKeywords[cycleIndex];
+          const label = titleCase(kw.name);
+          
+          // Clear previous keywords
+          presets.replaceChildren();
+          
+          // Show current keyword
+          const b = createEl('button', { type: 'button' }, [document.createTextNode(label)]);
+          b.style.opacity = '0';
+          b.style.transform = 'scale(0.9)';
+          b.style.transition = 'opacity 200ms ease, transform 200ms ease';
+          b.addEventListener('click', ()=> onKeywordSelect(label));
+          presets.appendChild(b);
+          
+          // Animate in
+          requestAnimationFrame(() => {
+            b.style.opacity = '1';
+            b.style.transform = 'scale(1)';
+          });
+          
+          cycleIndex++;
+          
+          // Continue cycling at 1 second intervals
+          setTimeout(cycleNextKeyword, 1000);
+        } else if (isInCyclePhase) {
+          // Cycling done, now show final 4 keywords
+          console.log('Cycling complete, showing final 4 keywords');
+          isInCyclePhase = false;
+          showFinalKeywords();
+        }
+      }
+      
+      // Function to show final 4 keywords one by one
+      function showFinalKeywords() {
+        presets.replaceChildren();
+        let finalIndex = 0;
+        
+        function showNextFinalKeyword() {
+          if (finalIndex < finalKeywords.length) {
+            const label = finalKeywords[finalIndex];
+            console.log('Showing final keyword:', label);
+            
+            const b = createEl('button', { type: 'button' }, [document.createTextNode(label)]);
+            b.style.opacity = '0';
+            b.style.transform = 'scale(0.8)';
+            b.style.transition = 'opacity 300ms ease, transform 300ms ease';
+            b.addEventListener('click', ()=> onKeywordSelect(label));
+            presets.appendChild(b);
+            
+            // Animate in
+            requestAnimationFrame(() => {
+              b.style.opacity = '1';
+              b.style.transform = 'scale(1)';
+            });
+            
+            finalIndex++;
+            
+            // Show next final keyword after delay
+            setTimeout(showNextFinalKeyword, 300);
+          } else {
+            console.log('All final keywords displayed');
+          }
+        }
+        
+        showNextFinalKeyword();
+      }
+      
+      // Start the cycling animation
+      cycleNextKeyword();
+    }
+    
+    // Load keywords from shared data (fallback)
+    // loadKeywordsFromSharedData(); // Commented out since we're using startKeywordGeneration
 
     // Listen for keyword changes from other pages
     if (window.ShopThatData) {
       window.ShopThatData.on('keywords', () => {
-        loadKeywordsFromSharedData();
+        // Don't reload keywords into options - only cycling animation uses keywords
         ensureSizeForContent();
       });
     }
@@ -1125,7 +1265,41 @@
       });
     }
 
-    let expanded = false;
+    // =====================
+    // Image Gallery Component - MUST be created before openBox() is called
+    // =====================
+    const galleryWrapper = createEl('div', { class: 'image-gallery-wrapper', hidden: '' });
+    const gallery = createEl('div', { class: 'image-gallery' });
+    const galleryTrack = createEl('div', { class: 'image-gallery-track' });
+    
+    // Create navigation arrows
+    function createArrowIcon(direction) {
+      const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+      svg.setAttribute('viewBox', '0 0 24 24');
+      svg.setAttribute('fill', 'none');
+      svg.setAttribute('stroke', 'currentColor');
+      svg.setAttribute('stroke-width', '2');
+      svg.setAttribute('stroke-linecap', 'round');
+      svg.setAttribute('stroke-linejoin', 'round');
+      const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      path.setAttribute('d', direction === 'left' ? 'M15 18l-6-6 6-6' : 'M9 18l6-6-6-6');
+      svg.appendChild(path);
+      return svg;
+    }
+    
+    const galPrevBtn = createEl('button', { class: 'gallery-nav-btn gallery-nav-btn--prev', type: 'button', 'aria-label': 'Previous images' });
+    galPrevBtn.appendChild(createArrowIcon('left'));
+    const galNextBtn = createEl('button', { class: 'gallery-nav-btn gallery-nav-btn--next', type: 'button', 'aria-label': 'Next images' });
+    galNextBtn.appendChild(createArrowIcon('right'));
+    
+    gallery.appendChild(galPrevBtn);
+    gallery.appendChild(galleryTrack);
+    gallery.appendChild(galNextBtn);
+    galleryWrapper.appendChild(gallery);
+    document.body.appendChild(galleryWrapper);
+
+    let expanded = true; // Start with chatbot open
 
     function createCloseIcon(){
       const icon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
@@ -1172,8 +1346,8 @@
       requestAnimationFrame(()=>{
         box.classList.remove('is-scroll-hidden');
       });
-      // kick off analysis of the currently visible image(s)
-      scheduleAnalysis();
+      // Don't analyze - we're using cycling keyword animation instead
+      // scheduleAnalysis(); // Disabled
       // On open, determine size based on current content
       ensureSizeForContent();
       // Perform health check when opening
@@ -1208,6 +1382,18 @@
     }
     updateToggle();
     toggle.addEventListener('click', toggleBox);
+    
+    // Auto-open chatbot and start keyword animation on page load
+    openBox();
+    
+    // Start keyword generation animation after a brief delay
+    setTimeout(() => {
+      console.log('About to call startKeywordGeneration...');
+      console.log('presets element:', presets);
+      console.log('title element:', title);
+      console.log('ShopThatData available:', !!window.ShopThatData);
+      startKeywordGeneration();
+    }, 500);
 
     // Refresh handler: clear messages and hide button
     refreshBtn.addEventListener('click', () => {
@@ -1239,11 +1425,6 @@
     // =====================
     // Visible image → bag keywords
     // =====================
-    const keywordsCache = new Map(); // imageUrl -> payload
-    let analyzeDebounce = null;
-    let selectedBagIndex = 0;
-    const visibleImageRatios = new Map(); // img -> ratio
-
     function observeImages(){
       if (!('IntersectionObserver' in window)) return;
       const imgs = Array.from(document.querySelectorAll('img'));
@@ -1335,8 +1516,8 @@
     function clearChildren(el){ while (el.firstChild) el.removeChild(el.firstChild); }
 
     function renderCampaignOptions(payload){
-      // Instead of using image analysis keywords, use ShopThatData keywords
-      loadKeywordsFromSharedData();
+      // Don't load keywords into options - only use presets for cycling animation
+      // options container should remain empty
     }
 
     // Removed detail view functions since we're using ShopThatData keywords directly
@@ -1347,15 +1528,8 @@
     }
 
     async function analyzeCurrentView(){
-      if (!expanded || box.hasAttribute('hidden')) return;
-      const img = getTopVisibleImage();
-      const url = img ? (img.currentSrc || img.src) : '';
-      if (!url) return;
-      const payload = await fetchVisionKeywords(url);
-      title.textContent = 'Hello!';
-      sub.textContent = 'Would you like to learn more about these?';
-      renderCampaignOptions(payload);
-      renderBagChips(payload);
+      // Don't analyze - we're using cycling keyword animation instead
+      return;
     }
 
     function scheduleAnalysis(){
@@ -1367,42 +1541,7 @@
     observeImages();
     window.addEventListener('scroll', ()=>{ if (expanded) scheduleAnalysis(); }, { passive: true });
 
-    // =====================
-    // Image Gallery Component
-    // =====================
-    const galleryWrapper = createEl('div', { class: 'image-gallery-wrapper', hidden: '' });
-    const gallery = createEl('div', { class: 'image-gallery' });
-    const galleryTrack = createEl('div', { class: 'image-gallery-track' });
-    
-    // Store gallery images separately
-    const galleryImages = [];
-    
-    // Create navigation arrows
-    function createArrowIcon(direction) {
-      const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-      svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
-      svg.setAttribute('viewBox', '0 0 24 24');
-      svg.setAttribute('fill', 'none');
-      svg.setAttribute('stroke', 'currentColor');
-      svg.setAttribute('stroke-width', '2');
-      svg.setAttribute('stroke-linecap', 'round');
-      svg.setAttribute('stroke-linejoin', 'round');
-      const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-      path.setAttribute('d', direction === 'left' ? 'M15 18l-6-6 6-6' : 'M9 18l6-6-6-6');
-      svg.appendChild(path);
-      return svg;
-    }
-    
-    const prevBtn = createEl('button', { class: 'gallery-nav-btn gallery-nav-btn--prev', type: 'button', 'aria-label': 'Previous images' });
-    prevBtn.appendChild(createArrowIcon('left'));
-    const nextBtn = createEl('button', { class: 'gallery-nav-btn gallery-nav-btn--next', type: 'button', 'aria-label': 'Next images' });
-    nextBtn.appendChild(createArrowIcon('right'));
-    
-    gallery.appendChild(prevBtn);
-    gallery.appendChild(galleryTrack);
-    gallery.appendChild(nextBtn);
-    galleryWrapper.appendChild(gallery);
-    document.body.appendChild(galleryWrapper);
+    // Gallery functions - defined after gallery elements are created above
     
     // Add image to gallery
     function addToGallery(imageSrc, productData) {
@@ -1497,10 +1636,6 @@
     inputW.addEventListener('dragleave', (e) => {
       inputW.classList.remove('drag-over');
     });
-    
-    // Product storage
-    const droppedProducts = [];
-    const wishlistProducts = [];
     
     // Generate product info from image name/URL
     function generateProductInfoFromImage(imgSrc) {
@@ -1785,26 +1920,26 @@
       
       // Disable prev button at start
       if (scrollLeft <= 0) {
-        prevBtn.classList.add('is-disabled');
+        galPrevBtn.classList.add('is-disabled');
       } else {
-        prevBtn.classList.remove('is-disabled');
+        galPrevBtn.classList.remove('is-disabled');
       }
       
       // Disable next button at end
       if (scrollLeft + clientWidth >= scrollWidth - 5) {
-        nextBtn.classList.add('is-disabled');
+        galNextBtn.classList.add('is-disabled');
       } else {
-        nextBtn.classList.remove('is-disabled');
+        galNextBtn.classList.remove('is-disabled');
       }
     }
     
-    prevBtn.addEventListener('click', () => {
+    galPrevBtn.addEventListener('click', () => {
       const scrollAmount = 250;
       galleryTrack.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
       setTimeout(updateNavigationButtons, 300);
     });
     
-    nextBtn.addEventListener('click', () => {
+    galNextBtn.addEventListener('click', () => {
       const scrollAmount = 250;
       galleryTrack.scrollBy({ left: scrollAmount, behavior: 'smooth' });
       setTimeout(updateNavigationButtons, 300);
