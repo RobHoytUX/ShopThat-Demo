@@ -233,16 +233,19 @@
   .image-gallery-wrapper.is-visible{opacity:1;transform:translateY(0);pointer-events:auto}
   .image-gallery-wrapper[hidden]{display:none}
   .image-gallery{background:linear-gradient(135deg,rgba(255,255,255,0.95),rgba(255,255,255,0.9));border:1px solid rgba(0,0,0,0.1);border-radius:12px;padding:12px 40px;box-shadow:0 8px 32px rgba(0,0,0,0.12);backdrop-filter:blur(16px) saturate(180%);-webkit-backdrop-filter:blur(16px) saturate(180%);position:relative;overflow:hidden}
-  .image-gallery-title{position:absolute;top:12px;left:12px;font-size:16px;font-weight:600;color:#111;pointer-events:none}
-  .product-modal{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:10000;backdrop-filter:blur(4px)}
-  .product-modal-content{background:#fff;border-radius:16px;padding:24px;max-width:400px;width:90%;max-height:80%;overflow:auto}
-  .product-modal-title{font-size:18px;font-weight:600;margin:0 0 16px;text-align:center}
-  .product-modal-close{position:absolute;top:16px;right:16px;width:32px;height:32px;border:none;background:transparent;cursor:pointer;border-radius:50%;display:flex;align-items:center;justify-content:center}
-  .product-modal-close:hover{background:rgba(0,0,0,0.1)}
-  .product-modal-card{text-align:center}
-  .product-modal-info{margin-top:16px}
-  .product-modal-info h3{margin:0 0 8px;font-size:18px;font-weight:600}
-  .product-modal-info p{margin:4px 0;color:#666;font-size:14px}
+  .image-gallery-title{position:absolute;top:12px;left:12px;font-size:16px;font-weight:600;color:#111;pointer-events:none;z-index:1}
+  .product-component{position:fixed;bottom:188px;left:20px;z-index:999;width:562.5px;opacity:0;transform:translateY(8px);pointer-events:none;transition:opacity 200ms ease,transform 200ms ease}
+  .product-component.is-visible{opacity:1;transform:translateY(0);pointer-events:auto}
+  .product-component[hidden]{display:none}
+  .product-component-inner{background:linear-gradient(135deg,rgba(255,255,255,0.95),rgba(255,255,255,0.9));border:1px solid rgba(0,0,0,0.1);border-radius:12px;padding:12px 40px;box-shadow:0 8px 32px rgba(0,0,0,0.12);backdrop-filter:blur(16px) saturate(180%);-webkit-backdrop-filter:blur(16px) saturate(180%);position:relative;overflow:hidden}
+  .product-component-title{position:absolute;top:12px;left:12px;font-size:16px;font-weight:600;color:#111;pointer-events:none;z-index:1}
+  .product-component-close{position:absolute;top:12px;right:12px;width:32px;height:32px;border-radius:50%;border:1px solid rgba(0,0,0,0.2);background:rgba(255,255,255,0.95);display:grid;place-items:center;color:#111;cursor:pointer;transition:all 200ms ease;z-index:2}
+  .product-component-close:hover{background:rgba(255,255,255,1);transform:scale(1.1)}
+  .product-component-content{display:flex;gap:16px;padding:48px 0 12px;align-items:center}
+  .product-component-image{width:200px;height:200px;border-radius:8px;object-fit:cover;flex-shrink:0}
+  .product-component-info{flex:1;min-width:0}
+  .product-component-info h3{margin:0 0 8px;font-size:18px;font-weight:600;color:#111}
+  .product-component-info p{margin:4px 0;color:#666;font-size:14px}
   .image-gallery-track{display:flex;gap:8px;overflow-x:auto;overflow-y:hidden;scroll-behavior:smooth;scrollbar-width:none;-webkit-overflow-scrolling:touch;padding:4px 0}
   .image-gallery-track::-webkit-scrollbar{display:none}
   .image-gallery-item{flex:0 0 auto;width:120px;height:120px;border-radius:8px;overflow:hidden;cursor:grab;position:relative;transition:transform 200ms ease,box-shadow 200ms ease}
@@ -458,34 +461,38 @@
     // Create navigation menu
     const chatbotNav = createEl('div', { class: 'chatbot-nav' });
 
-    // Create product detail modal (initially hidden)
-    const productModal = createEl('div', { class: 'product-modal', hidden: '' });
-    const productModalContent = createEl('div', { class: 'product-modal-content' });
-    const productModalTitle = createEl('div', { class: 'product-modal-title' }, [document.createTextNode('My Products')]);
-    const productModalClose = createEl('button', { class: 'product-modal-close', 'aria-label': 'Close' });
-    const productModalCloseIcon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-    productModalCloseIcon.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
-    productModalCloseIcon.setAttribute('viewBox', '0 0 24 24');
-    productModalCloseIcon.setAttribute('fill', 'none');
-    productModalCloseIcon.setAttribute('stroke', 'currentColor');
-    productModalCloseIcon.setAttribute('width', '24');
-    productModalCloseIcon.setAttribute('height', '24');
+    // Create product component (styled like gallery, positioned above it)
+    const productComponent = createEl('div', { class: 'product-component', hidden: '' });
+    const productComponentInner = createEl('div', { class: 'product-component-inner' });
+    const productComponentTitle = createEl('div', { class: 'product-component-title' }, [document.createTextNode('My Products')]);
+    const productComponentClose = createEl('button', { class: 'product-component-close', 'aria-label': 'Close' });
+    
+    const closeIcon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    closeIcon.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+    closeIcon.setAttribute('viewBox', '0 0 24 24');
+    closeIcon.setAttribute('fill', 'none');
+    closeIcon.setAttribute('stroke', 'currentColor');
+    closeIcon.setAttribute('width', '20');
+    closeIcon.setAttribute('height', '20');
     const closePath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
     closePath.setAttribute('d', 'M6 18 18 6M6 6l12 12');
     closePath.setAttribute('stroke-linecap', 'round');
     closePath.setAttribute('stroke-linejoin', 'round');
     closePath.setAttribute('stroke-width', '1.5');
-    productModalCloseIcon.appendChild(closePath);
-    productModalClose.appendChild(productModalCloseIcon);
+    closeIcon.appendChild(closePath);
+    productComponentClose.appendChild(closeIcon);
 
-    productModalClose.addEventListener('click', () => {
-      productModal.setAttribute('hidden', '');
+    const productComponentContent = createEl('div', { class: 'product-component-content' });
+
+    productComponentClose.addEventListener('click', () => {
+      toggleProductComponent(false);
     });
 
-    productModalContent.appendChild(productModalTitle);
-    productModalContent.appendChild(productModalClose);
-    productModal.appendChild(productModalContent);
-    document.body.appendChild(productModal);
+    productComponentInner.appendChild(productComponentTitle);
+    productComponentInner.appendChild(productComponentClose);
+    productComponentInner.appendChild(productComponentContent);
+    productComponent.appendChild(productComponentInner);
+    document.body.appendChild(productComponent);
     let navVisible = false;
     
     // Helper function to create nav icons
@@ -1688,35 +1695,49 @@
       updateNavigationButtons();
     }
 
-    // Function to open product modal
+    // Toggle product component visibility
+    function toggleProductComponent(show) {
+      if (show) {
+        productComponent.removeAttribute('hidden');
+        requestAnimationFrame(() => {
+          productComponent.classList.add('is-visible');
+        });
+      } else {
+        productComponent.classList.remove('is-visible');
+        setTimeout(() => {
+          productComponent.setAttribute('hidden', '');
+        }, 200);
+      }
+    }
+    
+    // Function to show product in component above gallery
     function openProductModal(item) {
-      productModal.removeAttribute('hidden');
-
       // Clear previous content
-      productModalContent.replaceChildren();
-      productModalContent.appendChild(productModalTitle);
-      productModalContent.appendChild(productModalClose);
-
-      // Create product card
-      const productCard = createEl('div', { class: 'product-modal-card' });
+      productComponentContent.replaceChildren();
+      
+      // Create product image
       const productImg = createEl('img', {
+        class: 'product-component-image',
         src: item.src,
-        alt: item.productData?.title || 'Product image',
-        style: 'width: 200px; height: 200px; object-fit: cover; border-radius: 8px; margin-bottom: 16px;'
+        alt: item.productData?.title || 'Product image'
       });
-
-      const productInfo = createEl('div', { class: 'product-modal-info' });
+      
+      // Create product info
+      const productInfo = createEl('div', { class: 'product-component-info' });
       const productTitle = createEl('h3', { text: item.productData?.title || 'Product Title' });
       const productModel = createEl('p', { text: `Model: ${item.productData?.model || 'N/A'}` });
       const productPrice = createEl('p', { text: `Price: ${item.productData?.price || 'N/A'}` });
-
+      
       productInfo.appendChild(productTitle);
       productInfo.appendChild(productModel);
       productInfo.appendChild(productPrice);
-
-      productCard.appendChild(productImg);
-      productCard.appendChild(productInfo);
-      productModalContent.appendChild(productCard);
+      
+      // Assemble content
+      productComponentContent.appendChild(productImg);
+      productComponentContent.appendChild(productInfo);
+      
+      // Show the component
+      toggleProductComponent(true);
     }
     
     // Drag and drop functionality
