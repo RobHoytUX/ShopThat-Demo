@@ -794,10 +794,10 @@
       if (label.toLowerCase() === 'kusama x lv campaign') {
         // Populate gallery with Kusama images
         const kusamaImages = [
-          { src: 'assets/kusama-gal1.jpg', title: 'Yayoi Kusama' },
-          { src: 'assets/kusama-gal2.jpg', title: 'Yayoi Kusama' },
-          { src: 'assets/kusama-gal3.jpg', title: 'Yayoi Kusama' },
-          { src: 'assets/kusama-gal4.jpg', title: 'Yayoi Kusama' }
+          { src: 'assets/kusama-gal1.png', title: 'Yayoi Kusama' },
+          { src: 'assets/kusama-gal2.png', title: 'Yayoi Kusama' },
+          { src: 'assets/kusama-gal3.png', title: 'Yayoi Kusama' },
+          { src: 'assets/kusama-gal4.png', title: 'Yayoi Kusama' }
         ];
         
         // Clear existing gallery images
