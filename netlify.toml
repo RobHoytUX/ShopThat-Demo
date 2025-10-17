@@ -1,6 +1,11 @@
 [build]
-  # Static site - no build command needed
-  publish = "."
+  # Since this is a static site, no build command needed
+  publish = "WebDemo"
+
+[build.environment]
+  # No environment variables needed for static site
+
+# No redirects needed for static site - removed to prevent 404 issues
 
 # Security headers
 [[headers]]

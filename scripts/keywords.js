@@ -32,20 +32,6 @@ console.log('Document ready state:', document.readyState);
   const width = () => svg.node().clientWidth;
   const height = () => svg.node().clientHeight;
 
-  // State management for hierarchical display
-  let currentViewMode = 'default'; // 'default' shows top-level + isolated, 'expanded' shows all, 'filtered' shows filtered
-  let selectedNode = null;
-  let allNodes = [];
-  let allLinks = [];
-  let visibleNodes = [];
-  let visibleLinks = [];
-  let filterState = {
-    topLevel: true,
-    connected: true,
-    secondary: true,
-    isolated: true
-  };
-
   // Mock graph data (also used for seeding Neo4j). Will be overridden by localStorage if present.
   const defaultNodes = [
     { id: 'Yayoi Kusama', group: 1, value: 90 },
@@ -59,9 +45,7 @@ console.log('Document ready state:', document.readyState);
     { id: 'Rafael Nadal', group: 2, value: 24 },
     { id: 'Monogram', group: 3, value: 26 },
     { id: 'Polka Dots', group: 3, value: 20 },
-    { id: 'Tote', group: 3, value: 16 },
-    { id: 'Isolated Node 1', group: 4, value: 15 },
-    { id: 'Isolated Node 2', group: 4, value: 12 }
+    { id: 'Tote', group: 3, value: 16 }
   ];
   const defaultLinks = [
     { source: 'Yayoi Kusama', target: 'Polka Dots' },
@@ -86,8 +70,8 @@ console.log('Document ready state:', document.readyState);
   }
   
   // Initialize with default data first, then try to load from storage
-  let initialNodes = defaultNodes.slice();
-  let initialLinks = defaultLinks.slice();
+  let graphNodes = defaultNodes.slice();
+  let graphLinks = defaultLinks.slice();
   
   // Try to load from shared data system
   const storedNodes = loadStored();
@@ -95,71 +79,124 @@ console.log('Document ready state:', document.readyState);
   
   if (storedNodes.length > 0) {
     // Convert stored format to D3 format if needed
-    initialNodes = storedNodes.map(node => ({
+    graphNodes = storedNodes.map(node => ({
       id: node.id || node.name,
       group: node.group || 1,
       value: node.value || 50
     }));
-    console.log('Loaded stored nodes:', initialNodes.map(n => ({ id: n.id, group: n.group })));
   }
   
   if (storedConnections.length > 0) {
-    initialLinks = storedConnections.slice();
+    graphLinks = storedConnections.slice();
   }
   
   // Ensure we always have some data to display
-  if (initialNodes.length === 0) {
+  if (graphNodes.length === 0) {
     console.warn('No nodes found, using default data');
-    initialNodes = defaultNodes.slice();
-    initialLinks = defaultLinks.slice();
-  } else {
-    // If we have stored data but it's all group 1, let's add some variety for demonstration
-    const hasVariety = initialNodes.some(node => node.group !== 1);
-    if (!hasVariety && initialNodes.length > 4) {
-      console.log('Adding group variety to stored nodes');
-      // Make some nodes isolated (group 4) for demonstration
-      if (initialNodes.length > 6) {
-        initialNodes[initialNodes.length - 1].group = 4;
-        initialNodes[initialNodes.length - 2].group = 4;
-      }
-      // Make some nodes secondary (group 3)
-      if (initialNodes.length > 4) {
-        initialNodes[Math.floor(initialNodes.length / 2)].group = 3;
-        initialNodes[Math.floor(initialNodes.length / 2) + 1].group = 3;
-      }
-      // Make some nodes connected (group 2)
-      if (initialNodes.length > 2) {
-        initialNodes[1].group = 2;
-        initialNodes[2].group = 2;
-      }
-    }
+    graphNodes = defaultNodes.slice();
+    graphLinks = defaultLinks.slice();
   }
   
-  // Set up initial graph data using the new system
-  allNodes = initialNodes;
-  allLinks = initialLinks;
-  
-  // Initialize with default view
-  currentViewMode = 'default';
-  visibleNodes = getVisibleNodes();
-  visibleLinks = getVisibleLinks(visibleNodes);
-  let graphNodes = visibleNodes;
-  let graphLinks = visibleLinks;
-  
-  console.log('Initial data setup:', {
-    allNodesCount: allNodes.length,
-    allLinksCount: allLinks.length,
-    visibleNodesCount: visibleNodes.length,
-    visibleLinksCount: visibleLinks.length,
-    currentViewMode: currentViewMode,
-    allNodesSample: allNodes.slice(0, 3),
-    visibleNodesSample: visibleNodes.slice(0, 3)
+  console.log('Final graph data:', {
+    nodes: graphNodes.length,
+    links: graphLinks.length,
+    nodesSample: graphNodes.slice(0, 3),
+    linksSample: graphLinks.slice(0, 3)
   });
 
-  const color = d3.scaleOrdinal()
-    .domain([1, 2, 3, 4])
-    .range(['#6366F1', '#5B21B6', '#F59E0B', '#10B981']);
+  // Hierarchical color scheme
+  const colorScheme = {
+    topLevel: '#6366F1',      // Primary blue for top-level nodes (most connected)
+    connected: '#5B21B6',     // Purple for nodes connected to top-level
+    isolated: '#10B981',      // Green for isolated nodes with no connections
+    secondary: '#F59E0B'      // Amber for secondary connected nodes
+  };
+  
+  const color = d3.scaleOrdinal([ colorScheme.topLevel, colorScheme.connected, colorScheme.isolated, colorScheme.secondary ]);
   const radius = d3.scaleSqrt().domain([10, 90]).range([16, 90]);
+
+  // Function to analyze node hierarchy and assign colors
+  function analyzeNodeHierarchy(nodes, links) {
+    const nodeConnections = new Map();
+    
+    // Initialize connection counts
+    nodes.forEach(node => {
+      nodeConnections.set(node.id, new Set());
+    });
+    
+    // Count connections for each node
+    links.forEach(link => {
+      const sourceId = typeof link.source === 'object' ? link.source.id : link.source;
+      const targetId = typeof link.target === 'object' ? link.target.id : link.target;
+      
+      if (nodeConnections.has(sourceId)) {
+        nodeConnections.get(sourceId).add(targetId);
+      }
+      if (nodeConnections.has(targetId)) {
+        nodeConnections.get(targetId).add(sourceId);
+      }
+    });
+    
+    // Assign hierarchical colors based on manually set group/level or auto-detection
+    return nodes.map(node => {
+      const connectionCount = nodeConnections.get(node.id)?.size || 0;
+      let hierarchyColor;
+      
+      // Use manually assigned group/level if available
+      if (node.group) {
+        switch(node.group) {
+          case 1: hierarchyColor = colorScheme.topLevel; break;
+          case 2: hierarchyColor = colorScheme.connected; break;
+          case 3: hierarchyColor = colorScheme.secondary; break;
+          case 4: hierarchyColor = colorScheme.isolated; break;
+          default: hierarchyColor = colorScheme.topLevel; break;
+        }
+      } else {
+        // Fallback to automatic detection if no manual level set
+        const connectionCounts = Array.from(nodeConnections.entries())
+          .map(([id, connections]) => ({ id, count: connections.size }))
+          .sort((a, b) => b.count - a.count);
+        
+        const maxConnections = connectionCounts[0]?.count || 0;
+        const topLevelThreshold = Math.max(1, Math.ceil(maxConnections * 0.7));
+        
+        const topLevelNodes = new Set(
+          connectionCounts
+            .filter(item => item.count >= topLevelThreshold && item.count > 0)
+            .map(item => item.id)
+        );
+        
+        const connectedToTopLevel = new Set();
+        links.forEach(link => {
+          const sourceId = typeof link.source === 'object' ? link.source.id : link.source;
+          const targetId = typeof link.target === 'object' ? link.target.id : link.target;
+          
+          if (topLevelNodes.has(sourceId) && !topLevelNodes.has(targetId)) {
+            connectedToTopLevel.add(targetId);
+          }
+          if (topLevelNodes.has(targetId) && !topLevelNodes.has(sourceId)) {
+            connectedToTopLevel.add(sourceId);
+          }
+        });
+        
+        if (topLevelNodes.has(node.id)) {
+          hierarchyColor = colorScheme.topLevel;
+        } else if (connectedToTopLevel.has(node.id)) {
+          hierarchyColor = colorScheme.connected;
+        } else if (connectionCount === 0) {
+          hierarchyColor = colorScheme.isolated;
+        } else {
+          hierarchyColor = colorScheme.secondary;
+        }
+      }
+      
+      return {
+        ...node,
+        hierarchyColor,
+        connectionCount
+      };
+    });
+  }
 
   function computeFontSizeForRadius(r){
     return Math.max(10, Math.min(18, Math.round(r * 0.28)));
@@ -185,133 +222,133 @@ console.log('Document ready state:', document.readyState);
     textSel.attr('dy', `${-(lineNumber * lineHeight)/2}em`);
   }
 
-  // Function to determine which nodes to show based on current mode
-  function getVisibleNodes() {
-    if (currentViewMode === 'default') {
-      // Show all nodes but mark non-top-level/non-isolated as disabled
-      return allNodes;
-    } else if (currentViewMode === 'expanded' && selectedNode) {
-      // Show selected node and all connected nodes
-      const connectedNodeIds = new Set();
-      connectedNodeIds.add(selectedNode.id);
-      
-      allLinks.forEach(link => {
-        const sourceId = typeof link.source === 'object' ? link.source.id : link.source;
-        const targetId = typeof link.target === 'object' ? link.target.id : link.target;
-        
-        if (sourceId === selectedNode.id) {
-          connectedNodeIds.add(targetId);
-        }
-        if (targetId === selectedNode.id) {
-          connectedNodeIds.add(sourceId);
-        }
-      });
-      
-      return allNodes.filter(node => connectedNodeIds.has(node.id));
-    } else if (currentViewMode === 'filtered') {
-      // Show nodes based on filter state
-      return allNodes.filter(node => {
-        switch (node.group) {
-          case 1: return filterState.topLevel;
-          case 2: return filterState.connected;
-          case 3: return filterState.secondary;
-          case 4: return filterState.isolated;
-          default: return true;
-        }
-      });
-    } else {
-      // Show all nodes
-      return allNodes;
-    }
-  }
-
-  // Function to get visible links based on visible nodes
-  function getVisibleLinks(visibleNodes) {
-    const visibleNodeIds = new Set(visibleNodes.map(n => n.id));
-    return allLinks.filter(link => {
-      const sourceId = typeof link.source === 'object' ? link.source.id : link.source;
-      const targetId = typeof link.target === 'object' ? link.target.id : link.target;
-      return visibleNodeIds.has(sourceId) && visibleNodeIds.has(targetId);
-    });
-  }
-
-  // Function to determine if a node should be disabled
-  function isNodeDisabled(node) {
-    if (currentViewMode === 'default') {
-      // In default mode, disable nodes that are not top-level (group 1) or isolated (group 4)
-      return node.group !== 1 && node.group !== 4;
-    } else if (currentViewMode === 'expanded' && selectedNode) {
-      // In expanded mode, disable nodes that are not connected to the selected node
-      const connectedNodeIds = new Set();
-      connectedNodeIds.add(selectedNode.id);
-      
-      allLinks.forEach(link => {
-        const sourceId = typeof link.source === 'object' ? link.source.id : link.source;
-        const targetId = typeof link.target === 'object' ? link.target.id : link.target;
-        
-        if (sourceId === selectedNode.id) {
-          connectedNodeIds.add(targetId);
-        }
-        if (targetId === selectedNode.id) {
-          connectedNodeIds.add(sourceId);
-        }
-      });
-      
-      return !connectedNodeIds.has(node.id);
-    }
-    return false;
-  }
-
-  // Function to update mode indicator
-  function updateModeIndicator() {
-    const modeIndicator = document.getElementById('modeIndicator');
-    if (modeIndicator) {
-      let modeText = 'Mode: Default View';
-      if (currentViewMode === 'expanded' && selectedNode) {
-        modeText = `Mode: Expanded from "${selectedNode.id}"`;
-      } else if (currentViewMode === 'filtered') {
-        modeText = 'Mode: Filtered View';
-      } else if (currentViewMode === 'all') {
-        modeText = 'Mode: Show All';
-      }
-      modeIndicator.querySelector('span').textContent = modeText;
-    }
-  }
-
   const gLinks = svg.append('g').attr('stroke', '#d9d9ef').attr('stroke-width', 2.5);
   const gNodes = svg.append('g');
-  const zoom = d3.zoom().scaleExtent([0.5, 2]).on('zoom', (ev)=>{
+  const zoom = d3.zoom().scaleExtent([0.3, 3]).on('zoom', (ev)=>{
     gNodes.attr('transform', ev.transform);
     gLinks.attr('transform', ev.transform);
   });
   svg.call(zoom);
 
-  const centerForce = d3.forceCenter(0, 0);
-  const sim = d3.forceSimulation(graphNodes)
-    .force('link', d3.forceLink(graphLinks).id(d => d.id).distance(80).strength(0.15))
-    .force('charge', d3.forceManyBody().strength(-150))
-    .force('center', centerForce)
-    .force('collision', d3.forceCollide().radius(d => radius(d.value)+6))
-    .force('bounds', () => {
-      // Keep nodes clustered toward center with gentle bounds
-      const w = width();
-      const h = height();
-      const centerX = w / 2;
-      const centerY = h / 2;
-      const maxDistance = Math.min(w, h) * 0.4; // Allow spreading but keep clustered
+  // State management for node visibility
+  let selectedNodeId = null;
+  let visibilityMode = 'default'; // 'default', 'connections', 'filtered'
+  const modeIndicator = document.getElementById('modeIndicator');
+  
+  // Filter state
+  let activeFilters = {
+    topLevel: true,
+    connected: true, 
+    secondary: true,
+    isolated: true
+  };
+
+  // Function to update mode indicator
+  function updateModeIndicator() {
+    if (modeIndicator) {
+      if (visibilityMode === 'default') {
+        modeIndicator.innerHTML = '<span>Mode: Default View (Top Level & Isolated)</span>';
+        modeIndicator.style.color = '#6366F1';
+      } else if (visibilityMode === 'connections') {
+        modeIndicator.innerHTML = `<span>Mode: Connections for "${selectedNodeId}"</span>`;
+        modeIndicator.style.color = '#5B21B6';
+      } else if (visibilityMode === 'filtered') {
+        const activeCount = Object.values(activeFilters).filter(Boolean).length;
+        modeIndicator.innerHTML = `<span>Mode: Custom Filter (${activeCount}/4 levels)</span>`;
+        modeIndicator.style.color = '#F59E0B';
+      }
+    }
+  }
+
+  // Function to get nodes based on current filter settings
+  function getFilteredNodes(nodes, links) {
+    const hierarchicalNodes = analyzeNodeHierarchy(nodes, links);
+    const visibleNodeIds = new Set();
+    
+    hierarchicalNodes.forEach(node => {
+      const level = getNodeLevel(node, hierarchicalNodes, links);
       
-      graphNodes.forEach(node => {
-        const dx = node.x - centerX;
-        const dy = node.y - centerY;
-        const distance = Math.sqrt(dx * dx + dy * dy);
-        
-        if (distance > maxDistance) {
-          const scale = maxDistance / distance;
-          node.x = centerX + dx * scale;
-          node.y = centerY + dy * scale;
-        }
-      });
+      if ((level === 'topLevel' && activeFilters.topLevel) ||
+          (level === 'connected' && activeFilters.connected) ||
+          (level === 'secondary' && activeFilters.secondary) ||
+          (level === 'isolated' && activeFilters.isolated)) {
+        visibleNodeIds.add(node.id);
+      }
     });
+    
+    return visibleNodeIds;
+  }
+
+  // Function to determine node level
+  function getNodeLevel(node, nodes, links) {
+    // Use manually assigned group/level if available
+    if (node.group) {
+      switch(node.group) {
+        case 1: return 'topLevel';
+        case 2: return 'connected';
+        case 3: return 'secondary';
+        case 4: return 'isolated';
+        default: return 'topLevel';
+      }
+    }
+    
+    // Fallback to automatic detection if no manual level set
+    const nodeConnections = new Map();
+    
+    // Initialize connection counts
+    nodes.forEach(n => {
+      nodeConnections.set(n.id, new Set());
+    });
+    
+    // Count connections for each node
+    links.forEach(link => {
+      const sourceId = typeof link.source === 'object' ? link.source.id : link.source;
+      const targetId = typeof link.target === 'object' ? link.target.id : link.target;
+      
+      if (nodeConnections.has(sourceId)) {
+        nodeConnections.get(sourceId).add(targetId);
+      }
+      if (nodeConnections.has(targetId)) {
+        nodeConnections.get(targetId).add(sourceId);
+      }
+    });
+    
+    const connectionCounts = Array.from(nodeConnections.entries())
+      .map(([id, connections]) => ({ id, count: connections.size }))
+      .sort((a, b) => b.count - a.count);
+    
+    const maxConnections = connectionCounts[0]?.count || 0;
+    const topLevelThreshold = Math.max(1, Math.ceil(maxConnections * 0.7));
+    
+    const nodeConnectionCount = nodeConnections.get(node.id)?.size || 0;
+    
+    if (nodeConnectionCount >= topLevelThreshold && nodeConnectionCount > 0) {
+      return 'topLevel';
+    } else if (nodeConnectionCount === 0) {
+      return 'isolated';
+    } else {
+      // Check if connected to top level nodes
+      const topLevelNodes = new Set(
+        connectionCounts
+          .filter(item => item.count >= topLevelThreshold && item.count > 0)
+          .map(item => item.id)
+      );
+      
+      const connectedToTopLevel = Array.from(nodeConnections.get(node.id) || [])
+        .some(connectedId => topLevelNodes.has(connectedId));
+      
+      return connectedToTopLevel ? 'connected' : 'secondary';
+    }
+  }
+
+  const centerForce = d3.forceCenter(400, 300); // Initialize with default center
+  const sim = d3.forceSimulation(graphNodes)
+    .force('link', d3.forceLink(graphLinks).id(d => d.id).distance(120).strength(0.1))
+    .force('charge', d3.forceManyBody().strength(-300))
+    .force('center', centerForce)
+    .force('collision', d3.forceCollide().radius(d => radius(d.value)+8))
+    .force('x', d3.forceX().strength(0.1))
+    .force('y', d3.forceY().strength(0.1));
 
   function rescaleForDrawer(){
     const openDetails = detailsDrawer.getAttribute('aria-hidden') === 'false';
@@ -329,66 +366,169 @@ console.log('Document ready state:', document.readyState);
     node.attr('transform', d => `translate(${d.x},${d.y})`);
   }
 
-  // Initialize empty selections - these will be populated by setGraphData
-  let link = gLinks.selectAll('line');
-  let node = gNodes.selectAll('g.node');
+  let link = gLinks.selectAll('line').data(graphLinks).join('line');
+
+  // Apply hierarchical analysis to nodes
+  let hierarchicalNodes = analyzeNodeHierarchy(graphNodes, graphLinks);
+  
+  let node = gNodes.selectAll('g.node').data(hierarchicalNodes).join(enter => {
+    console.log('Creating node for:', enter.data());
+    const g = enter.append('g').attr('class','node').style('cursor','pointer');
+    g.append('circle')
+      .attr('r', d => radius(d.value))
+      .attr('fill', d => d.hierarchyColor || colorScheme.isolated)
+      .attr('opacity', .9);
+    const text = g.append('text')
+      .attr('text-anchor','middle')
+      .attr('fill','#fff')
+      .style('font-weight','700');
+    text.each(function(d){
+      const r = radius(d.value);
+      d3.select(this).style('font-size', `${computeFontSizeForRadius(r)}px`);
+      wrapText(d3.select(this), d.id, r * 1.6);
+    });
+    return g;
+  });
+  
+  console.log('Total nodes created:', node.size());
+
+  node.on('click', (_, d) => {
+    handleNodeClick(d);
+    openDrawer(d);
+  });
 
   sim.on('tick', ticked);
 
+  // Function to determine which nodes should be visible in default mode
+  function getDefaultVisibleNodes(nodes, links) {
+    const visibleNodeIds = new Set();
+    
+    nodes.forEach(node => {
+      // Show nodes based on manually assigned levels or auto-detection
+      if (node.group) {
+        // If manual level assigned, show Top Level (1) and Isolated (4) nodes
+        if (node.group === 1 || node.group === 4) {
+          visibleNodeIds.add(node.id);
+        }
+      } else {
+        // Fallback to automatic detection for nodes without manual levels
+        const nodeConnections = new Map();
+        
+        // Initialize connection counts
+        nodes.forEach(n => {
+          nodeConnections.set(n.id, new Set());
+        });
+        
+        // Count connections for each node
+        links.forEach(link => {
+          const sourceId = typeof link.source === 'object' ? link.source.id : link.source;
+          const targetId = typeof link.target === 'object' ? link.target.id : link.target;
+          
+          if (nodeConnections.has(sourceId)) {
+            nodeConnections.get(sourceId).add(targetId);
+          }
+          if (nodeConnections.has(targetId)) {
+            nodeConnections.get(targetId).add(sourceId);
+          }
+        });
+        
+        const connectionCounts = Array.from(nodeConnections.entries())
+          .map(([id, connections]) => ({ id, count: connections.size }));
+        
+        const maxConnections = Math.max(...connectionCounts.map(item => item.count));
+        const topLevelThreshold = Math.max(1, Math.ceil(maxConnections * 0.7));
+        
+        const nodeConnectionCount = nodeConnections.get(node.id)?.size || 0;
+        
+        // Show top-level nodes (highly connected) or isolated nodes (no connections)
+        if (nodeConnectionCount >= topLevelThreshold || nodeConnectionCount === 0) {
+          visibleNodeIds.add(node.id);
+        }
+      }
+    });
+    
+    return visibleNodeIds;
+  }
+
+  // Function to get connected nodes for a specific node
+  function getConnectedNodes(nodeId, links) {
+    const connected = new Set([nodeId]); // Include the clicked node itself
+    
+    links.forEach(link => {
+      const sourceId = typeof link.source === 'object' ? link.source.id : link.source;
+      const targetId = typeof link.target === 'object' ? link.target.id : link.target;
+      
+      if (sourceId === nodeId) {
+        connected.add(targetId);
+      }
+      if (targetId === nodeId) {
+        connected.add(sourceId);
+      }
+    });
+    
+    return connected;
+  }
+
+  // Function to handle node clicks and update visibility
+  function handleNodeClick(clickedNode) {
+    if (visibilityMode === 'default') {
+      // Switch to connections mode for this node
+      selectedNodeId = clickedNode.id;
+      visibilityMode = 'connections';
+      const connectedNodeIds = getConnectedNodes(clickedNode.id, graphLinks);
+      updateNodeVisibility(connectedNodeIds);
+      updateModeIndicator();
+    } else if (visibilityMode === 'connections') {
+      if (selectedNodeId === clickedNode.id) {
+        // Clicking the same node - return to default mode
+        selectedNodeId = null;
+        visibilityMode = 'default';
+        const defaultVisible = getDefaultVisibleNodes(hierarchicalNodes, graphLinks);
+        updateNodeVisibility(defaultVisible);
+        updateModeIndicator();
+      } else {
+        // Clicking a different node - show its connections
+        selectedNodeId = clickedNode.id;
+        const connectedNodeIds = getConnectedNodes(clickedNode.id, graphLinks);
+        updateNodeVisibility(connectedNodeIds);
+        updateModeIndicator();
+      }
+    }
+  }
+
+  // Function to update node and link visibility
+  function updateNodeVisibility(visibleNodeIds) {
+    // Update node visibility
+    node.style('opacity', d => visibleNodeIds.has(d.id) ? 1 : 0.1)
+        .style('pointer-events', d => visibleNodeIds.has(d.id) ? 'all' : 'none');
+    
+    // Update link visibility - only show links between visible nodes
+    link.style('opacity', l => {
+      const sourceId = typeof l.source === 'object' ? l.source.id : l.source;
+      const targetId = typeof l.target === 'object' ? l.target.id : l.target;
+      return (visibleNodeIds.has(sourceId) && visibleNodeIds.has(targetId)) ? 1 : 0.05;
+    });
+  }
+
   function setGraphData(newNodes, newLinks){
-    console.log('setGraphData called with:', {
-      newNodesCount: (newNodes || []).length,
-      newLinksCount: (newLinks || []).length,
-      currentMode: currentViewMode
-    });
-    
-    // Store all data
-    allNodes = newNodes || [];
-    allLinks = (newLinks || []).filter(l => l.source && l.target && l.source !== l.target);
-    
-    // Get visible nodes and links based on current mode
-    visibleNodes = getVisibleNodes();
-    visibleLinks = getVisibleLinks(visibleNodes);
-    
-    console.log('After filtering:', {
-      allNodesCount: allNodes.length,
-      visibleNodesCount: visibleNodes.length,
-      visibleNodes: visibleNodes.map(n => n.id)
-    });
-    
-    // Update the graph with visible data
-    graphNodes = visibleNodes;
-    graphLinks = visibleLinks;
+    graphNodes = newNodes || [];
+    graphLinks = (newLinks || []).filter(l => l.source && l.target && l.source !== l.target);
+
+    // Apply hierarchical analysis to new data
+    const hierarchicalNodes = analyzeNodeHierarchy(graphNodes, graphLinks);
 
     link = gLinks.selectAll('line').data(graphLinks);
     link.exit().remove();
     link = link.join('line');
-    
-    // Apply disabled state styling to links
-    link.each(function(l) {
-      const linkElement = d3.select(this);
-      const sourceNode = graphNodes.find(n => n.id === (typeof l.source === 'object' ? l.source.id : l.source));
-      const targetNode = graphNodes.find(n => n.id === (typeof l.target === 'object' ? l.target.id : l.target));
-      
-      const isLinkDisabled = (sourceNode && isNodeDisabled(sourceNode)) || (targetNode && isNodeDisabled(targetNode));
-      
-      linkElement
-        .attr('opacity', isLinkDisabled ? 0.05 : 0.7)
-        .attr('stroke-width', isLinkDisabled ? 1.5 : 2.5);
-    });
 
-    node = gNodes.selectAll('g.node').data(graphNodes, d => d.id);
+    node = gNodes.selectAll('g.node').data(hierarchicalNodes, d => d.id);
     node.exit().remove();
     node = node.join(enter => {
-      console.log('Creating node:', enter.data());
       const g = enter.append('g').attr('class','node').style('cursor','pointer');
-      const circle = g.append('circle')
+      g.append('circle')
         .attr('r', d => radius(d.value))
-        .attr('fill', d => {
-          console.log(`Node ${d.id} has group ${d.group}, color: ${color(d.group)}`);
-          return color(d.group);
-        });
-      
+        .attr('fill', d => d.hierarchyColor || colorScheme.isolated)
+        .attr('opacity', .9);
       const text = g.append('text')
         .attr('text-anchor','middle')
         .attr('fill','#fff')
@@ -401,101 +541,125 @@ console.log('Document ready state:', document.readyState);
       return g;
     });
     
-    // Apply disabled state styling
-    node.each(function(d) {
-      const nodeElement = d3.select(this);
-      const isDisabled = isNodeDisabled(d);
-      
-      nodeElement.select('circle')
-        .attr('opacity', isDisabled ? 0.15 : 0.9)
-        .style('filter', isDisabled ? 'grayscale(1) brightness(1.5)' : 'none');
-      
-      nodeElement.select('text')
-        .attr('opacity', isDisabled ? 0.8 : 1)
-        .attr('fill', isDisabled ? '#ffffff' : '#ffffff');
-        
-      nodeElement.style('cursor', isDisabled ? 'default' : 'pointer');
+    // Update existing nodes with new colors
+    node.select('circle')
+      .attr('fill', d => d.hierarchyColor || colorScheme.isolated);
+    
+    node.on('click', (_, d) => {
+      handleNodeClick(d);
+      openDrawer(d);
     });
-    
-    node.on('click', (_, d) => handleNodeClick(d));
-    
-    console.log('Nodes created in DOM:', node.size());
-    console.log('SVG container has nodes:', gNodes.selectAll('g.node').size());
 
-    sim.nodes(graphNodes);
-    sim.force('link').links(graphLinks);
-    
-    // Ensure nodes start in reasonable positions - clustered in center
-    const w = width();
-    const h = height();
-    graphNodes.forEach((node, i) => {
-      if (!node.x || !node.y || isNaN(node.x) || isNaN(node.y)) {
-        // Arrange in a tight cluster in the center
-        const angle = (i / graphNodes.length) * 2 * Math.PI;
-        const radius = Math.min(40, graphNodes.length * 3); // Much smaller radius for tight clustering
-        node.x = w/2 + Math.cos(angle) * radius;
-        node.y = h/2 + Math.sin(angle) * radius;
+    // Initialize new nodes with positions near center
+    const w = svg.node().clientWidth || 800;
+    const h = svg.node().clientHeight || 500;
+    hierarchicalNodes.forEach(d => {
+      if (!d.x || !d.y) {
+        d.x = w/2 + (Math.random() - 0.5) * 100;
+        d.y = h/2 + (Math.random() - 0.5) * 100;
+        d.vx = 0;
+        d.vy = 0;
       }
     });
     
-    sim.alpha(0.9).restart();
+    sim.nodes(hierarchicalNodes);
+    sim.force('link').links(graphLinks);
+    sim.alpha(0.5).restart();
     
-    updateModeIndicator();
-  }
-
-  // Updated node click handler
-  function handleNodeClick(d) {
-    // Don't handle clicks on disabled nodes
-    if (isNodeDisabled(d)) {
-      return;
-    }
+    // Reset to default visibility mode when new data is loaded
+    selectedNodeId = null;
+    visibilityMode = 'default';
     
-    if (currentViewMode === 'default' && d.group === 1) {
-      // If clicking on a top-level node in default mode, expand to show connected nodes AND open side panel
-      selectedNode = d;
-      currentViewMode = 'expanded';
-      setGraphData(allNodes, allLinks);
-      openDrawer(d); // Also open the side panel
-    } else if (currentViewMode === 'expanded' && selectedNode && selectedNode.id === d.id) {
-      // If clicking on the same expanded node, reset to default view and close drawer
-      selectedNode = null;
-      currentViewMode = 'default';
-      setGraphData(allNodes, allLinks);
-      closeDrawer();
-    } else if (currentViewMode === 'expanded' && d.group === 1) {
-      // If clicking on a different top-level node while expanded, switch to that node and update drawer
-      selectedNode = d;
-      setGraphData(allNodes, allLinks);
-      openDrawer(d); // Update the side panel to show the new node
-    } else {
-      // Otherwise just open the drawer
-      openDrawer(d);
-    }
+    // Apply default filtering after simulation settles
+    setTimeout(() => {
+      const defaultVisible = getDefaultVisibleNodes(hierarchicalNodes, graphLinks);
+      updateNodeVisibility(defaultVisible);
+      updateModeIndicator();
+      
+      // Fit nodes to screen
+      setTimeout(() => {
+        fitNodesToScreen();
+      }, 1000);
+    }, 500);
   }
 
   function resize(){
     const canvasEl = container.querySelector('.keywords__canvas');
     const w = canvasEl?.clientWidth || 800; // Fallback width
-    const h = Math.max(window.innerHeight * 0.7, 400); // Minimum height
+    const h = Math.max(window.innerHeight * 0.75, 500); // Increased height
     console.log('Resize called with dimensions:', { w, h });
-    svg.attr('viewBox', `0 0 ${w} ${h}`).attr('width', w).attr('height', h);
-    centerForce.x(w/2).y(h/2);
     
-    // Center nodes initially if they don't have positions
-    if (graphNodes.some(node => !node.x || !node.y)) {
-      graphNodes.forEach((node, i) => {
-        if (!node.x || !node.y) {
-          // Arrange in a tight cluster in the center
-          const angle = (i / graphNodes.length) * 2 * Math.PI;
-          const radius = Math.min(40, graphNodes.length * 3); // Much smaller radius for tight clustering
-          node.x = w/2 + Math.cos(angle) * radius;
-          node.y = h/2 + Math.sin(angle) * radius;
-        }
-      });
+    // Set proper viewBox and dimensions
+    svg.attr('viewBox', `0 0 ${w} ${h}`)
+       .attr('width', w)
+       .attr('height', h);
+    
+    // Update center forces
+    centerForce.x(w/2).y(h/2);
+    sim.force('x', d3.forceX(w/2).strength(0.1));
+    sim.force('y', d3.forceY(h/2).strength(0.1));
+    
+    // Restart simulation gently
+    sim.alpha(0.3).restart();
+    rescaleForDrawer();
+  }
+
+  // Function to fit all visible nodes within the viewport
+  function fitNodesToScreen() {
+    const visibleNodes = hierarchicalNodes.filter(d => {
+      const nodeEl = node.filter(n => n.id === d.id);
+      const opacity = nodeEl.style('opacity');
+      return (opacity === '' || parseFloat(opacity) > 0.5) && d.x !== undefined && d.y !== undefined;
+    });
+    
+    if (visibleNodes.length === 0) {
+      console.log('No visible nodes to fit');
+      return;
     }
     
-    sim.alpha(0.7).restart();
-    rescaleForDrawer();
+    const bounds = {
+      minX: d3.min(visibleNodes, d => d.x - radius(d.value)),
+      maxX: d3.max(visibleNodes, d => d.x + radius(d.value)),
+      minY: d3.min(visibleNodes, d => d.y - radius(d.value)),
+      maxY: d3.max(visibleNodes, d => d.y + radius(d.value))
+    };
+    
+    const width = bounds.maxX - bounds.minX;
+    const height = bounds.maxY - bounds.minY;
+    
+    // Handle edge case where all nodes are at the same position
+    if (width === 0 || height === 0) {
+      svg.transition()
+        .duration(750)
+        .call(zoom.transform, d3.zoomIdentity);
+      return;
+    }
+    
+    const centerX = (bounds.minX + bounds.maxX) / 2;
+    const centerY = (bounds.minY + bounds.maxY) / 2;
+    
+    const svgWidth = svg.node().clientWidth;
+    const svgHeight = svg.node().clientHeight;
+    
+    // Calculate scale to fit with padding - zoom out more to show all nodes
+    const padding = 120; // Increased padding for better margins
+    const scale = Math.min(
+      (svgWidth - padding * 2) / width,
+      (svgHeight - padding * 2) / height,
+      1.2 // Reduced maximum scale to zoom out more
+    );
+    
+    // Calculate translation to center
+    const translateX = svgWidth / 2 - centerX * scale;
+    const translateY = svgHeight / 2 - centerY * scale;
+    
+    const transform = d3.zoomIdentity
+      .translate(translateX, translateY)
+      .scale(Math.max(scale, 0.4)); // Reduced minimum scale to allow more zoom out
+    
+    svg.transition()
+      .duration(750)
+      .call(zoom.transform, transform);
   }
   
   // Ensure resize is called after DOM is ready and elements have dimensions
@@ -514,20 +678,35 @@ console.log('Document ready state:', document.readyState);
         exists: !!canvasEl
       });
       
-      console.log('About to initialize with data:', {
-        allNodes: allNodes.length,
-        allLinks: allLinks.length,
-        sampleNodes: allNodes.slice(0, 2)
-      });
-      
-      // Initialize the graph data properly
-      setGraphData(allNodes, allLinks);
       resize();
       
-      console.log('After initialization:');
+      // Initialize nodes with random positions near center to prevent flying off
+      const w = svg.node().clientWidth || 800;
+      const h = svg.node().clientHeight || 500;
+      hierarchicalNodes.forEach(d => {
+        d.x = w/2 + (Math.random() - 0.5) * 100;
+        d.y = h/2 + (Math.random() - 0.5) * 100;
+        d.vx = 0; // Reset velocity
+        d.vy = 0;
+      });
+      
+      // Start simulation with lower alpha to prevent nodes from flying
+      sim.alpha(0.5).restart();
+      
+      // Apply default filtering after a short delay
+      setTimeout(() => {
+        const defaultVisible = getDefaultVisibleNodes(hierarchicalNodes, graphLinks);
+        updateNodeVisibility(defaultVisible);
+        updateModeIndicator();
+        
+        // Fit nodes to screen after they settle
+        setTimeout(() => {
+          fitNodesToScreen();
+        }, 1000);
+      }, 500);
+      
       console.log('Graph nodes in simulation:', sim.nodes().length);
       console.log('Graph links in simulation:', sim.force('link').links().length);
-      console.log('DOM nodes count:', gNodes.selectAll('g.node').size());
     }, 100);
   }
   
@@ -542,9 +721,23 @@ console.log('Document ready state:', document.readyState);
 
   function openDrawer(d){
     drawerTitle.textContent = d.id;
+    
+    // Determine hierarchy level description
+    let hierarchyLevel = 'Unknown';
+    if (d.hierarchyColor === colorScheme.topLevel) {
+      hierarchyLevel = 'Top Level (Most Connected)';
+    } else if (d.hierarchyColor === colorScheme.connected) {
+      hierarchyLevel = 'Connected to Top Level';
+    } else if (d.hierarchyColor === colorScheme.secondary) {
+      hierarchyLevel = 'Secondary Connected';
+    } else if (d.hierarchyColor === colorScheme.isolated) {
+      hierarchyLevel = 'Isolated (No Connections)';
+    }
+    
     drawerBody.innerHTML = ''+
       `<div><strong>Volume:</strong> ${d.value}</div>`+
-      `<div><strong>Connections:</strong> ${graphLinks.filter(l=> (l.source.id?l.source.id:l.source)===d.id || (l.target.id?l.target.id:l.target)===d.id).length}</div>`+
+      `<div><strong>Connections:</strong> ${d.connectionCount || graphLinks.filter(l=> (l.source.id?l.source.id:l.source)===d.id || (l.target.id?l.target.id:l.target)===d.id).length}</div>`+
+      `<div><strong>Hierarchy Level:</strong> <span style="color: ${d.hierarchyColor}; font-weight: 600;">${hierarchyLevel}</span></div>`+
       `<div><strong>Description:</strong> Placeholder description about ${d.id} with sample insights.</div>`+
       `<hr /><div><strong>Related Keywords</strong></div>`+
       `${graphLinks.filter(l=> (l.source.id?l.source.id:l.source)===d.id || (l.target.id?l.target.id:l.target)===d.id).map(l=>`<span class="chip" style="margin:4px 6px 0 0">${(l.source.id?l.source.id:l.source)===d.id ? (l.target.id?l.target.id:l.target) : (l.source.id?l.source.id:l.source)}</span>`).join('')}`;
@@ -576,87 +769,99 @@ console.log('Document ready state:', document.readyState);
     filterInput && (filterInput.value=''); 
     applyFilter(''); 
     closeDrawer(); 
-    // Reset to default view
-    currentViewMode = 'default';
-    selectedNode = null;
     
-    // Reset node positions to center cluster
-    const w = width();
-    const h = height();
-    graphNodes.forEach((node, i) => {
-      const angle = (i / graphNodes.length) * 2 * Math.PI;
-      const radius = Math.min(40, graphNodes.length * 3);
-      node.x = w/2 + Math.cos(angle) * radius;
-      node.y = h/2 + Math.sin(angle) * radius;
-      // Clear velocity
-      node.vx = 0;
-      node.vy = 0;
-    });
+    // Reset to default visibility mode
+    selectedNodeId = null;
+    visibilityMode = 'default';
+    const defaultVisible = getDefaultVisibleNodes(hierarchicalNodes, graphLinks);
+    updateNodeVisibility(defaultVisible);
+    updateModeIndicator();
     
-    setGraphData(allNodes, allLinks);
-    svg.transition().duration(250).call(zoom.transform, d3.zoomIdentity); 
-  });
-  
-  // Show All button functionality
-  const showAllBtn = document.getElementById('showAll');
-  showAllBtn && showAllBtn.addEventListener('click', () => {
-    currentViewMode = 'all';
-    selectedNode = null;
-    setGraphData(allNodes, allLinks);
-  });
-
-  // Filter by Level button functionality
-  const filterByLevelBtn = document.getElementById('filterByLevel');
-  const filterModal = document.getElementById('filterModal');
-  const filterModalClose = document.getElementById('filterModalClose');
-  const applyFilterBtn = document.getElementById('applyFilter');
-  const filterSelectAll = document.getElementById('filterSelectAll');
-  const filterSelectNone = document.getElementById('filterSelectNone');
-  
-  filterByLevelBtn && filterByLevelBtn.addEventListener('click', () => {
-    filterModal.style.display = 'flex';
-  });
-  
-  filterModalClose && filterModalClose.addEventListener('click', () => {
-    filterModal.style.display = 'none';
-  });
-  
-  filterModal && filterModal.addEventListener('click', (e) => {
-    if (e.target === filterModal) {
-      filterModal.style.display = 'none';
-    }
-  });
-  
-  filterSelectAll && filterSelectAll.addEventListener('click', () => {
-    document.getElementById('filterTopLevel').checked = true;
-    document.getElementById('filterConnected').checked = true;
-    document.getElementById('filterSecondary').checked = true;
-    document.getElementById('filterIsolated').checked = true;
-  });
-  
-  filterSelectNone && filterSelectNone.addEventListener('click', () => {
-    document.getElementById('filterTopLevel').checked = false;
-    document.getElementById('filterConnected').checked = false;
-    document.getElementById('filterSecondary').checked = false;
-    document.getElementById('filterIsolated').checked = false;
-  });
-  
-  applyFilterBtn && applyFilterBtn.addEventListener('click', () => {
-    filterState.topLevel = document.getElementById('filterTopLevel').checked;
-    filterState.connected = document.getElementById('filterConnected').checked;
-    filterState.secondary = document.getElementById('filterSecondary').checked;
-    filterState.isolated = document.getElementById('filterIsolated').checked;
-    
-    currentViewMode = 'filtered';
-    selectedNode = null;
-    setGraphData(allNodes, allLinks);
-    filterModal.style.display = 'none';
+    // Fit to default nodes
+    setTimeout(() => {
+      fitNodesToScreen();
+    }, 100);
   });
 
   // Zoom controls
   zoomIn && zoomIn.addEventListener('click', ()=> svg.transition().duration(200).call(zoom.scaleBy, 1.2));
   zoomOut && zoomOut.addEventListener('click', ()=> svg.transition().duration(200).call(zoom.scaleBy, 0.8));
-  fitBtn && fitBtn.addEventListener('click', ()=> svg.transition().duration(250).call(zoom.transform, d3.zoomIdentity));
+  fitBtn && fitBtn.addEventListener('click', fitNodesToScreen);
+
+  // Filter controls
+  const filterByLevelBtn = document.getElementById('filterByLevel');
+  const showAllBtn = document.getElementById('showAll');
+  const filterModal = document.getElementById('filterModal');
+  const filterModalClose = document.getElementById('filterModalClose');
+  const applyFilterBtn = document.getElementById('applyFilter');
+  const filterSelectAllBtn = document.getElementById('filterSelectAll');
+  const filterSelectNoneBtn = document.getElementById('filterSelectNone');
+
+  // Show filter modal
+  filterByLevelBtn && filterByLevelBtn.addEventListener('click', () => {
+    filterModal.style.display = 'flex';
+    
+    // Update checkboxes to match current filter state
+    document.getElementById('filterTopLevel').checked = activeFilters.topLevel;
+    document.getElementById('filterConnected').checked = activeFilters.connected;
+    document.getElementById('filterSecondary').checked = activeFilters.secondary;
+    document.getElementById('filterIsolated').checked = activeFilters.isolated;
+  });
+
+  // Close filter modal
+  filterModalClose && filterModalClose.addEventListener('click', () => {
+    filterModal.style.display = 'none';
+  });
+
+  // Close modal when clicking outside
+  filterModal && filterModal.addEventListener('click', (e) => {
+    if (e.target === filterModal) {
+      filterModal.style.display = 'none';
+    }
+  });
+
+  // Show all nodes
+  showAllBtn && showAllBtn.addEventListener('click', () => {
+    visibilityMode = 'filtered';
+    activeFilters = { topLevel: true, connected: true, secondary: true, isolated: true };
+    const allNodes = new Set(hierarchicalNodes.map(d => d.id));
+    updateNodeVisibility(allNodes);
+    updateModeIndicator();
+    setTimeout(() => fitNodesToScreen(), 100);
+  });
+
+  // Filter select all/none
+  filterSelectAllBtn && filterSelectAllBtn.addEventListener('click', () => {
+    document.getElementById('filterTopLevel').checked = true;
+    document.getElementById('filterConnected').checked = true;
+    document.getElementById('filterSecondary').checked = true;
+    document.getElementById('filterIsolated').checked = true;
+  });
+
+  filterSelectNoneBtn && filterSelectNoneBtn.addEventListener('click', () => {
+    document.getElementById('filterTopLevel').checked = false;
+    document.getElementById('filterConnected').checked = false;
+    document.getElementById('filterSecondary').checked = false;
+    document.getElementById('filterIsolated').checked = false;
+  });
+
+  // Apply filter
+  applyFilterBtn && applyFilterBtn.addEventListener('click', () => {
+    activeFilters = {
+      topLevel: document.getElementById('filterTopLevel').checked,
+      connected: document.getElementById('filterConnected').checked,
+      secondary: document.getElementById('filterSecondary').checked,
+      isolated: document.getElementById('filterIsolated').checked
+    };
+    
+    visibilityMode = 'filtered';
+    const filteredNodes = getFilteredNodes(hierarchicalNodes, graphLinks);
+    updateNodeVisibility(filteredNodes);
+    updateModeIndicator();
+    filterModal.style.display = 'none';
+    
+    setTimeout(() => fitNodesToScreen(), 100);
+  });
 
   // Neo4j integration
   const neo4jUriEl = document.getElementById('neo4jUri');
@@ -743,6 +948,28 @@ console.log('Document ready state:', document.readyState);
       setGraphData(graphNodes, graphLinks);
     });
   }
+
+  // Listen for custom events from Manage Keywords page
+  window.addEventListener('keywordsUpdated', (event) => {
+    const { keywords, connections } = event.detail;
+    
+    // Update graph data with new keywords and connections
+    graphNodes = keywords.map(node => ({
+      id: node.id || node.name,
+      group: node.group || 1,
+      value: node.value || 50
+    }));
+    
+    graphLinks = connections.slice();
+    
+    // Update the visualization
+    setGraphData(graphNodes, graphLinks);
+    
+    console.log('Keywords page updated from Manage Keywords:', { 
+      keywords: graphNodes.length, 
+      connections: graphLinks.length 
+    });
+  });
 
   // Function to refresh data from shared storage
   function refreshFromSharedData() {

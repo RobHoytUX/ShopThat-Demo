@@ -1,0 +1,344 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>shopThat — Sign In</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles/main.css?v=1">
+    <style>
+      .login-container {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 20px;
+      }
+
+      .login-card {
+        background: #fff;
+        border-radius: 20px;
+        padding: 48px 40px;
+        width: 100%;
+        max-width: 420px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+        text-align: center;
+      }
+
+      .login-brand {
+        font-size: 32px;
+        font-weight: 700;
+        color: #6366f1;
+        margin-bottom: 8px;
+      }
+
+      .login-subtitle {
+        color: #6b7280;
+        font-size: 16px;
+        margin-bottom: 40px;
+      }
+
+      .login-form {
+        display: grid;
+        gap: 24px;
+        text-align: left;
+      }
+
+      .form-group {
+        display: grid;
+        gap: 8px;
+      }
+
+      .form-label {
+        font-weight: 600;
+        font-size: 14px;
+        color: #374151;
+      }
+
+      .form-input {
+        padding: 16px;
+        border: 2px solid #e5e7eb;
+        border-radius: 12px;
+        font-size: 16px;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+      }
+
+      .form-input:focus {
+        outline: none;
+        border-color: #6366f1;
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+      }
+
+      .login-btn {
+        background: #6366f1;
+        color: #fff;
+        border: none;
+        padding: 16px 24px;
+        border-radius: 12px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background-color 0.2s ease, transform 0.1s ease;
+        margin-top: 8px;
+      }
+
+      .login-btn:hover {
+        background: #5856eb;
+        transform: translateY(-1px);
+      }
+
+      .login-btn:active {
+        transform: translateY(0);
+      }
+
+      .demo-credentials {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 20px;
+        margin-top: 24px;
+        text-align: left;
+      }
+
+      .demo-credentials h3 {
+        margin: 0 0 12px 0;
+        font-size: 14px;
+        font-weight: 600;
+        color: #374151;
+      }
+
+      .demo-cred-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px 0;
+        border-bottom: 1px solid #e5e7eb;
+      }
+
+      .demo-cred-item:last-child {
+        border-bottom: none;
+      }
+
+      .demo-cred-label {
+        font-size: 13px;
+        color: #6b7280;
+      }
+
+      .demo-cred-value {
+        font-size: 13px;
+        font-weight: 500;
+        color: #374151;
+        font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+        background: #fff;
+        padding: 4px 8px;
+        border-radius: 6px;
+        border: 1px solid #e5e7eb;
+        cursor: pointer;
+        transition: background-color 0.2s ease;
+      }
+
+      .demo-cred-value:hover {
+        background: #f3f4f6;
+      }
+
+      .error-message {
+        background: #fef2f2;
+        border: 1px solid #fecaca;
+        color: #dc2626;
+        padding: 12px 16px;
+        border-radius: 8px;
+        font-size: 14px;
+        margin-top: 16px;
+        display: none;
+      }
+
+      .success-message {
+        background: #f0fdf4;
+        border: 1px solid #bbf7d0;
+        color: #16a34a;
+        padding: 12px 16px;
+        border-radius: 8px;
+        font-size: 14px;
+        margin-top: 16px;
+        display: none;
+      }
+
+      /* Dark mode styles */
+      .dark-mode .login-card {
+        background: #1f2937;
+        color: #f9fafb;
+      }
+
+      .dark-mode .login-subtitle {
+        color: #9ca3af;
+      }
+
+      .dark-mode .form-label {
+        color: #f3f4f6;
+      }
+
+      .dark-mode .form-input {
+        background: #374151;
+        border-color: #4b5563;
+        color: #f9fafb;
+      }
+
+      .dark-mode .form-input:focus {
+        border-color: #6366f1;
+        background: #374151;
+      }
+
+      .dark-mode .demo-credentials {
+        background: #374151;
+        border-color: #4b5563;
+      }
+
+      .dark-mode .demo-credentials h3 {
+        color: #f3f4f6;
+      }
+
+      .dark-mode .demo-cred-item {
+        border-bottom-color: #4b5563;
+      }
+
+      .dark-mode .demo-cred-label {
+        color: #9ca3af;
+      }
+
+      .dark-mode .demo-cred-value {
+        background: #1f2937;
+        border-color: #4b5563;
+        color: #f3f4f6;
+      }
+
+      .dark-mode .demo-cred-value:hover {
+        background: #111827;
+      }
+
+      /* Mobile responsive */
+      @media (max-width: 480px) {
+        .login-card {
+          padding: 32px 24px;
+        }
+
+        .login-brand {
+          font-size: 28px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="login-container">
+      <div class="login-card">
+        <div class="login-brand">shopThat</div>
+        <p class="login-subtitle">Sign in to your account</p>
+        
+        <form class="login-form" id="loginForm">
+          <div class="form-group">
+            <label class="form-label" for="email">Email address</label>
+            <input 
+              type="email" 
+              id="email" 
+              class="form-input" 
+              placeholder="Enter your email"
+              required
+            />
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label" for="password">Password</label>
+            <input 
+              type="password" 
+              id="password" 
+              class="form-input" 
+              placeholder="Enter your password"
+              required
+            />
+          </div>
+          
+          <button type="submit" class="login-btn">Sign In</button>
+        </form>
+
+        <div class="error-message" id="errorMessage">
+          Invalid credentials. Please try again.
+        </div>
+
+        <div class="success-message" id="successMessage">
+          Signing in...
+        </div>
+
+        <div class="demo-credentials">
+          <h3>Demo Credentials</h3>
+          <div class="demo-cred-item">
+            <span class="demo-cred-label">Email:</span>
+            <span class="demo-cred-value" onclick="fillCredentials('admin@shopthat.com', 'demo123')">admin@shopthat.com</span>
+          </div>
+          <div class="demo-cred-item">
+            <span class="demo-cred-label">Password:</span>
+            <span class="demo-cred-value" onclick="fillCredentials('admin@shopthat.com', 'demo123')">demo123</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // Demo credentials
+      const validCredentials = {
+        'admin@shopthat.com': 'demo123',
+        'demo@shopthat.com': 'password',
+        'user@shopthat.com': 'shopThat2024'
+      };
+
+      // Fill credentials function
+      function fillCredentials(email, password) {
+        document.getElementById('email').value = email;
+        document.getElementById('password').value = password;
+      }
+
+      // Login form handler
+      document.getElementById('loginForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+        const errorMessage = document.getElementById('errorMessage');
+        const successMessage = document.getElementById('successMessage');
+        
+        // Hide previous messages
+        errorMessage.style.display = 'none';
+        successMessage.style.display = 'none';
+        
+        // Check credentials
+        if (validCredentials[email] && validCredentials[email] === password) {
+          // Store login state
+          localStorage.setItem('shopThatLoggedIn', 'true');
+          localStorage.setItem('shopThatUser', email);
+          
+          // Show success message
+          successMessage.style.display = 'block';
+          
+          // Redirect to dashboard after short delay
+          setTimeout(() => {
+            window.location.href = '/dashboard.html';
+          }, 1000);
+        } else {
+          // Show error message
+          errorMessage.style.display = 'block';
+        }
+      });
+
+      // Check if user is already logged in
+      if (localStorage.getItem('shopThatLoggedIn') === 'true') {
+        window.location.href = '/dashboard.html';
+      }
+
+      // Dark mode detection
+      if (localStorage.getItem('darkMode') === 'true') {
+        document.body.classList.add('dark-mode');
+      }
+    </script>
+  </body>
+</html>

@@ -1,0 +1,607 @@
+<!DOCTYPE html><!--[if lt IE 8 ]><html class="no-js ie ie7" lang="en-US"> <![endif]--><!--[if IE 8 ]><html class="no-js ie ie8" lang="en-US"> <![endif]--><!--[if gte IE 9 ]><html class="ie ie9" lang="en-US"> <![endif]--><!--[if !IE]><!--><html lang="en-US" class="no-js"><!--<![endif]--><head><meta charset="UTF-8"><script>if(navigator.userAgent.match(/MSIE|Internet Explorer/i)||navigator.userAgent.match(/Trident\/7\..*?rv:11/i)){var href=document.location.href;if(!href.match(/[?&]nowprocket/)){if(href.indexOf("?")==-1){if(href.indexOf("#")==-1){document.location.href=href+"?nowprocket=1"}else{document.location.href=href.replace("#","?nowprocket=1#")}}else{if(href.indexOf("#")==-1){document.location.href=href+"&nowprocket=1"}else{document.location.href=href.replace("#","&nowprocket=1#")}}}}</script><script>(()=>{class RocketLazyLoadScripts{constructor(){this.v="2.0.3",this.userEvents=["keydown","keyup","mousedown","mouseup","mousemove","mouseover","mouseenter","mouseout","mouseleave","touchmove","touchstart","touchend","touchcancel","wheel","click","dblclick","input","visibilitychange"],this.attributeEvents=["onblur","onclick","oncontextmenu","ondblclick","onfocus","onmousedown","onmouseenter","onmouseleave","onmousemove","onmouseout","onmouseover","onmouseup","onmousewheel","onscroll","onsubmit"]}async t(){this.i(),this.o(),/iP(ad|hone)/.test(navigator.userAgent)&&this.h(),this.u(),this.l(this),this.m(),this.k(this),this.p(this),this._(),await Promise.all([this.R(),this.L()]),this.lastBreath=Date.now(),this.S(this),this.P(),this.D(),this.O(),this.M(),await this.C(this.delayedScripts.normal),await this.C(this.delayedScripts.defer),await this.C(this.delayedScripts.async),this.F("domReady"),await this.T(),await this.j(),await this.I(),this.F("windowLoad"),await this.A(),window.dispatchEvent(new Event("rocket-allScriptsLoaded")),this.everythingLoaded=!0,this.lastTouchEnd&&await new Promise((t=>setTimeout(t,500-Date.now()+this.lastTouchEnd))),this.H(),this.F("all"),this.U(),this.W()}i(){this.CSPIssue=sessionStorage.getItem("rocketCSPIssue"),document.addEventListener("securitypolicyviolation",(t=>{this.CSPIssue||"script-src-elem"!==t.violatedDirective||"data"!==t.blockedURI||(this.CSPIssue=!0,sessionStorage.setItem("rocketCSPIssue",!0))}),{isRocket:!0})}o(){window.addEventListener("pageshow",(t=>{this.persisted=t.persisted,this.realWindowLoadedFired=!0}),{isRocket:!0}),window.addEventListener("pagehide",(()=>{this.onFirstUserAction=null}),{isRocket:!0})}h(){let t;function e(e){t=e}window.addEventListener("touchstart",e,{isRocket:!0}),window.addEventListener("touchend",(function i(o){Math.abs(o.changedTouches[0].pageX-t.changedTouches[0].pageX)<10&&Math.abs(o.changedTouches[0].pageY-t.changedTouches[0].pageY)<10&&o.timeStamp-t.timeStamp<200&&(o.target.dispatchEvent(new PointerEvent("click",{target:o.target,bubbles:!0,cancelable:!0,detail:1})),event.preventDefault(),window.removeEventListener("touchstart",e,{isRocket:!0}),window.removeEventListener("touchend",i,{isRocket:!0}))}),{isRocket:!0})}q(t){this.userActionTriggered||("mousemove"!==t.type||this.firstMousemoveIgnored?"keyup"===t.type||"mouseover"===t.type||"mouseout"===t.type||(this.userActionTriggered=!0,this.onFirstUserAction&&this.onFirstUserAction()):this.firstMousemoveIgnored=!0),"click"===t.type&&t.preventDefault(),this.savedUserEvents.length>0&&(t.stopPropagation(),t.stopImmediatePropagation()),"touchstart"===this.lastEvent&&"touchend"===t.type&&(this.lastTouchEnd=Date.now()),"click"===t.type&&(this.lastTouchEnd=0),this.lastEvent=t.type,this.savedUserEvents.push(t)}u(){this.savedUserEvents=[],this.userEventHandler=this.q.bind(this),this.userEvents.forEach((t=>window.addEventListener(t,this.userEventHandler,{passive:!1,isRocket:!0})))}U(){this.userEvents.forEach((t=>window.removeEventListener(t,this.userEventHandler,{passive:!1,isRocket:!0}))),this.savedUserEvents.forEach((t=>{t.target.dispatchEvent(new window[t.constructor.name](t.type,t))}))}m(){this.eventsMutationObserver=new MutationObserver((t=>{const e="return false";for(const i of t){if("attributes"===i.type){const t=i.target.getAttribute(i.attributeName);t&&t!==e&&(i.target.setAttribute("data-rocket-"+i.attributeName,t),i.target["rocket"+i.attributeName]=new Function("event",t),i.target.setAttribute(i.attributeName,e))}"childList"===i.type&&i.addedNodes.forEach((t=>{if(t.nodeType===Node.ELEMENT_NODE)for(const i of t.attributes)this.attributeEvents.includes(i.name)&&i.value&&""!==i.value&&(t.setAttribute("data-rocket-"+i.name,i.value),t["rocket"+i.name]=new Function("event",i.value),t.setAttribute(i.name,e))}))}})),this.eventsMutationObserver.observe(document,{subtree:!0,childList:!0,attributeFilter:this.attributeEvents})}H(){this.eventsMutationObserver.disconnect(),this.attributeEvents.forEach((t=>{document.querySelectorAll("[data-rocket-"+t+"]").forEach((e=>{e.setAttribute(t,e.getAttribute("data-rocket-"+t)),e.removeAttribute("data-rocket-"+t)}))}))}k(t){Object.defineProperty(HTMLElement.prototype,"onclick",{get(){return this.rocketonclick||null},set(e){this.rocketonclick=e,this.setAttribute(t.everythingLoaded?"onclick":"data-rocket-onclick","this.rocketonclick(event)")}})}S(t){function e(e,i){let o=e[i];e[i]=null,Object.defineProperty(e,i,{get:()=>o,set(s){t.everythingLoaded?o=s:e["rocket"+i]=o=s}})}e(document,"onreadystatechange"),e(window,"onload"),e(window,"onpageshow");try{Object.defineProperty(document,"readyState",{get:()=>t.rocketReadyState,set(e){t.rocketReadyState=e},configurable:!0}),document.readyState="loading"}catch(t){console.log("WPRocket DJE readyState conflict, bypassing")}}l(t){this.originalAddEventListener=EventTarget.prototype.addEventListener,this.originalRemoveEventListener=EventTarget.prototype.removeEventListener,this.savedEventListeners=[],EventTarget.prototype.addEventListener=function(e,i,o){o&&o.isRocket||!t.B(e,this)&&!t.userEvents.includes(e)||t.B(e,this)&&!t.userActionTriggered||e.startsWith("rocket-")||t.everythingLoaded?t.originalAddEventListener.call(this,e,i,o):t.savedEventListeners.push({target:this,remove:!1,type:e,func:i,options:o})},EventTarget.prototype.removeEventListener=function(e,i,o){o&&o.isRocket||!t.B(e,this)&&!t.userEvents.includes(e)||t.B(e,this)&&!t.userActionTriggered||e.startsWith("rocket-")||t.everythingLoaded?t.originalRemoveEventListener.call(this,e,i,o):t.savedEventListeners.push({target:this,remove:!0,type:e,func:i,options:o})}}F(t){"all"===t&&(EventTarget.prototype.addEventListener=this.originalAddEventListener,EventTarget.prototype.removeEventListener=this.originalRemoveEventListener),this.savedEventListeners=this.savedEventListeners.filter((e=>{let i=e.type,o=e.target||window;return"domReady"===t&&"DOMContentLoaded"!==i&&"readystatechange"!==i||("windowLoad"===t&&"load"!==i&&"readystatechange"!==i&&"pageshow"!==i||(this.B(i,o)&&(i="rocket-"+i),e.remove?o.removeEventListener(i,e.func,e.options):o.addEventListener(i,e.func,e.options),!1))}))}p(t){let e;function i(e){return t.everythingLoaded?e:e.split(" ").map((t=>"load"===t||t.startsWith("load.")?"rocket-jquery-load":t)).join(" ")}function o(o){function s(e){const s=o.fn[e];o.fn[e]=o.fn.init.prototype[e]=function(){return this[0]===window&&t.userActionTriggered&&("string"==typeof arguments[0]||arguments[0]instanceof String?arguments[0]=i(arguments[0]):"object"==typeof arguments[0]&&Object.keys(arguments[0]).forEach((t=>{const e=arguments[0][t];delete arguments[0][t],arguments[0][i(t)]=e}))),s.apply(this,arguments),this}}if(o&&o.fn&&!t.allJQueries.includes(o)){const e={DOMContentLoaded:[],"rocket-DOMContentLoaded":[]};for(const t in e)document.addEventListener(t,(()=>{e[t].forEach((t=>t()))}),{isRocket:!0});o.fn.ready=o.fn.init.prototype.ready=function(i){function s(){parseInt(o.fn.jquery)>2?setTimeout((()=>i.bind(document)(o))):i.bind(document)(o)}return t.realDomReadyFired?!t.userActionTriggered||t.fauxDomReadyFired?s():e["rocket-DOMContentLoaded"].push(s):e.DOMContentLoaded.push(s),o([])},s("on"),s("one"),s("off"),t.allJQueries.push(o)}e=o}t.allJQueries=[],o(window.jQuery),Object.defineProperty(window,"jQuery",{get:()=>e,set(t){o(t)}})}P(){const t=new Map;document.write=document.writeln=function(e){const i=document.currentScript,o=document.createRange(),s=i.parentElement;let n=t.get(i);void 0===n&&(n=i.nextSibling,t.set(i,n));const c=document.createDocumentFragment();o.setStart(c,0),c.appendChild(o.createContextualFragment(e)),s.insertBefore(c,n)}}async R(){return new Promise((t=>{this.userActionTriggered?t():this.onFirstUserAction=t}))}async L(){return new Promise((t=>{document.addEventListener("DOMContentLoaded",(()=>{this.realDomReadyFired=!0,t()}),{isRocket:!0})}))}async I(){return this.realWindowLoadedFired?Promise.resolve():new Promise((t=>{window.addEventListener("load",t,{isRocket:!0})}))}M(){this.pendingScripts=[];this.scriptsMutationObserver=new MutationObserver((t=>{for(const e of t)e.addedNodes.forEach((t=>{"SCRIPT"!==t.tagName||t.noModule||t.isWPRocket||this.pendingScripts.push({script:t,promise:new Promise((e=>{const i=()=>{const i=this.pendingScripts.findIndex((e=>e.script===t));i>=0&&this.pendingScripts.splice(i,1),e()};t.addEventListener("load",i,{isRocket:!0}),t.addEventListener("error",i,{isRocket:!0}),setTimeout(i,1e3)}))})}))})),this.scriptsMutationObserver.observe(document,{childList:!0,subtree:!0})}async j(){await this.J(),this.pendingScripts.length?(await this.pendingScripts[0].promise,await this.j()):this.scriptsMutationObserver.disconnect()}D(){this.delayedScripts={normal:[],async:[],defer:[]},document.querySelectorAll("script[type$=rocketlazyloadscript]").forEach((t=>{t.hasAttribute("data-rocket-src")?t.hasAttribute("async")&&!1!==t.async?this.delayedScripts.async.push(t):t.hasAttribute("defer")&&!1!==t.defer||"module"===t.getAttribute("data-rocket-type")?this.delayedScripts.defer.push(t):this.delayedScripts.normal.push(t):this.delayedScripts.normal.push(t)}))}async _(){await this.L();let t=[];document.querySelectorAll("script[type$=rocketlazyloadscript][data-rocket-src]").forEach((e=>{let i=e.getAttribute("data-rocket-src");if(i&&!i.startsWith("data:")){i.startsWith("//")&&(i=location.protocol+i);try{const o=new URL(i).origin;o!==location.origin&&t.push({src:o,crossOrigin:e.crossOrigin||"module"===e.getAttribute("data-rocket-type")})}catch(t){}}})),t=[...new Map(t.map((t=>[JSON.stringify(t),t]))).values()],this.N(t,"preconnect")}async $(t){if(await this.G(),!0!==t.noModule||!("noModule"in HTMLScriptElement.prototype))return new Promise((e=>{let i;function o(){(i||t).setAttribute("data-rocket-status","executed"),e()}try{if(navigator.userAgent.includes("Firefox/")||""===navigator.vendor||this.CSPIssue)i=document.createElement("script"),[...t.attributes].forEach((t=>{let e=t.nodeName;"type"!==e&&("data-rocket-type"===e&&(e="type"),"data-rocket-src"===e&&(e="src"),i.setAttribute(e,t.nodeValue))})),t.text&&(i.text=t.text),t.nonce&&(i.nonce=t.nonce),i.hasAttribute("src")?(i.addEventListener("load",o,{isRocket:!0}),i.addEventListener("error",(()=>{i.setAttribute("data-rocket-status","failed-network"),e()}),{isRocket:!0}),setTimeout((()=>{i.isConnected||e()}),1)):(i.text=t.text,o()),i.isWPRocket=!0,t.parentNode.replaceChild(i,t);else{const i=t.getAttribute("data-rocket-type"),s=t.getAttribute("data-rocket-src");i?(t.type=i,t.removeAttribute("data-rocket-type")):t.removeAttribute("type"),t.addEventListener("load",o,{isRocket:!0}),t.addEventListener("error",(i=>{this.CSPIssue&&i.target.src.startsWith("data:")?(console.log("WPRocket: CSP fallback activated"),t.removeAttribute("src"),this.$(t).then(e)):(t.setAttribute("data-rocket-status","failed-network"),e())}),{isRocket:!0}),s?(t.fetchPriority="high",t.removeAttribute("data-rocket-src"),t.src=s):t.src="data:text/javascript;base64,"+window.btoa(unescape(encodeURIComponent(t.text)))}}catch(i){t.setAttribute("data-rocket-status","failed-transform"),e()}}));t.setAttribute("data-rocket-status","skipped")}async C(t){const e=t.shift();return e?(e.isConnected&&await this.$(e),this.C(t)):Promise.resolve()}O(){this.N([...this.delayedScripts.normal,...this.delayedScripts.defer,...this.delayedScripts.async],"preload")}N(t,e){this.trash=this.trash||[];let i=!0;var o=document.createDocumentFragment();t.forEach((t=>{const s=t.getAttribute&&t.getAttribute("data-rocket-src")||t.src;if(s&&!s.startsWith("data:")){const n=document.createElement("link");n.href=s,n.rel=e,"preconnect"!==e&&(n.as="script",n.fetchPriority=i?"high":"low"),t.getAttribute&&"module"===t.getAttribute("data-rocket-type")&&(n.crossOrigin=!0),t.crossOrigin&&(n.crossOrigin=t.crossOrigin),t.integrity&&(n.integrity=t.integrity),t.nonce&&(n.nonce=t.nonce),o.appendChild(n),this.trash.push(n),i=!1}})),document.head.appendChild(o)}W(){this.trash.forEach((t=>t.remove()))}async T(){try{document.readyState="interactive"}catch(t){}this.fauxDomReadyFired=!0;try{await this.G(),document.dispatchEvent(new Event("rocket-readystatechange")),await this.G(),document.rocketonreadystatechange&&document.rocketonreadystatechange(),await this.G(),document.dispatchEvent(new Event("rocket-DOMContentLoaded")),await this.G(),window.dispatchEvent(new Event("rocket-DOMContentLoaded"))}catch(t){console.error(t)}}async A(){try{document.readyState="complete"}catch(t){}try{await this.G(),document.dispatchEvent(new Event("rocket-readystatechange")),await this.G(),document.rocketonreadystatechange&&document.rocketonreadystatechange(),await this.G(),window.dispatchEvent(new Event("rocket-load")),await this.G(),window.rocketonload&&window.rocketonload(),await this.G(),this.allJQueries.forEach((t=>t(window).trigger("rocket-jquery-load"))),await this.G();const t=new Event("rocket-pageshow");t.persisted=this.persisted,window.dispatchEvent(t),await this.G(),window.rocketonpageshow&&window.rocketonpageshow({persisted:this.persisted})}catch(t){console.error(t)}}async G(){Date.now()-this.lastBreath>45&&(await this.J(),this.lastBreath=Date.now())}async J(){return document.hidden?new Promise((t=>setTimeout(t))):new Promise((t=>requestAnimationFrame(t)))}B(t,e){return e===document&&"readystatechange"===t||(e===document&&"DOMContentLoaded"===t||(e===window&&"DOMContentLoaded"===t||(e===window&&"load"===t||e===window&&"pageshow"===t)))}static run(){(new RocketLazyLoadScripts).t()}}RocketLazyLoadScripts.run()})();</script>
+        
+        <meta name="HandheldFriendly" content="True">
+        <meta name="MobileOptimized" content="576">
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5">
+        
+
+                <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+	<style>img:is([sizes="auto" i], [sizes^="auto," i]) { contain-intrinsic-size: 3000px 1500px }</style>
+	<link rel="alternate" hreflang="fr" href="https://www.parisselectbook.com/2025/01/13/louis-vuitton-x-takashi-murakami-une-collaboration-qui-fait-revivre-la-celebre-petite-malle/">
+<link rel="alternate" hreflang="en" href="https://www.parisselectbook.com/en/2025/01/13/louis-vuitton-x-takashi-murakami-a-collaboration-that-revives-the-famous-petite-malle/">
+<link rel="alternate" hreflang="es" href="https://www.parisselectbook.com/es/2025/01/13/louis-vuitton-x-takashi-murakami-una-colaboracion-que-revive-la-famosa-petite-malle/">
+<link rel="alternate" hreflang="x-default" href="https://www.parisselectbook.com/2025/01/13/louis-vuitton-x-takashi-murakami-une-collaboration-qui-fait-revivre-la-celebre-petite-malle/">
+
+	<!-- This site is optimized with the Yoast SEO plugin v24.7 - https://yoast.com/wordpress/plugins/seo/ -->
+	<title>Louis Vuitton x Takashi Murakami: A Collaboration that Revives the Famous Petite Malle – Paris Select</title><link rel="preload" data-rocket-preload="" as="style" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&amp;family=Libre+Baskerville&amp;family=Noto+Sans&amp;family=Inter:wght@400;500;700&amp;display=swap"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&amp;family=Libre+Baskerville&amp;family=Noto+Sans&amp;family=Inter:wght@400;500;700&amp;display=swap" media="all" onload="this.media='all'"><noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&#038;family=Libre+Baskerville&#038;family=Noto+Sans&#038;family=Inter:wght@400;500;700&#038;display=swap" /></noscript>
+	<meta name="description" content="Maison Louis Vuitton joins forces with artist Takashi Murakami for a bold reinterpretation of the famous Petite Malle.">
+	<link rel="canonical" href="https://www.parisselectbook.com/en/2025/01/13/louis-vuitton-x-takashi-murakami-a-collaboration-that-revives-the-famous-petite-malle/">
+	<meta property="og:locale" content="en_US">
+	<meta property="og:type" content="article">
+	<meta property="og:title" content="Louis Vuitton x Takashi Murakami: A Collaboration that Revives the Famous Petite Malle – Paris Select">
+	<meta property="og:description" content="Maison Louis Vuitton joins forces with artist Takashi Murakami for a bold reinterpretation of the famous Petite Malle.">
+	<meta property="og:url" content="https://www.parisselectbook.com/en/2025/01/13/louis-vuitton-x-takashi-murakami-a-collaboration-that-revives-the-famous-petite-malle/">
+	<meta property="og:site_name" content="Paris Select">
+	<meta property="article:publisher" content="https://www.facebook.com/parisselect">
+	<meta property="article:published_time" content="2025-01-13T13:37:00+00:00">
+	<meta property="article:modified_time" content="2025-02-05T13:38:49+00:00">
+	<meta property="og:image" content="https://www.parisselectbook.com/wp-content/uploads/2025/01/GhKu5duWEAA74w7.jpeg">
+	<meta property="og:image:width" content="1080">
+	<meta property="og:image:height" content="1350">
+	<meta property="og:image:type" content="image/jpeg">
+	<meta name="author" content="Zaccharie TOUBOUL">
+	<meta name="twitter:card" content="summary_large_image">
+	<meta name="twitter:label1" content="Written by">
+	<meta name="twitter:data1" content="Zaccharie TOUBOUL">
+	<meta name="twitter:label2" content="Est. reading time">
+	<meta name="twitter:data2" content="3 minutes">
+	<script type="application/ld+json" class="yoast-schema-graph">{"@context":"https://schema.org","@graph":[{"@type":"Article","@id":"https://www.parisselectbook.com/en/2025/01/13/louis-vuitton-x-takashi-murakami-a-collaboration-that-revives-the-famous-petite-malle/#article","isPartOf":{"@id":"https://www.parisselectbook.com/en/2025/01/13/louis-vuitton-x-takashi-murakami-a-collaboration-that-revives-the-famous-petite-malle/"},"author":{"name":"Zaccharie TOUBOUL","@id":"https://www.parisselectbook.com/en/#/schema/person/aa1c787e9a0aa5e048942caa2953b19b"},"headline":"Louis Vuitton x Takashi Murakami: A Collaboration that Revives the Famous Petite Malle","datePublished":"2025-01-13T13:37:00+00:00","dateModified":"2025-02-05T13:38:49+00:00","mainEntityOfPage":{"@id":"https://www.parisselectbook.com/en/2025/01/13/louis-vuitton-x-takashi-murakami-a-collaboration-that-revives-the-famous-petite-malle/"},"wordCount":552,"publisher":{"@id":"https://www.parisselectbook.com/en/#organization"},"image":{"@id":"https://www.parisselectbook.com/en/2025/01/13/louis-vuitton-x-takashi-murakami-a-collaboration-that-revives-the-famous-petite-malle/#primaryimage"},"thumbnailUrl":"https://www.parisselectbook.com/wp-content/uploads/2025/01/GhKu5duWEAA74w7.jpeg","articleSection":["News du Luxe"],"inLanguage":"en-US"},{"@type":"WebPage","@id":"https://www.parisselectbook.com/en/2025/01/13/louis-vuitton-x-takashi-murakami-a-collaboration-that-revives-the-famous-petite-malle/","url":"https://www.parisselectbook.com/en/2025/01/13/louis-vuitton-x-takashi-murakami-a-collaboration-that-revives-the-famous-petite-malle/","name":"Louis Vuitton x Takashi Murakami: A Collaboration that Revives the Famous Petite Malle &#8211; Paris Select","isPartOf":{"@id":"https://www.parisselectbook.com/en/#website"},"primaryImageOfPage":{"@id":"https://www.parisselectbook.com/en/2025/01/13/louis-vuitton-x-takashi-murakami-a-collaboration-that-revives-the-famous-petite-malle/#primaryimage"},"image":{"@id":"https://www.parisselectbook.com/en/2025/01/13/louis-vuitton-x-takashi-murakami-a-collaboration-that-revives-the-famous-petite-malle/#primaryimage"},"thumbnailUrl":"https://www.parisselectbook.com/wp-content/uploads/2025/01/GhKu5duWEAA74w7.jpeg","datePublished":"2025-01-13T13:37:00+00:00","dateModified":"2025-02-05T13:38:49+00:00","description":"Maison Louis Vuitton joins forces with artist Takashi Murakami for a bold reinterpretation of the famous Petite Malle.","breadcrumb":{"@id":"https://www.parisselectbook.com/en/2025/01/13/louis-vuitton-x-takashi-murakami-a-collaboration-that-revives-the-famous-petite-malle/#breadcrumb"},"inLanguage":"en-US","potentialAction":[{"@type":"ReadAction","target":["https://www.parisselectbook.com/en/2025/01/13/louis-vuitton-x-takashi-murakami-a-collaboration-that-revives-the-famous-petite-malle/"]}]},{"@type":"ImageObject","inLanguage":"en-US","@id":"https://www.parisselectbook.com/en/2025/01/13/louis-vuitton-x-takashi-murakami-a-collaboration-that-revives-the-famous-petite-malle/#primaryimage","url":"https://www.parisselectbook.com/wp-content/uploads/2025/01/GhKu5duWEAA74w7.jpeg","contentUrl":"https://www.parisselectbook.com/wp-content/uploads/2025/01/GhKu5duWEAA74w7.jpeg","width":1080,"height":1350},{"@type":"BreadcrumbList","@id":"https://www.parisselectbook.com/en/2025/01/13/louis-vuitton-x-takashi-murakami-a-collaboration-that-revives-the-famous-petite-malle/#breadcrumb","itemListElement":[{"@type":"ListItem","position":1,"name":"News du Luxe","item":"https://www.parisselectbook.com/en/category/news-du-luxe-en/"},{"@type":"ListItem","position":2,"name":"Louis Vuitton x Takashi Murakami: A Collaboration that Revives the Famous Petite Malle"}]},{"@type":"WebSite","@id":"https://www.parisselectbook.com/en/#website","url":"https://www.parisselectbook.com/en/","name":"Paris Select Book","description":"Le guide chic des Tendances Parisiennes","publisher":{"@id":"https://www.parisselectbook.com/en/#organization"},"potentialAction":[{"@type":"SearchAction","target":{"@type":"EntryPoint","urlTemplate":"https://www.parisselectbook.com/en/?s={search_term_string}"},"query-input":{"@type":"PropertyValueSpecification","valueRequired":true,"valueName":"search_term_string"}}],"inLanguage":"en-US"},{"@type":"Organization","@id":"https://www.parisselectbook.com/en/#organization","name":"Paris Select","url":"https://www.parisselectbook.com/en/","logo":{"@type":"ImageObject","inLanguage":"en-US","@id":"https://www.parisselectbook.com/en/#/schema/logo/image/","url":"https://www.parisselectbook.com/wp-content/uploads/2024/06/logo-IG-TKTK-LK.png","contentUrl":"https://www.parisselectbook.com/wp-content/uploads/2024/06/logo-IG-TKTK-LK.png","width":684,"height":665,"caption":"Paris Select"},"image":{"@id":"https://www.parisselectbook.com/en/#/schema/logo/image/"},"sameAs":["https://www.facebook.com/parisselect","https://www.instagram.com/parisselect/","https://www.tiktok.com/@parisselect"]},{"@type":"Person","@id":"https://www.parisselectbook.com/en/#/schema/person/aa1c787e9a0aa5e048942caa2953b19b","name":"Zaccharie TOUBOUL"}]}</script>
+	<!-- / Yoast SEO plugin. -->
+
+
+<link href="https://fonts.gstatic.com" crossorigin="" rel="preconnect">
+<link rel="stylesheet" id="wp-block-library-css" href="https://www.parisselectbook.com/wp-includes/css/dist/block-library/style.min.css?ver=6.7.2" type="text/css" media="all">
+<style id="global-styles-inline-css" type="text/css">
+:root{--wp--preset--aspect-ratio--square: 1;--wp--preset--aspect-ratio--4-3: 4/3;--wp--preset--aspect-ratio--3-4: 3/4;--wp--preset--aspect-ratio--3-2: 3/2;--wp--preset--aspect-ratio--2-3: 2/3;--wp--preset--aspect-ratio--16-9: 16/9;--wp--preset--aspect-ratio--9-16: 9/16;--wp--preset--color--black: #000000;--wp--preset--color--cyan-bluish-gray: #abb8c3;--wp--preset--color--white: #ffffff;--wp--preset--color--pale-pink: #f78da7;--wp--preset--color--vivid-red: #cf2e2e;--wp--preset--color--luminous-vivid-orange: #ff6900;--wp--preset--color--luminous-vivid-amber: #fcb900;--wp--preset--color--light-green-cyan: #7bdcb5;--wp--preset--color--vivid-green-cyan: #00d084;--wp--preset--color--pale-cyan-blue: #8ed1fc;--wp--preset--color--vivid-cyan-blue: #0693e3;--wp--preset--color--vivid-purple: #9b51e0;--wp--preset--gradient--vivid-cyan-blue-to-vivid-purple: linear-gradient(135deg,rgba(6,147,227,1) 0%,rgb(155,81,224) 100%);--wp--preset--gradient--light-green-cyan-to-vivid-green-cyan: linear-gradient(135deg,rgb(122,220,180) 0%,rgb(0,208,130) 100%);--wp--preset--gradient--luminous-vivid-amber-to-luminous-vivid-orange: linear-gradient(135deg,rgba(252,185,0,1) 0%,rgba(255,105,0,1) 100%);--wp--preset--gradient--luminous-vivid-orange-to-vivid-red: linear-gradient(135deg,rgba(255,105,0,1) 0%,rgb(207,46,46) 100%);--wp--preset--gradient--very-light-gray-to-cyan-bluish-gray: linear-gradient(135deg,rgb(238,238,238) 0%,rgb(169,184,195) 100%);--wp--preset--gradient--cool-to-warm-spectrum: linear-gradient(135deg,rgb(74,234,220) 0%,rgb(151,120,209) 20%,rgb(207,42,186) 40%,rgb(238,44,130) 60%,rgb(251,105,98) 80%,rgb(254,248,76) 100%);--wp--preset--gradient--blush-light-purple: linear-gradient(135deg,rgb(255,206,236) 0%,rgb(152,150,240) 100%);--wp--preset--gradient--blush-bordeaux: linear-gradient(135deg,rgb(254,205,165) 0%,rgb(254,45,45) 50%,rgb(107,0,62) 100%);--wp--preset--gradient--luminous-dusk: linear-gradient(135deg,rgb(255,203,112) 0%,rgb(199,81,192) 50%,rgb(65,88,208) 100%);--wp--preset--gradient--pale-ocean: linear-gradient(135deg,rgb(255,245,203) 0%,rgb(182,227,212) 50%,rgb(51,167,181) 100%);--wp--preset--gradient--electric-grass: linear-gradient(135deg,rgb(202,248,128) 0%,rgb(113,206,126) 100%);--wp--preset--gradient--midnight: linear-gradient(135deg,rgb(2,3,129) 0%,rgb(40,116,252) 100%);--wp--preset--font-size--small: 13px;--wp--preset--font-size--medium: 20px;--wp--preset--font-size--large: 36px;--wp--preset--font-size--x-large: 42px;--wp--preset--spacing--20: 0.44rem;--wp--preset--spacing--30: 0.67rem;--wp--preset--spacing--40: 1rem;--wp--preset--spacing--50: 1.5rem;--wp--preset--spacing--60: 2.25rem;--wp--preset--spacing--70: 3.38rem;--wp--preset--spacing--80: 5.06rem;--wp--preset--shadow--natural: 6px 6px 9px rgba(0, 0, 0, 0.2);--wp--preset--shadow--deep: 12px 12px 50px rgba(0, 0, 0, 0.4);--wp--preset--shadow--sharp: 6px 6px 0px rgba(0, 0, 0, 0.2);--wp--preset--shadow--outlined: 6px 6px 0px -3px rgba(255, 255, 255, 1), 6px 6px rgba(0, 0, 0, 1);--wp--preset--shadow--crisp: 6px 6px 0px rgba(0, 0, 0, 1);}:where(.is-layout-flex){gap: 0.5em;}:where(.is-layout-grid){gap: 0.5em;}body .is-layout-flex{display: flex;}.is-layout-flex{flex-wrap: wrap;align-items: center;}.is-layout-flex > :is(*, div){margin: 0;}body .is-layout-grid{display: grid;}.is-layout-grid > :is(*, div){margin: 0;}:where(.wp-block-columns.is-layout-flex){gap: 2em;}:where(.wp-block-columns.is-layout-grid){gap: 2em;}:where(.wp-block-post-template.is-layout-flex){gap: 1.25em;}:where(.wp-block-post-template.is-layout-grid){gap: 1.25em;}.has-black-color{color: var(--wp--preset--color--black) !important;}.has-cyan-bluish-gray-color{color: var(--wp--preset--color--cyan-bluish-gray) !important;}.has-white-color{color: var(--wp--preset--color--white) !important;}.has-pale-pink-color{color: var(--wp--preset--color--pale-pink) !important;}.has-vivid-red-color{color: var(--wp--preset--color--vivid-red) !important;}.has-luminous-vivid-orange-color{color: var(--wp--preset--color--luminous-vivid-orange) !important;}.has-luminous-vivid-amber-color{color: var(--wp--preset--color--luminous-vivid-amber) !important;}.has-light-green-cyan-color{color: var(--wp--preset--color--light-green-cyan) !important;}.has-vivid-green-cyan-color{color: var(--wp--preset--color--vivid-green-cyan) !important;}.has-pale-cyan-blue-color{color: var(--wp--preset--color--pale-cyan-blue) !important;}.has-vivid-cyan-blue-color{color: var(--wp--preset--color--vivid-cyan-blue) !important;}.has-vivid-purple-color{color: var(--wp--preset--color--vivid-purple) !important;}.has-black-background-color{background-color: var(--wp--preset--color--black) !important;}.has-cyan-bluish-gray-background-color{background-color: var(--wp--preset--color--cyan-bluish-gray) !important;}.has-white-background-color{background-color: var(--wp--preset--color--white) !important;}.has-pale-pink-background-color{background-color: var(--wp--preset--color--pale-pink) !important;}.has-vivid-red-background-color{background-color: var(--wp--preset--color--vivid-red) !important;}.has-luminous-vivid-orange-background-color{background-color: var(--wp--preset--color--luminous-vivid-orange) !important;}.has-luminous-vivid-amber-background-color{background-color: var(--wp--preset--color--luminous-vivid-amber) !important;}.has-light-green-cyan-background-color{background-color: var(--wp--preset--color--light-green-cyan) !important;}.has-vivid-green-cyan-background-color{background-color: var(--wp--preset--color--vivid-green-cyan) !important;}.has-pale-cyan-blue-background-color{background-color: var(--wp--preset--color--pale-cyan-blue) !important;}.has-vivid-cyan-blue-background-color{background-color: var(--wp--preset--color--vivid-cyan-blue) !important;}.has-vivid-purple-background-color{background-color: var(--wp--preset--color--vivid-purple) !important;}.has-black-border-color{border-color: var(--wp--preset--color--black) !important;}.has-cyan-bluish-gray-border-color{border-color: var(--wp--preset--color--cyan-bluish-gray) !important;}.has-white-border-color{border-color: var(--wp--preset--color--white) !important;}.has-pale-pink-border-color{border-color: var(--wp--preset--color--pale-pink) !important;}.has-vivid-red-border-color{border-color: var(--wp--preset--color--vivid-red) !important;}.has-luminous-vivid-orange-border-color{border-color: var(--wp--preset--color--luminous-vivid-orange) !important;}.has-luminous-vivid-amber-border-color{border-color: var(--wp--preset--color--luminous-vivid-amber) !important;}.has-light-green-cyan-border-color{border-color: var(--wp--preset--color--light-green-cyan) !important;}.has-vivid-green-cyan-border-color{border-color: var(--wp--preset--color--vivid-green-cyan) !important;}.has-pale-cyan-blue-border-color{border-color: var(--wp--preset--color--pale-cyan-blue) !important;}.has-vivid-cyan-blue-border-color{border-color: var(--wp--preset--color--vivid-cyan-blue) !important;}.has-vivid-purple-border-color{border-color: var(--wp--preset--color--vivid-purple) !important;}.has-vivid-cyan-blue-to-vivid-purple-gradient-background{background: var(--wp--preset--gradient--vivid-cyan-blue-to-vivid-purple) !important;}.has-light-green-cyan-to-vivid-green-cyan-gradient-background{background: var(--wp--preset--gradient--light-green-cyan-to-vivid-green-cyan) !important;}.has-luminous-vivid-amber-to-luminous-vivid-orange-gradient-background{background: var(--wp--preset--gradient--luminous-vivid-amber-to-luminous-vivid-orange) !important;}.has-luminous-vivid-orange-to-vivid-red-gradient-background{background: var(--wp--preset--gradient--luminous-vivid-orange-to-vivid-red) !important;}.has-very-light-gray-to-cyan-bluish-gray-gradient-background{background: var(--wp--preset--gradient--very-light-gray-to-cyan-bluish-gray) !important;}.has-cool-to-warm-spectrum-gradient-background{background: var(--wp--preset--gradient--cool-to-warm-spectrum) !important;}.has-blush-light-purple-gradient-background{background: var(--wp--preset--gradient--blush-light-purple) !important;}.has-blush-bordeaux-gradient-background{background: var(--wp--preset--gradient--blush-bordeaux) !important;}.has-luminous-dusk-gradient-background{background: var(--wp--preset--gradient--luminous-dusk) !important;}.has-pale-ocean-gradient-background{background: var(--wp--preset--gradient--pale-ocean) !important;}.has-electric-grass-gradient-background{background: var(--wp--preset--gradient--electric-grass) !important;}.has-midnight-gradient-background{background: var(--wp--preset--gradient--midnight) !important;}.has-small-font-size{font-size: var(--wp--preset--font-size--small) !important;}.has-medium-font-size{font-size: var(--wp--preset--font-size--medium) !important;}.has-large-font-size{font-size: var(--wp--preset--font-size--large) !important;}.has-x-large-font-size{font-size: var(--wp--preset--font-size--x-large) !important;}
+:where(.wp-block-post-template.is-layout-flex){gap: 1.25em;}:where(.wp-block-post-template.is-layout-grid){gap: 1.25em;}
+:where(.wp-block-columns.is-layout-flex){gap: 2em;}:where(.wp-block-columns.is-layout-grid){gap: 2em;}
+:root :where(.wp-block-pullquote){font-size: 1.5em;line-height: 1.6;}
+</style>
+<link data-minify="1" rel="stylesheet" id="wpml-blocks-css" href="https://www.parisselectbook.com/wp-content/cache/min/1/wp-content/plugins/sitepress-multilingual-cms/dist/css/blocks/styles.css?ver=1740413676" type="text/css" media="all">
+<link rel="stylesheet" id="wpml-legacy-dropdown-0-css" href="https://www.parisselectbook.com/wp-content/plugins/sitepress-multilingual-cms/templates/language-switchers/legacy-dropdown/style.min.css?ver=1" type="text/css" media="all">
+<link rel="stylesheet" id="wpml-menu-item-0-css" href="https://www.parisselectbook.com/wp-content/plugins/sitepress-multilingual-cms/templates/language-switchers/menu-item/style.min.css?ver=1" type="text/css" media="all">
+<link data-minify="1" rel="stylesheet" id="main-css" href="https://www.parisselectbook.com/wp-content/cache/min/1/wp-content/themes/parisselectbook/dist/style.css?ver=1740413676" type="text/css" media="all">
+<link rel="stylesheet" id="select2-css" href="https://www.parisselectbook.com/wp-content/themes/parisselectbook/css/select2.min.css?ver=1.0.0" type="text/css" media="all">
+<link data-minify="1" rel="stylesheet" id="sib-front-css-css" href="https://www.parisselectbook.com/wp-content/cache/min/1/wp-content/plugins/mailin/css/mailin-front.css?ver=1740413676" type="text/css" media="all">
+<style id="rocket-lazyload-inline-css" type="text/css">
+.rll-youtube-player{position:relative;padding-bottom:56.23%;height:0;overflow:hidden;max-width:100%;}.rll-youtube-player:focus-within{outline: 2px solid currentColor;outline-offset: 5px;}.rll-youtube-player iframe{position:absolute;top:0;left:0;width:100%;height:100%;z-index:100;background:0 0}.rll-youtube-player img{bottom:0;display:block;left:0;margin:auto;max-width:100%;width:100%;position:absolute;right:0;top:0;border:none;height:auto;-webkit-transition:.4s all;-moz-transition:.4s all;transition:.4s all}.rll-youtube-player img:hover{-webkit-filter:brightness(75%)}.rll-youtube-player .play{height:100%;width:100%;left:0;top:0;position:absolute;background:url(https://www.parisselectbook.com/wp-content/plugins/wp-rocket/assets/img/youtube.png) no-repeat center;background-color: transparent !important;cursor:pointer;border:none;}
+</style>
+<script type="text/javascript" id="wpml-cookie-js-extra">
+/* <![CDATA[ */
+var wpml_cookies = {"wp-wpml_current_language":{"value":"en","expires":1,"path":"\/"}};
+var wpml_cookies = {"wp-wpml_current_language":{"value":"en","expires":1,"path":"\/"}};
+/* ]]> */
+</script>
+<script type="rocketlazyloadscript" data-minify="1" data-rocket-type="text/javascript" data-rocket-src="https://www.parisselectbook.com/wp-content/cache/min/1/wp-content/plugins/sitepress-multilingual-cms/res/js/cookies/language-cookie.js?ver=1740413676" id="wpml-cookie-js" defer="defer" data-wp-strategy="defer"></script>
+<script type="rocketlazyloadscript" data-rocket-type="text/javascript" data-rocket-src="https://www.parisselectbook.com/wp-content/plugins/sitepress-multilingual-cms/templates/language-switchers/legacy-dropdown/script.min.js?ver=1" id="wpml-legacy-dropdown-0-js" data-rocket-defer="" defer=""></script>
+<script type="rocketlazyloadscript" data-rocket-type="text/javascript" data-rocket-src="https://www.parisselectbook.com/wp-includes/js/jquery/jquery.min.js?ver=3.7.1" id="jquery-core-js" data-rocket-defer="" defer=""></script>
+<script type="rocketlazyloadscript" data-rocket-type="text/javascript" data-rocket-src="https://www.parisselectbook.com/wp-includes/js/jquery/jquery-migrate.min.js?ver=3.4.1" id="jquery-migrate-js" data-rocket-defer="" defer=""></script>
+<script type="text/javascript" id="sib-front-js-js-extra">
+/* <![CDATA[ */
+var sibErrMsg = {"invalidMail":"Please fill out valid email address","requiredField":"Please fill out required fields","invalidDateFormat":"Please fill out valid date format","invalidSMSFormat":"Please fill out valid phone number"};
+var ajax_sib_front_object = {"ajax_url":"https:\/\/www.parisselectbook.com\/wp-admin\/admin-ajax.php","ajax_nonce":"6ed65ea3a1","flag_url":"https:\/\/www.parisselectbook.com\/wp-content\/plugins\/mailin\/img\/flags\/"};
+/* ]]> */
+</script>
+<script type="rocketlazyloadscript" data-minify="1" data-rocket-type="text/javascript" data-rocket-src="https://www.parisselectbook.com/wp-content/cache/min/1/wp-content/plugins/mailin/js/mailin-front.js?ver=1740413676" id="sib-front-js-js" data-rocket-defer="" defer=""></script>
+<link rel="https://api.w.org/" href="https://www.parisselectbook.com/en/wp-json/"><link rel="alternate" title="JSON" type="application/json" href="https://www.parisselectbook.com/en/wp-json/wp/v2/posts/150952"><link rel="EditURI" type="application/rsd+xml" title="RSD" href="https://www.parisselectbook.com/xmlrpc.php?rsd">
+
+<link rel="shortlink" href="https://www.parisselectbook.com/en/?p=150952">
+<link rel="alternate" title="oEmbed (JSON)" type="application/json+oembed" href="https://www.parisselectbook.com/en/wp-json/oembed/1.0/embed?url=https%3A%2F%2Fwww.parisselectbook.com%2Fen%2F2025%2F01%2F13%2Flouis-vuitton-x-takashi-murakami-a-collaboration-that-revives-the-famous-petite-malle%2F">
+<link rel="alternate" title="oEmbed (XML)" type="text/xml+oembed" href="https://www.parisselectbook.com/en/wp-json/oembed/1.0/embed?url=https%3A%2F%2Fwww.parisselectbook.com%2Fen%2F2025%2F01%2F13%2Flouis-vuitton-x-takashi-murakami-a-collaboration-that-revives-the-famous-petite-malle%2F&amp;format=xml">
+<meta name="generator" content="WPML ver:4.6.15 stt:59,1,4,2;">
+        <!-- GOOGLE FONTS -->
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+        
+
+                    <script type="rocketlazyloadscript" async="" fetchpriority="low" data-rocket-src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8341765128137024" crossorigin="anonymous"></script>
+        
+    <noscript><style id="rocket-lazyload-nojs-css">.rll-youtube-player, [data-lazy-src]{display:none !important;}</style></noscript>
+        <link rel="shortcut icon" href="https://www.parisselectbook.com/wp-content/themes/parisselectbook/img/favicon/favicon.ico" type="image/x-icon">
+        <link rel="apple-touch-icon" sizes="60x60" href="https://www.parisselectbook.com/wp-content/themes/parisselectbook/img/favicon/apple-touch-icon-60x60.png">
+        <link rel="apple-touch-icon" sizes="76x76" href="https://www.parisselectbook.com/wp-content/themes/parisselectbook/img/favicon/apple-touch-icon-76x76.png">
+        <link rel="apple-touch-icon" sizes="120x120" href="https://www.parisselectbook.com/wp-content/themes/parisselectbook/img/favicon/apple-touch-icon-120x120.png">
+        <link rel="apple-touch-icon" sizes="152x152" href="https://www.parisselectbook.com/wp-content/themes/parisselectbook/img/favicon/apple-touch-icon-152x152.png">
+        <link rel="apple-touch-icon" sizes="180x180" href="https://www.parisselectbook.com/wp-content/themes/parisselectbook/img/favicon/apple-touch-icon-180x180.png">
+        <link rel="icon" type="image/png" href="https://www.parisselectbook.com/wp-content/themes/parisselectbook/img/favicon/favicon-32x32.png" sizes="32x32">
+        <link rel="icon" type="image/png" href="https://www.parisselectbook.com/wp-content/themes/parisselectbook/img/favicon/android-chrome-192x192.png" sizes="192x192">
+
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+        
+
+        <!-- Google tag (gtag.js) -->
+<script type="rocketlazyloadscript" async="" data-rocket-src="https://www.googletagmanager.com/gtag/js?id=G-NLDKKDFD5C"></script>
+<script type="rocketlazyloadscript">
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-NLDKKDFD5C');
+</script>
+
+<meta name="google-site-verification" content="w0s2-w9MrnRU2eINI4KYh6qXIuo6QOeOnxRCc-IXHcc">
+<!-- Google Tag Manager -->
+<script type="rocketlazyloadscript">(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-5G4B5SSJ');</script>
+<!-- End Google Tag Manager -->    <meta name="generator" content="WP Rocket 3.18.3" data-wpr-features="wpr_delay_js wpr_defer_js wpr_minify_js wpr_lazyload_images wpr_lazyload_iframes wpr_image_dimensions wpr_minify_css wpr_desktop"><link href="https://pagead2.googlesyndication.com" rel="preconnect" crossorigin="anonymous"><link href="https://www.googletagmanager.com" rel="preconnect"><link href="https://platform.twitter.com" rel="preconnect"><link href="https://www.instagram.com" rel="preconnect"></head>
+
+    
+    <body class="post-template-default single single-post postid-150952 single-format-standard">
+
+        
+                    <div data-rocket-location-hash="3b5e7f9c58d601981f309e344b39ab06" class="header-pattern"></div>
+            <header data-rocket-location-hash="c68188da780f11c554c4d18cceaef351" id="header">
+                <div data-rocket-location-hash="aaeb3c6cdb79d40364741180e5e7fa48" class="header-mid">
+                    <div data-rocket-location-hash="a07ea42f7826adb30ee53f29399bc39c" class="container">
+                        <div class="header-left">
+                            <div class="header-burger">
+                                <div class="burger_w">
+                                    <span></span>
+                                    <span></span>
+                                    <span></span>
+                                </div>
+                            </div>
+                            <div class="header-social">
+                                <a href="https://www.instagram.com/parisselect/" class="instagram" target="_blank" title="Paris Select Book on Instagram"><span class="icon-instagram"></span></a>
+                                <a href="https://www.facebook.com/parisselect" class="facebook" target="_blank" title="Paris Select Book on Facebook"><span class="icon-facebook"></span></a>
+                                <a href="https://www.tiktok.com/@parisselect" class="tiktok" target="_blank" title="Paris Select Book on tiktok"><span class="icon-tiktok"></span></a>
+                            </div>
+                        </div>
+
+                        <a class="header-brand" href="https://www.parisselectbook.com/en/" title="Home Paris Select Book">
+                            <img src="https://www.parisselectbook.com/wp-content/themes/parisselectbook/img/paris-select-book-h.svg" width="300" height="52" alt="Paris Select Book" data-lazy-src="https://www.parisselectbook.com/wp-content/themes/parisselectbook/img/paris-select-book-h.svg" data-ll-status="loaded" class="entered lazyloaded"><noscript><img src="https://www.parisselectbook.com/wp-content/themes/parisselectbook/img/paris-select-book-h.svg" width="300" height="52" alt="Paris Select Book" /></noscript>
+                        </a>
+
+                        <div class="header-right">
+                                                            <a href="https://www.parisselectbook.com/en/subscribe-to-newsletter/" class="header-newsletter">Subscribe to our newsletter</a>
+                            
+                            <div class="header-language">
+                                
+<div class="wpml-ls-statics-shortcode_actions wpml-ls wpml-ls-legacy-dropdown js-wpml-ls-legacy-dropdown">
+	<ul>
+
+		<li tabindex="0" class="wpml-ls-slot-shortcode_actions wpml-ls-item wpml-ls-item-en wpml-ls-current-language wpml-ls-item-legacy-dropdown">
+			<a href="#" class="js-wpml-ls-item-toggle wpml-ls-item-toggle">
+                                        <img width="18" height="12" class="wpml-ls-flag entered lazyloaded" src="https://www.parisselectbook.com/wp-content/uploads/flags/us.svg" alt="English" data-lazy-src="https://www.parisselectbook.com/wp-content/uploads/flags/us.svg" data-ll-status="loaded"><noscript><img width="18" height="12"
+            class="wpml-ls-flag"
+            src="https://www.parisselectbook.com/wp-content/uploads/flags/us.svg"
+            alt="English"
+            
+           
+    /></noscript></a>
+
+			<ul class="wpml-ls-sub-menu">
+				
+					<li class="wpml-ls-slot-shortcode_actions wpml-ls-item wpml-ls-item-fr wpml-ls-first-item">
+						<a href="https://www.parisselectbook.com/2025/01/13/louis-vuitton-x-takashi-murakami-une-collaboration-qui-fait-revivre-la-celebre-petite-malle/" class="wpml-ls-link">
+                                                    <img width="18" height="12" class="wpml-ls-flag entered lazyloaded" src="https://www.parisselectbook.com/wp-content/plugins/sitepress-multilingual-cms/res/flags/fr.svg" alt="French" data-lazy-src="https://www.parisselectbook.com/wp-content/plugins/sitepress-multilingual-cms/res/flags/fr.svg" data-ll-status="loaded"><noscript><img width="18" height="12"
+            class="wpml-ls-flag"
+            src="https://www.parisselectbook.com/wp-content/plugins/sitepress-multilingual-cms/res/flags/fr.svg"
+            alt="French"
+            
+           
+    /></noscript></a>
+					</li>
+
+				
+					<li class="wpml-ls-slot-shortcode_actions wpml-ls-item wpml-ls-item-es wpml-ls-last-item">
+						<a href="https://www.parisselectbook.com/es/2025/01/13/louis-vuitton-x-takashi-murakami-una-colaboracion-que-revive-la-famosa-petite-malle/" class="wpml-ls-link">
+                                                    <img width="18" height="12" class="wpml-ls-flag entered lazyloaded" src="https://www.parisselectbook.com/wp-content/plugins/sitepress-multilingual-cms/res/flags/es.svg" alt="Spanish" data-lazy-src="https://www.parisselectbook.com/wp-content/plugins/sitepress-multilingual-cms/res/flags/es.svg" data-ll-status="loaded"><noscript><img width="18" height="12"
+            class="wpml-ls-flag"
+            src="https://www.parisselectbook.com/wp-content/plugins/sitepress-multilingual-cms/res/flags/es.svg"
+            alt="Spanish"
+            
+           
+    /></noscript></a>
+					</li>
+
+							</ul>
+
+		</li>
+
+	</ul>
+</div>
+                            </div>
+                            <div class="header-search">
+                                <span class="icon-search"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div data-rocket-location-hash="1e83f1037c13fa83fce95464d99e9164" class="header-bottom">
+                    <div data-rocket-location-hash="9bc647e17ea447f4991941fc8acd49b3" class="header-menu-w">
+                        <div class="menu-header-anglais-container"><ul id="menu-header-anglais" class="header-menu"><li id="menu-item-123748" class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-has-children menu-item-123748"><a href="https://www.parisselectbook.com/en/category/que-faire-a-paris-en/">What to do In Paris</a>
+<ul class="sub-menu">
+	<li id="menu-item-123749" class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-123749"><a href="https://www.parisselectbook.com/en/category/que-faire-a-paris-en/walks/">Walks</a></li>
+	<li id="menu-item-123750" class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-123750"><a href="https://www.parisselectbook.com/en/category/que-faire-a-paris-en/this-week-end/">This week-end</a></li>
+	<li id="menu-item-123751" class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-123751"><a href="https://www.parisselectbook.com/en/category/que-faire-a-paris-en/culture-expositions-en/">Culture &amp; expositions</a></li>
+</ul>
+</li>
+<li id="menu-item-123752" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-123752"><a href="https://www.parisselectbook.com/en/what-to-do-in-paris-discover-every-corner-of-the-capital/">By district</a></li>
+<li id="menu-item-123753" class="menu-item menu-item-type-taxonomy menu-item-object-category current-post-ancestor current-menu-parent current-post-parent menu-item-123753"><a href="https://www.parisselectbook.com/en/category/news-du-luxe-en/">News du Luxe</a></li>
+<li id="menu-item-123754" class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-has-children menu-item-123754"><a href="https://www.parisselectbook.com/en/category/luxury-hotel/">Luxury Hotel</a>
+<ul class="sub-menu">
+	<li id="menu-item-123755" class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-123755"><a href="https://www.parisselectbook.com/en/category/luxury-hotel/in-paris/">In Paris</a></li>
+	<li id="menu-item-123756" class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-123756"><a href="https://www.parisselectbook.com/en/category/luxury-hotel/autour-de-paris-en/">Autour de paris</a></li>
+	<li id="menu-item-123757" class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-123757"><a href="https://www.parisselectbook.com/en/category/luxury-hotel/en-france-en/">En France</a></li>
+</ul>
+</li>
+<li id="menu-item-123758" class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-has-children menu-item-123758"><a href="https://www.parisselectbook.com/en/category/paris-by-night-en/">ParisByNight</a>
+<ul class="sub-menu">
+	<li id="menu-item-123759" class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-123759"><a href="https://www.parisselectbook.com/en/category/paris-by-night-en/bar-en/">Bar</a></li>
+</ul>
+</li>
+<li id="menu-item-123760" class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-has-children menu-item-123760"><a href="https://www.parisselectbook.com/en/category/restaurant/">Restaurant</a>
+<ul class="sub-menu">
+	<li id="menu-item-123761" class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-123761"><a href="https://www.parisselectbook.com/en/category/restaurant/cuisine-du-monde-en/">Cuisine du monde</a></li>
+	<li id="menu-item-123762" class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-123762"><a href="https://www.parisselectbook.com/en/category/restaurant/gourmandise-en/">Gourmandise</a></li>
+</ul>
+</li>
+<li id="menu-item-123763" class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-has-children menu-item-123763"><a href="https://www.parisselectbook.com/en/category/shopping-en/">Shopping</a>
+<ul class="sub-menu">
+	<li id="menu-item-123764" class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-123764"><a href="https://www.parisselectbook.com/en/category/shopping-en/decoration/">Decoration</a></li>
+	<li id="menu-item-123765" class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-123765"><a href="https://www.parisselectbook.com/en/category/shopping-en/joaillerie-horlogerie-en/">Joaillerie &amp; Horlogerie</a></li>
+</ul>
+</li>
+<li id="menu-item-123766" class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-has-children menu-item-123766"><a href="https://www.parisselectbook.com/en/category/beauty/">Beauty</a>
+<ul class="sub-menu">
+	<li id="menu-item-123767" class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-123767"><a href="https://www.parisselectbook.com/en/category/beauty/health-care/">Health care</a></li>
+	<li id="menu-item-123768" class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-123768"><a href="https://www.parisselectbook.com/en/category/beauty/makeup-en/">Makeup</a></li>
+</ul>
+</li>
+</ul></div>                        <a href="https://www.parisselectbook.com/en/select-guide/" title="Home Paris Select Guide"><img src="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20120%2030'%3E%3C/svg%3E" width="120" height="30" alt="Logo Paris Select Guide" data-lazy-src="https://www.parisselectbook.com/wp-content/themes/parisselectbook/img/select-guide-logo.svg"><noscript><img src="https://www.parisselectbook.com/wp-content/themes/parisselectbook/img/select-guide-logo.svg" width="120" height="30" alt="Logo Paris Select Guide" /></noscript></a>
+
+                        <div class="header-bottom-right">
+                                                            <a href="https://www.parisselectbook.com/en/subscribe-to-newsletter/" class="header-newsletter">Subscribe to our newsletter</a>
+                            
+                            <div class="header-social">
+                                <a href="https://www.instagram.com/parisselect/" class="instagram" target="_blank" title="Paris Select Book on Instagram"><span class="icon-instagram"></span></a>
+                                <a href="https://www.facebook.com/parisselect" class="facebook" target="_blank" title="Paris Select Book on Facebook"><span class="icon-facebook"></span></a>
+                                <a href="https://www.tiktok.com/@parisselect" class="tiktok" target="_blank" title="Paris Select Book on tiktok"><span class="icon-tiktok"></span></a>
+                            </div>
+                        </div>
+                        <div class="header-search">
+                            <span class="icon-search"></span>
+                        </div>
+                    </div>
+                </div>
+                <div data-rocket-location-hash="04a35a996501029848cd774880836cbb" class="header-search-w">
+                    <form name="search" action="https://www.parisselectbook.com/en/" class="search" method="get" role="search" id="searchForm">
+    <input class="search-input" id="searchFormValue" type="text" name="s" autocomplete="off" placeholder="Search" value="">
+    <input type="submit" class="search-submit" id="searchFormSubmit" value="Search">
+    <span class="icon-close"></span>
+        <input type="hidden" name="post_type" value="post">
+</form>                </div>
+            </header>
+        
+<main data-rocket-location-hash="56922a952f8bdd0ce56ac834fc0eb1ec">
+    <section data-rocket-location-hash="7664d5ba474588c13b9c7c4728137185" class="section-main">
+
+        
+            <nav>
+    
+    <div class="sidebar-bloc widget_block"><p><script type="rocketlazyloadscript" async="" data-rocket-src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8341765128137024" crossorigin="anonymous"></script><br>
+<!-- PS_SideBar_InArticle --><br>
+<ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-8341765128137024" data-ad-slot="3278845319" data-ad-format="auto" data-full-width-responsive="true"></ins><br>
+<script type="rocketlazyloadscript">
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script></p>
+</div>
+                <div class="sidebar-bloc">
+                <div class="sidebar-title"><span>New</span> trends !</div>
+                <div class="sidebar-post-list">
+                                            <a class="card" href="https://www.parisselectbook.com/en/2025/03/24/eva-longoria-and-apm-monaco-the-detail-all-paris-will-want-this-summer/" title="Eva Longoria and APM Monaco: the detail all Paris will want this summer">
+                            <div class="card-thumbnail">
+                                <img width="534" height="300" src="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20534%20300'%3E%3C/svg%3E" class="attachment-thumbnail size-thumbnail wp-post-image" alt="" decoding="async" fetchpriority="high" data-lazy-srcset="https://www.parisselectbook.com/wp-content/uploads/2025/03/A-2025-03-24T104031.660-534x300.jpg 534w, https://www.parisselectbook.com/wp-content/uploads/2025/03/A-2025-03-24T104031.660-295x166.jpg 295w, https://www.parisselectbook.com/wp-content/uploads/2025/03/A-2025-03-24T104031.660-880x495.jpg 880w, https://www.parisselectbook.com/wp-content/uploads/2025/03/A-2025-03-24T104031.660-768x432.jpg 768w, https://www.parisselectbook.com/wp-content/uploads/2025/03/A-2025-03-24T104031.660-1536x864.jpg 1536w, https://www.parisselectbook.com/wp-content/uploads/2025/03/A-2025-03-24T104031.660-180x100.jpg 180w, https://www.parisselectbook.com/wp-content/uploads/2025/03/A-2025-03-24T104031.660-312x175.jpg 312w, https://www.parisselectbook.com/wp-content/uploads/2025/03/A-2025-03-24T104031.660-829x466.jpg 829w, https://www.parisselectbook.com/wp-content/uploads/2025/03/A-2025-03-24T104031.660-372x209.jpg 372w, https://www.parisselectbook.com/wp-content/uploads/2025/03/A-2025-03-24T104031.660-1024x576.jpg 1024w, https://www.parisselectbook.com/wp-content/uploads/2025/03/A-2025-03-24T104031.660-296x167.jpg 296w, https://www.parisselectbook.com/wp-content/uploads/2025/03/A-2025-03-24T104031.660.jpg 1920w" data-lazy-sizes="(max-width: 534px) 100vw, 534px" data-lazy-src="https://www.parisselectbook.com/wp-content/uploads/2025/03/A-2025-03-24T104031.660-534x300.jpg"><noscript><img width="534" height="300" src="https://www.parisselectbook.com/wp-content/uploads/2025/03/A-2025-03-24T104031.660-534x300.jpg" class="attachment-thumbnail size-thumbnail wp-post-image" alt="" decoding="async" fetchpriority="high" srcset="https://www.parisselectbook.com/wp-content/uploads/2025/03/A-2025-03-24T104031.660-534x300.jpg 534w, https://www.parisselectbook.com/wp-content/uploads/2025/03/A-2025-03-24T104031.660-295x166.jpg 295w, https://www.parisselectbook.com/wp-content/uploads/2025/03/A-2025-03-24T104031.660-880x495.jpg 880w, https://www.parisselectbook.com/wp-content/uploads/2025/03/A-2025-03-24T104031.660-768x432.jpg 768w, https://www.parisselectbook.com/wp-content/uploads/2025/03/A-2025-03-24T104031.660-1536x864.jpg 1536w, https://www.parisselectbook.com/wp-content/uploads/2025/03/A-2025-03-24T104031.660-180x100.jpg 180w, https://www.parisselectbook.com/wp-content/uploads/2025/03/A-2025-03-24T104031.660-312x175.jpg 312w, https://www.parisselectbook.com/wp-content/uploads/2025/03/A-2025-03-24T104031.660-829x466.jpg 829w, https://www.parisselectbook.com/wp-content/uploads/2025/03/A-2025-03-24T104031.660-372x209.jpg 372w, https://www.parisselectbook.com/wp-content/uploads/2025/03/A-2025-03-24T104031.660-1024x576.jpg 1024w, https://www.parisselectbook.com/wp-content/uploads/2025/03/A-2025-03-24T104031.660-296x167.jpg 296w, https://www.parisselectbook.com/wp-content/uploads/2025/03/A-2025-03-24T104031.660.jpg 1920w" sizes="(max-width: 534px) 100vw, 534px" /></noscript>                            </div>
+                            <div class="card-text">
+                                <div class="card-title">Eva Longoria and APM Monaco: the detail all Paris will want this summer</div>
+                            </div>
+                        </a>
+                                            <a class="card" href="https://www.parisselectbook.com/en/2025/03/24/heres-why-the-kilian-paris-flagship-is-already-fascinating/" title="Here’s why the Kilian Paris flagship is already fascinating">
+                            <div class="card-thumbnail">
+                                <img width="534" height="300" src="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20534%20300'%3E%3C/svg%3E" class="attachment-thumbnail size-thumbnail wp-post-image" alt="" decoding="async" data-lazy-srcset="https://www.parisselectbook.com/wp-content/uploads/2025/03/A-2025-03-24T102535.415-534x300.jpg 534w, https://www.parisselectbook.com/wp-content/uploads/2025/03/A-2025-03-24T102535.415-295x166.jpg 295w, https://www.parisselectbook.com/wp-content/uploads/2025/03/A-2025-03-24T102535.415-880x495.jpg 880w, https://www.parisselectbook.com/wp-content/uploads/2025/03/A-2025-03-24T102535.415-768x432.jpg 768w, https://www.parisselectbook.com/wp-content/uploads/2025/03/A-2025-03-24T102535.415-1536x864.jpg 1536w, https://www.parisselectbook.com/wp-content/uploads/2025/03/A-2025-03-24T102535.415-180x100.jpg 180w, https://www.parisselectbook.com/wp-content/uploads/2025/03/A-2025-03-24T102535.415-312x175.jpg 312w, https://www.parisselectbook.com/wp-content/uploads/2025/03/A-2025-03-24T102535.415-829x466.jpg 829w, https://www.parisselectbook.com/wp-content/uploads/2025/03/A-2025-03-24T102535.415-372x209.jpg 372w, https://www.parisselectbook.com/wp-content/uploads/2025/03/A-2025-03-24T102535.415-1024x576.jpg 1024w, https://www.parisselectbook.com/wp-content/uploads/2025/03/A-2025-03-24T102535.415-296x167.jpg 296w, https://www.parisselectbook.com/wp-content/uploads/2025/03/A-2025-03-24T102535.415.jpg 1920w" data-lazy-sizes="(max-width: 534px) 100vw, 534px" data-lazy-src="https://www.parisselectbook.com/wp-content/uploads/2025/03/A-2025-03-24T102535.415-534x300.jpg"><noscript><img width="534" height="300" src="https://www.parisselectbook.com/wp-content/uploads/2025/03/A-2025-03-24T102535.415-534x300.jpg" class="attachment-thumbnail size-thumbnail wp-post-image" alt="" decoding="async" srcset="https://www.parisselectbook.com/wp-content/uploads/2025/03/A-2025-03-24T102535.415-534x300.jpg 534w, https://www.parisselectbook.com/wp-content/uploads/2025/03/A-2025-03-24T102535.415-295x166.jpg 295w, https://www.parisselectbook.com/wp-content/uploads/2025/03/A-2025-03-24T102535.415-880x495.jpg 880w, https://www.parisselectbook.com/wp-content/uploads/2025/03/A-2025-03-24T102535.415-768x432.jpg 768w, https://www.parisselectbook.com/wp-content/uploads/2025/03/A-2025-03-24T102535.415-1536x864.jpg 1536w, https://www.parisselectbook.com/wp-content/uploads/2025/03/A-2025-03-24T102535.415-180x100.jpg 180w, https://www.parisselectbook.com/wp-content/uploads/2025/03/A-2025-03-24T102535.415-312x175.jpg 312w, https://www.parisselectbook.com/wp-content/uploads/2025/03/A-2025-03-24T102535.415-829x466.jpg 829w, https://www.parisselectbook.com/wp-content/uploads/2025/03/A-2025-03-24T102535.415-372x209.jpg 372w, https://www.parisselectbook.com/wp-content/uploads/2025/03/A-2025-03-24T102535.415-1024x576.jpg 1024w, https://www.parisselectbook.com/wp-content/uploads/2025/03/A-2025-03-24T102535.415-296x167.jpg 296w, https://www.parisselectbook.com/wp-content/uploads/2025/03/A-2025-03-24T102535.415.jpg 1920w" sizes="(max-width: 534px) 100vw, 534px" /></noscript>                            </div>
+                            <div class="card-text">
+                                <div class="card-title">Here’s why the Kilian Paris flagship is already fascinating</div>
+                            </div>
+                        </a>
+                                            <a class="card" href="https://www.parisselectbook.com/en/2025/03/24/kim-kardashian-merges-skkn-with-skims-what-cotys-withdrawal-conceals/" title="Kim Kardashian merges Skkn with Skims: what Coty’s withdrawal conceals">
+                            <div class="card-thumbnail">
+                                <img width="534" height="300" src="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20534%20300'%3E%3C/svg%3E" class="attachment-thumbnail size-thumbnail wp-post-image" alt="" decoding="async" data-lazy-srcset="https://www.parisselectbook.com/wp-content/uploads/2025/03/A-2025-03-24T100648.911-534x300.jpg 534w, https://www.parisselectbook.com/wp-content/uploads/2025/03/A-2025-03-24T100648.911-295x166.jpg 295w, https://www.parisselectbook.com/wp-content/uploads/2025/03/A-2025-03-24T100648.911-880x495.jpg 880w, https://www.parisselectbook.com/wp-content/uploads/2025/03/A-2025-03-24T100648.911-768x432.jpg 768w, https://www.parisselectbook.com/wp-content/uploads/2025/03/A-2025-03-24T100648.911-1536x864.jpg 1536w, https://www.parisselectbook.com/wp-content/uploads/2025/03/A-2025-03-24T100648.911-180x100.jpg 180w, https://www.parisselectbook.com/wp-content/uploads/2025/03/A-2025-03-24T100648.911-312x175.jpg 312w, https://www.parisselectbook.com/wp-content/uploads/2025/03/A-2025-03-24T100648.911-829x466.jpg 829w, https://www.parisselectbook.com/wp-content/uploads/2025/03/A-2025-03-24T100648.911-372x209.jpg 372w, https://www.parisselectbook.com/wp-content/uploads/2025/03/A-2025-03-24T100648.911-1024x576.jpg 1024w, https://www.parisselectbook.com/wp-content/uploads/2025/03/A-2025-03-24T100648.911-296x167.jpg 296w, https://www.parisselectbook.com/wp-content/uploads/2025/03/A-2025-03-24T100648.911.jpg 1920w" data-lazy-sizes="(max-width: 534px) 100vw, 534px" data-lazy-src="https://www.parisselectbook.com/wp-content/uploads/2025/03/A-2025-03-24T100648.911-534x300.jpg"><noscript><img width="534" height="300" src="https://www.parisselectbook.com/wp-content/uploads/2025/03/A-2025-03-24T100648.911-534x300.jpg" class="attachment-thumbnail size-thumbnail wp-post-image" alt="" decoding="async" srcset="https://www.parisselectbook.com/wp-content/uploads/2025/03/A-2025-03-24T100648.911-534x300.jpg 534w, https://www.parisselectbook.com/wp-content/uploads/2025/03/A-2025-03-24T100648.911-295x166.jpg 295w, https://www.parisselectbook.com/wp-content/uploads/2025/03/A-2025-03-24T100648.911-880x495.jpg 880w, https://www.parisselectbook.com/wp-content/uploads/2025/03/A-2025-03-24T100648.911-768x432.jpg 768w, https://www.parisselectbook.com/wp-content/uploads/2025/03/A-2025-03-24T100648.911-1536x864.jpg 1536w, https://www.parisselectbook.com/wp-content/uploads/2025/03/A-2025-03-24T100648.911-180x100.jpg 180w, https://www.parisselectbook.com/wp-content/uploads/2025/03/A-2025-03-24T100648.911-312x175.jpg 312w, https://www.parisselectbook.com/wp-content/uploads/2025/03/A-2025-03-24T100648.911-829x466.jpg 829w, https://www.parisselectbook.com/wp-content/uploads/2025/03/A-2025-03-24T100648.911-372x209.jpg 372w, https://www.parisselectbook.com/wp-content/uploads/2025/03/A-2025-03-24T100648.911-1024x576.jpg 1024w, https://www.parisselectbook.com/wp-content/uploads/2025/03/A-2025-03-24T100648.911-296x167.jpg 296w, https://www.parisselectbook.com/wp-content/uploads/2025/03/A-2025-03-24T100648.911.jpg 1920w" sizes="(max-width: 534px) 100vw, 534px" /></noscript>                            </div>
+                            <div class="card-text">
+                                <div class="card-title">Kim Kardashian merges Skkn with Skims: what Coty’s withdrawal conceals</div>
+                            </div>
+                        </a>
+                                            <a class="card" href="https://www.parisselectbook.com/en/2025/03/24/loewe-changes-face-what-to-expect-from-the-mccollough-and-hernandez-duo/" title="Loewe changes face: what to expect from the McCollough and Hernandez duo?">
+                            <div class="card-thumbnail">
+                                <img width="534" height="300" src="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20534%20300'%3E%3C/svg%3E" class="attachment-thumbnail size-thumbnail wp-post-image" alt="" decoding="async" data-lazy-srcset="https://www.parisselectbook.com/wp-content/uploads/2025/03/A-100-1-534x300.jpg 534w, https://www.parisselectbook.com/wp-content/uploads/2025/03/A-100-1-295x166.jpg 295w, https://www.parisselectbook.com/wp-content/uploads/2025/03/A-100-1-880x495.jpg 880w, https://www.parisselectbook.com/wp-content/uploads/2025/03/A-100-1-768x432.jpg 768w, https://www.parisselectbook.com/wp-content/uploads/2025/03/A-100-1-1536x864.jpg 1536w, https://www.parisselectbook.com/wp-content/uploads/2025/03/A-100-1-180x100.jpg 180w, https://www.parisselectbook.com/wp-content/uploads/2025/03/A-100-1-312x175.jpg 312w, https://www.parisselectbook.com/wp-content/uploads/2025/03/A-100-1-829x466.jpg 829w, https://www.parisselectbook.com/wp-content/uploads/2025/03/A-100-1-372x209.jpg 372w, https://www.parisselectbook.com/wp-content/uploads/2025/03/A-100-1-1024x576.jpg 1024w, https://www.parisselectbook.com/wp-content/uploads/2025/03/A-100-1-296x167.jpg 296w, https://www.parisselectbook.com/wp-content/uploads/2025/03/A-100-1.jpg 1920w" data-lazy-sizes="(max-width: 534px) 100vw, 534px" data-lazy-src="https://www.parisselectbook.com/wp-content/uploads/2025/03/A-100-1-534x300.jpg"><noscript><img width="534" height="300" src="https://www.parisselectbook.com/wp-content/uploads/2025/03/A-100-1-534x300.jpg" class="attachment-thumbnail size-thumbnail wp-post-image" alt="" decoding="async" srcset="https://www.parisselectbook.com/wp-content/uploads/2025/03/A-100-1-534x300.jpg 534w, https://www.parisselectbook.com/wp-content/uploads/2025/03/A-100-1-295x166.jpg 295w, https://www.parisselectbook.com/wp-content/uploads/2025/03/A-100-1-880x495.jpg 880w, https://www.parisselectbook.com/wp-content/uploads/2025/03/A-100-1-768x432.jpg 768w, https://www.parisselectbook.com/wp-content/uploads/2025/03/A-100-1-1536x864.jpg 1536w, https://www.parisselectbook.com/wp-content/uploads/2025/03/A-100-1-180x100.jpg 180w, https://www.parisselectbook.com/wp-content/uploads/2025/03/A-100-1-312x175.jpg 312w, https://www.parisselectbook.com/wp-content/uploads/2025/03/A-100-1-829x466.jpg 829w, https://www.parisselectbook.com/wp-content/uploads/2025/03/A-100-1-372x209.jpg 372w, https://www.parisselectbook.com/wp-content/uploads/2025/03/A-100-1-1024x576.jpg 1024w, https://www.parisselectbook.com/wp-content/uploads/2025/03/A-100-1-296x167.jpg 296w, https://www.parisselectbook.com/wp-content/uploads/2025/03/A-100-1.jpg 1920w" sizes="(max-width: 534px) 100vw, 534px" /></noscript>                            </div>
+                            <div class="card-text">
+                                <div class="card-title">Loewe changes face: what to expect from the McCollough and Hernandez duo?</div>
+                            </div>
+                        </a>
+                                    </div>
+            </div>
+            
+    
+</nav>
+            <article data-rocket-location-hash="d9f327f133461ed3ea161caef742cd2e">
+
+                <section class="color- post-article" data-page="0" data-cat-id="2685" data-not="150952" itemscope="" itemtype="https://schema.org/NewsArticle">
+                    <ul id="breadcrumbs"><li><a href="https://www.parisselectbook.com/en/category/news-du-luxe-en/">News du Luxe</a></li> <li class="breadcrumb-separator">•</li> <li><a href="https://www.parisselectbook.com/en/2025/01/13/louis-vuitton-x-takashi-murakami-a-collaboration-that-revives-the-famous-petite-malle/">Louis Vuitton x Takashi Murakami: A Collaboration that Revives the Famous Petite Malle</a></li></ul>                    <div class="row">
+                        <div class="col-12">
+                            <div class="content post-text">
+                                <div class="single-top">
+                                    <h1>Louis Vuitton x Takashi Murakami: A Collaboration that Revives the Famous Petite Malle</h1>
+                                    <div class="single-thumbnail">
+                                        <div class="single-thumbnail-cover"></div>
+                                        <img width="829" height="466" src="https://www.parisselectbook.com/wp-content/uploads/2025/01/GhKu5duWEAA74w7-829x466.jpeg" class="attachment-single-desktop size-single-desktop wp-post-image entered lazyloaded" alt="" data-lazy-srcset="https://www.parisselectbook.com/wp-content/uploads/2025/01/GhKu5duWEAA74w7-829x466.jpeg 1287w, https://www.parisselectbook.com/wp-content/uploads/2025/01/GhKu5duWEAA74w7-372x209.jpeg 412w" data-lazy-sizes="(max-width: 412px) 100vw, 1287px" decoding="async" data-lazy-src="https://www.parisselectbook.com/wp-content/uploads/2025/01/GhKu5duWEAA74w7-829x466.jpeg" data-ll-status="loaded" sizes="(max-width: 412px) 100vw, 1287px" srcset="https://www.parisselectbook.com/wp-content/uploads/2025/01/GhKu5duWEAA74w7-829x466.jpeg 1287w, https://www.parisselectbook.com/wp-content/uploads/2025/01/GhKu5duWEAA74w7-372x209.jpeg 412w"><noscript><img width="829" height="466" src="https://www.parisselectbook.com/wp-content/uploads/2025/01/GhKu5duWEAA74w7-829x466.jpeg" class="attachment-single-desktop size-single-desktop wp-post-image" alt="" srcset="https://www.parisselectbook.com/wp-content/uploads/2025/01/GhKu5duWEAA74w7-829x466.jpeg 1287w, https://www.parisselectbook.com/wp-content/uploads/2025/01/GhKu5duWEAA74w7-372x209.jpeg 412w" sizes="(max-width: 412px) 100vw, 1287px" decoding="async" /></noscript>                                    </div>
+                                </div>
+                                                                <div class="single-description">
+                                    <div class="single-info">
+                                                                                    <div class="single-info-left">
+                                                                                        <a href="https://www.parisselectbook.com/en/category/news-du-luxe-en/" title="Catégorie News du Luxe" class="single-category">News du Luxe</a>                                            </div>
+                                                                            </div>
+
+                                                                        
+                                    
+                                    
+<p><strong>Maison Louis Vuitton joins forces with artist Takashi Murakami for a bold reinterpretation of the famous Petite Malle, celebrating the union between art and luxury craftsmanship.</strong></p>
+
+<p>Louis Vuitton’s iconic <strong>Petite Malle</strong> bag is given a new lease of life in a new edition that revives the historic collaboration with renowned Japanese artist Takashi Murakami. At the heart of this collection, Murakami’s “Superflat Garden” motif, which plays on a unique blend of colors and shapes, sublimates the Maison’s iconic Monogram canvas. This collaboration marks a tribute to a decade of artistic projects and testifies to an ongoing dialogue between fashion and contemporary art.  </p>
+
+<div class="wp-block-columns is-layout-flex wp-container-core-columns-is-layout-1 wp-block-columns-is-layout-flex">
+<div class="wp-block-column is-layout-flow wp-block-column-is-layout-flow" style="flex-basis:25%"></div>
+
+
+
+<div class="wp-block-column is-layout-flow wp-block-column-is-layout-flow" style="flex-basis:50%">
+<blockquote class="twitter-tweet" data-media-max-width="560"><p lang="en" dir="ltr">The iconic Petite Malle is playfully reimagined for the re-edition collection, with Takashi Murakami’s signature Superflat Garden motif enlivening the Monogram canvas and the engraved, hand-painted clasp<a href="https://twitter.com/hashtag/LVxMurakami?src=hash&amp;ref_src=twsrc%5Etfw">.#LVxMurakami</a> <a href="https://twitter.com/hashtag/LouisVuitton?src=hash&amp;ref_src=twsrc%5Etfw">#LouisVuitton</a> <a href="https://t.co/2Seqc1qUMj">pic.twitter.com/2Seqc1qUMj</a></p>– Louis Vuitton (@LouisVuitton)  <a href="https://twitter.com/LouisVuitton/status/1878756348470657501?ref_src=twsrc%5Etfw">January 13, 2025</a></blockquote> <script type="rocketlazyloadscript" async="" data-rocket-src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+</div>
+
+
+
+<div class="wp-block-column is-layout-flow wp-block-column-is-layout-flow" style="flex-basis:25%"></div>
+</div>
+
+<h2 class="wp-block-heading has-text-align-center">Takashi Murakami and Louis Vuitton: An emblematic partnership</h2>
+
+<div class="wp-block-columns is-layout-flex wp-container-core-columns-is-layout-2 wp-block-columns-is-layout-flex">
+<div class="wp-block-column is-layout-flow wp-block-column-is-layout-flow" style="flex-basis:25%"></div>
+
+
+
+<div class="wp-block-column is-layout-flow wp-block-column-is-layout-flow" style="flex-basis:50%">
+<blockquote class="instagram-media" data-instgrm-permalink="https://www.instagram.com/reel/DErpBIayyg6/?utm_source=ig_embed&amp;utm_campaign=loading" data-instgrm-version="14" style="  background:#FFF; border:0; border-radius:3px; box-shadow:0 0 1px 0 rgba(0,0,0,0.5),0 1px 10px 0 rgba(0,0,0,0.15); margin: 1px; max-width:540px; min-width:326px; padding:0; width:99.375%; width:-webkit-calc(100% - 2px); width:calc(100% - 2px);"><div style="padding:16px;"> <a href="https://www.instagram.com/reel/DErpBIayyg6/?utm_source=ig_embed&amp;utm_campaign=loading" style="  background:#FFFFFF; line-height:0; padding:0 0; text-align:center; text-decoration:none; width:100%;" target="_blank"> <div style="  display: flex; flex-direction: row; align-items: center;"> <div style="background-color: #F4F4F4; border-radius: 50%; flex-grow: 0; height: 40px; margin-right: 14px; width: 40px;"></div> <div style="display: flex; flex-direction: column; flex-grow: 1; justify-content: center;"> <div style="  background-color: #F4F4F4; border-radius: 4px; flex-grow: 0; height: 14px; margin-bottom: 6px; width: 100px;"></div> <div style="  background-color: #F4F4F4; border-radius: 4px; flex-grow: 0; height: 14px; width: 60px;"></div></div></div><div style="padding: 19% 0;"></div> <div style="display:block; height:50px; margin:0 auto 12px; width:50px;"><svg xmlns="https://www.w3.org/2000/svg" xmlns:xlink="https://www.w3.org/1999/xlink" width="50px" height="50px" viewBox="0 0 60 60" version="1.1"><g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"><g transform="translate(-511.000000, -20.000000)" fill="#000000"><g><path d="M556.869,30.41 C554.814,30.41 553.148,32.076 553.148,34.131 C553.148,36.186 554.814,37.852 556.869,37.852 C558.924,37.852 560.59,36.186 560.59,34.131 C560.59,32.076 558.924,30.41 556.869,30.41 M541,60.657 C535.114,60.657 530.342,55.887 530.342,50 C530.342,44.114 535.114,39.342 541,39.342 C546.887,39.342 551.658,44.114 551.658,50 C551.658,55.887 546.887,60.657 541,60.657 M541,33.886 C532.1,33.886 524.886,41.1 524.886,50 C524.886,58.899 532.1,66.113 541,66.113 C549.9,66.113 557.115,58.899 557.115,50 C557.115,41.1 549.9,33.886 541,33.886 M565.378,62.101 C565.244,65.022 564.756,66.606 564.346,67.663 C563.803,69.06 563.154,70.057 562.106,71.106 C561.058,72.155 560.06,72.803 558.662,73.347 C557.607,73.757 556.021,74.244 553.102,74.378 C549.944,74.521 548.997,74.552 541,74.552 C533.003,74.552 532.056,74.521 528.898,74.378 C525.979,74.244 524.393,73.757 523.338,73.347 C521.94,72.803 520.942,72.155 519.894,71.106 C518.846,70.057 518.197,69.06 517.654,67.663 C517.244,66.606 516.755,65.022 516.623,62.101 C516.479,58.943 516.448,57.996 516.448,50 C516.448,42.003 516.479,41.056 516.623,37.899 C516.755,34.978 517.244,33.391 517.654,32.338 C518.197,30.938 518.846,29.942 519.894,28.894 C520.942,27.846 521.94,27.196 523.338,26.654 C524.393,26.244 525.979,25.756 528.898,25.623 C532.057,25.479 533.004,25.448 541,25.448 C548.997,25.448 549.943,25.479 553.102,25.623 C556.021,25.756 557.607,26.244 558.662,26.654 C560.06,27.196 561.058,27.846 562.106,28.894 C563.154,29.942 563.803,30.938 564.346,32.338 C564.756,33.391 565.244,34.978 565.378,37.899 C565.522,41.056 565.552,42.003 565.552,50 C565.552,57.996 565.522,58.943 565.378,62.101 M570.82,37.631 C570.674,34.438 570.167,32.258 569.425,30.349 C568.659,28.377 567.633,26.702 565.965,25.035 C564.297,23.368 562.623,22.342 560.652,21.575 C558.743,20.834 556.562,20.326 553.369,20.18 C550.169,20.033 549.148,20 541,20 C532.853,20 531.831,20.033 528.631,20.18 C525.438,20.326 523.257,20.834 521.349,21.575 C519.376,22.342 517.703,23.368 516.035,25.035 C514.368,26.702 513.342,28.377 512.574,30.349 C511.834,32.258 511.326,34.438 511.181,37.631 C511.035,40.831 511,41.851 511,50 C511,58.147 511.035,59.17 511.181,62.369 C511.326,65.562 511.834,67.743 512.574,69.651 C513.342,71.625 514.368,73.296 516.035,74.965 C517.703,76.634 519.376,77.658 521.349,78.425 C523.257,79.167 525.438,79.673 528.631,79.82 C531.831,79.965 532.853,80.001 541,80.001 C549.148,80.001 550.169,79.965 553.369,79.82 C556.562,79.673 558.743,79.167 560.652,78.425 C562.623,77.658 564.297,76.634 565.965,74.965 C567.633,73.296 568.659,71.625 569.425,69.651 C570.167,67.743 570.674,65.562 570.82,62.369 C570.966,59.17 571,58.147 571,50 C571,41.851 570.966,40.831 570.82,37.631"></path></g></g></g></svg></div><div style="padding-top: 8px;"> <div style="  color:#3897f0; font-family:Arial,sans-serif; font-size:14px; font-style:normal; font-weight:550; line-height:18px;">See this post on Instagram</div></div><div style="padding: 12.5% 0;"></div> <div style="display: flex; flex-direction: row; margin-bottom: 14px; align-items: center;"><div> <div style="background-color: #F4F4F4; border-radius: 50%; height: 12.5px; width: 12.5px; transform: translateX(0px) translateY(7px);"></div> <div style="background-color: #F4F4F4; height: 12.5px; transform: rotate(-45deg) translateX(3px) translateY(1px); width: 12.5px; flex-grow: 0; margin-right: 14px; margin-left: 2px;"></div> <div style="background-color: #F4F4F4; border-radius: 50%; height: 12.5px; width: 12.5px; transform: translateX(9px) translateY(-18px);"></div></div><div style="margin-left: 8px;"> <div style="  background-color: #F4F4F4; border-radius: 50%; flex-grow: 0; height: 20px; width: 20px;"></div> <div style="  width: 0; height: 0; border-top: 2px solid transparent; border-left: 6px solid #f4f4f4; border-bottom: 2px solid transparent; transform: translateX(16px) translateY(-4px) rotate(30deg)"></div></div><div style="margin-left: auto;"> <div style="  width: 0px; border-top: 8px solid #F4F4F4; border-right: 8px solid transparent; transform: translateY(16px);"></div> <div style="  background-color: #F4F4F4; flex-grow: 0; height: 12px; width: 16px; transform: translateY(-4px);"></div> <div style="  width: 0; height: 0; border-top: 8px solid #F4F4F4; border-left: 8px solid transparent; transform: translateY(-4px) translateX(8px);"></div></div></div> <div style="display: flex; flex-direction: column; flex-grow: 1; justify-content: center; margin-bottom: 24px;"> <div style="  background-color: #F4F4F4; border-radius: 4px; flex-grow: 0; height: 14px; margin-bottom: 6px; width: 224px;"></div> <div style="  background-color: #F4F4F4; border-radius: 4px; flex-grow: 0; height: 14px; width: 144px;"></div></div></a><p style="  color:#c9c8cd; font-family:Arial,sans-serif; font-size:14px; line-height:17px; margin-bottom:0; margin-top:8px; overflow:hidden; padding:8px 0 7px; text-align:center; text-overflow:ellipsis; white-space:nowrap;"><a href="https://www.instagram.com/reel/DErpBIayyg6/?utm_source=ig_embed&amp;utm_campaign=loading" style="  color:#c9c8cd; font-family:Arial,sans-serif; font-size:14px; font-style:normal; font-weight:normal; line-height:17px; text-decoration:none;" target="_blank">A publication shared by Takashi Murakami (@takashipom)</a></p></div></blockquote>
+<script type="rocketlazyloadscript" async="" data-rocket-src="//www.instagram.com/embed.js"></script>
+</div>
+
+
+
+<div class="wp-block-column is-layout-flow wp-block-column-is-layout-flow" style="flex-basis:25%"></div>
+</div>
+
+<p>Since the 2000s, <strong><a href="https://www.singulart.com/en/artist/takashi-murakami-36528">Takashi Murakami</a></strong>a leading figure in contemporary art, has been closely associated with Louis Vuitton. Known for his pop creations and colorful motifs, the Japanese artist has already left his mark on the history of the House with floral motifs and variations on the famous Monogram. Today, this new collaboration highlights his <strong>Superflat</strong> universe, a movement he created that reflects his minimalist aesthetic and his critique of consumer culture.  </p>
+
+<p>The “Superflat Garden” motif enriches the Petite Malle with a contemporary and poetic touch, while celebrating Louis Vuitton’s craftsmanship. Hand-painted details and delicate engravings on the gilded clasps underline the piece’s unrivalled luxury. </p>
+
+<h2 class="wp-block-heading has-text-align-center">La petite malle, an icon reimagined</h2>
+
+<p>La <strong>Petite Malle</strong>, inspired by Louis Vuitton’s historic travel trunks, has been a symbol of modernity and elegance since its creation. This re-edition, adorned with Murakami’s signature floral motif, makes it a veritable portable work of art. The <strong>engraved and hand-painted details</strong>, visible in the promotional videos, testify to the extreme care given to each piece. This limited edition promises to seduce fashion lovers and art collectors alike.   </p>
+
+<p>With metallic finishes and a bold contrast between the colorful pattern and the classic Monogram canvas, the Petite Malle becomes a timeless accessory that stands as a link between tradition and innovation.</p>
+
+<h2 class="wp-block-heading has-text-align-center">Paris: The perfect setting to discover this collaboration</h2>
+
+<p>This collaboration will undoubtedly be showcased in <strong>Paris’</strong> flagship stores, notably on the Champs-Élysées and in the Faubourg Saint-Honoré district, where the history of the Maison Louis Vuitton is rooted. The French capital, a place of inspiration for Murakami and a symbol of luxury, is the ideal setting to discover this artistic reinterpretation. </p>
+
+<p>For art and fashion enthusiasts, this collaboration is an invitation to explore Murakami’s world while rediscovering Louis Vuitton’s iconic history. <strong>The windows of the Paris boutiques promise to be spectacular</strong>, with installations highlighting this special edition.</p>
+
+<h2 class="wp-block-heading has-text-align-center">A collector’s item</h2>
+
+<p>If you’re a collector or a lover of artistic collaborations, this reissue of the Petite Malle is a piece not to be missed. It embodies the constant dialogue between <strong>fashion and art</strong>, and perfectly illustrates Louis Vuitton’s unique craftsmanship. </p>
+
+<p>For more information, visit the official <strong>Louis Vuitton</strong> website, or browse the Paris boutiques to discover this exclusive collaboration between two icons of art and luxury.</p>
+
+                                    <div class="single-date">Written by <a itemprop="author" href="https://www.parisselectbook.com/en/author/zac_psb/" title="More articles by Zaccharie TOUBOUL">Zaccharie TOUBOUL</a>, the <span itemprop="datePublished" content="2025-01-13">13 January 2025</span></div>
+
+                                    
+                                    <div class="single-bottom">
+                                        <div class="single-bottom-label">Share on</div>
+                                        <div class="single-social">
+                                            <a rel="nofollow" href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fwww.parisselectbook.com%2Fen%2F2025%2F01%2F13%2Flouis-vuitton-x-takashi-murakami-a-collaboration-that-revives-the-famous-petite-malle%2F" class="facebook" target="_blank"><span class="icon-facebook"></span></a>
+                                            <a rel="nofollow" href="https://twitter.com/intent/tweet?text=Louis Vuitton x Takashi Murakami: A Collaboration that Revives the Famous Petite Malle&amp;url=https%3A%2F%2Fwww.parisselectbook.com%2Fen%2F2025%2F01%2F13%2Flouis-vuitton-x-takashi-murakami-a-collaboration-that-revives-the-famous-petite-malle%2F" class="twitter" target="_blank"><span class="icon-twitter"></span></a>
+                                            <a rel="nofollow" href="https://wa.me/?text=Louis Vuitton x Takashi Murakami: A Collaboration that Revives the Famous Petite Malle%20https%3A%2F%2Fwww.parisselectbook.com%2Fen%2F2025%2F01%2F13%2Flouis-vuitton-x-takashi-murakami-a-collaboration-that-revives-the-famous-petite-malle%2F" class="whatsapp" target="_blank"><span class="icon-whatsapp"></span></a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </article>
+
+        
+    </section>
+
+    <div data-rocket-location-hash="e20f14bd0a9ac43aecaa786057bbd7ef" class="no_more"></div>
+
+            <section data-rocket-location-hash="4a047041dfd448316c369206fc589344">
+            <div data-rocket-location-hash="68e122c6b23b4519e49c5a2a57b5f054" class="container">
+                <div class="row">
+                    <div class="col-12">
+                        <h2>You may also like</h2>
+                        <div class="row">
+                            
+    <div class="col-sm-6 col-md-6 col-lg-6 col-xl-6 col-3">        <a class="card archive-picture vertical color- post-156355 post type-post status-publish format-standard has-post-thumbnail hentry category-news-du-luxe-en" id="post-156355" href="https://www.parisselectbook.com/en/2025/02/28/valentino-opens-pm23-a-new-cultural-space-in-rome/" title="Valentino opens PM23, a new cultural space in Rome">
+            <div class="card-thumbnail">
+                <img width="356" height="410" src="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20356%20410'%3E%3C/svg%3E" class="attachment-archive-desktop size-archive-desktop wp-post-image" alt="" data-lazy-srcset="https://www.parisselectbook.com/wp-content/uploads/2025/02/A-32-1-356x410.jpg 1287w, https://www.parisselectbook.com/wp-content/uploads/2025/02/A-32-1-167x193.jpg 412w" data-lazy-sizes="(max-width: 412px) 100vw, 1287px" decoding="async" data-lazy-src="https://www.parisselectbook.com/wp-content/uploads/2025/02/A-32-1-356x410.jpg"><noscript><img width="356" height="410" src="https://www.parisselectbook.com/wp-content/uploads/2025/02/A-32-1-356x410.jpg" class="attachment-archive-desktop size-archive-desktop wp-post-image" alt="" srcset="https://www.parisselectbook.com/wp-content/uploads/2025/02/A-32-1-356x410.jpg 1287w, https://www.parisselectbook.com/wp-content/uploads/2025/02/A-32-1-167x193.jpg 412w" sizes="(max-width: 412px) 100vw, 1287px" decoding="async" /></noscript>            </div>
+            <div class="card-text">
+                                <div class="card-date">News du Luxe</div>                <div class="card-title">Valentino opens PM23, a new cultural space in Rome</div>
+            </div>
+        </a>
+
+    </div>
+    <div class="col-sm-6 col-md-6 col-lg-6 col-xl-6 col-3">        <a class="card archive-picture vertical color- post-142939 post type-post status-publish format-standard has-post-thumbnail hentry category-art-en" id="post-142939" href="https://www.parisselectbook.com/en/2024/10/16/gaelle-choisne-wins-the-prix-marcel-duchamp-2024/" title="Gaëlle Choisne wins the Prix Marcel Duchamp 2024">
+            <div class="card-thumbnail">
+                <img width="356" height="410" src="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20356%20410'%3E%3C/svg%3E" class="attachment-archive-desktop size-archive-desktop wp-post-image" alt="" data-lazy-srcset="https://www.parisselectbook.com/wp-content/uploads/2024/10/DIM-DONG-18-356x410.jpg 1287w, https://www.parisselectbook.com/wp-content/uploads/2024/10/DIM-DONG-18-167x193.jpg 412w" data-lazy-sizes="(max-width: 412px) 100vw, 1287px" decoding="async" data-lazy-src="https://www.parisselectbook.com/wp-content/uploads/2024/10/DIM-DONG-18-356x410.jpg"><noscript><img width="356" height="410" src="https://www.parisselectbook.com/wp-content/uploads/2024/10/DIM-DONG-18-356x410.jpg" class="attachment-archive-desktop size-archive-desktop wp-post-image" alt="" srcset="https://www.parisselectbook.com/wp-content/uploads/2024/10/DIM-DONG-18-356x410.jpg 1287w, https://www.parisselectbook.com/wp-content/uploads/2024/10/DIM-DONG-18-167x193.jpg 412w" sizes="(max-width: 412px) 100vw, 1287px" decoding="async" /></noscript>            </div>
+            <div class="card-text">
+                                <div class="card-date">Art</div>                <div class="card-title">Gaëlle Choisne wins the Prix Marcel Duchamp 2024</div>
+            </div>
+        </a>
+
+    </div>
+    <div class="col-sm-6 col-md-6 col-lg-6 col-xl-6 col-3">        <a class="card archive-picture vertical color- post-147588 post type-post status-publish format-standard has-post-thumbnail hentry category-beauty" id="post-147588" href="https://www.parisselectbook.com/en/2024/11/27/tom-ford-oud-wood-an-exceptional-fragrance-for-christmas/" title="Tom Ford Oud Wood: An exceptional fragrance for Christmas">
+            <div class="card-thumbnail">
+                <img width="356" height="410" src="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20356%20410'%3E%3C/svg%3E" class="attachment-archive-desktop size-archive-desktop wp-post-image" alt="" data-lazy-srcset="https://www.parisselectbook.com/wp-content/uploads/2024/11/Capture-decran-2024-11-27-a-15.25.22-356x410.png 1287w, https://www.parisselectbook.com/wp-content/uploads/2024/11/Capture-decran-2024-11-27-a-15.25.22-167x193.png 412w" data-lazy-sizes="(max-width: 412px) 100vw, 1287px" decoding="async" data-lazy-src="https://www.parisselectbook.com/wp-content/uploads/2024/11/Capture-decran-2024-11-27-a-15.25.22-356x410.png"><noscript><img width="356" height="410" src="https://www.parisselectbook.com/wp-content/uploads/2024/11/Capture-decran-2024-11-27-a-15.25.22-356x410.png" class="attachment-archive-desktop size-archive-desktop wp-post-image" alt="" srcset="https://www.parisselectbook.com/wp-content/uploads/2024/11/Capture-decran-2024-11-27-a-15.25.22-356x410.png 1287w, https://www.parisselectbook.com/wp-content/uploads/2024/11/Capture-decran-2024-11-27-a-15.25.22-167x193.png 412w" sizes="(max-width: 412px) 100vw, 1287px" decoding="async" /></noscript>            </div>
+            <div class="card-text">
+                                <div class="card-date">Beauty</div>                <div class="card-title">Tom Ford Oud Wood: An exceptional fragrance for Christmas</div>
+            </div>
+        </a>
+
+    </div>
+    <div class="col-sm-6 col-md-6 col-lg-6 col-xl-6 col-3">        <a class="card archive-picture vertical color- post-150909 post type-post status-publish format-standard has-post-thumbnail hentry category-mode-en category-shopping-en" id="post-150909" href="https://www.parisselectbook.com/en/2025/01/13/the-jacket-a-look-back-at-the-must-have-piece-for-winter-2025/" title="The jacket, a look back at the must-have piece for winter 2025">
+            <div class="card-thumbnail">
+                <img width="356" height="410" src="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20356%20410'%3E%3C/svg%3E" class="attachment-archive-desktop size-archive-desktop wp-post-image" alt="" data-lazy-srcset="https://www.parisselectbook.com/wp-content/uploads/2025/01/A-19-356x410.jpg 1287w, https://www.parisselectbook.com/wp-content/uploads/2025/01/A-19-167x193.jpg 412w" data-lazy-sizes="(max-width: 412px) 100vw, 1287px" decoding="async" data-lazy-src="https://www.parisselectbook.com/wp-content/uploads/2025/01/A-19-356x410.jpg"><noscript><img width="356" height="410" src="https://www.parisselectbook.com/wp-content/uploads/2025/01/A-19-356x410.jpg" class="attachment-archive-desktop size-archive-desktop wp-post-image" alt="" srcset="https://www.parisselectbook.com/wp-content/uploads/2025/01/A-19-356x410.jpg 1287w, https://www.parisselectbook.com/wp-content/uploads/2025/01/A-19-167x193.jpg 412w" sizes="(max-width: 412px) 100vw, 1287px" decoding="async" /></noscript>            </div>
+            <div class="card-text">
+                                <div class="card-date">Shopping - Mode</div>                <div class="card-title">The jacket, a look back at the must-have piece for winter 2025</div>
+            </div>
+        </a>
+
+    </div>                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+</main>
+
+                                    <section data-rocket-location-hash="385af55156c0c6af78fcb6e367d085a2" class="section-newsletter">
+                    <div data-rocket-location-hash="e78f661669626b32a35ef61e94e53af1" class="container">
+                        <div data-rocket-location-hash="576b72d25ad0ba98a187405592fe6b75" class="newsletter-w">
+                            <h2 class="center">Newsletter - Stay up-to-date</h2>
+                            <p>Subscribe to our newsletter. According to the RGPD rules, your email address will remain confidential and will not be disclosed under any circumstances.</p>
+                            <div class="cta-w">
+                                <a href="https://www.parisselectbook.com/en/subscribe-to-newsletter/" class="cta cta-dark" title="Join us">Join us</a>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                    
+
+        
+        <footer data-rocket-location-hash="a9ef3f2b79d6cd97832c39c647bc06ed">
+            <div data-rocket-location-hash="d41813fee4980beb3a7eacb7c0b429fa" class="container">
+                <div data-rocket-location-hash="5afad67fdc99fa2b611e2c12e9c99db3" class="footer-top">
+                    <div class="footer-left">
+                        <a class="footer-brand" href="https://www.parisselectbook.com/en/" title="Paris Select Book">
+                            <img src="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20300%2052'%3E%3C/svg%3E" width="300" height="52" alt="Paris Select Book" data-lazy-src="https://www.parisselectbook.com/wp-content/themes/parisselectbook/img/paris-select-book-h.svg"><noscript><img src="https://www.parisselectbook.com/wp-content/themes/parisselectbook/img/paris-select-book-h.svg" width="300" height="52" alt="Paris Select Book" /></noscript>
+                        </a>
+                        <div class="footer-subtitle">the chic guide of Parisian Trends</div>
+                    </div>
+                    <div class="footer-right">
+                                            </div>
+                </div>
+                <div data-rocket-location-hash="0563f1b4b1cc2b13f27d26ea23d02805" class="footer-mid">
+                                            <div class="footer-col">
+                            <div class="footer-menu-title">Categories</div>
+                            <div class="menu-footer-1-anglais-container"><ul id="menu-footer-1-anglais" class="footer-menu"><li id="menu-item-123740" class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-123740"><a href="https://www.parisselectbook.com/en/category/que-faire-a-paris-en/">Que faire à Paris ?</a></li>
+<li id="menu-item-123741" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-123741"><a href="https://www.parisselectbook.com/paris-par-quartier/">PAR QUARTIER</a></li>
+<li id="menu-item-123742" class="menu-item menu-item-type-taxonomy menu-item-object-category current-post-ancestor current-menu-parent current-post-parent menu-item-123742"><a href="https://www.parisselectbook.com/en/category/news-du-luxe-en/">News du Luxe</a></li>
+<li id="menu-item-123743" class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-123743"><a href="https://www.parisselectbook.com/en/category/luxury-hotel/">Luxury Hotel</a></li>
+<li id="menu-item-123744" class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-123744"><a href="https://www.parisselectbook.com/en/category/paris-by-night-en/">ParisByNight</a></li>
+<li id="menu-item-123745" class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-123745"><a href="https://www.parisselectbook.com/en/category/restaurant/">Restaurant</a></li>
+<li id="menu-item-123746" class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-123746"><a href="https://www.parisselectbook.com/en/category/shopping-en/">Shopping</a></li>
+</ul></div>                        </div>
+                                                                <div class="footer-col">
+                            <div class="footer-menu-title">About</div>
+                            <div class="menu-footer-2-anglais-container"><ul id="menu-footer-2-anglais" class="footer-menu"><li id="menu-item-123775" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-123775"><a href="https://www.parisselectbook.com/en/who-we-are/">Who we are</a></li>
+<li id="menu-item-123776" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-123776"><a href="https://www.parisselectbook.com/en/schin-editions/">SCHIN Editions</a></li>
+<li id="menu-item-123777" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-123777"><a href="https://www.parisselectbook.com/en/our-partner-hotels/">Our partner hotels</a></li>
+</ul></div>                        </div>
+                                                                <div class="footer-col">
+                            <div class="footer-menu-title">Paris Select</div>
+                            <div class="menu-footer-3-container"><ul id="menu-footer-3" class="footer-menu"><li id="menu-item-292" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-292"><a href="https://www.parisselectbook.com/en/we-recruit-job-offers-internship-offers/">We recruit job offers, internship offers</a></li>
+<li id="menu-item-293" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-293"><a href="https://www.parisselectbook.com/en/contact/">Contact</a></li>
+<li id="menu-item-357" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-357"><a href="https://www.parisselectbook.com/en/select-guide/">Select Guide</a></li>
+</ul></div>                        </div>
+                                                                <div class="footer-col">
+                            <div class="footer-menu-title">Legal</div>
+                            <div class="menu-footer-4-anglais-container"><ul id="menu-footer-4-anglais" class="footer-menu"><li id="menu-item-123769" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-123769"><a rel="privacy-policy" href="https://www.parisselectbook.com/en/terms-of-use/">Terms of use</a></li>
+<li id="menu-item-123770" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-123770"><a href="https://www.parisselectbook.com/en/privacy-policy/">Privacy policy</a></li>
+<li id="menu-item-123771" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-123771"><a href="https://www.parisselectbook.com/en/cookie-policy/">Cookie policy</a></li>
+</ul></div>                        </div>
+                                    </div>
+                <div data-rocket-location-hash="c9d3a3fedfd970217f801ffa38885ab0" class="footer-copyright">Paris Select © 2025 All Rights Reserved</div>
+            </div>
+        </footer>
+
+        <div data-rocket-location-hash="eab74e775c58857454e382c99dc41c66" class="footer-nav">
+            <a href="https://www.parisselectbook.com/en/" title="Spotlight" class="footer-nav-item">
+                <span class="icon-top"></span>
+                <span class="footer-nav-label">Spotlight</span>
+            </a>
+            <!--<div class="footer-nav-item">
+                <span class="icon-favoris"></span>
+                <span class="footer-nav-label"></span>
+            </div>-->
+                            <a href="https://www.parisselectbook.com/en/subscribe-to-newsletter/" class="footer-nav-item">
+                    <span class="icon-newsletter"></span>
+                    <span class="footer-nav-label">Newsletter</span>
+                </a>
+                                        <a href="https://www.parisselectbook.com/en/select-guide/" class="footer-nav-item">
+                    <span class="icon-grid"></span>
+                    <span class="footer-nav-label">Select Guide</span>
+                </a>
+                    </div>
+
+        <!-- SCRIPTS -->
+        <style id="core-block-supports-inline-css" type="text/css">
+.wp-container-core-columns-is-layout-1{flex-wrap:nowrap;}.wp-container-core-columns-is-layout-2{flex-wrap:nowrap;}
+</style>
+<script type="rocketlazyloadscript" data-rocket-type="text/javascript" data-rocket-src="https://www.parisselectbook.com/wp-content/themes/parisselectbook/js/jquery-3.5.1.min.js?ver=1.0.0" id="jq-js" data-rocket-defer="" defer=""></script>
+<script type="text/javascript" id="main-js-extra">
+/* <![CDATA[ */
+var imagePath = "https:\/\/www.parisselectbook.com\/wp-content\/themes\/parisselectbook\/img\/";
+/* ]]> */
+</script>
+<script type="rocketlazyloadscript" data-minify="1" data-rocket-type="text/javascript" data-rocket-src="https://www.parisselectbook.com/wp-content/cache/min/1/wp-content/themes/parisselectbook/dist/app.js?ver=1740413677" id="main-js" data-rocket-defer="" defer=""></script>
+<script type="rocketlazyloadscript" data-rocket-type="text/javascript" data-rocket-src="https://www.parisselectbook.com/wp-content/themes/parisselectbook/js/select2.min.js?ver=1.0.0" id="select2-js" data-rocket-defer="" defer=""></script>
+<script>window.lazyLoadOptions=[{elements_selector:"img[data-lazy-src],.rocket-lazyload,iframe[data-lazy-src]",data_src:"lazy-src",data_srcset:"lazy-srcset",data_sizes:"lazy-sizes",class_loading:"lazyloading",class_loaded:"lazyloaded",threshold:300,callback_loaded:function(element){if(element.tagName==="IFRAME"&&element.dataset.rocketLazyload=="fitvidscompatible"){if(element.classList.contains("lazyloaded")){if(typeof window.jQuery!="undefined"){if(jQuery.fn.fitVids){jQuery(element).parent().fitVids()}}}}}},{elements_selector:".rocket-lazyload",data_src:"lazy-src",data_srcset:"lazy-srcset",data_sizes:"lazy-sizes",class_loading:"lazyloading",class_loaded:"lazyloaded",threshold:300,}];window.addEventListener('LazyLoad::Initialized',function(e){var lazyLoadInstance=e.detail.instance;if(window.MutationObserver){var observer=new MutationObserver(function(mutations){var image_count=0;var iframe_count=0;var rocketlazy_count=0;mutations.forEach(function(mutation){for(var i=0;i<mutation.addedNodes.length;i++){if(typeof mutation.addedNodes[i].getElementsByTagName!=='function'){continue}
+if(typeof mutation.addedNodes[i].getElementsByClassName!=='function'){continue}
+images=mutation.addedNodes[i].getElementsByTagName('img');is_image=mutation.addedNodes[i].tagName=="IMG";iframes=mutation.addedNodes[i].getElementsByTagName('iframe');is_iframe=mutation.addedNodes[i].tagName=="IFRAME";rocket_lazy=mutation.addedNodes[i].getElementsByClassName('rocket-lazyload');image_count+=images.length;iframe_count+=iframes.length;rocketlazy_count+=rocket_lazy.length;if(is_image){image_count+=1}
+if(is_iframe){iframe_count+=1}}});if(image_count>0||iframe_count>0||rocketlazy_count>0){lazyLoadInstance.update()}});var b=document.getElementsByTagName("body")[0];var config={childList:!0,subtree:!0};observer.observe(b,config)}},!1)</script><script data-no-minify="1" async="" src="https://www.parisselectbook.com/wp-content/plugins/wp-rocket/assets/js/lazyload/17.8.3/lazyload.min.js"></script><script>function lazyLoadThumb(e,alt,l){var t='<img data-lazy-src="https://i.ytimg.com/vi/ID/hqdefault.jpg" alt="" width="480" height="360"><noscript><img src="https://i.ytimg.com/vi/ID/hqdefault.jpg" alt="" width="480" height="360"></noscript>',a='<button class="play" aria-label="Play Youtube video"></button>';if(l){t=t.replace('data-lazy-','');t=t.replace('loading="lazy"','');t=t.replace(/<noscript>.*?<\/noscript>/g,'');}t=t.replace('alt=""','alt="'+alt+'"');return t.replace("ID",e)+a}function lazyLoadYoutubeIframe(){var e=document.createElement("iframe"),t="ID?autoplay=1";t+=0===this.parentNode.dataset.query.length?"":"&"+this.parentNode.dataset.query;e.setAttribute("src",t.replace("ID",this.parentNode.dataset.src)),e.setAttribute("frameborder","0"),e.setAttribute("allowfullscreen","1"),e.setAttribute("allow","accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"),this.parentNode.parentNode.replaceChild(e,this.parentNode)}document.addEventListener("DOMContentLoaded",function(){var exclusions=[];var e,t,p,u,l,a=document.getElementsByClassName("rll-youtube-player");for(t=0;t<a.length;t++)(e=document.createElement("div")),(u='https://i.ytimg.com/vi/ID/hqdefault.jpg'),(u=u.replace('ID',a[t].dataset.id)),(l=exclusions.some(exclusion=>u.includes(exclusion))),e.setAttribute("data-id",a[t].dataset.id),e.setAttribute("data-query",a[t].dataset.query),e.setAttribute("data-src",a[t].dataset.src),(e.innerHTML=lazyLoadThumb(a[t].dataset.id,a[t].dataset.alt,l)),a[t].appendChild(e),(p=e.querySelector(".play")),(p.onclick=lazyLoadYoutubeIframe)});</script>
+            <script>var rocket_beacon_data = {"ajax_url":"https:\/\/www.parisselectbook.com\/wp-admin\/admin-ajax.php","nonce":"eb1c8a1ac0","url":"https:\/\/www.parisselectbook.com\/en\/2025\/01\/13\/louis-vuitton-x-takashi-murakami-a-collaboration-that-revives-the-famous-petite-malle","is_mobile":false,"width_threshold":1600,"height_threshold":700,"delay":500,"debug":null,"status":{"atf":true,"lrc":true},"elements":"img, video, picture, p, main, div, li, svg, section, header, span","lrc_threshold":1800}</script><script data-name="wpr-wpr-beacon" src="https://www.parisselectbook.com/wp-content/plugins/wp-rocket/assets/js/wpr-beacon.min.js" async="" beacon-completed="true"></script>
+
+<script type="rocketlazyloadscript" data-rocket-type="text/javascript">window.addEventListener('DOMContentLoaded', function() {
+    (function( $ ) {
+        "use strict";
+        $(document).ready(function(){
+
+            var load = false;
+            var offset = $('.no_more').offset();
+
+            $(window).scroll(function(){
+                if((offset.top-$(window).height() <= $(window).scrollTop()) && load==false){
+
+                    load = true;
+
+                    var page    = $(".post-article:last").attr("data-page"),
+                        id_cat  = $(".post-article:last").attr("data-cat-id"),
+                        id_not  = $(".post-article:last").attr("data-not");
+
+                    if(page <= 3) {
+                        $.ajax({
+                            url: '/ajax/' + id_cat + '/' + id_not + '/' + page + '.html',
+                            type: 'GET',
+                            success: function (response) {
+                                if (response.indexOf('nope') >= 0) {
+                                    load = true;
+                                    $("#no_more").html('<div class="next-article-label">Plus de résultats pour le moment</div>');
+                                } else {
+                                    $('section.section-main:last').after(response);
+                                    offset = $('.no_more:last').offset();
+                                    load = false;
+                                }
+                            }
+                        });
+                    }
+                }
+            });
+        });
+    })(jQuery);
+});</script>
+
+<!-- This website is like a Rocket, isn't it? Performance optimized by WP Rocket. Learn more: https://wp-rocket.me --></body></html>

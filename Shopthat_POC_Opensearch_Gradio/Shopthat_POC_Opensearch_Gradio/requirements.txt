@@ -1,0 +1,12 @@
+pandas
+openpyxl
+requests
+beautifulsoup4
+lxml
+sentence-transformers
+langchain
+langchain-community
+opensearch-py
+langchain-huggingface
+gradio
+groq

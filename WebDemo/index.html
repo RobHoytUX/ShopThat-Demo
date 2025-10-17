@@ -1,0 +1,346 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>Core Values Campaign — WebDemo</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet">
+.    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <link rel="stylesheet" href="styles/main.css?v=1">
+  </head>
+  <body>
+    <a href="#main" class="skip-link">Skip to content</a>
+    <header class="lv-header" role="banner">
+      <div class="lv-header__inner">
+        <div class="lv-left">
+          <button class="lv-burger" aria-label="Open menu" aria-expanded="false" aria-controls="nav"><span></span></button>
+          <span class="lv-menu-label">Menu</span>
+          <a class="lv-search-link" href="#" aria-label="Search">
+            <span class="lv-search-icon" aria-hidden="true"></span>
+            <span>Search</span>
+          </a>
+        </div>
+        <a class="lv-logo" href="#" aria-label="Louis Vuitton Home">
+          <img src="assets/logo.svg" alt="Louis Vuitton" />
+        </a>
+        <div class="lv-right">
+          <a class="lv-contact" href="#">Contact Us</a>
+          <a class="lv-ico lv-ico--heart" href="#" aria-label="Wishlist">
+            <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M12 21s-6.5-4.2-9-7.7C1.3 11.1 2 7.8 5 6.6c2.1-.9 4.1.2 5 1.6 1-1.4 2.9-2.5 5-1.6 3 1.2 3.7 4.5 2 6.7-2.5 3.5-9 7.7-9 7.7z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </a>
+          <a class="lv-ico lv-ico--user" href="#" aria-label="Account">
+            <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="12" cy="8" r="3.5" fill="none" stroke="currentColor" stroke-width="2"/>
+              <path d="M4 19c1.8-3 5-5 8-5s6.2 2 8 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+          </a>
+          <a class="lv-ico lv-ico--bag" href="#" aria-label="Shopping bag">
+            <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M6 9h12l-1 10H7L6 9z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+              <path d="M9 9V7a3 3 0 0 1 6 0v2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+            <span class="lv-badge" aria-hidden="true">0</span>
+          </a>
+        </div>
+      </div>
+    </header>
+
+    <main id="main" class="lv-main" role="main">
+      <!-- Hero Section with video placeholder -->
+      <section class="hero" aria-label="Core Values Campaign Hero">
+        <div class="hero__media">
+          <video class="hero__video" autoplay muted playsinline aria-label="Campaign reel" id="hero-video">
+            <source src="assets/kusama.mp4" type="video/mp4">
+            <source src="assets/kusama.mov" type="video/quicktime">
+          </video>
+          <div class="hero__fallback" aria-hidden="true"></div>
+        </div>
+        <div class="hero__content">
+          <div class="hero__content-inner">
+          </div>
+        </div>
+        
+      </section>
+
+      <!-- Interlude text block on white background -->
+      <section class="interlude" aria-label="Intro copy">
+        <div class="interlude__inner">
+          <p class="interlude__text">
+            Discover the Louis Vuitton x Yayoi Kusama campaign—playful, graphic, and unmistakably modern. Polka‑dot motifs reimagine iconic silhouettes and leather finishes, celebrating craftsmanship and joyful expression through bold color, texture, and form.
+          </p>
+        </div>
+      </section>
+
+      <!-- Product Gallery with Tabs -->
+      <section class="product-gallery" aria-label="Product Gallery">
+        <!-- Tab Navigation -->
+        <div class="gallery-tabs" id="gallery-tabs">
+          <div class="gallery-tabs__inner">
+            <button class="gallery-tab active" data-tab="women">Women</button>
+            <button class="gallery-tab" data-tab="men">Men</button>
+          </div>
+        </div>
+
+        <!-- Category Navigation -->
+        <nav class="category-nav" id="category-nav">
+          <div class="category-nav__inner">
+            <a href="#" class="category-link active">Looks</a>
+            <a href="#" class="category-link">Leather Goods</a>
+            <a href="#" class="category-link">Small Leather Goods</a>
+            <a href="#" class="category-link">Ready to Wear</a>
+            <a href="#" class="category-link">Shoes</a>
+            <a href="#" class="category-link">Accessories</a>
+            <a href="#" class="category-link">Fragrances</a>
+            <a href="#" class="category-link">Art of Living</a>
+          </div>
+        </nav>
+
+        <!-- Product Grid -->
+        <div class="product-grid">
+          <article class="product-card">
+            <a href="#" class="product-card__link">
+              <div class="product-card__image">
+                <img src="assets/kusama3.png" alt="LV X YK KEEPALL 25" loading="lazy" />
+                <button class="product-card__wishlist" aria-label="Add to wishlist">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="24" height="24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z" />
+                  </svg>
+                </button>
+              </div>
+              <div class="product-card__info">
+                <h3 class="product-card__title">LV X YK KEEPALL 25</h3>
+                <p class="product-card__price">$2,980.00</p>
+              </div>
+            </a>
+          </article>
+
+          <article class="product-card">
+            <a href="#" class="product-card__link">
+              <div class="product-card__image">
+                <img src="assets/kusama3.png" alt="LV X YK SAC PLAT" loading="lazy" />
+                <button class="product-card__wishlist" aria-label="Add to wishlist">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="24" height="24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z" />
+                  </svg>
+                </button>
+              </div>
+              <div class="product-card__info">
+                <h3 class="product-card__title">LV X YK SAC PLAT</h3>
+                <p class="product-card__price">$3,800.00</p>
+              </div>
+            </a>
+          </article>
+
+          <article class="product-card">
+            <a href="#" class="product-card__link">
+              <div class="product-card__image">
+                <img src="assets/kusama3.png" alt="LV X YK MINI SOFT TRUNK" loading="lazy" />
+                <button class="product-card__wishlist" aria-label="Add to wishlist">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="24" height="24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z" />
+                  </svg>
+                </button>
+              </div>
+              <div class="product-card__info">
+                <h3 class="product-card__title">LV X YK MINI SOFT TRUNK</h3>
+                <p class="product-card__price">$4,000.00</p>
+              </div>
+            </a>
+          </article>
+
+          <article class="product-card">
+            <a href="#" class="product-card__link">
+              <div class="product-card__image">
+                <img src="assets/kusama3.png" alt="LV X YK KEEPALL 55" loading="lazy" />
+                <button class="product-card__wishlist" aria-label="Add to wishlist">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="24" height="24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z" />
+                  </svg>
+                </button>
+              </div>
+              <div class="product-card__info">
+                <h3 class="product-card__title">LV X YK KEEPALL 55</h3>
+                <p class="product-card__price">$3,650.00</p>
+              </div>
+            </a>
+          </article>
+
+          <article class="product-card">
+            <a href="#" class="product-card__link">
+              <div class="product-card__image">
+                <img src="assets/kusama3.png" alt="LV X YK Collection Item" loading="lazy" />
+                <button class="product-card__wishlist" aria-label="Add to wishlist">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="24" height="24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z" />
+                  </svg>
+                </button>
+              </div>
+              <div class="product-card__info">
+                <h3 class="product-card__title">LV X YK BAG</h3>
+                <p class="product-card__price">$2,750.00</p>
+              </div>
+            </a>
+          </article>
+
+          <article class="product-card">
+            <a href="#" class="product-card__link">
+              <div class="product-card__image">
+                <img src="assets/kusama3.png" alt="LV X YK Collection Item" loading="lazy" />
+                <button class="product-card__wishlist" aria-label="Add to wishlist">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="24" height="24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z" />
+                  </svg>
+                </button>
+              </div>
+              <div class="product-card__info">
+                <h3 class="product-card__title">LV X YK TRUNK</h3>
+                <p class="product-card__price">$4,200.00</p>
+              </div>
+            </a>
+          </article>
+
+          <article class="product-card">
+            <a href="#" class="product-card__link">
+              <div class="product-card__image">
+                <img src="assets/kusama3.png" alt="LV X YK Collection Item" loading="lazy" />
+                <button class="product-card__wishlist" aria-label="Add to wishlist">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="24" height="24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z" />
+                  </svg>
+                </button>
+              </div>
+              <div class="product-card__info">
+                <h3 class="product-card__title">LV X YK POUCH</h3>
+                <p class="product-card__price">$1,890.00</p>
+              </div>
+            </a>
+          </article>
+
+          <article class="product-card">
+            <a href="#" class="product-card__link">
+              <div class="product-card__image">
+                <img src="assets/kusama3.png" alt="LV X YK Collection Item" loading="lazy" />
+                <button class="product-card__wishlist" aria-label="Add to wishlist">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="24" height="24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z" />
+                  </svg>
+                </button>
+              </div>
+              <div class="product-card__info">
+                <h3 class="product-card__title">LV X YK BACKPACK</h3>
+                <p class="product-card__price">$3,950.00</p>
+              </div>
+            </a>
+          </article>
+        </div>
+      </section>
+
+    </main>
+
+    <footer class="lv-footer" role="contentinfo">
+      <div class="lv-footer__inner">
+        <nav aria-label="Footer">
+          <ul>
+            <li><a href="#">Privacy</a></li>
+            <li><a href="#">Terms</a></li>
+            <li><a href="#">Contact</a></li>
+          </ul>
+        </nav>
+        <p class="copyright">shopThat demo</p>
+      </div>
+    </footer>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script src="scripts/shared-data.js"></script>
+    <script src="scripts/main.js" defer></script>
+    <script>
+      // Remove old chatbot overlay code - keywords now generated in main.js chatbot widget
+      
+      // Chatbot Conversation Flow (kept for compatibility)
+      const chatbotConversations = {
+        initial: {
+          keywords: ['Kusama x LV', 'Kusama', 'Stores', 'Capucine Bag']
+        },
+        'kusama-x-lv': {
+          message: 'Experience the extraordinary collaboration between Yayoi Kusama and Louis Vuitton. This groundbreaking partnership brings together contemporary art and luxury craftsmanship in an unprecedented way.',
+          keywords: ['Campaign Content', 'Campaign Products']
+        },
+        'campaign-content': {
+          action: 'navigate-kusama-homepage',
+          notification: 'Drag and drop images into the gallery to explore the collection'
+        },
+        'campaign-products': {
+          keywords: ['Infinity Dots', 'Painted Dots', 'Psychedelic Flower']
+        },
+        'psychedelic-flower': {
+          message: 'The Psychedelic Flower collection features vibrant, organic patterns inspired by Kusama\'s iconic floral motifs. Each piece celebrates nature through bold color and imaginative design.',
+          products: [
+            { name: 'Psychedelic Flower Keepall', price: '$3,400', image: 'assets/kusama3.png' },
+            { name: 'Psychedelic Flower Pochette', price: '$2,100', image: 'assets/kusama3.png' },
+            { name: 'Psychedelic Flower Wallet', price: '$890', image: 'assets/kusama3.png' }
+          ]
+        },
+        'kusama': {
+          message: 'Yayoi Kusama is a renowned Japanese contemporary artist known for her immersive installations and signature polka dot patterns. Her work explores themes of infinity, self-obliteration, and the cosmos.',
+          keywords: ['Kusama Art', 'Kusama LV Campaign Content']
+        },
+        'kusama-art': {
+          action: 'navigate-kusama-homepage',
+          notification: 'Drag and drop images into the gallery to explore Kusama\'s artistic world'
+        },
+        'stores': {
+          message: 'Visit our Louis Vuitton stores to experience the Kusama collaboration in person.',
+          storeButtons: [
+            { name: '57th Street', location: 'New York' },
+            { name: 'SoHo', location: 'New York' }
+          ],
+          keywords: ['Store', 'Restaurants', 'Museums Galleries']
+        },
+        'capucine-bag': {
+          message: 'The Capucines bag, named after the Rue des Capucines where Louis Vuitton opened his first store in 1854, is a testament to exceptional savoir-faire. The Kusama edition reimagines this iconic silhouette with her distinctive artistic vision.',
+          products: [
+            { name: 'Capucines MM Infinity Dots', price: '$6,400', image: 'assets/kusama3.png' },
+            { name: 'Capucines PM Painted Dots', price: '$5,900', image: 'assets/kusama3.png' },
+            { name: 'Capucines Mini Psychedelic Flower', price: '$4,800', image: 'assets/kusama3.png' }
+          ]
+        }
+      };
+
+      // Chatbot State
+      let chatbotState = {
+        currentFlow: 'initial',
+        videoKeywordsShown: false
+      };
+
+      // Dark mode functionality
+      function initDarkMode() {
+        const darkModeToggle = document.getElementById('darkModeToggle');
+        const body = document.body;
+        
+        if (localStorage.getItem('darkMode') === 'true') {
+          body.classList.add('dark-mode');
+        }
+        
+        if (darkModeToggle) {
+          darkModeToggle.addEventListener('click', () => {
+            body.classList.toggle('dark-mode');
+            localStorage.setItem('darkMode', body.classList.contains('dark-mode'));
+          });
+        }
+      }
+      
+      // Initialize dark mode only (chatbot and keywords handled by main.js)
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', () => {
+          initDarkMode();
+        });
+      } else {
+        initDarkMode();
+      }
+    </script>
+  </body>
+</html>

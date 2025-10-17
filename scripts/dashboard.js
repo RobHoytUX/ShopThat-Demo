@@ -39,38 +39,41 @@
     ['Météore', 240, '$60.00']
   ];
 
+  // Enhanced keyword data with engagement metrics matching the screenshot
+  const keywordEngagementData = [
+    { name: 'Yayoi Kusama', cost: 14000, engagement: 30 },
+    { name: 'Pharrell', cost: 2000, engagement: 15 },
+    { name: 'Infinity Mirrors', cost: 500, engagement: 10 },
+    { name: 'Painted Dots', cost: 1000, engagement: 20 },
+    { name: 'Louis Vuitton', cost: 850, engagement: 25 },
+    { name: 'Pumpkins', cost: 450, engagement: 22 },
+    { name: 'Gisele Bundchen', cost: 1000, engagement: 30 },
+    { name: 'MoMa', cost: 370, engagement: 12 },
+    { name: 'FeiFei Sun', cost: 1150, engagement: 25 },
+    { name: 'Central Park', cost: 150, engagement: 23 }
+  ];
+
   function populateTopKeywords(filterTerm=''){
     const body = $('#top-keywords-body');
     if (!body) return;
     body.replaceChildren();
     
-    // Data exactly matching the screenshot
-    const topKeywordsData = [
-      { name: 'Yayoi Kusama', revenue: 14000, engagement: 30 },
-      { name: 'Pharrell', revenue: 2000, engagement: 15 },
-      { name: 'Infinity Mirrors', revenue: 500, engagement: 10 },
-      { name: 'Painted Dots', revenue: 1000, engagement: 20 },
-      { name: 'Louis Vuitton', revenue: 850, engagement: 25 },
-      { name: 'Pumpkins', revenue: 450, engagement: 22 },
-      { name: 'Gisele Bundchen', revenue: 1000, engagement: 30 },
-      { name: 'MoMa', revenue: 370, engagement: 12 },
-      { name: 'FeiFei Sun', revenue: 1150, engagement: 25 },
-      { name: 'Central Park', revenue: 150, engagement: 23 }
-    ];
+    // Always use the demo engagement data for consistent display
+    const keywords = keywordEngagementData.slice();
     
-    // Filter keywords based on search term
-    const filteredKeywords = topKeywordsData
+    // Filter and sort keywords by cost (highest first)
+    const filteredKeywords = keywords
       .filter(k => k.name.toLowerCase().includes(filterTerm.toLowerCase()))
-      .sort((a, b) => b.revenue - a.revenue) // Sort by revenue descending
+      .sort((a, b) => (b.cost || 0) - (a.cost || 0))
       .slice(0, 10); // Show top 10
     
-    // Populate table with keywords
+    // Populate table with keywords matching screenshot format
     filteredKeywords.forEach(keyword => {
       const tr = document.createElement('tr');
       tr.innerHTML = `
-        <td>${keyword.name}</td>
-        <td>$${keyword.revenue.toLocaleString()}</td>
-        <td>${keyword.engagement}%</td>
+        <td class="keyword-name">${keyword.name}</td>
+        <td class="keyword-cost">$${keyword.cost.toLocaleString()}</td>
+        <td class="keyword-engagement">${keyword.engagement}%</td>
       `;
       body.appendChild(tr);
     });

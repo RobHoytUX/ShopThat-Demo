@@ -7,9 +7,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles/main.css?v=1">
-    <link rel="stylesheet" href="styles/dashboard.css?v=1">
-    <script src="auth-config.js"></script>
+    <link rel="stylesheet" href="styles/main.css">
+    <link rel="stylesheet" href="styles/dashboard.css">
   </head>
   <body class="app app--settings">
     <aside class="sidebar" aria-label="Primary">
@@ -20,20 +19,13 @@
         <a href="/dashboard.html">Dashboard</a>
         <a href="/keywords.html">Keywords</a>
         <a href="/internals.html">Internals</a>
-        <a href="/publishers.html">Publishers</a>
+        <a href="/publishers.html" aria-disabled="true">Publishers</a>
         <a href="/open-source.html" aria-disabled="true">Open source</a>
         <a href="/products.html">Products</a>
         <a href="/financials.html">Financials</a>
-        <a class="is-active" href="/settings.html">Settings</a>
+        <a class="is-active" href="/settings.html" aria-disabled="true">Settings</a>
         <a href="#" aria-disabled="true">Sign Out</a>
       </nav>
-      <div class="sidebar__cta">
-        <div class="cta">
-          <div class="cta__title">shopThat</div>
-          <div class="cta__desc">Get access to all features on shopThat</div>
-          <button class="cta__btn" type="button">Upgrade</button>
-        </div>
-      </div>
     </aside>
 
     <header class="appbar" role="banner">

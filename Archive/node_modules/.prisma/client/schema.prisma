@@ -1,0 +1,181 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id       Int    @id @default(autoincrement())
+  username String @unique
+  password String
+}
+
+model Dashboard {
+  id         String       @id @default(uuid())
+  widgets    Widget[]
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+  type       String?
+  comapaings Comapaings[]
+}
+
+model Widget {
+  id          String    @id @default(uuid())
+  dashboardId String
+  dashboard   Dashboard @relation(fields: [dashboardId], references: [id], onDelete: Cascade)
+  title       String? // Nullable
+  description String? // Nullable
+  type        String // Not nullable
+  sortOrder   Int // Not nullable
+  data        Json // Stores object data
+}
+
+model Article {
+  id          String     @id @default(uuid())
+  title       String
+  content     String
+  images      String[]   @default([])
+  events      String[]   @default([])
+  people      String[]   @default([])
+  products    String[]   @default([])
+  usagesCount Int        @default(0)
+  Publisher   Publisher? @relation(fields: [publisherId], references: [id])
+  publisherId String?
+  createdAt   DateTime   @default(now())
+  author      String     @default("")
+}
+
+model Keyword {
+  id          String @id @default(uuid())
+  title       String
+  usagesCount Int    @default(0)
+}
+
+model Publisher {
+  id          String    @id @default(uuid())
+  title       String
+  description String
+  logo        String?
+  usagesCount Int       @default(0)
+  articles    Article[]
+}
+
+model Comapaings {
+  id                   String           @id @default(uuid())
+  title                String
+  subTitle             String?
+  content              String
+  imageUrl             String?
+  images               String[]         @default([])
+  events               String[]         @default([])
+  people               String[]         @default([])
+  products             String[]         @default([])
+  items                ComapaingItems[] @relation("CampaingItemsToComapaings")
+  categories           Categories?      @relation("CategoriesOnComapaings", fields: [categoriesId], references: [id])
+  categoriesId         String?
+  dashboard            Dashboard?       @relation(fields: [dashboardId], references: [id])
+  dashboardId          String?
+  publisherDashboardId String?
+}
+
+model ComapaingItems {
+  id        String       @id @default(uuid())
+  title     String
+  image     String?
+  active    Boolean      @default(true)
+  type      String[]     @default([])
+  campaings Comapaings[] @relation("CampaingItemsToComapaings")
+  documents Documents[]  @relation("ComapaingItemDocuments")
+}
+
+model Categories {
+  id               String       @id @default(uuid())
+  title            String
+  description      String
+  image            String?
+  parentCategory   Categories?  @relation("CategoryToChildren", fields: [parentCategoryId], references: [id])
+  parentCategoryId String?
+  children         Categories[] @relation("CategoryToChildren")
+  products         Products[]   @relation("CategoriesOnProducts")
+  comapaings       Comapaings[] @relation("CategoriesOnComapaings")
+}
+
+model Products {
+  id               String       @id @default(uuid())
+  title            String
+  image            String?
+  usagesCount      Int          @default(0)
+  categories       Categories[] @relation("CategoriesOnProducts")
+  shortDescription String?
+  launchDate       DateTime     @default(now())
+  endDate          DateTime     @default(now())
+  salesAmount      String?
+}
+
+model Chat {
+  id        String    @id @default(uuid())
+  groqId    String? // ID from Groq if you need to maintain conversation state with the API
+  createdAt DateTime  @default(now())
+  messages  Message[]
+}
+
+model Message {
+  id        String   @id @default(uuid())
+  chatId    String
+  chat      Chat     @relation(fields: [chatId], references: [id])
+  role      String // e.g. 'customer' or 'groq'
+  content   String
+  tags      String[]
+  createdAt DateTime @default(now())
+}
+
+model Media {
+  id           Int      @id @default(autoincrement())
+  originalName String
+  url          String
+  isActive     Boolean  @default(true)
+  external     Boolean  @default(true)
+  uploadedAt   DateTime @default(now())
+}
+
+model Documents {
+  id             Int              @id @default(autoincrement())
+  url            String
+  isActive       Boolean          @default(true)
+  external       Boolean          @default(true)
+  createdAt      DateTime         @default(now())
+  comapaingItems ComapaingItems[] @relation("ComapaingItemDocuments")
+}
+
+model ChatBotSettings {
+  id        String   @id @default(uuid())
+  key       String
+  value     String
+  createdAt DateTime @default(now())
+}
+
+model KeyWords {
+  id        String            @id @default(uuid())
+  keyWord   String
+  active    Boolean
+  createdAt DateTime          @default(now())
+  related   RelatedKeyWords[]
+}
+
+model RelatedKeyWords {
+  id         String    @id @default(uuid())
+  keyWord    String
+  active     Boolean
+  createdAt  DateTime  @default(now())
+  KeyWords   KeyWords? @relation(fields: [keyWordsId], references: [id])
+  keyWordsId String?
+}
