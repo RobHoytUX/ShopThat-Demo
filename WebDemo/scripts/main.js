@@ -232,21 +232,31 @@
   .image-gallery-wrapper{position:fixed;bottom:20px;left:20px;z-index:998;width:562.5px;opacity:0;transform:translateY(8px);pointer-events:none;transition:opacity 200ms ease,transform 200ms ease}
   .image-gallery-wrapper.is-visible{opacity:1;transform:translateY(0);pointer-events:auto}
   .image-gallery-wrapper[hidden]{display:none}
-  .image-gallery{background:linear-gradient(135deg,rgba(255,255,255,0.95),rgba(255,255,255,0.9));border:1px solid rgba(0,0,0,0.1);border-radius:12px;padding:12px 40px;box-shadow:0 8px 32px rgba(0,0,0,0.12);backdrop-filter:blur(16px) saturate(180%);-webkit-backdrop-filter:blur(16px) saturate(180%);position:relative;overflow:hidden}
+  .image-gallery{background:linear-gradient(135deg,rgba(255,255,255,0.4),rgba(255,255,255,0.22));border:1px solid rgba(255,255,255,0.35);border-radius:12px;padding:12px 40px;min-height:144px;box-shadow:0 8px 32px 0 rgba(31,38,135,0.3);backdrop-filter:blur(16px) saturate(180%);-webkit-backdrop-filter:blur(16px) saturate(180%);position:relative;overflow:visible}
   .image-gallery-title{position:absolute;top:12px;left:12px;font-size:16px;font-weight:600;color:#111;pointer-events:none;z-index:1}
-  .product-component{position:fixed;bottom:188px;left:20px;z-index:999;width:562.5px;opacity:0;transform:translateY(8px);pointer-events:none;transition:opacity 200ms ease,transform 200ms ease}
+  .image-gallery-clear{position:absolute;top:12px;right:12px;padding:6px 12px;border-radius:8px;border:1px solid rgba(0,0,0,0.2);background:rgba(255,255,255,0.95);font-size:12px;font-weight:500;color:#111;cursor:pointer;transition:all 200ms ease;z-index:1}
+  .image-gallery-clear:hover{background:rgba(255,255,255,1);transform:scale(1.05)}
+  .product-component{position:fixed;bottom:240px;left:20px;z-index:999;width:562.5px;opacity:0;transform:translateY(8px);pointer-events:none;transition:opacity 200ms ease,transform 200ms ease}
   .product-component.is-visible{opacity:1;transform:translateY(0);pointer-events:auto}
   .product-component[hidden]{display:none}
-  .product-component-inner{background:linear-gradient(135deg,rgba(255,255,255,0.95),rgba(255,255,255,0.9));border:1px solid rgba(0,0,0,0.1);border-radius:12px;padding:12px 40px;box-shadow:0 8px 32px rgba(0,0,0,0.12);backdrop-filter:blur(16px) saturate(180%);-webkit-backdrop-filter:blur(16px) saturate(180%);position:relative;overflow:hidden}
+  .product-component-inner{background:linear-gradient(135deg,rgba(255,255,255,0.4),rgba(255,255,255,0.22));border:1px solid rgba(255,255,255,0.35);border-radius:12px;padding:12px 40px;min-height:220px;box-shadow:0 8px 32px 0 rgba(31,38,135,0.3);backdrop-filter:blur(16px) saturate(180%);-webkit-backdrop-filter:blur(16px) saturate(180%);position:relative;overflow:visible}
   .product-component-title{position:absolute;top:12px;left:12px;font-size:16px;font-weight:600;color:#111;pointer-events:none;z-index:1}
   .product-component-close{position:absolute;top:12px;right:12px;width:32px;height:32px;border-radius:50%;border:1px solid rgba(0,0,0,0.2);background:rgba(255,255,255,0.95);display:grid;place-items:center;color:#111;cursor:pointer;transition:all 200ms ease;z-index:2}
   .product-component-close:hover{background:rgba(255,255,255,1);transform:scale(1.1)}
-  .product-component-content{display:flex;gap:16px;padding:48px 0 12px;align-items:center}
-  .product-component-image{width:200px;height:200px;border-radius:8px;object-fit:cover;flex-shrink:0}
+  .product-component-content{display:flex;flex-direction:column;gap:12px;padding:40px 0 8px 0}
+  .product-component-card{background:rgba(255,255,255,0.98);border-radius:16px;padding:16px;display:flex;gap:16px;align-items:center;box-shadow:0 2px 12px rgba(0,0,0,0.12)}
+  .product-component-gallery-label{font-size:15px;font-weight:600;color:#111;margin:0 0 8px 0}
+  .product-component-gallery{display:flex;gap:8px;overflow-x:auto;overflow-y:hidden;scroll-behavior:smooth;scrollbar-width:none;-webkit-overflow-scrolling:touch;padding:4px 0}
+  .product-component-gallery::-webkit-scrollbar{display:none}
+  .product-component-gallery-item{flex:0 0 auto;width:80px;height:80px;border-radius:8px;overflow:hidden;cursor:pointer;border:2px solid transparent;transition:all 200ms ease;background:#f5f5f5}
+  .product-component-gallery-item:hover{transform:scale(1.05);box-shadow:0 4px 12px rgba(0,0,0,0.15)}
+  .product-component-gallery-item.is-active{border-color:#111;transform:scale(1.05)}
+  .product-component-gallery-item img{width:100%;height:100%;object-fit:cover}
+  .product-component-image{width:100px;height:100px;border-radius:12px;object-fit:cover;flex-shrink:0;background:#f5f5f5}
   .product-component-info{flex:1;min-width:0}
-  .product-component-info h3{margin:0 0 8px;font-size:18px;font-weight:600;color:#111}
-  .product-component-info p{margin:4px 0;color:#666;font-size:14px}
-  .image-gallery-track{display:flex;gap:8px;overflow-x:auto;overflow-y:hidden;scroll-behavior:smooth;scrollbar-width:none;-webkit-overflow-scrolling:touch;padding:4px 0}
+  .product-component-info h3{margin:0 0 4px;font-size:16px;font-weight:600;color:#111;line-height:1.3}
+  .product-component-info p{margin:2px 0;color:#666;font-size:13px}
+  .image-gallery-track{display:flex;gap:8px;overflow-x:auto;overflow-y:hidden;scroll-behavior:smooth;scrollbar-width:none;-webkit-overflow-scrolling:touch;padding:40px 0 4px 0}
   .image-gallery-track::-webkit-scrollbar{display:none}
   .image-gallery-item{flex:0 0 auto;width:120px;height:120px;border-radius:8px;overflow:hidden;cursor:grab;position:relative;transition:transform 200ms ease,box-shadow 200ms ease}
   .image-gallery-item:active{cursor:grabbing}
@@ -569,7 +579,7 @@
       navItem.addEventListener('click', () => {
         // Special handling for grid icon - open new tab
         if (item.view === 'grid') {
-          window.open('/homepage', '_blank');
+          window.open('product-dashboard.html', '_blank');
           // Close nav after opening new tab
           navVisible = false;
           chatbotNav.classList.remove('is-visible');
@@ -1384,7 +1394,21 @@
     // Add title to gallery
     const galleryTitle = createEl('div', { class: 'image-gallery-title' }, [document.createTextNode('My Media')]);
     
+    // Add clear button
+    const galleryClearBtn = createEl('button', { class: 'image-gallery-clear', type: 'button', 'aria-label': 'Clear added images' });
+    galleryClearBtn.textContent = 'Clear';
+    
+    galleryClearBtn.addEventListener('click', () => {
+      // Only remove non-default images (keep image1-7.png)
+      const defaultImages = galleryImages.filter(img => img.src.includes('image') && /image[1-7]\.png/.test(img.src));
+      galleryImages.length = 0;
+      galleryImages.push(...defaultImages);
+      saveGalleryImages();
+      renderGallery();
+    });
+    
     gallery.appendChild(galleryTitle);
+    gallery.appendChild(galleryClearBtn);
     gallery.appendChild(galPrevBtn);
     gallery.appendChild(galleryTrack);
     gallery.appendChild(galNextBtn);
@@ -1474,6 +1498,44 @@
     }
     updateToggle();
     toggle.addEventListener('click', toggleBox);
+    
+    // Initialize default media gallery images - always ensure they exist
+    function initializeDefaultMedia() {
+      const defaultMediaImages = [
+        { src: 'assets/image1.png', productData: { title: 'Kusama Collection 1' } },
+        { src: 'assets/image2.png', productData: { title: 'Kusama Collection 2' } },
+        { src: 'assets/image3.png', productData: { title: 'Kusama Collection 3' } },
+        { src: 'assets/image4.png', productData: { title: 'Kusama Collection 4' } },
+        { src: 'assets/image5.png', productData: { title: 'Kusama Collection 5' } },
+        { src: 'assets/image6.png', productData: { title: 'Kusama Collection 6' } },
+        { src: 'assets/image7.png', productData: { title: 'Kusama Collection 7' } }
+      ];
+      
+      // Check if default images already exist, if not add them
+      defaultMediaImages.forEach(defaultImg => {
+        const exists = galleryImages.some(img => img.src === defaultImg.src);
+        if (!exists) {
+          galleryImages.unshift(defaultImg); // Add to beginning
+        }
+      });
+      
+      // Reverse to maintain correct order (image1 first)
+      const tempDefaults = galleryImages.filter(img => img.src.includes('image'));
+      const tempOthers = galleryImages.filter(img => !img.src.includes('image'));
+      galleryImages.length = 0;
+      galleryImages.push(...tempDefaults.reverse(), ...tempOthers);
+      
+      saveGalleryImages();
+      renderGallery();
+    }
+    
+    // Load saved data from localStorage
+    loadProducts();
+    loadGalleryImages();
+    loadWishlist();
+    
+    // Initialize default media if gallery is empty
+    initializeDefaultMedia();
     
     // Auto-open chatbot and start keyword animation on page load
     openBox();
@@ -1647,6 +1709,8 @@
         productData: productData
       });
       
+      saveGalleryImages(); // Save to localStorage
+      
       // Re-render gallery
       renderGallery();
     }
@@ -1710,10 +1774,29 @@
       }
     }
     
+    // Generate related products for gallery
+    function generateRelatedProducts(currentProduct) {
+      const allProducts = [
+        { title: 'LV X YK CAPUCINES BB', model: 'M46401', price: '$6,400.00', image: 'assets/Products/0047_LV X YK Capucines BB.jpg' },
+        { title: 'LV X YK CAPUCINES BB WHITE', model: 'M46402', price: '$6,400.00', image: 'assets/Products/0048_LV X YK Capucines BB-white.jpg' },
+        { title: 'LV X YK TWIST MM RED WHITE', model: 'M46403', price: '$4,200.00', image: 'assets/Products/0049_Louis-Vuitton-x-Yayoi-Kusama-Twist-MM-Red-White.jpg' },
+        { title: 'LV X YK CAPUCINES BB SILVER', model: 'M46404', price: '$6,400.00', image: 'assets/Products/0055_Louis-Vuitton-x-Yayoi-Kusama-Capucines-BB-Silver.jpg' },
+        { title: 'LV X YK TECHNICAL GABARDINE BLAZER', model: 'M46406', price: '$3,900.00', image: 'assets/Products/0084_LV X YK TECHNICAL GABARDINE BLAZER.jpg' },
+        { title: 'LV X YK COLLECTION BAG', model: 'M46407', price: '$2,750.00', image: 'assets/Products/0089_louisvuitton--FOPA50P89900_PM2_Front view.jpg' },
+        { title: 'LV X YK METAL STUDS METAL JACKET', model: 'M46408', price: '$4,800.00', image: 'assets/Products/0102_LV X YK METAL STUDS METAL JACKET.jpg' },
+        { title: 'LV X YK PAINTED DOTS ONE PIECE SWIMSUIT', model: 'M46409', price: '$1,200.00', image: 'assets/Products/0083_Louis-Vuitton-x-Yayoi-Kusama-Painted-Dots-One-Piece-Swimsuit-Black.jpg' }
+      ];
+      
+      return allProducts;
+    }
+    
     // Function to show product in component above gallery
     function openProductModal(item) {
       // Clear previous content
       productComponentContent.replaceChildren();
+      
+      // Create card wrapper
+      const productCard = createEl('div', { class: 'product-component-card' });
       
       // Create product image
       const productImg = createEl('img', {
@@ -1732,9 +1815,53 @@
       productInfo.appendChild(productModel);
       productInfo.appendChild(productPrice);
       
-      // Assemble content
-      productComponentContent.appendChild(productImg);
-      productComponentContent.appendChild(productInfo);
+      // Assemble card
+      productCard.appendChild(productImg);
+      productCard.appendChild(productInfo);
+      
+      // Add card to content
+      productComponentContent.appendChild(productCard);
+      
+      // Create gallery label
+      const galleryLabel = createEl('div', { class: 'product-component-gallery-label', text: 'Related products' });
+      productComponentContent.appendChild(galleryLabel);
+      
+      // Create product gallery
+      const gallery = createEl('div', { class: 'product-component-gallery' });
+      const relatedProducts = generateRelatedProducts(item);
+      
+      relatedProducts.forEach((product, index) => {
+        const galleryItem = createEl('div', { 
+          class: index === 0 ? 'product-component-gallery-item is-active' : 'product-component-gallery-item'
+        });
+        
+        const img = createEl('img', {
+          src: product.image,
+          alt: product.title
+        });
+        
+        galleryItem.appendChild(img);
+        
+        // Add click handler to update main product card
+        galleryItem.addEventListener('click', () => {
+          // Remove active class from all items
+          gallery.querySelectorAll('.product-component-gallery-item').forEach(i => 
+            i.classList.remove('is-active')
+          );
+          // Add active class to clicked item
+          galleryItem.classList.add('is-active');
+          
+          // Update main product card
+          productImg.src = product.image;
+          productTitle.textContent = product.title;
+          productModel.textContent = `Model: ${product.model}`;
+          productPrice.textContent = `Price: ${product.price}`;
+        });
+        
+        gallery.appendChild(galleryItem);
+      });
+      
+      productComponentContent.appendChild(gallery);
       
       // Show the component
       toggleProductComponent(true);
@@ -1811,6 +1938,61 @@
       };
     }
     
+    // Save products to localStorage
+    function saveProducts() {
+      localStorage.setItem('droppedProducts', JSON.stringify(droppedProducts));
+    }
+    
+    // Save gallery images to localStorage
+    function saveGalleryImages() {
+      localStorage.setItem('galleryImages', JSON.stringify(galleryImages));
+    }
+    
+    // Save wishlist to localStorage
+    function saveWishlist() {
+      localStorage.setItem('wishlistProducts', JSON.stringify(wishlistProducts));
+    }
+    
+    // Load products from localStorage on init
+    function loadProducts() {
+      const saved = localStorage.getItem('droppedProducts');
+      if (saved) {
+        try {
+          const products = JSON.parse(saved);
+          droppedProducts.push(...products);
+        } catch (e) {
+          console.error('Failed to load products:', e);
+        }
+      }
+    }
+    
+    // Load gallery images from localStorage on init
+    function loadGalleryImages() {
+      const saved = localStorage.getItem('galleryImages');
+      if (saved) {
+        try {
+          const images = JSON.parse(saved);
+          galleryImages.push(...images);
+          renderGallery();
+        } catch (e) {
+          console.error('Failed to load gallery images:', e);
+        }
+      }
+    }
+    
+    // Load wishlist from localStorage on init
+    function loadWishlist() {
+      const saved = localStorage.getItem('wishlistProducts');
+      if (saved) {
+        try {
+          const products = JSON.parse(saved);
+          wishlistProducts.push(...products);
+        } catch (e) {
+          console.error('Failed to load wishlist:', e);
+        }
+      }
+    }
+    
     // Render product list view (book icon)
     function renderProductListView() {
       messages.replaceChildren();
@@ -1854,6 +2036,7 @@
               wishlistProducts.push(product);
               heartSvg.setAttribute('fill', 'currentColor');
             }
+            saveWishlist(); // Save to localStorage
             updateWishlistBadge();
             // Refresh wishlist view to show updated list
             if (currentView === 'favorites') {
@@ -1913,6 +2096,7 @@
             const index = wishlistProducts.findIndex(p => p.id === product.id);
             if (index > -1) {
               wishlistProducts.splice(index, 1);
+              saveWishlist(); // Save to localStorage
               renderWishlistView();
               updateWishlistBadge();
             }
@@ -2027,6 +2211,7 @@
           
           // Store product with consistent naming from our database
           droppedProducts.push(productInfo);
+          saveProducts(); // Save to localStorage
           
           // Track in ShopThatData if available
           if (window.ShopThatData && currentSessionId) {
@@ -2049,6 +2234,7 @@
         addMessage('bot', `I've added this ${productInfo.title} to your product library. You can view it in the Library tab or see it on the map!`);
         
         droppedProducts.push(productInfo);
+        saveProducts(); // Save to localStorage
       }
       
       refreshBtn.removeAttribute('hidden');

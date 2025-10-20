@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Product Dashboard - Louis Vuitton</title>
+  <link rel="icon" type="image/svg+xml" href="assets/logo.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="styles/product-dashboard.css">
+</head>
+<body>
+  <!-- Header -->
+  <header class="dashboard-header">
+    <div class="dashboard-header__inner">
+      <a href="index.html" class="dashboard-logo">
+        <img src="assets/louis-vuitton.svg" alt="Louis Vuitton" />
+      </a>
+      <h1 class="dashboard-title">Product Dashboard</h1>
+      <div class="dashboard-header__actions">
+        <button class="dashboard-btn dashboard-btn--secondary" id="clearAllBtn">Clear All</button>
+        <button class="dashboard-btn dashboard-btn--primary" id="exportBtn">Export Data</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="dashboard-main">
+    <!-- Sidebar Navigation -->
+    <aside class="dashboard-sidebar">
+      <nav class="dashboard-nav">
+        <button class="dashboard-nav-item is-active" data-view="chat">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <span>Chat History</span>
+        </button>
+        <button class="dashboard-nav-item" data-view="library">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <span>Library</span>
+          <span class="dashboard-badge" id="libraryCount">0</span>
+        </button>
+        <button class="dashboard-nav-item" data-view="media">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <span>My Media</span>
+          <span class="dashboard-badge" id="mediaCount">0</span>
+        </button>
+        <button class="dashboard-nav-item" data-view="map">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M9 6.75V15m6-6v8.25m.503 3.498 4.875-2.437c.381-.19.622-.58.622-1.006V4.82c0-.836-.88-1.38-1.628-1.006l-3.869 1.934c-.317.159-.69.159-1.006 0L9.503 3.252a1.125 1.125 0 0 0-1.006 0L3.622 5.689C3.24 5.88 3 6.27 3 6.695V19.18c0 .836.88 1.38 1.628 1.006l3.869-1.934c.317-.159.69-.159 1.006 0l4.994 2.497c.317.158.69.158 1.006 0Z" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <span>Map View</span>
+        </button>
+        <button class="dashboard-nav-item" data-view="favorites">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <span>Favorites</span>
+          <span class="dashboard-badge" id="favoritesCount">0</span>
+        </button>
+      </nav>
+    </aside>
+
+    <!-- Content Area -->
+    <div class="dashboard-content">
+      <!-- Chat History View -->
+      <section class="dashboard-view" id="chatView">
+        <div class="dashboard-view-header">
+          <h2>Chat History</h2>
+          <p class="dashboard-view-subtitle">Review your conversation history and related keywords</p>
+        </div>
+        <div class="dashboard-chat-container" id="chatContainer">
+          <!-- Chat sessions will be populated here -->
+        </div>
+      </section>
+
+      <!-- Library View -->
+      <section class="dashboard-view" id="libraryView" hidden>
+        <div class="dashboard-view-header">
+          <h2>Product Library</h2>
+          <p class="dashboard-view-subtitle">All products from your interactions</p>
+        </div>
+        <div class="dashboard-products-grid" id="libraryGrid">
+          <!-- Products will be populated here -->
+        </div>
+      </section>
+
+      <!-- Media View -->
+      <section class="dashboard-view" id="mediaView" hidden>
+        <div class="dashboard-view-header">
+          <h2>My Media</h2>
+          <p class="dashboard-view-subtitle">Your saved images and media</p>
+        </div>
+        <div class="dashboard-media-grid" id="mediaGrid">
+          <!-- Media items will be populated here -->
+        </div>
+      </section>
+
+      <!-- Map View -->
+      <section class="dashboard-view" id="mapView" hidden>
+        <div class="dashboard-view-header">
+          <h2>Store Locations</h2>
+          <p class="dashboard-view-subtitle">Find Louis Vuitton stores near you</p>
+        </div>
+        <div class="dashboard-map-container">
+          <div id="dashboardMap" class="dashboard-map"></div>
+          <div class="dashboard-map-products" id="mapProducts">
+            <!-- Map-related products -->
+          </div>
+        </div>
+      </section>
+
+      <!-- Favorites View -->
+      <section class="dashboard-view" id="favoritesView" hidden>
+        <div class="dashboard-view-header">
+          <h2>Favorites</h2>
+          <p class="dashboard-view-subtitle">Your wishlist items</p>
+        </div>
+        <div class="dashboard-products-grid" id="favoritesGrid">
+          <!-- Favorite products will be populated here -->
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="scripts/shared-data.js"></script>
+  <script src="scripts/product-dashboard.js"></script>
+</body>
+</html>
