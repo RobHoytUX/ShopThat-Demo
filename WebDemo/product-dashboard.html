@@ -109,7 +109,30 @@
           <p class="dashboard-view-subtitle">Find Louis Vuitton stores near you</p>
         </div>
         <div class="dashboard-map-container">
-          <div id="dashboardMap" class="dashboard-map"></div>
+          <div class="dashboard-map-wrapper">
+            <div id="dashboardMap" class="dashboard-map"></div>
+            
+            <!-- Location Explorer Component (overlays map) -->
+            <div class="dashboard-location-explorer" id="locationExplorer" hidden>
+          <div class="location-explorer-header">
+            <h3>Explore Nearby</h3>
+            <button class="location-explorer-close" id="closeLocationExplorer" aria-label="Close">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M6 18L18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+          </div>
+          <div class="location-explorer-tabs">
+            <button class="location-tab is-active" data-category="stores">Curated Stores</button>
+            <button class="location-tab" data-category="museums">Museums</button>
+            <button class="location-tab" data-category="restaurants">Restaurants</button>
+          </div>
+          <div class="location-explorer-content" id="locationContent">
+            <!-- Location images will be populated here -->
+          </div>
+        </div>
+          </div>
+          
           <div class="dashboard-map-products" id="mapProducts">
             <!-- Map-related products -->
           </div>

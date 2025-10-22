@@ -228,7 +228,8 @@
   .chatbot-product-card-link{display:inline-flex;align-items:center;gap:4px;font-size:12px;color:#4A90E2;margin-top:6px;text-decoration:none;transition:color 150ms ease}
   .chatbot-product-card-link:hover{color:#357ABD}
   .chatbot-product-card-link svg{width:14px;height:14px}
-  .chatbot-wrapper{position:fixed;bottom:104px;right:20px;z-index:999}
+  .chatbot-wrapper{position:fixed;bottom:104px;right:20px;z-index:999;transition:bottom 0.3s ease}
+  .chatbot-wrapper.expanded{bottom:20px}
   .image-gallery-wrapper{position:fixed;bottom:20px;left:20px;z-index:998;width:562.5px;opacity:0;transform:translateY(8px);pointer-events:none;transition:opacity 200ms ease,transform 200ms ease}
   .image-gallery-wrapper.is-visible{opacity:1;transform:translateY(0);pointer-events:auto}
   .image-gallery-wrapper[hidden]{display:none}
@@ -271,15 +272,42 @@
   .gallery-nav-btn--next{right:4px}
   .gallery-nav-btn svg{width:16px;height:16px}
   .chatbot-input.drag-over{background:rgba(74,144,226,0.1);border-color:#4A90E2}
-  .chatbot-map-container{display:none;width:100%;height:400px;border-radius:8px;overflow:hidden;margin:60px 0 16px 0;position:relative;z-index:1}
+  .chatbot-map-container{display:none;width:100%;height:350px;border-radius:8px;overflow:hidden;margin:40px 0 16px 0;position:relative;z-index:1;flex-shrink:0}
   .chatbot-map-container.is-visible{display:block}
-  .chatbot-product-gallery{display:none;width:100%;height:120px;margin-bottom:16px;overflow-x:auto;overflow-y:visible;white-space:nowrap;scrollbar-width:thin;padding-bottom:4px}
-  .chatbot-product-gallery.is-visible{display:block}
+  .chatbot-product-gallery{display:none !important;width:100%;margin-top:12px;margin-bottom:0;overflow-x:auto;overflow-y:visible;white-space:nowrap;scrollbar-width:thin;padding:0;gap:12px;flex-shrink:0;min-height:168px}
+  .chatbot-product-gallery.is-visible{display:flex !important}
   .chatbot-header[hidden],.chatbot-messages[hidden],.chatbot-input[hidden]{display:none !important}
   .chatbot-product-gallery::-webkit-scrollbar{height:6px}
   .chatbot-product-gallery::-webkit-scrollbar-track{background:rgba(0,0,0,0.06);border-radius:3px}
   .chatbot-product-gallery::-webkit-scrollbar-thumb{background:rgba(0,0,0,0.25);border-radius:3px}
-  .chatbot-product-item{display:inline-block;width:100px;height:100px;background:linear-gradient(135deg,rgba(200,200,200,0.3),rgba(150,150,150,0.3));border:1px solid rgba(0,0,0,0.1);border-radius:8px;margin-right:8px;vertical-align:top}
+  .chatbot-map-empty{padding:20px;text-align:center;color:#666;font-size:14px;width:100%}
+  .chatbot-map-product-card{flex:0 0 auto;width:340px;background:#fff;border-radius:16px;padding:16px;box-shadow:0 2px 12px rgba(0,0,0,0.08);display:flex;gap:14px;align-items:center;transition:all 0.2s ease;cursor:pointer;overflow:hidden;height:140px}
+  .chatbot-map-product-card:hover{transform:translateY(-2px);box-shadow:0 4px 20px rgba(0,0,0,0.15)}
+  .chatbot-map-product-image{width:100px;height:100px;border-radius:12px;object-fit:cover;flex-shrink:0;background:#f5f5f5}
+  .chatbot-map-product-info{flex:1;display:flex;flex-direction:column;gap:4px;min-width:0;overflow:hidden;justify-content:center}
+  .chatbot-map-product-title{font-size:13px;font-weight:600;color:#111;margin:0;line-height:1.3;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;word-wrap:break-word}
+  .chatbot-map-product-model{font-size:12px;color:#888;margin:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .chatbot-map-product-price{font-size:15px;font-weight:700;color:#111;margin:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .chatbot-map-product-link{display:inline-flex;align-items:center;gap:4px;font-size:12px;color:#4A90E2;text-decoration:none;margin-top:0;transition:color 0.2s ease;flex-shrink:0}
+  .chatbot-map-product-link:hover{color:#357ABD}
+  .chatbot-map-product-link svg{width:13px;height:13px;flex-shrink:0}
+  .chatbot-location-explorer{display:none !important;background:rgba(255,255,255,0.98);border-radius:12px;padding:16px;margin:0;box-shadow:0 2px 12px rgba(0,0,0,0.08);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);flex-direction:column;flex-shrink:0;min-height:220px}
+  .chatbot-location-explorer.is-visible:not([hidden]){display:flex !important}
+  .chatbot-explorer-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+  .chatbot-explorer-header h3{font-size:16px;font-weight:600;color:#111;margin:0}
+  .chatbot-explorer-close{width:28px;height:28px;border-radius:50%;border:1px solid rgba(0,0,0,0.1);background:#fff;display:grid;place-items:center;cursor:pointer;transition:all 0.2s ease}
+  .chatbot-explorer-close:hover{background:#f5f5f5;transform:scale(1.1)}
+  .chatbot-explorer-close svg{width:14px;height:14px;color:#666}
+  .chatbot-explorer-tabs{display:flex;gap:8px;margin-bottom:12px;border-bottom:1px solid rgba(0,0,0,0.1);padding-bottom:2px}
+  .chatbot-explorer-tab{padding:8px 16px;border:none;background:transparent;font-size:12px;font-weight:500;color:#666;cursor:pointer;transition:all 0.2s ease;border-bottom:2px solid transparent;margin-bottom:-2px;white-space:nowrap}
+  .chatbot-explorer-tab:hover{color:#111}
+  .chatbot-explorer-tab.is-active{color:#111;border-bottom-color:#111}
+  .chatbot-explorer-content{display:flex;gap:10px;overflow-x:auto;overflow-y:hidden;padding-bottom:0px;scroll-behavior:smooth;scrollbar-width:none;-ms-overflow-style:none}
+  .chatbot-explorer-content::-webkit-scrollbar{display:none}
+  .chatbot-explorer-item{cursor:pointer;border-radius:10px;overflow:hidden;transition:all 0.2s ease;background:#f8f8f8;flex:0 0 auto;width:140px}
+  .chatbot-explorer-item:hover{transform:translateY(-3px);box-shadow:0 4px 12px rgba(0,0,0,0.12)}
+  .chatbot-explorer-image{width:140px;height:110px;object-fit:cover;display:block}
+  .chatbot-explorer-name{padding:8px 6px;font-size:11px;font-weight:500;color:#111;margin:0;text-align:center;background:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .chatbot-toggle{background:#000;color:#fff;border-radius:50%;cursor:pointer;position:absolute;bottom:-80px;right:8px;border:0;outline:none;box-shadow:none;display:grid;place-items:center;width:56px;height:56px;padding:0}
   .chatbot-toggle:focus{outline:none}
   .chatbot-toggle img{width:24px;height:24px;filter:brightness(0) invert(1)}
@@ -607,6 +635,29 @@
     
     // Leaflet map instance
     let leafletMap = null;
+    let chatbotLocationMarkers = []; // Store location markers for cleanup
+    
+    // Location data for chatbot explorer
+    const chatbotLocationData = {
+      stores: [
+        { lat: 40.7614, lng: -73.9776, name: 'Bergdorf Goodman', image: 'assets/kusama1.png' },
+        { lat: 40.7580, lng: -73.9855, name: 'Saks Fifth Avenue', image: 'assets/kusama2.png' },
+        { lat: 40.7128, lng: -74.0060, name: 'Brookfield Place', image: 'assets/kusama3.png' },
+        { lat: 40.7589, lng: -73.9851, name: 'Tiffany & Co.', image: 'assets/kusama4.webp' }
+      ],
+      museums: [
+        { lat: 40.7794, lng: -73.9632, name: 'Metropolitan Museum of Art', image: 'assets/kusama-gal1.png' },
+        { lat: 40.7614, lng: -73.9776, name: 'Museum of Modern Art', image: 'assets/kusama-gal2.png' },
+        { lat: 40.7738, lng: -73.9540, name: 'Guggenheim Museum', image: 'assets/kusama-gal3.png' },
+        { lat: 40.7831, lng: -73.9712, name: 'Whitney Museum', image: 'assets/kusama-gal4.png' }
+      ],
+      restaurants: [
+        { lat: 40.7580, lng: -73.9855, name: 'Le Bernardin', image: 'assets/image1.png' },
+        { lat: 40.7614, lng: -73.9776, name: 'Per Se', image: 'assets/image2.png' },
+        { lat: 40.7489, lng: -73.9680, name: 'Eleven Madison Park', image: 'assets/image3.png' },
+        { lat: 40.7228, lng: -74.0062, name: 'The Modern', image: 'assets/image4.png' }
+      ]
+    };
     
     // Function to initialize Leaflet map
     function initializeMap() {
@@ -615,8 +666,8 @@
       // Wait a bit for the container to be visible
       setTimeout(() => {
         if (typeof L !== 'undefined') {
-          // Initialize map centered on Paris (Louis Vuitton HQ)
-          leafletMap = L.map('chatbot-map').setView([48.8566, 2.3522], 13);
+          // Initialize map centered between both stores, zoomed out to show both
+          leafletMap = L.map('chatbot-map').setView([40.7438, -73.9853], 12);
           
           // Add OpenStreetMap tiles
           L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -648,16 +699,15 @@
             popupAnchor: [0, -40]
           });
           
-          // Add sample markers for Louis Vuitton stores with custom icon
+          // Add Louis Vuitton NYC store markers with custom icon
           const stores = [
-            { lat: 48.8698, lng: 2.3075, name: 'Louis Vuitton Champs-Élysées' },
-            { lat: 48.8606, lng: 2.3376, name: 'Louis Vuitton Place Vendôme' },
-            { lat: 48.8529, lng: 2.3368, name: 'Louis Vuitton Saint-Germain' }
+            { lat: 40.7632, lng: -73.9732, name: 'Louis Vuitton 57th Street', address: '6 E 57th St, New York, NY 10022' },
+            { lat: 40.7245, lng: -73.9975, name: 'Louis Vuitton SoHo', address: '116 Greene St, New York, NY 10012' }
           ];
           
           stores.forEach(store => {
             L.marker([store.lat, store.lng], { icon: lvIcon })
-              .bindPopup(`<b>${store.name}</b>`)
+              .bindPopup(`<b>${store.name}</b><br>${store.address}`)
               .addTo(leafletMap);
           });
           
@@ -681,6 +731,11 @@
         inputW.removeAttribute('hidden');
         mapContainer.classList.remove('is-visible');
         productGallery.classList.remove('is-visible');
+        chatbotLocationExplorer.classList.remove('is-visible');
+        // Close location explorer and return to default size
+        closeChatbotLocationExplorer();
+        // Return to default chat size
+        updateBoxSizeForState();
         // Restore chat messages if they exist - DON'T clear them
       } else if (view === 'library') {
         // Show product list view (book icon) - NO INPUT
@@ -689,6 +744,11 @@
         inputW.setAttribute('hidden', '');
         mapContainer.classList.remove('is-visible');
         productGallery.classList.remove('is-visible');
+        chatbotLocationExplorer.classList.remove('is-visible');
+        // Close location explorer and return to default size
+        closeChatbotLocationExplorer();
+        // Return to default size
+        updateBoxSizeForState();
         // Render product list - DON'T clear existing messages
         renderProductListView();
       } else if (view === 'favorites') {
@@ -698,6 +758,11 @@
         inputW.setAttribute('hidden', '');
         mapContainer.classList.remove('is-visible');
         productGallery.classList.remove('is-visible');
+        chatbotLocationExplorer.classList.remove('is-visible');
+        // Close location explorer and return to default size
+        closeChatbotLocationExplorer();
+        // Return to default size
+        updateBoxSizeForState();
         // Render wishlist - DON'T clear existing messages
         renderWishlistView();
       } else if (view === 'map') {
@@ -707,10 +772,23 @@
         inputW.setAttribute('hidden', '');
         mapContainer.classList.add('is-visible');
         productGallery.classList.add('is-visible');
+        // Don't add is-visible to explorer yet - it opens when clicking a product card
+
+        // Set appropriate height for map view with product cards
+        // Map (400px) + Product Gallery (~250px) + padding (~100px) = ~750px
+        const mapViewHeight = Math.min(850, getMaxChatbotHeight());
+        setBoxSize(FULL_W, mapViewHeight);
 
         // Initialize map and render products
         initializeMap();
         renderMapView();
+        
+        // Ensure map displays correctly
+        setTimeout(() => {
+          if (leafletMap) {
+            leafletMap.invalidateSize();
+          }
+        }, 100);
       } else {
         // For other views (search), hide all chat elements including input
         header.setAttribute('hidden', '');
@@ -718,12 +796,52 @@
         inputW.setAttribute('hidden', '');
         mapContainer.classList.remove('is-visible');
         productGallery.classList.remove('is-visible');
+        chatbotLocationExplorer.classList.remove('is-visible');
+        
+        // Close location explorer and return to default size
+        closeChatbotLocationExplorer();
+        // Return to default size
+        updateBoxSizeForState();
       }
     }
     
     // Create map and product gallery containers
     const mapContainer = createEl('div', { class: 'chatbot-map-container', id: 'chatbot-map' });
     const productGallery = createEl('div', { class: 'chatbot-product-gallery' });
+    
+    // Create location explorer for chatbot
+    const chatbotLocationExplorer = createEl('div', { class: 'chatbot-location-explorer', id: 'chatbot-location-explorer', hidden: '' });
+    const explorerHeader = createEl('div', { class: 'chatbot-explorer-header' });
+    const explorerTitle = createEl('h3', { text: 'Explore Nearby' });
+    const explorerClose = createEl('button', { class: 'chatbot-explorer-close', 'aria-label': 'Close' });
+    const closeSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    closeSvg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+    closeSvg.setAttribute('viewBox', '0 0 24 24');
+    closeSvg.setAttribute('fill', 'none');
+    closeSvg.setAttribute('stroke', 'currentColor');
+    closeSvg.setAttribute('stroke-width', '2');
+    const explorerClosePath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    explorerClosePath.setAttribute('d', 'M6 18L18 6M6 6l12 12');
+    explorerClosePath.setAttribute('stroke-linecap', 'round');
+    explorerClosePath.setAttribute('stroke-linejoin', 'round');
+    closeSvg.appendChild(explorerClosePath);
+    explorerClose.appendChild(closeSvg);
+    explorerHeader.appendChild(explorerTitle);
+    explorerHeader.appendChild(explorerClose);
+    
+    const explorerTabs = createEl('div', { class: 'chatbot-explorer-tabs' });
+    const tabStores = createEl('button', { class: 'chatbot-explorer-tab is-active', 'data-category': 'stores', text: 'Curated Stores' });
+    const tabMuseums = createEl('button', { class: 'chatbot-explorer-tab', 'data-category': 'museums', text: 'Museums' });
+    const tabRestaurants = createEl('button', { class: 'chatbot-explorer-tab', 'data-category': 'restaurants', text: 'Restaurants' });
+    explorerTabs.appendChild(tabStores);
+    explorerTabs.appendChild(tabMuseums);
+    explorerTabs.appendChild(tabRestaurants);
+    
+    const explorerContent = createEl('div', { class: 'chatbot-explorer-content', id: 'chatbot-explorer-content' });
+    
+    chatbotLocationExplorer.appendChild(explorerHeader);
+    chatbotLocationExplorer.appendChild(explorerTabs);
+    chatbotLocationExplorer.appendChild(explorerContent);
     
     // Create placeholder product items
     for (let i = 0; i < 8; i++) {
@@ -769,11 +887,16 @@
       return Math.max(400, maxHeight); // Minimum 400px for usability
     }
     
-    function setBoxSize(widthPx, heightPx){
+    function setBoxSize(widthPx, heightPx, skipConstraint = false){
+      if (skipConstraint) {
+        box.style.width = widthPx + 'px';
+        box.style.height = heightPx + 'px';
+      } else {
       const maxHeight = getMaxChatbotHeight();
       const constrainedHeight = Math.min(heightPx, maxHeight);
       box.style.width = widthPx + 'px';
       box.style.height = constrainedHeight + 'px';
+      }
     }
     // Start in full expanded state with increased width
     const INITIAL_W = 700; // Increased to fit 4 images side by side
@@ -881,7 +1004,7 @@
     // The back button is no longer needed since there are no detail views
     backBtn.setAttribute('hidden','');
 
-    box.appendChild(refreshBtn); box.appendChild(backBtn); box.appendChild(sortBtn); box.appendChild(header); box.appendChild(mapContainer); box.appendChild(productGallery); box.appendChild(messages); box.appendChild(inputW);
+    box.appendChild(refreshBtn); box.appendChild(backBtn); box.appendChild(sortBtn); box.appendChild(header); box.appendChild(mapContainer); box.appendChild(productGallery); box.appendChild(chatbotLocationExplorer); box.appendChild(messages); box.appendChild(inputW);
     
     // Navigation toggle functionality
     sortBtn.addEventListener('click', (e) => {
@@ -2138,19 +2261,91 @@
     function renderMapView() {
       productGallery.replaceChildren();
       
+      // NYC LV store locations for product assignment
+      const storeLocations = [
+        { lat: 40.7632, lng: -73.9732, name: 'Louis Vuitton 57th Street', address: '6 E 57th St, New York, NY 10022' },
+        { lat: 40.7245, lng: -73.9975, name: 'Louis Vuitton SoHo', address: '116 Greene St, New York, NY 10012' }
+      ];
+      
       if (droppedProducts.length === 0) {
-        // Show placeholder boxes
-        for (let i = 0; i < 8; i++) {
-          const placeholder = createEl('div', { class: 'chatbot-product-item' });
-          productGallery.appendChild(placeholder);
-        }
+        // Show empty message
+        const emptyMsg = createEl('div', { 
+          class: 'chatbot-map-empty',
+          text: 'No products yet. Drop product images from the homepage to see them here!' 
+        });
+        productGallery.appendChild(emptyMsg);
       } else {
-        // Show actual products
-        droppedProducts.forEach(product => {
-          const item = createEl('div', { class: 'chatbot-product-item chatbot-product-item--filled' });
-          const img = createEl('img', { src: product.image, alt: product.title });
-          item.appendChild(img);
-          productGallery.appendChild(item);
+        // Show actual product cards
+        droppedProducts.forEach((product, index) => {
+          // Assign location alternately between the two stores
+          const storeIndex = index % 2;
+          product.location = {
+            lat: storeLocations[storeIndex].lat,
+            lng: storeLocations[storeIndex].lng
+          };
+          
+          const card = createEl('div', { class: 'chatbot-map-product-card' });
+          
+          // Product image
+          const img = createEl('img', { 
+            class: 'chatbot-map-product-image',
+            src: product.image,
+            alt: product.title
+          });
+          
+          // Product info
+          const info = createEl('div', { class: 'chatbot-map-product-info' });
+          const title = createEl('h3', { class: 'chatbot-map-product-title', text: product.title });
+          const model = createEl('p', { class: 'chatbot-map-product-model', text: product.model });
+          const price = createEl('p', { class: 'chatbot-map-product-price', text: product.price });
+          
+          // View on LV Store link
+          const link = createEl('a', { 
+            class: 'chatbot-map-product-link',
+            href: `https://us.louisvuitton.com/eng-us/search/${encodeURIComponent(product.model)}`,
+            target: '_blank',
+            rel: 'noopener noreferrer',
+            text: 'View on LV Store '
+          });
+          
+          // Add external link icon
+          const linkIcon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+          linkIcon.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+          linkIcon.setAttribute('viewBox', '0 0 24 24');
+          linkIcon.setAttribute('fill', 'none');
+          linkIcon.setAttribute('stroke', 'currentColor');
+          linkIcon.setAttribute('stroke-width', '2');
+          linkIcon.setAttribute('width', '16');
+          linkIcon.setAttribute('height', '16');
+          const linkPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+          linkPath.setAttribute('d', 'M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25');
+          linkPath.setAttribute('stroke-linecap', 'round');
+          linkPath.setAttribute('stroke-linejoin', 'round');
+          linkIcon.appendChild(linkPath);
+          link.appendChild(linkIcon);
+          
+          info.appendChild(title);
+          info.appendChild(model);
+          info.appendChild(price);
+          info.appendChild(link);
+          
+          card.appendChild(img);
+          card.appendChild(info);
+          
+          // Add click handler to zoom to product location and open explorer
+          card.addEventListener('click', (e) => {
+            // Don't zoom or open explorer if clicking the link
+            if (e.target.tagName === 'A' || e.target.closest('a')) return;
+            
+            if (leafletMap && product.location) {
+              leafletMap.setView([product.location.lat, product.location.lng], 15);
+            }
+            
+            // Open location explorer
+            openChatbotLocationExplorer();
+          });
+          
+          productGallery.appendChild(card);
           
           // Add marker to map if available
           if (leafletMap && product.location) {
@@ -2159,8 +2354,124 @@
               .addTo(leafletMap);
           }
         });
+        
+        // Save updated product locations to localStorage
+        saveProducts();
       }
     }
+    
+    // Chatbot Location Explorer Functions
+    function openChatbotLocationExplorer() {
+      chatbotLocationExplorer.removeAttribute('hidden');
+      chatbotLocationExplorer.classList.add('is-visible');
+      loadChatbotLocationCategory('stores');
+      
+      // Expand chatbot to nearly full viewport height for map view
+      const viewportHeight = window.innerHeight;
+      const expandedHeight = viewportHeight - 40; // 20px margin top and bottom
+      
+      // Move wrapper closer to bottom to allow more expansion
+      wrapper.classList.add('expanded');
+      
+      setBoxSize(FULL_W, expandedHeight, true); // Skip constraint to allow full expansion
+      
+      // Ensure map resizes properly
+      setTimeout(() => {
+        if (leafletMap) {
+          leafletMap.invalidateSize();
+        }
+      }, 300);
+    }
+    
+    function closeChatbotLocationExplorer() {
+      chatbotLocationExplorer.setAttribute('hidden', '');
+      chatbotLocationExplorer.classList.remove('is-visible');
+      clearChatbotLocationMarkers();
+      
+      // Remove expanded class from wrapper
+      wrapper.classList.remove('expanded');
+      
+      // Only resize if we're still in map view
+      // (other view switches handle their own sizing)
+      if (mapContainer.classList.contains('is-visible')) {
+        // Return to normal map view height
+        const normalHeight = Math.min(850, getMaxChatbotHeight());
+        setBoxSize(FULL_W, normalHeight);
+        
+        // Ensure map resizes properly
+        setTimeout(() => {
+          if (leafletMap) {
+            leafletMap.invalidateSize();
+          }
+        }, 300);
+      }
+    }
+    
+    function clearChatbotLocationMarkers() {
+      chatbotLocationMarkers.forEach(marker => {
+        if (leafletMap) {
+          leafletMap.removeLayer(marker);
+        }
+      });
+      chatbotLocationMarkers = [];
+    }
+    
+    function loadChatbotLocationCategory(category) {
+      const content = document.getElementById('chatbot-explorer-content');
+      content.replaceChildren();
+      
+      clearChatbotLocationMarkers();
+      
+      const locations = chatbotLocationData[category] || [];
+      
+      if (!leafletMap) return;
+      
+      locations.forEach(location => {
+        // Add standard marker to map (different from LV product markers)
+        const marker = L.marker([location.lat, location.lng])
+          .bindPopup(`<b>${location.name}</b>`)
+          .addTo(leafletMap);
+        chatbotLocationMarkers.push(marker);
+        
+        // Add image to content
+        const item = createEl('div', { class: 'chatbot-explorer-item' });
+        const img = createEl('img', { 
+          class: 'chatbot-explorer-image',
+          src: location.image,
+          alt: location.name
+        });
+        const name = createEl('p', { class: 'chatbot-explorer-name', text: location.name });
+        
+        item.appendChild(img);
+        item.appendChild(name);
+        content.appendChild(item);
+        
+        // Click to zoom to location
+        item.addEventListener('click', () => {
+          if (leafletMap) {
+            leafletMap.setView([location.lat, location.lng], 15);
+            marker.openPopup();
+          }
+        });
+      });
+    }
+    
+    // Event listeners for chatbot location explorer
+    explorerClose.addEventListener('click', closeChatbotLocationExplorer);
+    
+    const chatbotExplorerTabs = document.querySelectorAll('.chatbot-explorer-tab');
+    chatbotExplorerTabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        const category = tab.getAttribute('data-category');
+        
+        // Update active tab
+        chatbotExplorerTabs.forEach(t => t.classList.remove('is-active'));
+        tab.classList.add('is-active');
+        
+        // Load category
+        loadChatbotLocationCategory(category);
+      });
+    });
     
     inputW.addEventListener('drop', async (e) => {
       e.preventDefault();

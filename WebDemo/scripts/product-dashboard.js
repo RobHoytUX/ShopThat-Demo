@@ -45,6 +45,29 @@
 
   let currentView = 'chat';
   let leafletMap = null;
+  let locationMarkers = []; // Store location markers for cleanup
+  
+  // Location data for explorer
+  const locationData = {
+    stores: [
+      { lat: 40.7614, lng: -73.9776, name: 'Bergdorf Goodman', image: 'assets/kusama1.png' },
+      { lat: 40.7580, lng: -73.9855, name: 'Saks Fifth Avenue', image: 'assets/kusama2.png' },
+      { lat: 40.7128, lng: -74.0060, name: 'Brookfield Place', image: 'assets/kusama3.png' },
+      { lat: 40.7589, lng: -73.9851, name: 'Tiffany & Co.', image: 'assets/kusama4.webp' }
+    ],
+    museums: [
+      { lat: 40.7794, lng: -73.9632, name: 'Metropolitan Museum of Art', image: 'assets/kusama-gal1.png' },
+      { lat: 40.7614, lng: -73.9776, name: 'Museum of Modern Art', image: 'assets/kusama-gal2.png' },
+      { lat: 40.7738, lng: -73.9540, name: 'Guggenheim Museum', image: 'assets/kusama-gal3.png' },
+      { lat: 40.7831, lng: -73.9712, name: 'Whitney Museum', image: 'assets/kusama-gal4.png' }
+    ],
+    restaurants: [
+      { lat: 40.7580, lng: -73.9855, name: 'Le Bernardin', image: 'assets/image1.png' },
+      { lat: 40.7614, lng: -73.9776, name: 'Per Se', image: 'assets/image2.png' },
+      { lat: 40.7489, lng: -73.9680, name: 'Eleven Madison Park', image: 'assets/image3.png' },
+      { lat: 40.7228, lng: -74.0062, name: 'The Modern', image: 'assets/image4.png' }
+    ]
+  };
 
   // View switching
   function switchView(viewName) {
@@ -71,6 +94,11 @@
       }
     });
 
+    // Close location explorer when switching away from map view
+    if (viewName !== 'map') {
+      closeLocationExplorer();
+    }
+    
     // Initialize view-specific content
     if (viewName === 'chat') renderChatHistory();
     else if (viewName === 'library') renderLibrary();
@@ -228,18 +256,18 @@
     
     // Initialize map if not already done
     if (!leafletMap && typeof L !== 'undefined') {
-      leafletMap = L.map('dashboardMap').setView([48.8566, 2.3522], 13);
+      // Center map between both stores, zoomed out to show both
+      leafletMap = L.map('dashboardMap').setView([40.7438, -73.9853], 12);
       
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
         maxZoom: 19
       }).addTo(leafletMap);
       
-      // Add LV store markers
+      // Add LV NYC store markers
       const stores = [
-        { lat: 48.8698, lng: 2.3075, name: 'Louis Vuitton Champs-Élysées', address: '101 Avenue des Champs-Élysées' },
-        { lat: 48.8606, lng: 2.3376, name: 'Louis Vuitton Place Vendôme', address: '2 Place Vendôme' },
-        { lat: 48.8529, lng: 2.3368, name: 'Louis Vuitton Saint-Germain', address: '170 Boulevard Saint-Germain' }
+        { lat: 40.7632, lng: -73.9732, name: 'Louis Vuitton 57th Street', address: '6 E 57th St, New York, NY 10022' },
+        { lat: 40.7245, lng: -73.9975, name: 'Louis Vuitton SoHo', address: '116 Greene St, New York, NY 10012' }
       ];
       
       const lvIcon = L.divIcon({
@@ -283,15 +311,23 @@
     const products = productsJson ? JSON.parse(productsJson) : [];
     console.log('Map view - Parsed products:', products);
     
-    // All products get a location if they don't have one
-    products.forEach(product => {
-      if (!product.location) {
-        product.location = { 
-          lat: 48.8566 + (Math.random() - 0.5) * 0.02, 
-          lng: 2.3522 + (Math.random() - 0.5) * 0.02 
-        };
-      }
+    // NYC LV store locations for product assignment
+    const storeLocations = [
+      { lat: 40.7632, lng: -73.9732, name: 'Louis Vuitton 57th Street', address: '6 E 57th St, New York, NY 10022' },
+      { lat: 40.7245, lng: -73.9975, name: 'Louis Vuitton SoHo', address: '116 Greene St, New York, NY 10012' }
+    ];
+    
+    // Assign products to alternate between the two store locations
+    products.forEach((product, index) => {
+      const storeIndex = index % 2;
+      product.location = {
+        lat: storeLocations[storeIndex].lat,
+        lng: storeLocations[storeIndex].lng
+      };
     });
+    
+    // Save updated locations back to localStorage
+    localStorage.setItem('droppedProducts', JSON.stringify(products));
     
     const productsWithLocation = products.filter(p => p.location);
     console.log('Products with locations:', productsWithLocation);
@@ -304,21 +340,136 @@
       productsEl.appendChild(emptyMsg);
     } else {
       productsWithLocation.forEach(product => {
-        const item = createEl('div', { class: 'dashboard-map-product' });
-        const title = createEl('h4', { text: product.title });
-        const price = createEl('p', { text: product.price });
-        item.appendChild(title);
-        item.appendChild(price);
+        const card = createEl('div', { class: 'dashboard-map-product' });
         
-        item.addEventListener('click', () => {
+        // Product image
+        const img = createEl('img', { 
+          class: 'dashboard-map-product-image',
+          src: product.image,
+          alt: product.title
+        });
+        
+        // Product info container
+        const info = createEl('div', { class: 'dashboard-map-product-info' });
+        const title = createEl('h3', { class: 'dashboard-map-product-title', text: product.title });
+        const model = createEl('p', { class: 'dashboard-map-product-model', text: product.model });
+        const price = createEl('p', { class: 'dashboard-map-product-price', text: product.price });
+        
+        // View on LV Store link
+        const link = createEl('a', { 
+          class: 'dashboard-map-product-link',
+          href: `https://us.louisvuitton.com/eng-us/search/${encodeURIComponent(product.model)}`,
+          target: '_blank',
+          rel: 'noopener noreferrer',
+          text: 'View on LV Store '
+        });
+        
+        // Add external link icon
+        const linkIcon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        linkIcon.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+        linkIcon.setAttribute('viewBox', '0 0 24 24');
+        linkIcon.setAttribute('fill', 'none');
+        linkIcon.setAttribute('stroke', 'currentColor');
+        linkIcon.setAttribute('stroke-width', '2');
+        linkIcon.setAttribute('width', '16');
+        linkIcon.setAttribute('height', '16');
+        const linkPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        linkPath.setAttribute('d', 'M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25');
+        linkPath.setAttribute('stroke-linecap', 'round');
+        linkPath.setAttribute('stroke-linejoin', 'round');
+        linkIcon.appendChild(linkPath);
+        link.appendChild(linkIcon);
+        
+        info.appendChild(title);
+        info.appendChild(model);
+        info.appendChild(price);
+        info.appendChild(link);
+        
+        card.appendChild(img);
+        card.appendChild(info);
+        
+        card.addEventListener('click', (e) => {
+          // Don't zoom or open explorer if clicking the link
+          if (e.target.tagName === 'A' || e.target.closest('a')) return;
+          
+          // Zoom to product's assigned store location
           if (leafletMap && product.location) {
             leafletMap.setView([product.location.lat, product.location.lng], 15);
           }
+          
+          // Open location explorer
+          openLocationExplorer();
         });
         
-        productsEl.appendChild(item);
+        productsEl.appendChild(card);
       });
     }
+  }
+  
+  // Location Explorer Functions
+  function openLocationExplorer() {
+    const explorer = document.getElementById('locationExplorer');
+    explorer.removeAttribute('hidden');
+    
+    // Load default category (stores)
+    loadLocationCategory('stores');
+  }
+  
+  function closeLocationExplorer() {
+    const explorer = document.getElementById('locationExplorer');
+    explorer.setAttribute('hidden', '');
+    
+    // Clear location markers
+    clearLocationMarkers();
+  }
+  
+  function clearLocationMarkers() {
+    locationMarkers.forEach(marker => {
+      if (leafletMap) {
+        leafletMap.removeLayer(marker);
+      }
+    });
+    locationMarkers = [];
+  }
+  
+  function loadLocationCategory(category) {
+    const content = document.getElementById('locationContent');
+    content.replaceChildren();
+    
+    // Clear previous location markers
+    clearLocationMarkers();
+    
+    const locations = locationData[category] || [];
+    
+    if (!leafletMap) return;
+    
+    // Add markers and images
+    locations.forEach(location => {
+      // Add standard marker to map (different from LV product markers)
+      const marker = L.marker([location.lat, location.lng])
+        .bindPopup(`<b>${location.name}</b>`)
+        .addTo(leafletMap);
+      locationMarkers.push(marker);
+      
+      // Add image to content
+      const item = createEl('div', { class: 'location-item' });
+      const img = createEl('img', { 
+        class: 'location-image',
+        src: location.image,
+        alt: location.name
+      });
+      const name = createEl('p', { class: 'location-name', text: location.name });
+      
+      item.appendChild(img);
+      item.appendChild(name);
+      content.appendChild(item);
+      
+      // Click to zoom to location
+      item.addEventListener('click', () => {
+        leafletMap.setView([location.lat, location.lng], 15);
+        marker.openPopup();
+      });
+    });
   }
 
   // Render Favorites
@@ -519,6 +670,26 @@
       }
     });
   }
+
+  // Location Explorer Event Listeners
+  const closeExplorerBtn = document.getElementById('closeLocationExplorer');
+  if (closeExplorerBtn) {
+    closeExplorerBtn.addEventListener('click', closeLocationExplorer);
+  }
+  
+  const locationTabs = document.querySelectorAll('.location-tab');
+  locationTabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      const category = tab.getAttribute('data-category');
+      
+      // Update active tab
+      locationTabs.forEach(t => t.classList.remove('is-active'));
+      tab.classList.add('is-active');
+      
+      // Load category
+      loadLocationCategory(category);
+    });
+  });
 
   // Initialize
   renderChatHistory();

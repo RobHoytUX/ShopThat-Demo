@@ -450,11 +450,20 @@ html, body {
   display: grid;
   grid-template-columns: 1fr 380px;
   gap: 24px;
-  height: calc(100vh - 250px);
+  height: calc(100vh - 200px);
   min-height: 600px;
+  align-items: start;
+}
+
+.dashboard-map-wrapper {
+  position: relative;
+  border-radius: 16px;
+  overflow: hidden;
+  height: 100%;
 }
 
 .dashboard-map {
+  height: 100%;
   border-radius: 16px;
   overflow: hidden;
   box-shadow: 0 2px 8px rgba(0,0,0,0.06);
@@ -466,32 +475,258 @@ html, body {
   padding: 24px;
   overflow-y: auto;
   box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  height: 100%;
 }
 
 .dashboard-map-product {
-  padding: 16px;
+  padding: 20px;
+  border-radius: 16px;
+  background: #fff;
+  border: 1px solid rgba(0,0,0,0.08);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+
+.dashboard-map-product:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+}
+
+.dashboard-map-product-image {
+  width: 120px;
+  height: 120px;
   border-radius: 12px;
-  margin-bottom: 12px;
-  background: #f8f8f8;
+  object-fit: cover;
+  flex-shrink: 0;
+  background: #f5f5f5;
+}
+
+.dashboard-map-product-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.dashboard-map-product-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #111;
+  margin: 0;
+  line-height: 1.3;
+}
+
+.dashboard-map-product-model {
+  font-size: 13px;
+  color: #888;
+  margin: 0;
+}
+
+.dashboard-map-product-price {
+  font-size: 16px;
+  font-weight: 700;
+  color: #111;
+  margin: 0;
+}
+
+.dashboard-map-product-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  color: #4A90E2;
+  text-decoration: none;
+  margin-top: 4px;
+  transition: color 0.2s ease;
+  align-self: flex-start;
+}
+
+.dashboard-map-product-link:hover {
+  color: #357ABD;
+}
+
+.dashboard-map-product-link svg {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+
+/* Location Explorer */
+.dashboard-location-explorer {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(to top, rgba(255,255,255,0.98) 0%, rgba(255,255,255,0.95) 100%);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  padding: 20px 24px 24px 24px;
+  box-shadow: 0 -4px 24px rgba(0,0,0,0.15);
+  z-index: 1000;
+  max-height: 280px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  border-radius: 0 0 16px 16px;
+  transform: translateY(0);
+  transition: transform 0.3s ease, opacity 0.3s ease;
+  animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.dashboard-location-explorer[hidden] {
+  display: none;
+}
+
+.location-explorer-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  flex-shrink: 0;
+}
+
+.location-explorer-header h3 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #111;
+  margin: 0;
+}
+
+.location-explorer-close {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid rgba(0,0,0,0.1);
+  background: #fff;
+  display: grid;
+  place-items: center;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
-.dashboard-map-product:hover {
-  background: #f0f0f0;
-  transform: translateX(-4px);
+.location-explorer-close:hover {
+  background: #f5f5f5;
+  transform: scale(1.1);
 }
 
-.dashboard-map-product h4 {
-  font-size: 14px;
-  font-weight: 600;
-  margin: 0 0 4px;
-}
-
-.dashboard-map-product p {
-  font-size: 13px;
+.location-explorer-close svg {
+  width: 16px;
+  height: 16px;
   color: #666;
+}
+
+.location-explorer-tabs {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 16px;
+  border-bottom: 1px solid rgba(0,0,0,0.1);
+  padding-bottom: 2px;
+  flex-shrink: 0;
+}
+
+.location-tab {
+  padding: 10px 20px;
+  border: none;
+  background: transparent;
+  font-size: 13px;
+  font-weight: 500;
+  color: #666;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  white-space: nowrap;
+}
+
+.location-tab:hover {
+  color: #111;
+}
+
+.location-tab.is-active {
+  color: #111;
+  border-bottom-color: #111;
+}
+
+.location-explorer-content {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-bottom: 8px;
+  flex: 1;
+  scroll-behavior: smooth;
+}
+
+.location-explorer-content::-webkit-scrollbar {
+  height: 6px;
+}
+
+.location-explorer-content::-webkit-scrollbar-track {
+  background: rgba(0,0,0,0.05);
+  border-radius: 3px;
+}
+
+.location-explorer-content::-webkit-scrollbar-thumb {
+  background: rgba(0,0,0,0.2);
+  border-radius: 3px;
+}
+
+.location-explorer-content::-webkit-scrollbar-thumb:hover {
+  background: rgba(0,0,0,0.3);
+}
+
+.location-item {
+  cursor: pointer;
+  border-radius: 12px;
+  overflow: hidden;
+  transition: all 0.2s ease;
+  background: #f8f8f8;
+  flex: 0 0 auto;
+  width: 180px;
+}
+
+.location-item:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+}
+
+.location-image {
+  width: 180px;
+  height: 140px;
+  object-fit: cover;
+  display: block;
+}
+
+.location-name {
+  padding: 10px 8px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #111;
   margin: 0;
+  text-align: center;
+  background: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* Empty States */
@@ -539,20 +774,74 @@ html, body {
   .dashboard-map-container {
     grid-template-columns: 1fr;
     height: auto;
+    min-height: auto;
   }
   
-  .dashboard-map {
+  .dashboard-map-wrapper {
     height: 500px;
   }
   
   .dashboard-map-products {
+    height: auto;
     max-height: 400px;
+  }
+  
+  .location-item {
+    width: 160px;
+  }
+  
+  .location-image {
+    width: 160px;
+    height: 130px;
   }
 }
 
 @media (max-width: 768px) {
   .dashboard-header__inner {
     padding: 12px 20px;
+  }
+  
+  .dashboard-location-explorer {
+    padding: 14px 16px 16px 16px;
+    max-height: 240px;
+  }
+  
+  .location-explorer-header h3 {
+    font-size: 16px;
+  }
+  
+  .location-explorer-tabs {
+    gap: 6px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  
+  .location-explorer-tabs::-webkit-scrollbar {
+    display: none;
+  }
+  
+  .location-tab {
+    padding: 8px 14px;
+    font-size: 12px;
+  }
+  
+  .location-explorer-content {
+    gap: 10px;
+  }
+  
+  .location-item {
+    width: 140px;
+  }
+  
+  .location-image {
+    width: 140px;
+    height: 110px;
+  }
+  
+  .location-name {
+    font-size: 11px;
+    padding: 8px 6px;
   }
   
   .dashboard-title {
