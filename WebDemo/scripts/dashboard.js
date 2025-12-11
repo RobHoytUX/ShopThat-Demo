@@ -247,78 +247,83 @@
     const lvProducts = [
       { 
         id: 1,
-        name: 'Keepall 50', 
-        price: '$2,570', 
-        cost: '$32.13', 
-        uses: 125,
-        description: 'Iconic Louis Vuitton travel bag crafted from Monogram canvas with natural leather trim. Features spacious interior and classic design.',
-        category: 'Travel Bags',
-        material: 'Monogram Canvas',
-        dimensions: '50 x 29 x 23 cm',
-        avgSessionTime: '2m 15s',
-        conversionRate: '8.2%',
-        totalRevenue: '$21,525',
-        keywordMentions: 89
+        name: 'LV X YK CAPUCINES BB', 
+        price: '$6,400', 
+        cost: '$95.50', 
+        uses: 382,
+        image: 'assets/Products/0047_LV X YK Capucines BB.jpg',
+        description: 'Louis Vuitton x Yayoi Kusama collaboration. Black leather Capucines BB bag featuring Kusama\'s iconic multicolored polka dots. Limited edition collectible piece.',
+        category: 'Handbags - Kusama Collection',
+        material: 'Polka Dot Leather',
+        dimensions: '21 x 14 x 8 cm',
+        avgSessionTime: '6m 15s',
+        conversionRate: '22.5%',
+        totalRevenue: '$144,800',
+        keywordMentions: 342
       },
       { 
         id: 2,
-        name: 'Neverfull MM', 
-        price: '$2,030', 
-        cost: '$41.25', 
-        uses: 165,
-        description: 'Versatile tote bag in Monogram canvas with leather handles and trim. Perfect for everyday use with spacious interior.',
-        category: 'Handbags',
-        material: 'Monogram Canvas',
-        dimensions: '32 x 29 x 17 cm',
-        avgSessionTime: '3m 42s',
-        conversionRate: '12.1%',
-        totalRevenue: '$33,495',
-        keywordMentions: 124
+        name: 'LV X YK CAPUCINES BB WHITE', 
+        price: '$6,400', 
+        cost: '$92.75', 
+        uses: 371,
+        image: 'assets/Products/0048_LV X YK Capucines BB-white.jpg',
+        description: 'Louis Vuitton x Yayoi Kusama collaboration. Ivory leather Capucines BB bag adorned with vibrant multicolored polka dots. Rare limited edition design.',
+        category: 'Handbags - Kusama Collection',
+        material: 'Polka Dot Leather',
+        dimensions: '21 x 14 x 8 cm',
+        avgSessionTime: '5m 52s',
+        conversionRate: '21.8%',
+        totalRevenue: '$139,264',
+        keywordMentions: 318
       },
       { 
         id: 3,
-        name: 'Speedy 30', 
-        price: '$1,760', 
-        cost: '$28.75', 
-        uses: 115,
-        description: 'Classic Louis Vuitton handbag in Monogram canvas. Compact yet spacious with iconic curved silhouette.',
-        category: 'Handbags',
-        material: 'Monogram Canvas',
-        dimensions: '30 x 21 x 17 cm',
-        avgSessionTime: '1m 58s',
-        conversionRate: '6.5%',
-        totalRevenue: '$20,240',
-        keywordMentions: 67
+        name: 'LV X YK TWIST MM RED WHITE', 
+        price: '$4,200', 
+        cost: '$68.25', 
+        uses: 273,
+        image: 'assets/Products/0049_Louis-Vuitton-x-Yayoi-Kusama-Twist-MM-Red-White.jpg',
+        description: 'Louis Vuitton x Yayoi Kusama collaboration. Bold red leather Twist MM bag with white polka dots and crystal-embellished LV logo. Statement piece from this iconic collaboration.',
+        category: 'Handbags - Kusama Collection',
+        material: 'Polka Dot Leather & Crystal',
+        dimensions: '23 x 17 x 9 cm',
+        avgSessionTime: '4m 38s',
+        conversionRate: '18.2%',
+        totalRevenue: '$76,440',
+        keywordMentions: 245
       },
       { 
         id: 4,
-        name: 'Twist Bag', 
-        price: '$4,400', 
-        cost: '$67.50', 
-        uses: 270,
-        description: 'Modern interpretation of the LV turn-lock closure in Epi leather. Contemporary design meets traditional craftsmanship.',
-        category: 'Handbags',
-        material: 'Epi Leather',
-        dimensions: '23 x 18 x 9 cm',
-        avgSessionTime: '4m 12s',
-        conversionRate: '15.3%',
-        totalRevenue: '$67,320',
-        keywordMentions: 198
+        name: 'LV X YK CAPUCINES BB SILVER', 
+        price: '$6,400', 
+        cost: '$94.00', 
+        uses: 376,
+        image: 'assets/Products/0055_Louis-Vuitton-x-Yayoi-Kusama-Capucines-BB-Silver.jpg',
+        description: 'Louis Vuitton x Yayoi Kusama collaboration. Metallic silver leather Capucines BB bag with studded polka dot details. Futuristic interpretation of Kusama\'s signature motif.',
+        category: 'Handbags - Kusama Collection',
+        material: 'Metallic Studded Leather',
+        dimensions: '21 x 14 x 8 cm',
+        avgSessionTime: '6m 02s',
+        conversionRate: '23.1%',
+        totalRevenue: '$150,528',
+        keywordMentions: 335
       },
       { 
         id: 5,
-        name: 'Capucines MM', 
-        price: '$5,800', 
-        cost: '$89.25', 
-        uses: 357,
-        description: 'Elegant bag named after the street where Louis Vuitton opened his first store. Features luxurious leather and distinctive LV closure.',
-        category: 'Handbags',
-        material: 'Leather',
-        dimensions: '27 x 18 x 9 cm',
-        avgSessionTime: '5m 28s',
-        conversionRate: '18.7%',
-        totalRevenue: '$103,530',
-        keywordMentions: 267
+        name: 'LV X YK POLKA DOT BODYSUIT', 
+        price: '$3,200', 
+        cost: '$52.50', 
+        uses: 210,
+        image: 'assets/Products/0083_Louis-Vuitton-x-Yayoi-Kusama-Painted-Dots-One-Piece-Swimsuit-Black.jpg',
+        description: 'Louis Vuitton x Yayoi Kusama collaboration. Black bodysuit with vibrant multicolored polka dots. Wearable art piece celebrating Kusama\'s iconic infinity dots.',
+        category: 'Ready-to-Wear - Kusama Collection',
+        material: 'Polka Dot Print Fabric',
+        dimensions: 'Various Sizes Available',
+        avgSessionTime: '3m 45s',
+        conversionRate: '14.5%',
+        totalRevenue: '$46,400',
+        keywordMentions: 186
       }
     ];
     
@@ -328,7 +333,7 @@
       item.setAttribute('data-product-id', product.id);
       item.innerHTML = `
         <div class="product-image">
-          <img src="assets/kusama3.png" alt="LV ${product.name}" />
+          <img src="${product.image}" alt="LV ${product.name}" />
         </div>
         <div class="product-name">${product.name}</div>
         <div class="product-price">${product.price}</div>
@@ -433,7 +438,7 @@
       </div>
       <div class="product-panel-content">
         <div class="product-detail-image">
-          <img src="assets/kusama3.png" alt="${product.name}" />
+          <img src="${product.image}" alt="${product.name}" />
         </div>
         
         <div class="product-detail-info">

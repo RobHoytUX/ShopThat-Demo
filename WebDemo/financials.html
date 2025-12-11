@@ -114,7 +114,7 @@
                   <span class="metric-unit">conversions</span>
                 </div>
                 <div class="metric-item">
-                  <span class="metric-label">Cost Per Conversion</span>
+                  <span class="metric-label">Engagement Rate</span>
                   <span class="metric-value">$1.25</span>
                   <span class="metric-unit">1.5% improvement</span>
                 </div>
@@ -296,7 +296,7 @@
         kusama: {
           spend: '$20,000',
           conversions: '1000',
-          costPerConversion: '$1.25',
+          engagementRate: '$1.25',
           improvement: '1.5%',
           chatbotClicks: '200,000',
           clickPercentage: '20%',
@@ -313,7 +313,7 @@
         murakami: {
           spend: '$15,000',
           conversions: '850',
-          costPerConversion: '$1.76',
+          engagementRate: '$1.76',
           improvement: '2.1%',
           chatbotClicks: '175,000',
           clickPercentage: '18%',
@@ -330,7 +330,7 @@
         'core-values': {
           spend: '$12,500',
           conversions: '720',
-          costPerConversion: '$1.74',
+          engagementRate: '$1.74',
           improvement: '1.8%',
           chatbotClicks: '150,000',
           clickPercentage: '15%',
@@ -429,8 +429,8 @@
           // Publisher Led Conversions
           performanceMetrics[0].querySelector('.metric-value').textContent = data.conversions;
           
-          // Cost Per Conversion
-          performanceMetrics[1].querySelector('.metric-value').textContent = data.costPerConversion;
+          // Engagement Rate
+          performanceMetrics[1].querySelector('.metric-value').textContent = data.engagementRate;
           performanceMetrics[1].querySelector('.metric-unit').textContent = data.improvement + ' improvement';
           
           // Keyword Click in Chatbot

@@ -229,22 +229,22 @@
   .chatbot-product-card-link:hover{color:#357ABD}
   .chatbot-product-card-link svg{width:14px;height:14px}
   .chatbot-wrapper{position:fixed;bottom:104px;right:20px;z-index:999;transition:bottom 0.3s ease}
-  .chatbot-wrapper.expanded{bottom:20px}
-  .image-gallery-wrapper{position:fixed;bottom:20px;left:20px;z-index:998;width:562.5px;opacity:0;transform:translateY(8px);pointer-events:none;transition:opacity 200ms ease,transform 200ms ease}
-  .image-gallery-wrapper.is-visible{opacity:1;transform:translateY(0);pointer-events:auto}
+  .chatbot-wrapper.expanded{bottom:190px}
+  .image-gallery-wrapper{position:fixed;top:auto;bottom:-200px;right:20px;z-index:997;width:562.5px;opacity:0;transform:translateY(20px);pointer-events:none;transition:opacity 300ms ease,transform 300ms ease,bottom 0.3s ease}
+  .image-gallery-wrapper.is-visible{opacity:1;transform:translateY(0);pointer-events:auto;bottom:-6px}
   .image-gallery-wrapper[hidden]{display:none}
   .image-gallery{background:linear-gradient(135deg,rgba(255,255,255,0.4),rgba(255,255,255,0.22));border:1px solid rgba(255,255,255,0.35);border-radius:12px;padding:12px 40px;min-height:144px;box-shadow:0 8px 32px 0 rgba(31,38,135,0.3);backdrop-filter:blur(16px) saturate(180%);-webkit-backdrop-filter:blur(16px) saturate(180%);position:relative;overflow:visible}
   .image-gallery-title{position:absolute;top:12px;left:12px;font-size:16px;font-weight:600;color:#111;pointer-events:none;z-index:1}
   .image-gallery-clear{position:absolute;top:12px;right:12px;padding:6px 12px;border-radius:8px;border:1px solid rgba(0,0,0,0.2);background:rgba(255,255,255,0.95);font-size:12px;font-weight:500;color:#111;cursor:pointer;transition:all 200ms ease;z-index:1}
   .image-gallery-clear:hover{background:rgba(255,255,255,1);transform:scale(1.05)}
-  .product-component{position:fixed;bottom:240px;left:20px;z-index:999;width:562.5px;opacity:0;transform:translateY(8px);pointer-events:none;transition:opacity 200ms ease,transform 200ms ease}
-  .product-component.is-visible{opacity:1;transform:translateY(0);pointer-events:auto}
+  .product-component{position:fixed;bottom:20px;left:20px;z-index:999;width:562.5px;opacity:0;transform:translateX(20px);pointer-events:none;transition:opacity 300ms ease,transform 300ms ease}
+  .product-component.is-visible{opacity:1;transform:translateX(0);pointer-events:auto}
   .product-component[hidden]{display:none}
-  .product-component-inner{background:linear-gradient(135deg,rgba(255,255,255,0.4),rgba(255,255,255,0.22));border:1px solid rgba(255,255,255,0.35);border-radius:12px;padding:12px 40px;min-height:220px;box-shadow:0 8px 32px 0 rgba(31,38,135,0.3);backdrop-filter:blur(16px) saturate(180%);-webkit-backdrop-filter:blur(16px) saturate(180%);position:relative;overflow:visible}
+  .product-component-inner{background:linear-gradient(135deg,rgba(255,255,255,0.4),rgba(255,255,255,0.22));border:1px solid rgba(255,255,255,0.35);border-radius:12px;padding:12px;min-height:220px;box-shadow:0 8px 32px 0 rgba(31,38,135,0.3);backdrop-filter:blur(16px) saturate(180%);-webkit-backdrop-filter:blur(16px) saturate(180%);position:relative;overflow:visible}
   .product-component-title{position:absolute;top:12px;left:12px;font-size:16px;font-weight:600;color:#111;pointer-events:none;z-index:1}
   .product-component-close{position:absolute;top:12px;right:12px;width:32px;height:32px;border-radius:50%;border:1px solid rgba(0,0,0,0.2);background:rgba(255,255,255,0.95);display:grid;place-items:center;color:#111;cursor:pointer;transition:all 200ms ease;z-index:2}
   .product-component-close:hover{background:rgba(255,255,255,1);transform:scale(1.1)}
-  .product-component-content{display:flex;flex-direction:column;gap:12px;padding:40px 0 8px 0}
+  .product-component-content{display:flex;flex-direction:column;gap:12px;padding:40px 20px 8px 20px}
   .product-component-card{background:rgba(255,255,255,0.98);border-radius:16px;padding:16px;display:flex;gap:16px;align-items:center;box-shadow:0 2px 12px rgba(0,0,0,0.12)}
   .product-component-gallery-label{font-size:15px;font-weight:600;color:#111;margin:0 0 8px 0}
   .product-component-gallery{display:flex;gap:8px;overflow-x:auto;overflow-y:hidden;scroll-behavior:smooth;scrollbar-width:none;-webkit-overflow-scrolling:touch;padding:4px 0}
@@ -399,6 +399,12 @@
   .nav-badge{position:absolute;top:-4px;right:-4px;background:#e74c3c;color:#fff;border-radius:10px;padding:0 6px;font-size:10px;line-height:18px;height:18px;min-width:18px;display:inline-grid;place-items:center;font-weight:600}
   .chatbot-product-item--filled{background:transparent;border:1px solid rgba(0,0,0,0.15);position:relative;overflow:hidden}
   .chatbot-product-item--filled img{width:100%;height:100%;object-fit:cover}
+  .chatbot-map-legend{position:absolute;bottom:20px;right:20px;background:white;padding:12px 16px;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,0.15);z-index:1000;min-width:180px}
+  .chatbot-map-legend .map-legend-title{font-size:13px;font-weight:600;margin:0 0 10px 0;color:#111}
+  .chatbot-map-legend .map-legend-items{display:flex;flex-direction:column;gap:8px}
+  .chatbot-map-legend .map-legend-item{display:flex;align-items:center;gap:8px}
+  .chatbot-map-legend .map-legend-marker{width:12px;height:12px;border-radius:50%;border:2px solid white;box-shadow:0 1px 3px rgba(0,0,0,0.4);flex-shrink:0}
+  .chatbot-map-legend .map-legend-item span{font-size:12px;color:#333}
   @media (max-width:600px){.chatbot-box{width:90vw}}
   `;
 
@@ -503,35 +509,40 @@
     const productComponent = createEl('div', { class: 'product-component', hidden: '' });
     const productComponentInner = createEl('div', { class: 'product-component-inner' });
     const productComponentTitle = createEl('div', { class: 'product-component-title' }, [document.createTextNode('My Products')]);
-    const productComponentClose = createEl('button', { class: 'product-component-close', 'aria-label': 'Close' });
+    const productComponentBack = createEl('button', { class: 'product-component-close', 'aria-label': 'Back to My Media' });
     
-    const closeIcon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-    closeIcon.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
-    closeIcon.setAttribute('viewBox', '0 0 24 24');
-    closeIcon.setAttribute('fill', 'none');
-    closeIcon.setAttribute('stroke', 'currentColor');
-    closeIcon.setAttribute('width', '20');
-    closeIcon.setAttribute('height', '20');
-    const closePath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-    closePath.setAttribute('d', 'M6 18 18 6M6 6l12 12');
-    closePath.setAttribute('stroke-linecap', 'round');
-    closePath.setAttribute('stroke-linejoin', 'round');
-    closePath.setAttribute('stroke-width', '1.5');
-    closeIcon.appendChild(closePath);
-    productComponentClose.appendChild(closeIcon);
+    const productBackIcon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    productBackIcon.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+    productBackIcon.setAttribute('viewBox', '0 0 24 24');
+    productBackIcon.setAttribute('fill', 'none');
+    productBackIcon.setAttribute('stroke', 'currentColor');
+    productBackIcon.setAttribute('width', '20');
+    productBackIcon.setAttribute('height', '20');
+    const productBackPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    productBackPath.setAttribute('d', 'M15 18l-6-6 6-6');
+    productBackPath.setAttribute('stroke-linecap', 'round');
+    productBackPath.setAttribute('stroke-linejoin', 'round');
+    productBackPath.setAttribute('stroke-width', '1.5');
+    productBackIcon.appendChild(productBackPath);
+    productComponentBack.appendChild(productBackIcon);
 
     const productComponentContent = createEl('div', { class: 'product-component-content' });
 
-    productComponentClose.addEventListener('click', () => {
+    productComponentBack.addEventListener('click', () => {
       toggleProductComponent(false);
+      setTimeout(() => {
+        galleryVisible = true; // Update state when showing gallery
+        toggleGallery(true);
+      }, 150);
     });
 
     productComponentInner.appendChild(productComponentTitle);
-    productComponentInner.appendChild(productComponentClose);
+    productComponentInner.appendChild(productComponentBack);
     productComponentInner.appendChild(productComponentContent);
     productComponent.appendChild(productComponentInner);
     document.body.appendChild(productComponent);
     let navVisible = false;
+    let galleryVisible = false; // Track gallery visibility state
     
     // Helper function to create nav icons
     function createNavIcon(iconType) {
@@ -637,25 +648,46 @@
     let leafletMap = null;
     let chatbotLocationMarkers = []; // Store location markers for cleanup
     
-    // Location data for chatbot explorer
+    // Location data for chatbot explorer - Real locations near LV stores
     const chatbotLocationData = {
       stores: [
-        { lat: 40.7614, lng: -73.9776, name: 'Bergdorf Goodman', image: 'assets/kusama1.png' },
-        { lat: 40.7580, lng: -73.9855, name: 'Saks Fifth Avenue', image: 'assets/kusama2.png' },
-        { lat: 40.7128, lng: -74.0060, name: 'Brookfield Place', image: 'assets/kusama3.png' },
-        { lat: 40.7589, lng: -73.9851, name: 'Tiffany & Co.', image: 'assets/kusama4.webp' }
+        // Near Louis Vuitton 57th Street
+        { lat: 40.7638, lng: -73.9744, name: 'Bergdorf Goodman', address: '754 5th Ave', image: 'assets/kusama1.png' },
+        { lat: 40.7577, lng: -73.9788, name: 'Saks Fifth Avenue', address: '611 5th Ave', image: 'assets/kusama2.png' },
+        { lat: 40.7625, lng: -73.9735, name: 'Tiffany & Co.', address: 'Fifth Avenue & 57th St', image: 'assets/kusama4.webp' },
+        { lat: 40.7590, lng: -73.9775, name: 'Cartier', address: '653 5th Ave', image: 'assets/kusama3.png' },
+        { lat: 40.7635, lng: -73.9745, name: 'Van Cleef & Arpels', address: '744 5th Ave', image: 'assets/kusama1.png' },
+        // Near Louis Vuitton SoHo
+        { lat: 40.7244, lng: -73.9976, name: 'Aesop', address: '113 Greene St', image: 'assets/kusama2.png' },
+        { lat: 40.7241, lng: -74.0003, name: 'The Mercer', address: '147 Mercer St', image: 'assets/kusama3.png' },
+        { lat: 40.7247, lng: -73.9985, name: 'COS', address: '129 Spring St', image: 'assets/kusama4.webp' },
+        { lat: 40.7196, lng: -73.9990, name: 'Glossier', address: '123 Lafayette St', image: 'assets/kusama1.png' }
       ],
       museums: [
-        { lat: 40.7794, lng: -73.9632, name: 'Metropolitan Museum of Art', image: 'assets/kusama-gal1.png' },
-        { lat: 40.7614, lng: -73.9776, name: 'Museum of Modern Art', image: 'assets/kusama-gal2.png' },
-        { lat: 40.7738, lng: -73.9540, name: 'Guggenheim Museum', image: 'assets/kusama-gal3.png' },
-        { lat: 40.7831, lng: -73.9712, name: 'Whitney Museum', image: 'assets/kusama-gal4.png' }
+        // Near Louis Vuitton 57th Street
+        { lat: 40.7614, lng: -73.9776, name: 'Museum of Modern Art (MoMA)', address: '11 W 53rd St', image: 'assets/kusama-gal2.png' },
+        { lat: 40.7794, lng: -73.9632, name: 'Metropolitan Museum of Art', address: '1000 5th Ave', image: 'assets/kusama-gal1.png' },
+        { lat: 40.7829, lng: -73.9589, name: 'Guggenheim Museum', address: '1071 5th Ave', image: 'assets/kusama-gal3.png' },
+        { lat: 40.7813, lng: -73.9740, name: 'American Museum of Natural History', address: 'Central Park West at 79th St', image: 'assets/kusama-gal4.png' },
+        // Near Louis Vuitton SoHo
+        { lat: 40.7221, lng: -73.9915, name: 'New Museum', address: '235 Bowery', image: 'assets/kusama-gal1.png' },
+        { lat: 40.7214, lng: -74.0018, name: 'Drawing Center', address: '35 Wooster St', image: 'assets/kusama-gal2.png' },
+        { lat: 40.7195, lng: -73.9989, name: 'Museum of Chinese in America', address: '215 Centre St', image: 'assets/kusama-gal3.png' },
+        { lat: 40.7264, lng: -74.0051, name: 'New York City Fire Museum', address: '278 Spring St', image: 'assets/kusama-gal4.png' }
       ],
       restaurants: [
-        { lat: 40.7580, lng: -73.9855, name: 'Le Bernardin', image: 'assets/image1.png' },
-        { lat: 40.7614, lng: -73.9776, name: 'Per Se', image: 'assets/image2.png' },
-        { lat: 40.7489, lng: -73.9680, name: 'Eleven Madison Park', image: 'assets/image3.png' },
-        { lat: 40.7228, lng: -74.0062, name: 'The Modern', image: 'assets/image4.png' }
+        // Near Louis Vuitton 57th Street
+        { lat: 40.7619, lng: -73.9816, name: 'Le Bernardin', address: '155 W 51st St', image: 'assets/image1.png' },
+        { lat: 40.7614, lng: -73.9776, name: 'The Modern', address: '9 W 53rd St (at MoMA)', image: 'assets/image4.png' },
+        { lat: 40.7655, lng: -73.9682, name: 'Daniel', address: '60 E 65th St', image: 'assets/image2.png' },
+        { lat: 40.7589, lng: -73.9754, name: 'La Grenouille', address: '3 E 52nd St', image: 'assets/image3.png' },
+        { lat: 40.7611, lng: -73.9738, name: 'The Polo Bar', address: '1 E 55th St', image: 'assets/image1.png' },
+        // Near Louis Vuitton SoHo
+        { lat: 40.7222, lng: -74.0000, name: 'Balthazar', address: '80 Spring St', image: 'assets/image2.png' },
+        { lat: 40.7242, lng: -74.0003, name: "Sadelle's", address: '463 W Broadway', image: 'assets/image3.png' },
+        { lat: 40.7248, lng: -73.9979, name: "Raoul's", address: '180 Prince St', image: 'assets/image4.png' },
+        { lat: 40.7260, lng: -74.0012, name: 'The Dutch', address: '131 Sullivan St', image: 'assets/image1.png' },
+        { lat: 40.7246, lng: -73.9996, name: 'Cipriani Downtown', address: '376 West Broadway', image: 'assets/image2.png' }
       ]
     };
     
@@ -669,11 +701,27 @@
           // Initialize map centered between both stores, zoomed out to show both
           leafletMap = L.map('chatbot-map').setView([40.7438, -73.9853], 12);
           
-          // Add OpenStreetMap tiles
-          L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          // Define base layers for map and satellite views
+          const streetMap = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
             maxZoom: 19
-          }).addTo(leafletMap);
+          });
+          
+          const satelliteMap = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+            attribution: '',
+            maxZoom: 19
+          });
+          
+          // Add default layer (street map)
+          streetMap.addTo(leafletMap);
+          
+          // Create layer control
+          const baseMaps = {
+            "Map View": streetMap,
+            "Satellite View": satelliteMap
+          };
+          
+          L.control.layers(baseMaps, null, { position: 'topright' }).addTo(leafletMap);
           
           // Create custom LV icon
           const lvIcon = L.divIcon({
@@ -710,6 +758,89 @@
               .bindPopup(`<b>${store.name}</b><br>${store.address}`)
               .addTo(leafletMap);
           });
+          
+          // Add all nearby locations to map by default with color-coded markers
+          const addNearbyLocations = () => {
+            // Create custom icons for different categories
+            const storeIcon = L.divIcon({
+              className: 'custom-store-marker',
+              html: '<div style="width: 12px; height: 12px; background: #3b82f6; border-radius: 50%; border: 2px solid white; box-shadow: 0 1px 3px rgba(0,0,0,0.4);"></div>',
+              iconSize: [12, 12],
+              iconAnchor: [6, 6]
+            });
+            
+            const museumIcon = L.divIcon({
+              className: 'custom-museum-marker',
+              html: '<div style="width: 12px; height: 12px; background: #8b5cf6; border-radius: 50%; border: 2px solid white; box-shadow: 0 1px 3px rgba(0,0,0,0.4);"></div>',
+              iconSize: [12, 12],
+              iconAnchor: [6, 6]
+            });
+            
+            const restaurantIcon = L.divIcon({
+              className: 'custom-restaurant-marker',
+              html: '<div style="width: 12px; height: 12px; background: #10b981; border-radius: 50%; border: 2px solid white; box-shadow: 0 1px 3px rgba(0,0,0,0.4);"></div>',
+              iconSize: [12, 12],
+              iconAnchor: [6, 6]
+            });
+            
+            // Add stores
+            chatbotLocationData.stores.forEach(location => {
+              const popupContent = location.address 
+                ? `<b>${location.name}</b><br><small>${location.address}</small>`
+                : `<b>${location.name}</b>`;
+              L.marker([location.lat, location.lng], { icon: storeIcon })
+                .bindPopup(popupContent)
+                .addTo(leafletMap);
+            });
+            
+            // Add museums
+            chatbotLocationData.museums.forEach(location => {
+              const popupContent = location.address 
+                ? `<b>${location.name}</b><br><small>${location.address}</small>`
+                : `<b>${location.name}</b>`;
+              L.marker([location.lat, location.lng], { icon: museumIcon })
+                .bindPopup(popupContent)
+                .addTo(leafletMap);
+            });
+            
+            // Add restaurants
+            chatbotLocationData.restaurants.forEach(location => {
+              const popupContent = location.address 
+                ? `<b>${location.name}</b><br><small>${location.address}</small>`
+                : `<b>${location.name}</b>`;
+              L.marker([location.lat, location.lng], { icon: restaurantIcon })
+                .bindPopup(popupContent)
+                .addTo(leafletMap);
+            });
+          };
+          
+          // Add nearby locations after a short delay
+          setTimeout(addNearbyLocations, 200);
+          
+          // Add map legend
+          const mapLegend = createEl('div', { class: 'chatbot-map-legend' });
+          mapLegend.innerHTML = `
+            <h4 class="map-legend-title">Map Legend</h4>
+            <div class="map-legend-items">
+              <div class="map-legend-item">
+                <div class="map-legend-marker" style="background: #000;"></div>
+                <span>Louis Vuitton</span>
+              </div>
+              <div class="map-legend-item">
+                <div class="map-legend-marker" style="background: #3b82f6;"></div>
+                <span>Curated Stores</span>
+              </div>
+              <div class="map-legend-item">
+                <div class="map-legend-marker" style="background: #8b5cf6;"></div>
+                <span>Museums</span>
+              </div>
+              <div class="map-legend-item">
+                <div class="map-legend-marker" style="background: #10b981;"></div>
+                <span>Restaurants</span>
+              </div>
+            </div>
+          `;
+          document.getElementById('chatbot-map').appendChild(mapLegend);
           
           // Fix map display issues
           setTimeout(() => {
@@ -1012,8 +1143,10 @@
       e.stopPropagation();
       console.log('Sort button clicked! Current navVisible:', navVisible);
       navVisible = !navVisible;
-      console.log('New navVisible:', navVisible);
+      galleryVisible = !galleryVisible; // Toggle gallery along with nav
+      console.log('New navVisible:', navVisible, 'galleryVisible:', galleryVisible);
       chatbotNav.classList.toggle('is-visible', navVisible);
+      toggleGallery(galleryVisible); // Toggle gallery visibility
       console.log('Nav classList:', chatbotNav.classList.toString());
     });
     wrapper.appendChild(toggle); wrapper.appendChild(box); wrapper.appendChild(chatbotNav);
@@ -1591,7 +1724,7 @@
       ensureSizeForContent();
       // Perform health check when opening
       performHealthCheck();
-      // Show gallery when chatbot opens
+      // Open gallery automatically when chatbot opens
       toggleGallery(true);
     }
     function closeBox(){
@@ -1602,6 +1735,7 @@
       
       // Close nav if it's open
       navVisible = false;
+      galleryVisible = false; // Reset gallery state
       chatbotNav.classList.remove('is-visible');
       
       // Hide gallery when chatbot closes
@@ -1893,7 +2027,7 @@
         productComponent.classList.remove('is-visible');
         setTimeout(() => {
           productComponent.setAttribute('hidden', '');
-        }, 200);
+        }, 300);
       }
     }
     
@@ -1986,8 +2120,12 @@
       
       productComponentContent.appendChild(gallery);
       
-      // Show the component
-      toggleProductComponent(true);
+      // Hide My Media and show My Products with smooth transition
+      galleryVisible = false; // Update state when hiding gallery
+      toggleGallery(false);
+      setTimeout(() => {
+        toggleProductComponent(true);
+      }, 150);
     }
     
     // Drag and drop functionality
@@ -2428,8 +2566,11 @@
       
       locations.forEach(location => {
         // Add standard marker to map (different from LV product markers)
+        const popupContent = location.address 
+          ? `<b>${location.name}</b><br><small>${location.address}</small>`
+          : `<b>${location.name}</b>`;
         const marker = L.marker([location.lat, location.lng])
-          .bindPopup(`<b>${location.name}</b>`)
+          .bindPopup(popupContent)
           .addTo(leafletMap);
         chatbotLocationMarkers.push(marker);
         
@@ -2600,7 +2741,7 @@
         galleryWrapper.classList.remove('is-visible');
         setTimeout(() => {
           galleryWrapper.setAttribute('hidden', '');
-        }, 200);
+        }, 300);
       }
     }
     
