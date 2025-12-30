@@ -248,6 +248,11 @@
   // Setup AI Chat Prompt
   function setupAIChat() {
     const chatPrompt = document.querySelector('.ai-chat-prompt');
+    if (!chatPrompt) {
+      console.error('AI chat prompt not found');
+      return;
+    }
+    
     const chatInput = document.getElementById('aiChatInput');
     const chatSend = document.getElementById('aiChatSend');
     const chatMessages = document.getElementById('aiChatMessages');
@@ -330,7 +335,13 @@
     
     // Toggle history view
     function toggleHistoryView() {
+      if (!chatPrompt) {
+        console.error('chatPrompt is null in toggleHistoryView');
+        return;
+      }
+      
       const isExpanded = chatPrompt.classList.contains('expanded');
+      console.log('Toggling history view. Current state:', isExpanded);
       
       if (isExpanded) {
         chatPrompt.classList.remove('expanded');
@@ -417,6 +428,65 @@
     }
   }
 
+  // Drawer image sets - different images load based on which card is clicked
+  const drawerImageSets = {
+    // Card 1 (canvas-1.jpg) - Girl with flowers set
+    0: [
+      'assets/media-1.jpg',  // Girl with flowers (B&W)
+      'assets/media-2.jpg',  // Red/pink dots abstract artwork (framed)
+      'assets/media-3.jpg',  // Horse with dots artwork
+      'assets/media-4.jpg',  // Pumpkin artwork (orange/red)
+      'assets/media-5.jpg'   // Woman with polka dot toast
+    ],
+    // Card 2 (canvas-2.jpg) - Blue face paint set
+    1: [
+      'assets/media-set2-1.jpg',  // Purple polka dot woman lying down
+      'assets/media-set2-2.jpg',  // Model with blue LV bag
+      'assets/media-set2-3.jpg',  // Kusama painting dots on back
+      'assets/media-set2-4.jpg'   // Infinity mirror room
+    ],
+    // Card 3 (canvas-3.jpg) - Kusama polka dot outfit set
+    2: [
+      'assets/media-set3-1.jpg',  // Kusama with red wig at large canvas
+      'assets/media-set3-2.jpg',  // Pink polka dots on street with LV logo
+      'assets/media-set3-3.jpg',  // Model with silver balls - Creating Infinity
+      'assets/media-set3-4.jpg'   // Pink infinity room with balloons
+    ],
+    // Card 4 (canvas-4.jpg) - Blue bag set
+    3: [
+      'assets/media-set4-1.jpg',  // Two models in blue LV outfits walking
+      'assets/media-set4-2.jpg',  // Pumpkin tattoo arm + man with pumpkin bag
+      'assets/media-set4-3.jpg',  // Blue pumpkin artwork
+      'assets/media-set4-4.jpg'   // B&W abstract wave/dot pattern
+    ],
+    // Card 5 (canvas-5.jpg) - Blue paint swatch set
+    4: [
+      'assets/media-set5-1.jpg',  // Blonde model with colorful dots and LV bag
+      'assets/media-set5-2.jpg',  // Model in polka dot outfit with LV bag
+      'assets/media-set5-3.jpg',  // Kusama with red wig painting colorful table
+      'assets/media-set5-4.jpg',  // Red paint swatch on blue background
+      'assets/media-set5-5.jpg'   // B&W Kusama on pasta installation
+    ]
+  };
+
+  // Track which card's images are currently loaded
+  let currentLoadedCardIndex = -1;
+
+  // Product images for specific cards (e.g., canvas-2 shows products)
+  const cardProductImages = {
+    // Card 2 (canvas-2.jpg) - Blue face paint has LV products
+    1: [
+      'assets/product-set1-1.jpg',  // Blue polka dot LV bag
+      'assets/product-set1-2.jpg',  // B&W polka dot LV sneakers
+      'assets/product-set1-3.jpg',  // Silver ball LV earrings
+      'assets/product-set1-4.jpg',  // Silver ball LV necklace
+      'assets/product-set1-5.jpg',  // Black polka dot pencil case
+      'assets/product-set1-6.jpg',  // Polka dot LV sunglasses
+      'assets/product-set1-7.jpg',  // B&W polka dot LV t-shirt
+      'assets/product-set1-8.jpg'   // Silver studded LV jacket
+    ]
+  };
+
   // Setup My Media Drawer
   function setupMyMediaDrawer() {
     const drawerImages = document.getElementById('drawerImages');
@@ -425,28 +495,29 @@
     const rightBtn = document.getElementById('scrollRight');
     const drawer = document.querySelector('.my-media-drawer');
     
-    // Get drawer images from localStorage or initialize
+    // Get drawer images from localStorage or initialize with empty
     let drawerImagesList = JSON.parse(localStorage.getItem('drawerImages') || '[]');
     
-    // Initialize with default images if empty
-    if (drawerImagesList.length === 0) {
-      drawerImagesList = [
-        'assets/image1.png',
-        'assets/image2.png',
-        'assets/image3.png',
-        'assets/image4.png',
-        'assets/image5.png',
-        'assets/image6.png',
-        'assets/image7.png',
-        'assets/kusama-book.png',
-        'assets/kusama-pressrelease.png'
-      ];
+    // Start with empty drawer - will be populated when a card is clicked
+    if (currentLoadedCardIndex === -1) {
+      drawerImagesList = [];
       localStorage.setItem('drawerImages', JSON.stringify(drawerImagesList));
     }
     
     // Populate drawer with draggable images
     function populateDrawer() {
       drawerImages.replaceChildren();
+      
+      // Show placeholder if drawer is empty
+      if (drawerImagesList.length === 0) {
+        const placeholder = createEl('div', { 
+          class: 'drawer-placeholder',
+          text: 'Click an image card to load curated media'
+        });
+        placeholder.style.cssText = 'display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; color: rgba(0,0,0,0.4); font-size: 14px; font-style: italic; padding: 20px; text-align: center;';
+        drawerImages.appendChild(placeholder);
+        return;
+      }
       
       drawerImagesList.forEach((src, index) => {
         const img = createEl('img', {
@@ -587,6 +658,7 @@
     }
 
     let focusedCard = null;
+    let originalCanvasCard = null; // Track the original canvas card before media selection
     const cards = [];
 
     // Generate stacked card positions
@@ -910,6 +982,21 @@
       focusedCard = card;
       backdrop.classList.add('active');
       
+      // Find the index of the focused card
+      const focusedIndex = cards.indexOf(card);
+      
+      // Load curated images for this card if available and not already loaded
+      if (drawerImageSets[focusedIndex] && currentLoadedCardIndex !== focusedIndex) {
+        loadCuratedDrawerImages(focusedIndex);
+      }
+      
+      // Show/hide My Products component based on card
+      if (cardProductImages[focusedIndex]) {
+        showProductsDrawer(focusedIndex);
+      } else {
+        hideProductsDrawer();
+      }
+      
       // Ensure transition is enabled for smooth animation
       cards.forEach(c => {
         if (c.style.transition === 'none') {
@@ -918,9 +1005,10 @@
         c.style.transformOrigin = 'center center';
       });
       
-      // Calculate center of viewport
+      // Calculate center of viewport, offset up to keep My Media drawer accessible
       const viewportCenterX = window.innerWidth / 2;
-      const viewportCenterY = window.innerHeight / 2;
+      const drawerHeight = 180; // Height of My Media drawer
+      const viewportCenterY = (window.innerHeight - drawerHeight) / 2;
       
       // Get card dimensions (before any transform)
       const cardRect = card.getBoundingClientRect();
@@ -932,11 +1020,11 @@
           c.classList.add('focused');
           c.classList.remove('unfocused');
           
-          // Calculate offset to center
+          // Calculate offset to center (above the drawer)
           const offsetX = viewportCenterX - cardCenterX;
           const offsetY = viewportCenterY - cardCenterY;
           
-          // Move to center - scale is handled by CSS class
+          // Move to center above drawer - scale is handled by CSS class
           c.style.left = (parseFloat(c.dataset.originalX) + offsetX) + 'px';
           c.style.top = (parseFloat(c.dataset.originalY) + offsetY) + 'px';
           c.style.zIndex = 1000;
@@ -968,14 +1056,230 @@
         }
       });
     }
+    
+    // Load curated images into the My Media drawer based on card index
+    function loadCuratedDrawerImages(cardIndex) {
+      currentLoadedCardIndex = cardIndex;
+      
+      // Get the image set for this card (default to first set if not found)
+      const imageSet = drawerImageSets[cardIndex] || drawerImageSets[0];
+      
+      // Set the curated images in localStorage
+      localStorage.setItem('drawerImages', JSON.stringify(imageSet));
+      
+      // Re-populate the drawer
+      const drawerImagesEl = document.getElementById('drawerImages');
+      if (drawerImagesEl) {
+        drawerImagesEl.replaceChildren();
+        
+        imageSet.forEach((src, index) => {
+          const img = createEl('img', {
+            class: 'my-media-image',
+            src: src,
+            alt: `Media ${index + 1}`,
+            draggable: 'true'
+          });
+          
+          // Drag start
+          img.addEventListener('dragstart', (e) => {
+            e.dataTransfer.setData('image/src', src);
+            e.dataTransfer.setData('source', 'drawer');
+            img.style.opacity = '0.5';
+          });
+          
+          img.addEventListener('dragend', () => {
+            img.style.opacity = '1';
+          });
+          
+          // Click to focus this image as a card
+          img.addEventListener('click', (e) => {
+            console.log('My Media image clicked:', src);
+            e.stopPropagation();
+            focusMediaImage(src, `Media ${index + 1}`);
+          });
+          
+          // Add cursor pointer for clickable
+          img.style.cursor = 'pointer';
+          
+          // Add with fade-in animation
+          img.style.opacity = '0';
+          img.style.transform = 'translateY(10px)';
+          drawerImagesEl.appendChild(img);
+          
+          // Staggered fade-in
+          setTimeout(() => {
+            img.style.transition = 'all 0.3s ease-out';
+            img.style.opacity = '1';
+            img.style.transform = 'translateY(0)';
+          }, index * 80);
+        });
+        
+        console.log('Curated drawer images loaded');
+      }
+    }
+    
+    // Focus a media image from the drawer as a new card
+    function focusMediaImage(imageSrc, title) {
+      console.log('focusMediaImage called:', imageSrc, 'focusedCard:', !!focusedCard);
+      if (!focusedCard) {
+        console.log('No focused card, returning');
+        return;
+      }
+      
+      // Save reference to original canvas card if this is the first media selection
+      if (!originalCanvasCard && cards.includes(focusedCard)) {
+        originalCanvasCard = focusedCard;
+      }
+      
+      // Show the clear selection button
+      const clearBtn = document.getElementById('clearSelectionBtn');
+      if (clearBtn) {
+        clearBtn.classList.add('visible');
+      }
+      
+      // Move the currently focused card to "previously-focused" state
+      focusedCard.classList.remove('focused');
+      focusedCard.classList.add('previously-focused');
+      
+      // Position the previously focused card slightly behind and to the side
+      const prevRect = focusedCard.getBoundingClientRect();
+      focusedCard.style.left = (parseFloat(focusedCard.style.left) - 80) + 'px';
+      focusedCard.style.top = (parseFloat(focusedCard.style.top) + 30) + 'px';
+      focusedCard.style.zIndex = 999;
+      
+      // Create a new temporary card for the media image
+      const newCard = createEl('div', { class: 'dashboard-media-container media-temp-card' });
+      newCard.style.position = 'absolute';
+      newCard.style.transition = 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
+      newCard.style.width = '290px';
+      newCard.style.height = '370px';
+      newCard.style.borderRadius = '24px';
+      newCard.style.background = 'rgba(255, 255, 255, 0.35)';
+      newCard.style.backdropFilter = 'blur(8px)';
+      newCard.style.border = '1px solid rgba(255, 255, 255, 0.3)';
+      newCard.style.boxShadow = '0 8px 32px rgba(31, 38, 135, 0.15)';
+      newCard.style.overflow = 'hidden';
+      newCard.style.padding = '16px';
+      
+      // Create card content
+      const cardContent = createEl('div', { class: 'media-card-content' });
+      cardContent.style.width = '100%';
+      cardContent.style.height = '100%';
+      cardContent.style.borderRadius = '16px';
+      cardContent.style.overflow = 'hidden';
+      
+      const img = createEl('img', {
+        class: 'media-card-image',
+        src: imageSrc,
+        alt: title
+      });
+      img.style.width = '100%';
+      img.style.height = '100%';
+      img.style.objectFit = 'cover';
+      
+      cardContent.appendChild(img);
+      newCard.appendChild(cardContent);
+      
+      // Add to the media grid
+      mediaGrid.appendChild(newCard);
+      
+      // Position at the same spot as the focused card initially
+      const drawerHeight = 280;
+      const viewportCenterX = window.innerWidth / 2;
+      const viewportCenterY = (window.innerHeight - drawerHeight) / 2;
+      
+      // Start from drawer position (bottom left)
+      newCard.style.left = '100px';
+      newCard.style.top = (window.innerHeight - 100) + 'px';
+      newCard.style.opacity = '0';
+      newCard.style.transform = 'scale(0.5)';
+      
+      // Animate to center (scaled up like the focused cards)
+      setTimeout(() => {
+        newCard.classList.add('focused');
+        newCard.style.left = (viewportCenterX - 217) + 'px'; // Half of 290*1.5 = 217
+        newCard.style.top = (viewportCenterY - 277) + 'px';  // Half of 370*1.5 = 277
+        newCard.style.opacity = '1';
+        newCard.style.transform = 'scale(1.5)';
+        newCard.style.zIndex = 1000;
+      }, 50);
+      
+      // Update the focused card reference
+      focusedCard = newCard;
+      
+      // Add click handler to unfocus
+      newCard.addEventListener('click', (e) => {
+        if (!e.target.closest('.media-action-btn')) {
+          unfocusAllCards();
+        }
+      });
+    }
+    
+    // Clear selection - return focus to original canvas card
+    function clearMediaSelection() {
+      console.log('Clear selection clicked, originalCanvasCard:', !!originalCanvasCard);
+      
+      if (!originalCanvasCard) return;
+      
+      // Remove all temporary media cards
+      const tempCards = mediaGrid.querySelectorAll('.media-temp-card');
+      tempCards.forEach(card => card.remove());
+      
+      // Save reference before resetting
+      const cardToFocus = originalCanvasCard;
+      
+      // Disable transition temporarily so the reset happens instantly
+      cardToFocus.style.transition = 'none';
+      
+      // Reset the card to its original position first (so focusCard calculates correct offset)
+      cardToFocus.classList.remove('previously-focused', 'focused', 'unfocused');
+      cardToFocus.style.left = cardToFocus.dataset.originalX + 'px';
+      cardToFocus.style.top = cardToFocus.dataset.originalY + 'px';
+      cardToFocus.style.transform = `rotate(${cardToFocus.dataset.originalRotation}deg) scale(1)`;
+      cardToFocus.style.zIndex = cardToFocus.dataset.originalZIndex;
+      
+      originalCanvasCard = null;
+      focusedCard = null;
+      
+      // Hide the clear selection button
+      const clearBtn = document.getElementById('clearSelectionBtn');
+      if (clearBtn) {
+        clearBtn.classList.remove('visible');
+      }
+      
+      // Force a reflow so the position reset takes effect
+      cardToFocus.offsetHeight;
+      
+      // Re-enable transition for the focus animation
+      cardToFocus.style.transition = 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
+      
+      // Re-focus the original card using the standard focus mechanism
+      focusCard(cardToFocus);
+    }
+    
+    // Setup clear selection button
+    const clearSelectionBtn = document.getElementById('clearSelectionBtn');
+    if (clearSelectionBtn) {
+      clearSelectionBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        clearMediaSelection();
+      });
+    }
 
     // Unfocus all cards - return to original state
     function unfocusAllCards() {
       focusedCard = null;
+      originalCanvasCard = null; // Reset original card reference
       backdrop.classList.remove('active');
       
+      // Hide clear selection button
+      const clearBtn = document.getElementById('clearSelectionBtn');
+      if (clearBtn) {
+        clearBtn.classList.remove('visible');
+      }
+      
       cards.forEach(c => {
-        c.classList.remove('focused', 'unfocused');
+        c.classList.remove('focused', 'unfocused', 'previously-focused');
         
         // Restore original position (scale back to 1.0 = 100% = original size)
         c.style.left = c.dataset.originalX + 'px';
@@ -983,6 +1287,115 @@
         c.style.transform = `rotate(${c.dataset.originalRotation}deg) scale(1)`;
         c.style.zIndex = c.dataset.originalZIndex;
       });
+      
+      // Remove any temporary media cards
+      const tempCards = mediaGrid.querySelectorAll('.media-temp-card');
+      tempCards.forEach(card => card.remove());
+      
+      // Reset My Media drawer to initial empty state
+      resetDrawerToEmpty();
+      
+      // Hide My Products drawer
+      hideProductsDrawer();
+    }
+    
+    // Reset the My Media drawer to its initial empty state
+    function resetDrawerToEmpty() {
+      currentLoadedCardIndex = -1;
+      localStorage.setItem('drawerImages', JSON.stringify([]));
+      
+      const drawerImagesEl = document.getElementById('drawerImages');
+      if (drawerImagesEl) {
+        drawerImagesEl.replaceChildren();
+        
+        const placeholder = createEl('div', { 
+          class: 'drawer-placeholder',
+          text: 'Click an image card to load curated media'
+        });
+        placeholder.style.cssText = 'display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; color: rgba(0,0,0,0.4); font-size: 14px; font-style: italic; padding: 20px; text-align: center;';
+        drawerImagesEl.appendChild(placeholder);
+      }
+    }
+    
+    // Show the My Products drawer with product images
+    function showProductsDrawer(cardIndex) {
+      const productsDrawer = document.getElementById('myProductsDrawer');
+      const productImagesEl = document.getElementById('productImages');
+      
+      if (!productsDrawer || !productImagesEl) return;
+      
+      const productImages = cardProductImages[cardIndex];
+      if (!productImages) return;
+      
+      // Show the drawer
+      productsDrawer.classList.add('visible');
+      
+      // Populate with product images
+      productImagesEl.replaceChildren();
+      
+      productImages.forEach((src, index) => {
+        const img = createEl('img', {
+          class: 'my-media-image',
+          src: src,
+          alt: `Product ${index + 1}`,
+          draggable: 'true'
+        });
+        
+        // Add with fade-in animation
+        img.style.opacity = '0';
+        img.style.transform = 'translateY(10px)';
+        productImagesEl.appendChild(img);
+        
+        // Staggered fade-in
+        setTimeout(() => {
+          img.style.transition = 'all 0.3s ease-out';
+          img.style.opacity = '1';
+          img.style.transform = 'translateY(0)';
+        }, index * 50);
+      });
+      
+      // Add loaded class for animation
+      setTimeout(() => {
+        productsDrawer.classList.add('loaded');
+      }, 50);
+      
+      // Setup scroll buttons
+      setupProductsScrollButtons();
+    }
+    
+    // Hide the My Products drawer
+    function hideProductsDrawer() {
+      const productsDrawer = document.getElementById('myProductsDrawer');
+      if (productsDrawer) {
+        productsDrawer.classList.remove('loaded');
+        setTimeout(() => {
+          productsDrawer.classList.remove('visible');
+        }, 300);
+      }
+    }
+    
+    // Setup scroll buttons for products drawer
+    function setupProductsScrollButtons() {
+      const productImages = document.getElementById('productImages');
+      const scrollContainer = document.getElementById('productsScrollContainer');
+      const leftBtn = document.getElementById('productsScrollLeft');
+      const rightBtn = document.getElementById('productsScrollRight');
+      
+      if (!productImages || !scrollContainer || !leftBtn || !rightBtn) return;
+      
+      let scrollPosition = 0;
+      const scrollAmount = 224; // Image width + gap
+      
+      leftBtn.onclick = () => {
+        scrollPosition = Math.max(0, scrollPosition - scrollAmount);
+        productImages.style.transform = `translateX(-${scrollPosition}px)`;
+      };
+      
+      rightBtn.onclick = () => {
+        const maxScroll = productImages.scrollWidth - scrollContainer.clientWidth;
+        scrollPosition = Math.min(maxScroll, scrollPosition + scrollAmount);
+        productImages.style.transform = `translateX(-${scrollPosition}px)`;
+      };
     }
 
     // Click backdrop to unfocus
@@ -1562,33 +1975,38 @@
     }
   });
 
-  // Initialize demo data - always set to 5 cards
+  // Initialize demo data - always set to 5 cards (Initial Layout images)
+  // These are the default canvas card images shown on page load
   function initializeDemoData() {
     const demoMedia = [
       {
-        src: 'assets/kusama1.png',
-        productData: { title: 'Yayoi Kusama Portrait' }
+        src: 'assets/canvas-1.jpg',  // Kusama sitting with polka dot fabric (B&W)
+        productData: { title: 'Kusama Portrait - Polka Dot Room' }
       },
       {
-        src: 'assets/kusama2.png',
-        productData: { title: 'Kusama Exhibition' }
+        src: 'assets/canvas-2.jpg',  // Woman with blue circles on face
+        productData: { title: 'Blue Face Paint Editorial' }
       },
       {
-        src: 'assets/kusama3.png',
-        productData: { title: 'Polka Dot Art' }
+        src: 'assets/canvas-3.jpg',  // Kusama in polka dot outfit and hat (B&W)
+        productData: { title: 'Kusama Polka Dot Outfit' }
       },
       {
-        src: 'assets/kusama4.webp',
-        productData: { title: 'Kusama Installation' }
+        src: 'assets/canvas-4.jpg',  // Arm with blue dots holding blue LV bag
+        productData: { title: 'LV x Kusama Blue Bag' }
       },
       {
-        src: 'assets/kusama-gal1.png',
-        productData: { title: 'Gallery View 1' }
+        src: 'assets/canvas-5.jpg',  // Blue paint swatch
+        productData: { title: 'Blue Paint Swatch' }
       }
     ];
     
     localStorage.setItem('galleryImages', JSON.stringify(demoMedia));
-    console.log('Demo media data initialized with 5 cards');
+    
+    // Reset drawer loaded state so it can be populated on card click
+    currentLoadedCardIndex = -1;
+    
+    console.log('Demo media data initialized with 5 canvas cards');
   }
 
   // Initialize demo data

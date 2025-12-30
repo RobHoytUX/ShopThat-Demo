@@ -164,6 +164,30 @@
           </div>
         </div>
 
+        <!-- My Products Floating Component (shows above My Media for specific cards) -->
+        <div class="my-products-drawer" id="myProductsDrawer">
+          <div class="my-media-header">
+            <h3>My Products</h3>
+          </div>
+          <div class="my-media-drawer-content">
+            <button class="my-media-arrow my-media-arrow-left" id="productsScrollLeft">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M15 19l-7-7 7-7" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+            <div class="my-media-scroll-container" id="productsScrollContainer">
+              <div class="my-media-images" id="productImages">
+                <!-- Product images will be populated here -->
+              </div>
+            </div>
+            <button class="my-media-arrow my-media-arrow-right" id="productsScrollRight">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M9 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+
         <!-- My Media Floating Component -->
         <div class="my-media-drawer">
           <div class="drawer-drop-indicator" id="dropIndicator">
@@ -173,6 +197,7 @@
           </div>
           <div class="my-media-header">
             <h3>My Media</h3>
+            <button class="clear-selection-btn" id="clearSelectionBtn">Clear Selection</button>
           </div>
           <div class="my-media-drawer-content">
             <button class="my-media-arrow my-media-arrow-left" id="scrollLeft">
@@ -269,6 +294,6 @@
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="scripts/shared-data.js"></script>
-  <script src="scripts/product-dashboard.js"></script>
+  <script src="scripts/product-dashboard.js?v=13"></script>
 </body>
 </html>

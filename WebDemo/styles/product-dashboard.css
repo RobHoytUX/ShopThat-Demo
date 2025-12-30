@@ -578,6 +578,15 @@ html, body {
   transform: scale(0.85) !important;
 }
 
+/* Previously focused card - scaled down but not greyed out */
+.dashboard-media-container.previously-focused {
+  opacity: 1;
+  filter: none;
+  pointer-events: none;
+  transform: scale(0.85) !important;
+  z-index: 999 !important;
+}
+
 .dashboard-media-item {
   position: relative;
   background: #fff;
@@ -1053,8 +1062,8 @@ html, body {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  z-index: 100;
-  max-width: 600px;
+  z-index: 1500; /* Same as chat - in front of scrim when card is focused */
+  width: 525px;
   opacity: 0;
   transform: translateY(20px);
   transition: all 0.3s ease;
@@ -1065,9 +1074,44 @@ html, body {
   transform: translateY(0);
 }
 
+/* My Products Floating Drawer - positioned above My Media */
+.my-products-drawer {
+  position: fixed;
+  bottom: 220px; /* 32px (My Media bottom) + ~164px (My Media height) + 24px margin */
+  left: 32px;
+  background: rgba(255, 255, 255, 0.3);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 28px;
+  box-shadow: 0 8px 32px rgba(31, 38, 135, 0.15);
+  padding: 20px;
+  padding-top: 16px;
+  display: none;
+  flex-direction: column;
+  gap: 12px;
+  z-index: 1500;
+  width: 525px;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: all 0.3s ease;
+}
+
+.my-products-drawer.visible {
+  display: flex;
+}
+
+.my-products-drawer.loaded {
+  opacity: 1;
+  transform: translateY(0);
+}
+
 .my-media-header {
   flex-shrink: 0;
   margin-bottom: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .my-media-header h3 {
@@ -1075,6 +1119,28 @@ html, body {
   font-weight: 600;
   color: #111;
   margin: 0;
+}
+
+.clear-selection-btn {
+  background: transparent;
+  border: none;
+  color: rgba(0, 0, 0, 0.5);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  display: none;
+}
+
+.clear-selection-btn:hover {
+  background: rgba(0, 0, 0, 0.08);
+  color: rgba(0, 0, 0, 0.7);
+}
+
+.clear-selection-btn.visible {
+  display: block;
 }
 
 .my-media-drawer-content {
