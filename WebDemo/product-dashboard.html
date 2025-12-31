@@ -116,7 +116,17 @@
         </div>
         
         <!-- AI Chat Prompt -->
+        <!-- Chat Toggle Button (minimized state) -->
+        <button class="ai-chat-toggle" id="aiChatToggle">
+          <img src="assets/louis-vuitton.svg" alt="LV">
+        </button>
+        
         <div class="ai-chat-prompt">
+          <button class="ai-chat-minimize-btn" id="aiChatMinimize" title="Minimize">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M19.5 12h-15" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
           <div class="ai-chat-actions">
             <button class="ai-chat-action-btn" id="newChatBtn">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -283,7 +293,13 @@
       <section class="dashboard-view" id="favoritesView" hidden>
         <div class="dashboard-view-header">
           <h2>Favorites</h2>
-          <p class="dashboard-view-subtitle">Your wishlist items</p>
+          <p class="dashboard-view-subtitle">Your wishlist items organized by category</p>
+        </div>
+        <div class="favorites-tabs">
+          <button class="favorites-tab is-active" data-tab="tab1">Tab 1</button>
+          <button class="favorites-tab" data-tab="tab2">Tab 2</button>
+          <button class="favorites-tab" data-tab="tab3">Tab 3</button>
+          <button class="favorites-tab" data-tab="tab4">Tab 4</button>
         </div>
         <div class="dashboard-products-grid" id="favoritesGrid">
           <!-- Favorite products will be populated here -->
@@ -294,6 +310,6 @@
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="scripts/shared-data.js"></script>
-  <script src="scripts/product-dashboard.js?v=13"></script>
+  <script src="scripts/product-dashboard.js?v=24"></script>
 </body>
 </html>

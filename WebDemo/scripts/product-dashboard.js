@@ -276,6 +276,27 @@
       }
     }, 400);
     
+    // Chat minimize/maximize functionality
+    const minimizeBtn = document.getElementById('aiChatMinimize');
+    const chatToggle = document.getElementById('aiChatToggle');
+    
+    console.log('Minimize setup - btn:', !!minimizeBtn, 'toggle:', !!chatToggle);
+    
+    if (minimizeBtn && chatToggle) {
+      minimizeBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        console.log('Minimize clicked');
+        chatPrompt.classList.add('minimized');
+        chatToggle.classList.add('visible');
+      });
+      
+      chatToggle.addEventListener('click', () => {
+        console.log('Toggle clicked - expanding');
+        chatPrompt.classList.remove('minimized');
+        chatToggle.classList.remove('visible');
+      });
+    }
+    
     // Update button states
     function updateButtonStates() {
       const hasMessages = chatMessages.children.length > 0;
@@ -426,6 +447,140 @@
         }
       });
     }
+    
+    // === DRAG AND DROP IMAGE TO CHAT ===
+    let droppedImageSrc = null;
+    
+    // Create drop indicator element
+    const dropIndicator = createEl('div', { class: 'ai-chat-drop-indicator' });
+    dropIndicator.innerHTML = `
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M12 4.5v15m7.5-7.5h-15" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <span>Drop image to analyze</span>
+    `;
+    chatPrompt.appendChild(dropIndicator);
+    
+    // Drag over handler
+    chatPrompt.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      chatPrompt.classList.add('drag-over');
+    });
+    
+    // Drag leave handler
+    chatPrompt.addEventListener('dragleave', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (!chatPrompt.contains(e.relatedTarget)) {
+        chatPrompt.classList.remove('drag-over');
+      }
+    });
+    
+    // Drop handler
+    chatPrompt.addEventListener('drop', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      chatPrompt.classList.remove('drag-over');
+      
+      // Get the dropped image source
+      const imageSrc = e.dataTransfer.getData('image/src');
+      if (imageSrc) {
+        handleDroppedImage(imageSrc);
+      }
+    });
+    
+    // Handle dropped image - analyze and add to favorites
+    function handleDroppedImage(imageSrc) {
+      droppedImageSrc = imageSrc;
+      
+      // Get the chat messages container
+      const messagesContainer = document.getElementById('aiChatMessages');
+      if (!messagesContainer) return;
+      
+      // Create image message (user message with image)
+      const imageMessage = createEl('div', { class: 'ai-chat-message user-message image-message' });
+      const previewEl = createEl('div', { class: 'ai-chat-image-preview' });
+      const previewImg = createEl('img', { src: imageSrc, alt: 'Dropped image' });
+      const previewInfo = createEl('div', { class: 'ai-chat-image-preview-info' });
+      const previewTitle = createEl('p', { class: 'ai-chat-image-preview-title', text: 'Image uploaded' });
+      const previewStatus = createEl('p', { class: 'ai-chat-image-preview-status', text: 'Analyzing...' });
+      
+      previewInfo.appendChild(previewTitle);
+      previewInfo.appendChild(previewStatus);
+      previewEl.appendChild(previewImg);
+      previewEl.appendChild(previewInfo);
+      imageMessage.appendChild(previewEl);
+      
+      // Add to chat messages
+      messagesContainer.appendChild(imageMessage);
+      
+      // Scroll to bottom to show new message
+      messagesContainer.scrollTop = messagesContainer.scrollHeight;
+      
+      // Simulate AI analysis
+      setTimeout(() => {
+        previewStatus.textContent = 'Analysis complete';
+        
+        // Get image filename for description
+        const filename = imageSrc.split('/').pop().replace(/\.(jpg|png|jpeg|gif)$/i, '');
+        
+        // Add AI response about the image
+        const analysisResponses = [
+          `This image from the Kusama x Louis Vuitton campaign showcases the iconic polka dot pattern. The piece features Yayoi Kusama's distinctive infinity dots merged with Louis Vuitton's luxury craftsmanship.`,
+          `I've identified this as part of the exclusive Kusama collaboration. The image displays the artist's signature repetitive patterns that symbolize infinity and the cosmic universe.`,
+          `This campaign visual represents the fusion of contemporary art and haute couture. The vibrant colors and dot motifs are trademark elements of Kusama's artistic vision.`,
+          `The image captures the essence of the Kusama x LV partnership - a celebration of bold patterns and luxury fashion. Products associated include the Neverfull, Speedy, and various accessories.`
+        ];
+        
+        const randomAnalysis = analysisResponses[Math.floor(Math.random() * analysisResponses.length)];
+        addMessage(randomAnalysis, false);
+        
+        // Auto-add to favorites
+        addToFavorites(imageSrc, 'tab1');
+        
+        // Update status
+        previewStatus.textContent = 'Added to Favorites';
+        previewStatus.style.color = '#333';
+        
+        // Scroll to bottom to show latest message
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        
+      }, 1500);
+    }
+    
+    // Add image to favorites
+    function addToFavorites(imageSrc, tab = 'tab1') {
+      let favorites = JSON.parse(localStorage.getItem('categorizedFavorites') || '{}');
+      if (!favorites[tab]) {
+        favorites[tab] = [];
+      }
+      
+      // Check if already exists
+      const exists = favorites[tab].some(item => item.src === imageSrc);
+      if (!exists) {
+        favorites[tab].push({
+          src: imageSrc,
+          addedAt: new Date().toISOString(),
+          title: imageSrc.split('/').pop().replace(/\.(jpg|png|jpeg|gif)$/i, '')
+        });
+        localStorage.setItem('categorizedFavorites', JSON.stringify(favorites));
+        
+        // Update badge
+        updateFavoritesBadge();
+        
+        // Refresh favorites if we're viewing it
+        if (currentView === 'favorites') {
+          renderFavorites();
+        }
+      }
+    }
+    
+    // Make addToFavorites available globally
+    window.addToFavorites = addToFavorites;
+    
+    // Make handleDroppedImage available globally for canvas card drops
+    window.handleDroppedImageFromCard = handleDroppedImage;
   }
 
   // Drawer image sets - different images load based on which card is clicked
@@ -694,11 +849,17 @@
       
       bookmarkBtn.addEventListener('click', (e) => {
         e.stopPropagation();
-        bookmarkBtn.classList.toggle('active');
-        if (bookmarkBtn.classList.contains('active')) {
+        const isBookmarked = bookmarkBtn.classList.toggle('active');
+        if (isBookmarked) {
           bookmarkSvg.setAttribute('fill', 'currentColor');
+          // Add to favorites
+          if (window.addToFavorites) {
+            window.addToFavorites(item.src, 'tab1');
+          }
         } else {
           bookmarkSvg.setAttribute('fill', 'none');
+          // Remove from favorites
+          removeFromFavorites(item.src, 'tab1');
         }
       });
       
@@ -758,6 +919,8 @@
       let fixedStartTop = 0;
       let dragStarted = false;
       let activeCard = null;
+      let lastMouseX = 0;
+      let lastMouseY = 0;
       
       function dragStart(e) {
         // Don't start drag if focused/unfocused
@@ -800,6 +963,10 @@
           mouseX = e.clientX;
           mouseY = e.clientY;
         }
+        
+        // Store last known mouse position for use in dragEnd
+        lastMouseX = mouseX;
+        lastMouseY = mouseY;
 
         currentX = mouseX - initialX;
         currentY = mouseY - initialY;
@@ -844,17 +1011,36 @@
           // Check if over drawer and show add indicator
           const drawer = document.querySelector('.my-media-drawer');
           const dropIndicator = document.getElementById('dropIndicator');
+          const chatPrompt = document.querySelector('.ai-chat-prompt');
+          
+          const currentMouseX = e.clientX || (e.touches && e.touches[0] ? e.touches[0].clientX : 0);
+          const currentMouseY = e.clientY || (e.touches && e.touches[0] ? e.touches[0].clientY : 0);
+          
+          // Check if over AI Chat
+          if (chatPrompt) {
+            const chatRect = chatPrompt.getBoundingClientRect();
+            const isOverChat = (
+              currentMouseX >= chatRect.left &&
+              currentMouseX <= chatRect.right &&
+              currentMouseY >= chatRect.top &&
+              currentMouseY <= chatRect.bottom
+            );
+            
+            if (isOverChat) {
+              chatPrompt.classList.add('drag-over');
+            } else {
+              chatPrompt.classList.remove('drag-over');
+            }
+          }
           
           if (drawer && dropIndicator) {
             const drawerRect = drawer.getBoundingClientRect();
-            const mouseX = e.clientX || (e.touches && e.touches[0] ? e.touches[0].clientX : 0);
-            const mouseY = e.clientY || (e.touches && e.touches[0] ? e.touches[0].clientY : 0);
             
             const isOverDrawer = (
-              mouseX >= drawerRect.left &&
-              mouseX <= drawerRect.right &&
-              mouseY >= drawerRect.top &&
-              mouseY <= drawerRect.bottom
+              currentMouseX >= drawerRect.left &&
+              currentMouseX <= drawerRect.right &&
+              currentMouseY >= drawerRect.top &&
+              currentMouseY <= drawerRect.bottom
             );
             
             if (isOverDrawer) {
@@ -888,12 +1074,57 @@
           
           console.log('Drag ended');
           
+          // Use last known mouse position (more reliable than mouseup event coordinates)
+          const mouseX = lastMouseX || e.clientX || 0;
+          const mouseY = lastMouseY || e.clientY || 0;
+          
+          console.log('Drop position:', mouseX, mouseY);
+          
+          // Check if dropped over AI Chat component
+          const chatPrompt = document.querySelector('.ai-chat-prompt');
+          if (chatPrompt) {
+            // Always remove drag-over class on drag end
+            chatPrompt.classList.remove('drag-over');
+            
+            const chatRect = chatPrompt.getBoundingClientRect();
+            console.log('Chat bounds:', chatRect.left, chatRect.top, chatRect.right, chatRect.bottom);
+            console.log('Mouse position:', mouseX, mouseY);
+            
+            const isOverChat = (
+              mouseX >= chatRect.left &&
+              mouseX <= chatRect.right &&
+              mouseY >= chatRect.top &&
+              mouseY <= chatRect.bottom
+            );
+            
+            console.log('Is over chat:', isOverChat);
+            
+            if (isOverChat) {
+              console.log('✓ Card dropped on AI Chat! Analyzing...');
+              
+              // Analyze the image and add to favorites
+              if (window.handleDroppedImageFromCard) {
+                window.handleDroppedImageFromCard(item.src);
+              }
+              
+              // Return card to original position with animation
+              glassContainer.style.position = 'absolute';
+              glassContainer.style.left = glassContainer.dataset.originalX + 'px';
+              glassContainer.style.top = glassContainer.dataset.originalY + 'px';
+              glassContainer.style.transform = `rotate(${glassContainer.dataset.originalRotation}deg) scale(0.95)`;
+              glassContainer.style.zIndex = glassContainer.dataset.originalZIndex;
+              
+              xOffset = 0;
+              yOffset = 0;
+              
+              return;
+            }
+          }
+          
           // Check if dropped over My Media drawer using mouse position
           const drawer = document.querySelector('.my-media-drawer');
           if (drawer) {
             const drawerRect = drawer.getBoundingClientRect();
-            const mouseX = e.clientX || (e.touches && e.touches[0] ? e.touches[0].clientX : 0);
-            const mouseY = e.clientY || (e.touches && e.touches[0] ? e.touches[0].clientY : 0);
             
             // Check if mouse is over drawer
             const isOverDrawer = (
@@ -1073,11 +1304,35 @@
         drawerImagesEl.replaceChildren();
         
         imageSet.forEach((src, index) => {
+          // Create wrapper for image + bookmark
+          const wrapper = createEl('div', { class: 'my-media-image-wrapper' });
+          
           const img = createEl('img', {
             class: 'my-media-image',
             src: src,
             alt: `Media ${index + 1}`,
             draggable: 'true'
+          });
+          
+          // Create bookmark button
+          const bookmarkBtn = createEl('button', { class: 'my-media-bookmark-btn' });
+          bookmarkBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0 1 11.186 0Z" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+          
+          // Check if already bookmarked
+          const favorites = JSON.parse(localStorage.getItem('categorizedFavorites') || '{}');
+          const isBookmarked = Object.values(favorites).some(arr => arr.some(item => item.src === src));
+          if (isBookmarked) {
+            bookmarkBtn.classList.add('is-bookmarked');
+          }
+          
+          bookmarkBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const nowBookmarked = bookmarkBtn.classList.toggle('is-bookmarked');
+            if (nowBookmarked && window.addToFavorites) {
+              window.addToFavorites(src, 'tab1');
+            } else {
+              removeFromFavorites(src, 'tab1');
+            }
           });
           
           // Drag start
@@ -1101,16 +1356,19 @@
           // Add cursor pointer for clickable
           img.style.cursor = 'pointer';
           
+          wrapper.appendChild(img);
+          wrapper.appendChild(bookmarkBtn);
+          
           // Add with fade-in animation
-          img.style.opacity = '0';
-          img.style.transform = 'translateY(10px)';
-          drawerImagesEl.appendChild(img);
+          wrapper.style.opacity = '0';
+          wrapper.style.transform = 'translateY(10px)';
+          drawerImagesEl.appendChild(wrapper);
           
           // Staggered fade-in
           setTimeout(() => {
-            img.style.transition = 'all 0.3s ease-out';
-            img.style.opacity = '1';
-            img.style.transform = 'translateY(0)';
+            wrapper.style.transition = 'all 0.3s ease-out';
+            wrapper.style.opacity = '1';
+            wrapper.style.transform = 'translateY(0)';
           }, index * 80);
         });
         
@@ -1339,6 +1597,17 @@
           src: src,
           alt: `Product ${index + 1}`,
           draggable: 'true'
+        });
+        
+        // Drag start for products
+        img.addEventListener('dragstart', (e) => {
+          e.dataTransfer.setData('image/src', src);
+          e.dataTransfer.setData('source', 'products');
+          img.style.opacity = '0.5';
+        });
+        
+        img.addEventListener('dragend', () => {
+          img.style.opacity = '1';
         });
         
         // Add with fade-in animation
@@ -1746,22 +2015,147 @@
   }
 
   // Render Favorites
+  // Track current favorites tab
+  let currentFavoritesTab = 'tab1';
+  
   function renderFavorites() {
     const grid = document.getElementById('favoritesGrid');
     grid.replaceChildren();
 
-    const favorites = JSON.parse(localStorage.getItem('wishlistProducts') || '[]');
+    // Add glass grid styling
+    grid.classList.add('favorites-grid-glass');
     
-    updateBadge('favoritesCount', favorites.length);
+    // Setup tab listeners
+    setupFavoritesTabs();
+    
+    // Get categorized favorites
+    const categorizedFavorites = JSON.parse(localStorage.getItem('categorizedFavorites') || '{}');
+    const currentTabFavorites = categorizedFavorites[currentFavoritesTab] || [];
+    
+    // Also get legacy wishlist products
+    const legacyFavorites = JSON.parse(localStorage.getItem('wishlistProducts') || '[]');
+    
+    // Combine for badge count
+    const allFavoritesCount = Object.values(categorizedFavorites).reduce((sum, arr) => sum + arr.length, 0) + legacyFavorites.length;
+    updateBadge('favoritesCount', allFavoritesCount);
 
-    if (favorites.length === 0) {
-      showEmptyState(grid, 'No favorites yet', 'Add products to your wishlist from the library');
+    if (currentTabFavorites.length === 0 && (currentFavoritesTab !== 'tab1' || legacyFavorites.length === 0)) {
+      grid.classList.remove('favorites-grid-glass');
+      showEmptyState(grid, 'No favorites in this category', 'Drag images to the chat or click bookmark icons to add favorites');
       return;
     }
 
-    favorites.forEach(product => {
-      const card = createProductCard(product, false);
+    // Render current tab favorites (new categorized system)
+    currentTabFavorites.forEach(item => {
+      const card = createFavoriteCard(item);
       grid.appendChild(card);
+    });
+    
+    // Also show legacy favorites in tab1 (convert to glass card style)
+    if (currentFavoritesTab === 'tab1') {
+      legacyFavorites.forEach(product => {
+        // Convert legacy product to new format
+        const item = {
+          src: product.image,
+          title: product.title,
+          addedAt: new Date().toISOString()
+        };
+        const card = createFavoriteCard(item);
+      grid.appendChild(card);
+      });
+    }
+  }
+  
+  // Create a favorite card from image data
+  function createFavoriteCard(item) {
+    // Glass card container (like explore cards)
+    const card = createEl('div', { class: 'favorite-glass-card' });
+    card.style.position = 'relative';
+    
+    // Inner white card
+    const inner = createEl('div', { class: 'favorite-glass-card-inner' });
+    
+    // Image
+    const img = createEl('img', {
+      class: 'favorite-glass-card-image',
+      src: item.src,
+      alt: item.title || 'Favorite'
+    });
+    
+    inner.appendChild(img);
+    
+    // Info section (outside the inner card, in the glass area)
+    const info = createEl('div', { class: 'favorite-glass-card-info' });
+    const title = createEl('h3', { 
+      class: 'favorite-glass-card-title', 
+      text: item.title || 'Campaign Image' 
+    });
+    const date = createEl('p', { 
+      class: 'favorite-glass-card-date', 
+      text: item.addedAt ? new Date(item.addedAt).toLocaleDateString() : '' 
+    });
+    
+    // Remove button
+    const removeBtn = createEl('button', { class: 'favorite-glass-card-remove' });
+    removeBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 18L18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+    removeBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      removeFromFavorites(item.src, currentFavoritesTab);
+    });
+    
+    info.appendChild(title);
+    info.appendChild(date);
+    
+    card.appendChild(removeBtn);
+    card.appendChild(inner);
+    card.appendChild(info);
+    
+    return card;
+  }
+  
+  // Remove from favorites
+  function removeFromFavorites(src, tab) {
+    let favorites = JSON.parse(localStorage.getItem('categorizedFavorites') || '{}');
+    if (favorites[tab]) {
+      favorites[tab] = favorites[tab].filter(item => item.src !== src);
+      localStorage.setItem('categorizedFavorites', JSON.stringify(favorites));
+      renderFavorites();
+      updateFavoritesBadge();
+    }
+  }
+  
+  // Update favorites badge
+  function updateFavoritesBadge() {
+    const categorizedFavorites = JSON.parse(localStorage.getItem('categorizedFavorites') || '{}');
+    const legacyFavorites = JSON.parse(localStorage.getItem('wishlistProducts') || '[]');
+    const allFavoritesCount = Object.values(categorizedFavorites).reduce((sum, arr) => sum + arr.length, 0) + legacyFavorites.length;
+    updateBadge('favoritesCount', allFavoritesCount);
+  }
+  
+  // Setup favorites tab listeners
+  function setupFavoritesTabs() {
+    const tabs = document.querySelectorAll('.favorites-tab');
+    tabs.forEach(tab => {
+      // Remove existing listeners by cloning
+      const newTab = tab.cloneNode(true);
+      tab.parentNode.replaceChild(newTab, tab);
+      
+      // Update active state
+      if (newTab.dataset.tab === currentFavoritesTab) {
+        newTab.classList.add('is-active');
+      } else {
+        newTab.classList.remove('is-active');
+      }
+      
+      // Add click listener
+      newTab.addEventListener('click', () => {
+        currentFavoritesTab = newTab.dataset.tab;
+        // Update tab styles
+        document.querySelectorAll('.favorites-tab').forEach(t => t.classList.remove('is-active'));
+        newTab.classList.add('is-active');
+        // Re-render grid
+        renderFavorites();
+      });
     });
   }
 

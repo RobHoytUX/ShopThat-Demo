@@ -343,6 +343,138 @@ html, body {
   border-radius: 16px 16px 16px 4px;
 }
 
+/* Favorites Tabs */
+.favorites-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 24px;
+  padding: 4px;
+  background: rgba(0, 0, 0, 0.04);
+  border-radius: 12px;
+  width: fit-content;
+}
+
+.favorites-tab {
+  padding: 10px 24px;
+  border: none;
+  background: transparent;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: rgba(0, 0, 0, 0.5);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.favorites-tab:hover {
+  color: rgba(0, 0, 0, 0.7);
+  background: rgba(0, 0, 0, 0.04);
+}
+
+.favorites-tab.is-active {
+  background: #111;
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Favorites Glass Cards */
+.favorites-grid-glass {
+  display: flex !important;
+  flex-wrap: wrap;
+  gap: 24px !important;
+  align-items: flex-start;
+  justify-content: flex-start;
+}
+
+.favorite-glass-card {
+  background: rgba(255, 255, 255, 0.35);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 6px 24px rgba(31, 38, 135, 0.1);
+  padding: 10px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  overflow: hidden;
+  width: 175px;
+}
+
+.favorite-glass-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 32px rgba(31, 38, 135, 0.16);
+  background: rgba(255, 255, 255, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+}
+
+.favorite-glass-card-inner {
+  background: #fff;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+}
+
+.favorite-glass-card-image {
+  width: 100%;
+  aspect-ratio: 3/4;
+  object-fit: cover;
+  display: block;
+  border-radius: 14px;
+}
+
+.favorite-glass-card-info {
+  padding: 8px 4px 2px;
+  text-align: center;
+}
+
+.favorite-glass-card-title {
+  font-size: 12px;
+  font-weight: 600;
+  margin: 0 0 2px;
+  color: #111;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.favorite-glass-card-date {
+  font-size: 10px;
+  color: rgba(0, 0, 0, 0.4);
+  margin: 0;
+}
+
+.favorite-glass-card-remove {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.85);
+  border: none;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  opacity: 0;
+  z-index: 10;
+}
+
+.favorite-glass-card:hover .favorite-glass-card-remove {
+  opacity: 1;
+}
+
+.favorite-glass-card-remove:hover {
+  background: rgba(239, 68, 68, 0.15);
+  transform: scale(1.1);
+}
+
+.favorite-glass-card-remove svg {
+  width: 10px;
+  height: 10px;
+  color: #666;
+}
+
 /* Product Grids */
 .dashboard-products-grid,
 .dashboard-media-grid {
@@ -701,6 +833,39 @@ html, body {
 }
 
 /* AI Chat Prompt */
+/* Chat Toggle Button (minimized state) */
+.ai-chat-toggle {
+  position: fixed;
+  bottom: 32px;
+  right: 32px;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: #000;
+  border: none;
+  cursor: pointer;
+  display: none;
+  place-items: center;
+  z-index: 1500;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.ai-chat-toggle:hover {
+  transform: scale(1.08);
+  box-shadow: 0 6px 28px rgba(0, 0, 0, 0.35);
+}
+
+.ai-chat-toggle img {
+  width: 28px;
+  height: 28px;
+  filter: brightness(0) invert(1);
+}
+
+.ai-chat-toggle.visible {
+  display: grid;
+}
+
 .ai-chat-prompt {
   position: fixed;
   bottom: 32px;
@@ -724,6 +889,40 @@ html, body {
   max-height: 600px;
   min-height: 200px;
   overflow: hidden;
+}
+
+.ai-chat-prompt.minimized {
+  opacity: 0 !important;
+  transform: translateY(20px) scale(0.8) !important;
+  pointer-events: none !important;
+  visibility: hidden;
+}
+
+/* Minimize button in chat */
+.ai-chat-minimize-btn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.08);
+  border: none;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  z-index: 10;
+}
+
+.ai-chat-minimize-btn:hover {
+  background: rgba(0, 0, 0, 0.15);
+}
+
+.ai-chat-minimize-btn svg {
+  width: 16px;
+  height: 16px;
+  color: #666;
 }
 
 .ai-chat-prompt.expanded {
@@ -1044,6 +1243,210 @@ html, body {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+/* Chat Drop Zone for Images */
+.ai-chat-prompt.drag-over {
+  border: 2px dashed #6366F1;
+  background: rgba(99, 102, 241, 0.1);
+}
+
+.ai-chat-drop-indicator {
+  display: none;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(99, 102, 241, 0.15);
+  backdrop-filter: blur(4px);
+  border-radius: 28px;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 12px;
+  z-index: 100;
+}
+
+.ai-chat-prompt.drag-over .ai-chat-drop-indicator {
+  display: flex;
+}
+
+.ai-chat-drop-indicator svg {
+  width: 48px;
+  height: 48px;
+  color: #6366F1;
+}
+
+.ai-chat-drop-indicator span {
+  font-size: 14px;
+  font-weight: 600;
+  color: #6366F1;
+}
+
+/* Chat Image Preview */
+/* Image message in chat */
+.ai-chat-message.image-message {
+  background: transparent;
+  padding: 0;
+}
+
+.ai-chat-message.image-message .ai-chat-image-preview {
+  margin: 0;
+}
+
+.ai-chat-image-preview {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: rgba(99, 102, 241, 0.08);
+  border-radius: 16px;
+  flex-shrink: 0;
+}
+
+.ai-chat-image-preview img {
+  width: 60px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.ai-chat-image-preview-info {
+  flex: 1;
+}
+
+.ai-chat-image-preview-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #111;
+  margin: 0 0 4px;
+}
+
+.ai-chat-image-preview-status {
+  font-size: 12px;
+  color: #6366F1;
+  margin: 0;
+}
+
+.ai-chat-image-preview-remove {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.08);
+  border: none;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.ai-chat-image-preview-remove:hover {
+  background: rgba(239, 68, 68, 0.15);
+}
+
+.ai-chat-image-preview-remove svg {
+  width: 14px;
+  height: 14px;
+  color: #666;
+}
+
+/* Bookmark Icon on Cards */
+.card-bookmark-btn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(8px);
+  border: none;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  z-index: 10;
+  opacity: 0;
+}
+
+.dashboard-media-container:hover .card-bookmark-btn,
+.my-media-image:hover + .card-bookmark-btn,
+.card-bookmark-btn:hover,
+.card-bookmark-btn.is-bookmarked {
+  opacity: 1;
+}
+
+.card-bookmark-btn:hover {
+  background: rgba(255, 255, 255, 1);
+  transform: scale(1.1);
+}
+
+.card-bookmark-btn svg {
+  width: 18px;
+  height: 18px;
+  color: #666;
+  transition: all 0.2s ease;
+}
+
+.card-bookmark-btn.is-bookmarked svg {
+  color: #6366F1;
+  fill: #6366F1;
+}
+
+.card-bookmark-btn:not(.is-bookmarked):hover svg {
+  color: #6366F1;
+}
+
+/* My Media Image Bookmark */
+.my-media-image-wrapper {
+  position: relative;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+/* Bookmark button on My Media drawer images */
+.my-media-bookmark-btn {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(6px);
+  border: none;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  opacity: 0;
+  z-index: 5;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+.my-media-bookmark-btn svg {
+  width: 14px;
+  height: 14px;
+  color: #666;
+}
+
+.my-media-bookmark-btn:hover {
+  background: rgba(255, 255, 255, 1);
+  transform: scale(1.1);
+}
+
+.my-media-bookmark-btn.is-bookmarked {
+  opacity: 1;
+}
+
+.my-media-bookmark-btn.is-bookmarked svg {
+  fill: #333;
+  color: #333;
+}
+
+.my-media-image-wrapper:hover .my-media-bookmark-btn {
+  opacity: 1;
 }
 
 /* My Media Floating Drawer */
