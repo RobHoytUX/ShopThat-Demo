@@ -793,8 +793,132 @@ console.log('Document ready state:', document.readyState);
     }
   }
 
+  // AI Side Panel functionality
+  function initAISidePanel() {
+    const askAiBtn = document.getElementById('askAiBtn');
+    const aiSidePanel = document.getElementById('aiSidePanel');
+    const aiPanelClose = document.getElementById('aiPanelClose');
+    const aiPanelOverlay = document.getElementById('aiPanelOverlay');
+    const aiInput = document.getElementById('aiInput');
+    const aiSendBtn = document.getElementById('aiSendBtn');
+    const aiMessages = document.getElementById('aiMessages');
+
+    if (!askAiBtn || !aiSidePanel) {
+      console.log('AI panel elements not found');
+      return;
+    }
+
+    // Open panel
+    askAiBtn.addEventListener('click', () => {
+      aiSidePanel.classList.add('active');
+      aiPanelOverlay.classList.add('active');
+      aiSidePanel.setAttribute('aria-hidden', 'false');
+      setTimeout(() => aiInput.focus(), 300);
+    });
+
+    // Close panel
+    function closePanel() {
+      aiSidePanel.classList.remove('active');
+      aiPanelOverlay.classList.remove('active');
+      aiSidePanel.setAttribute('aria-hidden', 'true');
+    }
+
+    aiPanelClose.addEventListener('click', closePanel);
+    aiPanelOverlay.addEventListener('click', closePanel);
+
+    // Handle Escape key
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && aiSidePanel.classList.contains('active')) {
+        closePanel();
+      }
+    });
+
+    // Send message functionality
+    function sendMessage() {
+      const message = aiInput.value.trim();
+      if (!message) return;
+
+      // Remove welcome message if present
+      const welcomeMsg = aiMessages.querySelector('.ai-welcome-message');
+      if (welcomeMsg) welcomeMsg.remove();
+
+      // Add user message
+      const userMsg = document.createElement('div');
+      userMsg.className = 'ai-message user';
+      userMsg.textContent = message;
+      aiMessages.appendChild(userMsg);
+
+      // Clear input
+      aiInput.value = '';
+
+      // Scroll to bottom
+      aiMessages.scrollTop = aiMessages.scrollHeight;
+
+      // Simulate AI response
+      setTimeout(() => {
+        const aiResponse = document.createElement('div');
+        aiResponse.className = 'ai-message ai';
+        aiResponse.textContent = generateAIResponse(message);
+        aiMessages.appendChild(aiResponse);
+        aiMessages.scrollTop = aiMessages.scrollHeight;
+      }, 800);
+    }
+
+    // Generate AI response based on query
+    function generateAIResponse(query) {
+      const lowerQuery = query.toLowerCase();
+      
+      // Get current keyword data
+      const keywords = window.ShopThatData ? window.ShopThatData.getKeywords() : [];
+      const connections = window.ShopThatData ? window.ShopThatData.getConnections() : [];
+
+      if (lowerQuery.includes('how many') && lowerQuery.includes('keyword')) {
+        return `There are currently ${keywords.length} keywords in the knowledge graph. The graph also has ${connections.length} connections between them.`;
+      }
+      
+      if (lowerQuery.includes('most connected') || lowerQuery.includes('top keyword')) {
+        // Count connections per keyword
+        const connectionCounts = {};
+        connections.forEach(conn => {
+          connectionCounts[conn.source] = (connectionCounts[conn.source] || 0) + 1;
+          connectionCounts[conn.target] = (connectionCounts[conn.target] || 0) + 1;
+        });
+        
+        const sorted = Object.entries(connectionCounts).sort((a, b) => b[1] - a[1]);
+        if (sorted.length > 0) {
+          const top3 = sorted.slice(0, 3).map(([name, count]) => `${name} (${count} connections)`).join(', ');
+          return `The most connected keywords are: ${top3}. These keywords serve as hubs in your knowledge graph.`;
+        }
+        return 'No connection data available yet. Try adding some keyword connections.';
+      }
+
+      if (lowerQuery.includes('kusama') || lowerQuery.includes('yayoi')) {
+        return 'Yayoi Kusama is a central keyword in the knowledge graph, connecting to many product and artistic concepts. Her collaboration with Louis Vuitton is a key topic, featuring polka dots, monogram patterns, and various product lines.';
+      }
+
+      if (lowerQuery.includes('connection') || lowerQuery.includes('link')) {
+        return `The knowledge graph currently has ${connections.length} connections. Connections represent relationships between keywords - for example, "Yayoi Kusama" might be connected to "Polka Dots" and "Monogram" patterns.`;
+      }
+
+      if (lowerQuery.includes('help') || lowerQuery.includes('what can')) {
+        return 'I can help you understand the keyword knowledge graph! Ask me about:\n• How many keywords exist\n• The most connected keywords\n• Connections between concepts\n• Specific keywords like "Kusama" or "Murakami"';
+      }
+
+      // Default response
+      return `I understand you're asking about "${query}". The knowledge graph contains ${keywords.length} keywords organized into a hierarchical structure. You can click on any keyword node to see its details and connections.`;
+    }
+
+    aiSendBtn.addEventListener('click', sendMessage);
+    aiInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') sendMessage();
+    });
+  }
+
   // Initialize dark mode
   initDarkMode();
+  
+  // Initialize AI Side Panel
+  initAISidePanel();
 })();
 
 

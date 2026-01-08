@@ -3,13 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Product Dashboard - Louis Vuitton</title>
+  <title>Dashboard - Louis Vuitton</title>
   <link rel="icon" type="image/svg+xml" href="assets/logo.svg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  <link rel="stylesheet" href="styles/product-dashboard.css">
+  <link rel="stylesheet" href="styles/product-dashboard.css?v=5">
 </head>
 <body>
   <!-- Header -->
@@ -18,7 +18,7 @@
       <a href="index.html" class="dashboard-logo">
         <img src="assets/louis-vuitton.svg" alt="Louis Vuitton" />
       </a>
-      <h1 class="dashboard-title">Product Dashboard</h1>
+      <h1 class="dashboard-title">Dashboard</h1>
       <div class="dashboard-header__actions">
         <button class="dashboard-btn dashboard-btn--secondary" id="clearAllBtn">Clear All</button>
         <button class="dashboard-btn dashboard-btn--primary" id="exportBtn">Export Data</button>
@@ -231,10 +231,8 @@
 
       <!-- Map View -->
       <section class="dashboard-view" id="mapView" hidden>
-        <div class="dashboard-view-header">
-          <h2>Store Locations</h2>
-          <p class="dashboard-view-subtitle">Find Louis Vuitton stores near you</p>
-        </div>
+        <!-- Keywords Container (above map) -->
+        <div class="map-keywords-container" id="mapKeywordsContainer"></div>
         <div class="dashboard-map-container">
           <div class="dashboard-map-wrapper">
             <div id="dashboardMap" class="dashboard-map"></div>
@@ -248,16 +246,20 @@
                   <span>Louis Vuitton</span>
                 </div>
                 <div class="map-legend-item">
-                  <div class="map-legend-marker" style="background: #3b82f6;"></div>
-                  <span>Curated Stores</span>
+                  <div class="map-legend-marker" style="background: #10b981;"></div>
+                  <span>Restaurants</span>
                 </div>
                 <div class="map-legend-item">
                   <div class="map-legend-marker" style="background: #8b5cf6;"></div>
                   <span>Museums</span>
                 </div>
                 <div class="map-legend-item">
-                  <div class="map-legend-marker" style="background: #10b981;"></div>
-                  <span>Restaurants</span>
+                  <div class="map-legend-marker" style="background: #3b82f6;"></div>
+                  <span>Galleries</span>
+                </div>
+                <div class="map-legend-item">
+                  <div class="map-legend-marker" style="background: #f59e0b;"></div>
+                  <span>Others Nearby</span>
                 </div>
               </div>
             </div>
@@ -273,9 +275,10 @@
             </button>
           </div>
           <div class="location-explorer-tabs">
-            <button class="location-tab is-active" data-category="stores">Curated Stores</button>
+            <button class="location-tab is-active" data-category="restaurants">Restaurants</button>
             <button class="location-tab" data-category="museums">Museums</button>
-            <button class="location-tab" data-category="restaurants">Restaurants</button>
+            <button class="location-tab" data-category="galleries">Galleries</button>
+            <button class="location-tab" data-category="others">Others Nearby</button>
           </div>
           <div class="location-explorer-content" id="locationContent">
             <!-- Location images will be populated here -->

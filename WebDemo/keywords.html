@@ -117,6 +117,13 @@
               </svg>
               Neo4j
             </button>
+            <button class="btn btn--ai" id="askAiBtn" aria-label="Ask AI">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09Z" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 0 0-2.456 2.456Z" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              Ask AI
+            </button>
             <a class="btn btn--primary" href="/keywords-manage.html" aria-label="Manage Keywords">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M12 20h9"></path>
@@ -214,6 +221,37 @@
           </div>
         </div>
       </div>
+
+      <!-- AI Chat Side Panel -->
+      <aside class="ai-side-panel" id="aiSidePanel" aria-label="AI Chat" aria-hidden="true">
+        <div class="ai-side-panel__header">
+          <h3>Ask AI</h3>
+          <button class="icon-btn" id="aiPanelClose" aria-label="Close">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M6 18L18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+        </div>
+        <div class="ai-side-panel__messages" id="aiMessages">
+          <div class="ai-welcome-message">
+            <div class="ai-welcome-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09Z" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+            <p>Ask me anything about keywords, connections, or the knowledge graph.</p>
+          </div>
+        </div>
+        <div class="ai-side-panel__input">
+          <input type="text" id="aiInput" placeholder="Ask about keywords..." />
+          <button class="ai-send-btn" id="aiSendBtn">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M6 12h12m0 0l-6-6m6 6l-6 6" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+        </div>
+      </aside>
+      <div class="ai-side-panel-overlay" id="aiPanelOverlay"></div>
     </main>
 
     <script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>

@@ -1932,6 +1932,114 @@ html, body {
   text-overflow: ellipsis;
 }
 
+.location-item.selected {
+  outline: 3px solid #6366F1;
+  outline-offset: 2px;
+  transform: translateY(-4px);
+  box-shadow: 0 4px 16px rgba(99, 102, 241, 0.3);
+}
+
+/* Map Keywords Container (above the map) */
+.map-keywords-container {
+  background: linear-gradient(135deg, #fafafa 0%, #f5f5f5 100%);
+  border-radius: 12px;
+  padding: 0;
+  margin-bottom: 16px;
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition: all 0.3s ease;
+}
+
+.map-keywords-container.visible {
+  padding: 16px 20px;
+  max-height: 150px;
+  opacity: 1;
+  overflow-y: auto;
+  border: 1px solid rgba(0,0,0,0.08);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+
+/* Location Keywords Container (legacy) */
+.location-keywords-container {
+  background: linear-gradient(135deg, #fafafa 0%, #f0f0f0 100%);
+  border-radius: 12px;
+  padding: 0;
+  margin-top: 16px;
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition: all 0.3s ease;
+}
+
+.location-keywords-container.visible {
+  padding: 16px;
+  max-height: 200px;
+  opacity: 1;
+  overflow-y: auto;
+}
+
+.map-keywords-container .keywords-header,
+.location-keywords-container .keywords-header,
+.keywords-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.keywords-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #333;
+}
+
+.keywords-close-btn {
+  background: none;
+  border: none;
+  font-size: 18px;
+  color: #666;
+  cursor: pointer;
+  padding: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+}
+
+.keywords-close-btn:hover {
+  background: rgba(0,0,0,0.1);
+  color: #333;
+}
+
+.keywords-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  width: 100%;
+}
+
+.keyword-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 12px;
+  background: #e8e8e8;
+  color: #444;
+  font-size: 12px;
+  font-weight: 500;
+  border-radius: 20px;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.keyword-badge:hover {
+  transform: translateY(-1px);
+  background: #d8d8d8;
+}
+
 /* Map Legend */
 .map-legend {
   position: absolute;
