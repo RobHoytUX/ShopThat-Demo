@@ -25,18 +25,18 @@
   }
 
   const topKeywordsLeft = [
-    ['Roger Federer', 348, '$87.00'],
-    ['Rafael Nadal', 230, '$57.50'],
-    ['Oscars', 100, '$25.00'],
-    ['Olympics', 54, '$13.50'],
-    ['Zendaya', 90, '$22.50']
+    ['The Plaza', 1250, '$312.50'],
+    ['Cafe Carlyle', 1180, '$295.00'],
+    ['Le Bernardin', 1120, '$280.00'],
+    ['Jean-Georges Vongerichten', 1080, '$270.00'],
+    ['The St. Regis', 1020, '$255.00']
   ];
   const topKeywordsRight = [
-    ['Trio Messenger', 80, '$20.00'],
-    ['Takashi Murakami', 500, '$125.00'],
-    ['Yayoi Kasuma', 908, '$227.00'],
-    ['Keepall Bag', 200, '$50.00'],
-    ['Météore', 240, '$60.00']
+    ['The Baccarat', 980, '$245.00'],
+    ['The Mark Hotel', 920, '$230.00'],
+    ['The Modern', 950, '$237.50'],
+    ['The Carlyle', 1050, '$262.50'],
+    ['Three Michelin Stars', 1000, '$250.00']
   ];
 
   function populateTopKeywords(filterTerm=''){
@@ -44,18 +44,36 @@
     if (!body) return;
     body.replaceChildren();
     
-    // Data exactly matching the screenshot
+    // Restaurant & Hotel keywords data (All NYC venues)
     const topKeywordsData = [
-      { name: 'Yayoi Kusama', revenue: 14000, engagement: 30 },
-      { name: 'Pharrell', revenue: 2000, engagement: 15 },
-      { name: 'Infinity Mirrors', revenue: 500, engagement: 10 },
-      { name: 'Painted Dots', revenue: 1000, engagement: 20 },
-      { name: 'Louis Vuitton', revenue: 850, engagement: 25 },
-      { name: 'Pumpkins', revenue: 450, engagement: 22 },
-      { name: 'Gisele Bundchen', revenue: 1000, engagement: 30 },
-      { name: 'MoMa', revenue: 370, engagement: 12 },
-      { name: 'FeiFei Sun', revenue: 1150, engagement: 25 },
-      { name: 'Central Park', revenue: 150, engagement: 23 }
+      // The Plaza keywords
+      { name: 'The Plaza', revenue: 35000, engagement: 48 },
+      { name: 'Afternoon Tea', revenue: 18000, engagement: 35 },
+      // The Carlyle keywords
+      { name: 'Cafe Carlyle', revenue: 30000, engagement: 45 },
+      { name: 'The Carlyle', revenue: 28000, engagement: 43 },
+      { name: 'Bemelmans Bar', revenue: 22000, engagement: 38 },
+      { name: 'Classic Cabaret', revenue: 16000, engagement: 35 },
+      // Jean-Georges keywords
+      { name: 'Jean-Georges Vongerichten', revenue: 27000, engagement: 42 },
+      { name: 'Jean-Georges at The Mark', revenue: 24000, engagement: 40 },
+      // The St. Regis keywords
+      { name: 'The St. Regis', revenue: 26000, engagement: 41 },
+      { name: 'King Cole Bar', revenue: 15000, engagement: 32 },
+      // The Baccarat keywords
+      { name: 'The Baccarat', revenue: 25000, engagement: 40 },
+      { name: 'Indoor Pool', revenue: 12000, engagement: 28 },
+      // The Mark Hotel keywords
+      { name: 'The Mark Hotel', revenue: 23000, engagement: 39 },
+      { name: 'Metropolitan Museum of Art', revenue: 18000, engagement: 34 },
+      // Le Bernardin keywords
+      { name: 'Le Bernardin', revenue: 28000, engagement: 42 },
+      { name: 'Three Michelin Stars', revenue: 25000, engagement: 40 },
+      { name: 'Eric Ripert', revenue: 20000, engagement: 36 },
+      // The Modern keywords
+      { name: 'The Modern', revenue: 25000, engagement: 38 },
+      { name: 'Two Michelin Stars', revenue: 20000, engagement: 35 },
+      { name: 'MoMA Museum', revenue: 15000, engagement: 28 }
     ];
     
     // Filter keywords based on search term

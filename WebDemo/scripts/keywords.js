@@ -46,33 +46,434 @@ console.log('Document ready state:', document.readyState);
     isolated: true
   };
 
-  // Mock graph data (also used for seeding Neo4j). Will be overridden by localStorage if present.
+  // Restaurant graph data (also used for seeding Neo4j). Will be overridden by localStorage if present.
   const defaultNodes = [
-    { id: 'Yayoi Kusama', group: 1, value: 90 },
-    { id: 'Trio Messenger', group: 1, value: 35 },
-    { id: 'Keepall Bag', group: 1, value: 28 },
-    { id: 'Takashi Murakami', group: 1, value: 50 },
-    { id: 'Oscars', group: 2, value: 18 },
-    { id: 'Zendaya', group: 2, value: 22 },
-    { id: 'Olympics', group: 2, value: 27 },
-    { id: 'Roger Federer', group: 2, value: 30 },
-    { id: 'Rafael Nadal', group: 2, value: 24 },
-    { id: 'Monogram', group: 3, value: 26 },
-    { id: 'Polka Dots', group: 3, value: 20 },
-    { id: 'Tote', group: 3, value: 16 },
-    { id: 'Isolated Node 1', group: 4, value: 15 },
-    { id: 'Isolated Node 2', group: 4, value: 12 }
+    // ============================================
+    // THE MODERN RESTAURANT
+    // ============================================
+    // Group 1 - Top Level (Most Connected) - Core concepts (Blue #6366F1)
+    { id: 'The Modern', group: 1, value: 95 },
+    { id: 'Two Michelin Stars', group: 1, value: 90 },
+    { id: 'MoMA Museum', group: 1, value: 85 },
+    
+    // Group 2 - Connected to Top Level - Dining experiences & venues (Purple #5B21B6)
+    { id: 'The Modern (Dining Room)', group: 2, value: 82 },
+    { id: 'The Bar Room', group: 2, value: 75 },
+    { id: 'The Kitchen Table', group: 2, value: 68 },
+    { id: 'Sculpture Garden', group: 2, value: 80 },
+    { id: 'MoMA Sculpture Garden', group: 2, value: 78 },
+    { id: 'Eggs on Eggs on Eggs', group: 2, value: 85 },
+    { id: 'Grand Award Wine List', group: 2, value: 80 },
+    { id: 'Upscale & Sophisticated', group: 2, value: 72 },
+    
+    // Group 3 - Secondary Connected - Menu items & descriptors (Orange #F59E0B)
+    { id: 'Truffles', group: 3, value: 70 },
+    { id: 'Cocktails', group: 3, value: 60 },
+    { id: 'Lunch', group: 3, value: 55 },
+    { id: 'Dinner', group: 3, value: 60 },
+    { id: 'Seasonal & Local', group: 3, value: 65 },
+    { id: 'Caviar Hot Dogs', group: 3, value: 70 },
+    
+    // Group 4 - Isolated/Contextual - Business & booking details (Green #10B981)
+    { id: 'Union Square Hospitality Group (USHG)', group: 4, value: 60 },
+    { id: 'Artful & Refined', group: 4, value: 55 },
+    { id: '28-Day Reservations', group: 4, value: 50 },
+    { id: 'Hospitality Included', group: 4, value: 52 },
+
+    // ============================================
+    // LE BERNARDIN RESTAURANT
+    // ============================================
+    // Group 1 - Top Level (Most Connected) - Core concepts (Blue #6366F1)
+    { id: 'Le Bernardin', group: 1, value: 95 },
+    { id: 'Three Michelin Stars', group: 1, value: 92 },
+    { id: 'Eric Ripert', group: 1, value: 88 },
+    { id: 'Seafood', group: 1, value: 85 },
+    
+    // Group 2 - Connected to Top Level - Dining experiences & style (Purple #5B21B6)
+    { id: 'Fine Dining', group: 2, value: 82 },
+    { id: 'French Cuisine', group: 2, value: 80 },
+    { id: 'Tasting Menu', group: 2, value: 78 },
+    { id: 'Prix Fixe', group: 2, value: 75 },
+    { id: 'Elegant', group: 2, value: 70 },
+    { id: 'Contemporary', group: 2, value: 68 },
+    { id: 'Upscale', group: 2, value: 72 },
+    { id: 'Professional Service', group: 2, value: 75 },
+    { id: 'Luxurious Decor', group: 2, value: 70 },
+    { id: 'Wine', group: 2, value: 72 },
+    { id: 'Sommelier', group: 2, value: 68 },
+    { id: 'Expert Service', group: 2, value: 70 },
+    
+    // Group 3 - Secondary Connected - Menu sections & descriptors (Orange #F59E0B)
+    { id: 'Almost Raw', group: 3, value: 65 },
+    { id: 'Barely Touched', group: 3, value: 65 },
+    { id: 'Lightly Cooked', group: 3, value: 65 },
+    { id: 'Business Casual', group: 3, value: 55 },
+    { id: 'Reservations Required', group: 3, value: 60 },
+    { id: 'Special Occasions', group: 3, value: 58 },
+    { id: 'The Fish is the Star', group: 3, value: 62 },
+    
+    // Group 4 - Signature Dishes (Green #10B981)
+    { id: 'Tuna with Foie Gras', group: 4, value: 72 },
+    { id: 'Slowly Baked Salmon with Caviar', group: 4, value: 70 },
+    { id: 'Pistachio Dessert', group: 4, value: 60 },
+    { id: 'Poached Lobster', group: 4, value: 68 },
+    { id: 'Dover Sole', group: 4, value: 65 },
+    { id: 'Scallop with Caviar', group: 4, value: 66 },
+    { id: 'Halibut', group: 4, value: 62 },
+    { id: 'Peruvian Dark Chocolate Tart', group: 4, value: 58 },
+    { id: 'Four-Star NY Times', group: 4, value: 55 },
+    { id: 'La Liste Top Restaurants', group: 4, value: 52 },
+
+    // ============================================
+    // THE CARLYLE HOTEL
+    // ============================================
+    // Group 1 - Top Level (Most Connected) - Core concepts (Blue #6366F1)
+    { id: 'Cafe Carlyle', group: 1, value: 95 },
+    { id: 'The Carlyle', group: 1, value: 92 },
+    { id: 'Bemelmans Bar', group: 1, value: 88 },
+    { id: 'Art Deco', group: 1, value: 85 },
+    { id: 'Luxury Hotel', group: 1, value: 82 },
+    
+    // Group 2 - Connected to Top Level - Venues & experiences (Purple #5B21B6)
+    { id: 'Classic Cabaret', group: 2, value: 80 },
+    { id: 'Dowling\'s at The Carlyle', group: 2, value: 78 },
+    { id: 'Ludwig Bemelmans', group: 2, value: 75 },
+    { id: 'Madeline Murals', group: 2, value: 72 },
+    { id: 'Live Entertainment', group: 2, value: 75 },
+    { id: 'Supper Club', group: 2, value: 70 },
+    { id: 'Rosewood Hotel', group: 2, value: 72 },
+    { id: 'Upper East Side', group: 2, value: 78 },
+    { id: 'Five-Star', group: 2, value: 80 },
+    { id: 'Iconic', group: 2, value: 68 },
+    { id: 'Celebrities', group: 2, value: 72 },
+    
+    // Group 3 - Secondary Connected - Details & atmosphere (Orange #F59E0B)
+    { id: 'Dress Code', group: 3, value: 60 },
+    { id: 'Evenings', group: 3, value: 55 },
+    { id: 'Concerts', group: 3, value: 65 },
+    { id: '76th Street', group: 3, value: 52 },
+    { id: 'Madison Avenue', group: 3, value: 68 },
+    { id: 'Central Park', group: 3, value: 75 },
+    
+    // Group 4 - Isolated/Contextual - Amenities & services (Green #10B981)
+    { id: 'Valmont Spa', group: 4, value: 58 },
+    { id: 'Yves Durif Salon', group: 4, value: 52 },
+    { id: 'Fitness Center', group: 4, value: 50 },
+    { id: 'Pet-Friendly', group: 4, value: 48 },
+    { id: 'Concierge', group: 4, value: 55 },
+    { id: '24-Hour Service', group: 4, value: 58 },
+    { id: 'Central Park Views', group: 4, value: 65 },
+    { id: 'Valet Parking', group: 4, value: 50 },
+
+    // ============================================
+    // JEAN-GEORGES AT THE MARK (Restaurant)
+    // ============================================
+    // Group 1 - Top Level
+    { id: 'Jean-Georges Vongerichten', group: 1, value: 92 },
+    { id: 'Jean-Georges at The Mark', group: 1, value: 90 },
+    
+    // Group 2 - Connected to Top Level
+    { id: 'Fresh from the Market', group: 2, value: 75 },
+    { id: 'World Class', group: 2, value: 72 },
+    { id: 'Innovative Seasonings', group: 2, value: 70 },
+    { id: 'Hand Crafted Bar', group: 2, value: 68 },
+    { id: 'Comfortable Dining Room', group: 2, value: 65 },
+    { id: 'French-Inspired', group: 2, value: 72 },
+    { id: 'Global Bistro', group: 2, value: 70 },
+    
+    // Group 3 - Secondary
+    { id: 'People Watching', group: 3, value: 55 },
+    { id: 'Brunch', group: 3, value: 60 },
+
+    // ============================================
+    // THE MARK HOTEL
+    // ============================================
+    // Group 1 - Top Level
+    { id: 'The Mark Hotel', group: 1, value: 90 },
+    
+    // Group 2 - Connected to Top Level
+    { id: 'Polished', group: 2, value: 68 },
+    { id: 'Art Deco-Inspired', group: 2, value: 70 },
+    { id: 'Swanky Bar', group: 2, value: 72 },
+    { id: 'Metropolitan Museum of Art', group: 2, value: 78 },
+    
+    // Group 3 - Secondary
+    { id: 'Salon', group: 3, value: 52 },
+
+    // ============================================
+    // THE PLAZA HOTEL
+    // ============================================
+    // Group 1 - Top Level
+    { id: 'The Plaza', group: 1, value: 95 },
+    
+    // Group 2 - Connected to Top Level
+    { id: 'Landmark Building', group: 2, value: 75 },
+    { id: '19th-Century Architecture', group: 2, value: 70 },
+    { id: 'Afternoon Tea', group: 2, value: 72 },
+    { id: 'Spa', group: 2, value: 68 },
+    
+    // Group 3 - Secondary
+    { id: 'Gym', group: 3, value: 50 },
+
+    // ============================================
+    // THE ST. REGIS HOTEL
+    // ============================================
+    // Group 1 - Top Level
+    { id: 'The St. Regis', group: 1, value: 92 },
+    
+    // Group 2 - Connected to Top Level
+    { id: 'King Cole Bar', group: 2, value: 78 },
+    { id: 'Steam Room', group: 2, value: 60 },
+
+    // ============================================
+    // THE BACCARAT HOTEL
+    // ============================================
+    // Group 1 - Top Level
+    { id: 'The Baccarat', group: 1, value: 90 },
+    
+    // Group 2 - Connected to Top Level
+    { id: 'Elegant Bar', group: 2, value: 72 },
+    { id: 'Indoor Pool', group: 2, value: 65 },
+    { id: 'Empire State Building', group: 2, value: 70 },
+
+    // ============================================
+    // SHARED KEYWORDS (All venues)
+    // ============================================
+    { id: 'Restaurant', group: 2, value: 70 },
+    { id: 'New York', group: 3, value: 75 },
+    { id: '57th Street', group: 3, value: 55 },
+    { id: '51st Street', group: 3, value: 50 },
+    { id: 'Midtown Manhattan', group: 3, value: 58 },
+    { id: 'Lobster', group: 3, value: 65 },
+    { id: 'Lunch', group: 3, value: 55 },
+    { id: 'Dinner', group: 3, value: 60 },
+    { id: 'Hotel', group: 2, value: 70 },
+    { id: 'Luxury', group: 2, value: 75 }
   ];
   const defaultLinks = [
-    { source: 'Yayoi Kusama', target: 'Polka Dots' },
-    { source: 'Yayoi Kusama', target: 'Monogram' },
-    { source: 'Yayoi Kusama', target: 'Tote' },
-    { source: 'Takashi Murakami', target: 'Monogram' },
-    { source: 'Keepall Bag', target: 'Monogram' },
-    { source: 'Trio Messenger', target: 'Tote' },
-    { source: 'Roger Federer', target: 'Olympics' },
-    { source: 'Rafael Nadal', target: 'Olympics' },
-    { source: 'Zendaya', target: 'Oscars' }
+    // ============================================
+    // THE MODERN CONNECTIONS
+    // ============================================
+    { source: 'The Modern', target: 'Restaurant' },
+    { source: 'The Modern', target: 'MoMA Museum' },
+    { source: 'The Modern', target: 'Sculpture Garden' },
+    { source: 'The Modern', target: 'The Modern (Dining Room)' },
+    { source: 'The Modern', target: 'The Bar Room' },
+    { source: 'The Modern', target: 'The Kitchen Table' },
+    { source: 'The Modern', target: 'Two Michelin Stars' },
+    { source: 'The Modern', target: 'Union Square Hospitality Group (USHG)' },
+    { source: 'The Modern', target: 'Hospitality Included' },
+    { source: 'The Modern', target: 'Grand Award Wine List' },
+    { source: 'The Modern', target: 'Upscale & Sophisticated' },
+    { source: 'The Modern', target: 'New York' },
+    { source: 'MoMA Museum', target: 'MoMA Sculpture Garden' },
+    { source: 'MoMA Museum', target: 'Artful & Refined' },
+    { source: 'The Modern (Dining Room)', target: 'Two Michelin Stars' },
+    { source: 'The Modern (Dining Room)', target: 'Eggs on Eggs on Eggs' },
+    { source: 'The Modern (Dining Room)', target: 'Seasonal & Local' },
+    { source: 'The Bar Room', target: 'Cocktails' },
+    { source: 'The Bar Room', target: 'Caviar Hot Dogs' },
+    { source: 'The Kitchen Table', target: 'Seasonal & Local' },
+    { source: 'Upscale & Sophisticated', target: 'The Modern (Dining Room)' },
+    { source: 'Restaurant', target: 'Lunch' },
+    { source: 'Restaurant', target: 'Dinner' },
+    { source: 'Dinner', target: 'Lobster' },
+    { source: 'Dinner', target: 'Truffles' },
+    
+    // ============================================
+    // LE BERNARDIN CONNECTIONS
+    // ============================================
+    { source: 'Le Bernardin', target: 'Three Michelin Stars' },
+    { source: 'Le Bernardin', target: 'Eric Ripert' },
+    { source: 'Le Bernardin', target: 'Seafood' },
+    { source: 'Le Bernardin', target: 'Fine Dining' },
+    { source: 'Le Bernardin', target: 'French Cuisine' },
+    { source: 'Le Bernardin', target: 'Restaurant' },
+    { source: 'Le Bernardin', target: 'New York' },
+    { source: 'Le Bernardin', target: 'Midtown Manhattan' },
+    { source: 'Le Bernardin', target: '51st Street' },
+    { source: 'Le Bernardin', target: 'Tasting Menu' },
+    { source: 'Le Bernardin', target: 'Prix Fixe' },
+    { source: 'Le Bernardin', target: 'Elegant' },
+    { source: 'Le Bernardin', target: 'Contemporary' },
+    { source: 'Le Bernardin', target: 'Professional Service' },
+    { source: 'Le Bernardin', target: 'Expert Service' },
+    { source: 'Le Bernardin', target: 'Wine' },
+    { source: 'Le Bernardin', target: 'Sommelier' },
+    { source: 'Le Bernardin', target: 'Luxurious Decor' },
+    { source: 'Eric Ripert', target: 'Three Michelin Stars' },
+    { source: 'Eric Ripert', target: 'French Cuisine' },
+    { source: 'Seafood', target: 'Almost Raw' },
+    { source: 'Seafood', target: 'Barely Touched' },
+    { source: 'Seafood', target: 'Lightly Cooked' },
+    { source: 'Seafood', target: 'The Fish is the Star' },
+    { source: 'Seafood', target: 'Tuna with Foie Gras' },
+    { source: 'Seafood', target: 'Slowly Baked Salmon with Caviar' },
+    { source: 'Seafood', target: 'Poached Lobster' },
+    { source: 'Seafood', target: 'Dover Sole' },
+    { source: 'Seafood', target: 'Scallop with Caviar' },
+    { source: 'Seafood', target: 'Halibut' },
+    { source: 'Three Michelin Stars', target: 'Four-Star NY Times' },
+    { source: 'Three Michelin Stars', target: 'La Liste Top Restaurants' },
+    { source: 'Fine Dining', target: 'Upscale' },
+    { source: 'Fine Dining', target: 'Special Occasions' },
+    { source: 'Fine Dining', target: 'Reservations Required' },
+    { source: 'Fine Dining', target: 'Business Casual' },
+    { source: 'Tasting Menu', target: 'Almost Raw' },
+    { source: 'Tasting Menu', target: 'Barely Touched' },
+    { source: 'Tasting Menu', target: 'Lightly Cooked' },
+    { source: 'Pistachio Dessert', target: 'Le Bernardin' },
+    { source: 'Peruvian Dark Chocolate Tart', target: 'Le Bernardin' },
+    { source: 'Wine', target: 'Sommelier' },
+    { source: 'Lobster', target: 'Poached Lobster' },
+    
+    // ============================================
+    // THE CARLYLE CONNECTIONS
+    // ============================================
+    { source: 'Cafe Carlyle', target: 'The Carlyle' },
+    { source: 'Cafe Carlyle', target: 'Classic Cabaret' },
+    { source: 'Cafe Carlyle', target: 'Live Entertainment' },
+    { source: 'Cafe Carlyle', target: 'Supper Club' },
+    { source: 'Cafe Carlyle', target: 'Concerts' },
+    { source: 'Cafe Carlyle', target: 'Celebrities' },
+    { source: 'Cafe Carlyle', target: 'Evenings' },
+    { source: 'Cafe Carlyle', target: 'Cocktails' },
+    { source: 'Cafe Carlyle', target: 'Dress Code' },
+    { source: 'The Carlyle', target: 'Bemelmans Bar' },
+    { source: 'The Carlyle', target: 'Art Deco' },
+    { source: 'The Carlyle', target: 'Luxury Hotel' },
+    { source: 'The Carlyle', target: 'Rosewood Hotel' },
+    { source: 'The Carlyle', target: 'Five-Star' },
+    { source: 'The Carlyle', target: 'Upper East Side' },
+    { source: 'The Carlyle', target: '76th Street' },
+    { source: 'The Carlyle', target: 'Madison Avenue' },
+    { source: 'The Carlyle', target: 'New York' },
+    { source: 'The Carlyle', target: 'Iconic' },
+    { source: 'The Carlyle', target: 'Dowling\'s at The Carlyle' },
+    { source: 'The Carlyle', target: 'Valmont Spa' },
+    { source: 'The Carlyle', target: 'Yves Durif Salon' },
+    { source: 'The Carlyle', target: 'Fitness Center' },
+    { source: 'The Carlyle', target: 'Concierge' },
+    { source: 'The Carlyle', target: '24-Hour Service' },
+    { source: 'The Carlyle', target: 'Valet Parking' },
+    { source: 'The Carlyle', target: 'Pet-Friendly' },
+    { source: 'Bemelmans Bar', target: 'Art Deco' },
+    { source: 'Bemelmans Bar', target: 'Ludwig Bemelmans' },
+    { source: 'Bemelmans Bar', target: 'Madeline Murals' },
+    { source: 'Bemelmans Bar', target: 'Cocktails' },
+    { source: 'Bemelmans Bar', target: 'Live Entertainment' },
+    { source: 'Ludwig Bemelmans', target: 'Madeline Murals' },
+    { source: 'Luxury Hotel', target: 'Five-Star' },
+    { source: 'Luxury Hotel', target: 'Central Park Views' },
+    { source: 'Upper East Side', target: 'Central Park' },
+    { source: 'Upper East Side', target: 'Madison Avenue' },
+    { source: 'Upper East Side', target: '76th Street' },
+    { source: 'Dowling\'s at The Carlyle', target: 'Fine Dining' },
+    { source: 'Dowling\'s at The Carlyle', target: 'Restaurant' },
+
+    // ============================================
+    // JEAN-GEORGES AT THE MARK CONNECTIONS
+    // ============================================
+    { source: 'Jean-Georges Vongerichten', target: 'Jean-Georges at The Mark' },
+    { source: 'Jean-Georges Vongerichten', target: 'World Class' },
+    { source: 'Jean-Georges Vongerichten', target: 'Innovative Seasonings' },
+    { source: 'Jean-Georges at The Mark', target: 'The Mark Hotel' },
+    { source: 'Jean-Georges at The Mark', target: 'Restaurant' },
+    { source: 'Jean-Georges at The Mark', target: 'Fresh from the Market' },
+    { source: 'Jean-Georges at The Mark', target: 'Hand Crafted Bar' },
+    { source: 'Jean-Georges at The Mark', target: 'Comfortable Dining Room' },
+    { source: 'Jean-Georges at The Mark', target: 'French-Inspired' },
+    { source: 'Jean-Georges at The Mark', target: 'Global Bistro' },
+    { source: 'Jean-Georges at The Mark', target: 'People Watching' },
+    { source: 'Jean-Georges at The Mark', target: 'Brunch' },
+    { source: 'Jean-Georges at The Mark', target: 'Lunch' },
+    { source: 'Jean-Georges at The Mark', target: 'Dinner' },
+    { source: 'Jean-Georges at The Mark', target: 'Iconic' },
+    { source: 'Jean-Georges at The Mark', target: 'Upper East Side' },
+    { source: 'Jean-Georges at The Mark', target: 'New York' },
+
+    // ============================================
+    // THE MARK HOTEL CONNECTIONS
+    // ============================================
+    { source: 'The Mark Hotel', target: 'Hotel' },
+    { source: 'The Mark Hotel', target: 'Luxury' },
+    { source: 'The Mark Hotel', target: 'Upper East Side' },
+    { source: 'The Mark Hotel', target: 'Central Park' },
+    { source: 'The Mark Hotel', target: 'Metropolitan Museum of Art' },
+    { source: 'The Mark Hotel', target: 'Polished' },
+    { source: 'The Mark Hotel', target: 'Art Deco-Inspired' },
+    { source: 'The Mark Hotel', target: 'Swanky Bar' },
+    { source: 'The Mark Hotel', target: 'Fitness Center' },
+    { source: 'The Mark Hotel', target: 'Salon' },
+    { source: 'The Mark Hotel', target: 'New York' },
+    { source: 'The Mark Hotel', target: '57th Street' },
+
+    // ============================================
+    // THE PLAZA HOTEL CONNECTIONS
+    // ============================================
+    { source: 'The Plaza', target: 'Hotel' },
+    { source: 'The Plaza', target: 'Luxury' },
+    { source: 'The Plaza', target: 'Landmark Building' },
+    { source: 'The Plaza', target: '19th-Century Architecture' },
+    { source: 'The Plaza', target: 'Central Park' },
+    { source: 'The Plaza', target: 'Afternoon Tea' },
+    { source: 'The Plaza', target: 'Spa' },
+    { source: 'The Plaza', target: 'Gym' },
+    { source: 'The Plaza', target: 'Iconic' },
+    { source: 'The Plaza', target: 'New York' },
+    { source: 'The Plaza', target: '57th Street' },
+
+    // ============================================
+    // THE ST. REGIS HOTEL CONNECTIONS
+    // ============================================
+    { source: 'The St. Regis', target: 'Hotel' },
+    { source: 'The St. Regis', target: 'Luxury' },
+    { source: 'The St. Regis', target: 'Midtown Manhattan' },
+    { source: 'The St. Regis', target: 'MoMA Museum' },
+    { source: 'The St. Regis', target: 'Central Park' },
+    { source: 'The St. Regis', target: 'Gym' },
+    { source: 'The St. Regis', target: 'Steam Room' },
+    { source: 'The St. Regis', target: 'King Cole Bar' },
+    { source: 'The St. Regis', target: 'Iconic' },
+    { source: 'The St. Regis', target: 'New York' },
+    { source: 'The St. Regis', target: '57th Street' },
+
+    // ============================================
+    // THE BACCARAT HOTEL CONNECTIONS
+    // ============================================
+    { source: 'The Baccarat', target: 'Hotel' },
+    { source: 'The Baccarat', target: 'Luxury' },
+    { source: 'The Baccarat', target: 'MoMA Museum' },
+    { source: 'The Baccarat', target: 'Central Park' },
+    { source: 'The Baccarat', target: 'Empire State Building' },
+    { source: 'The Baccarat', target: 'French Cuisine' },
+    { source: 'The Baccarat', target: 'Elegant Bar' },
+    { source: 'The Baccarat', target: 'Afternoon Tea' },
+    { source: 'The Baccarat', target: 'Spa' },
+    { source: 'The Baccarat', target: 'Gym' },
+    { source: 'The Baccarat', target: 'Indoor Pool' },
+    { source: 'The Baccarat', target: 'New York' },
+    { source: 'The Baccarat', target: '57th Street' },
+
+    // ============================================
+    // ADDITIONAL CARLYLE CONNECTIONS
+    // ============================================
+    { source: 'The Carlyle', target: 'Hotel' },
+    { source: 'The Carlyle', target: 'Classic Cabaret' },
+    { source: 'The Carlyle', target: '57th Street' },
+
+    // ============================================
+    // SHARED LOCATION CONNECTIONS
+    // ============================================
+    { source: 'New York', target: 'Midtown Manhattan' },
+    { source: 'New York', target: '51st Street' },
+    { source: 'New York', target: 'Upper East Side' },
+    { source: 'New York', target: '57th Street' },
+    { source: 'Midtown Manhattan', target: '51st Street' },
+    { source: 'Midtown Manhattan', target: '57th Street' },
+    { source: 'Hotel', target: 'Luxury' },
+    { source: 'Hotel', target: 'Concierge' },
+    { source: 'Luxury', target: 'Five-Star' }
   ];
 
   const STORAGE_KEY = 'st_keywords_v1';
@@ -188,10 +589,10 @@ console.log('Document ready state:', document.readyState);
   // Function to determine which nodes to show based on current mode
   function getVisibleNodes() {
     if (currentViewMode === 'default') {
-      // Show all nodes but mark non-top-level/non-isolated as disabled
-      return allNodes;
+      // Only show primary keywords (Group 1) on page load
+      return allNodes.filter(node => node.group === 1);
     } else if (currentViewMode === 'expanded' && selectedNode) {
-      // Show selected node and all connected nodes
+      // Show selected node and all connected nodes (expand to show secondary keywords)
       const connectedNodeIds = new Set();
       connectedNodeIds.add(selectedNode.id);
       
@@ -235,29 +636,15 @@ console.log('Document ready state:', document.readyState);
     });
   }
 
-  // Function to determine if a node should be disabled
+  // Function to determine if a node should be disabled (greyed out but visible)
   function isNodeDisabled(node) {
+    // In default mode, all visible nodes (only Group 1) are enabled
     if (currentViewMode === 'default') {
-      // In default mode, disable nodes that are not top-level (group 1) or isolated (group 4)
-      return node.group !== 1 && node.group !== 4;
-    } else if (currentViewMode === 'expanded' && selectedNode) {
-      // In expanded mode, disable nodes that are not connected to the selected node
-      const connectedNodeIds = new Set();
-      connectedNodeIds.add(selectedNode.id);
-      
-      allLinks.forEach(link => {
-        const sourceId = typeof link.source === 'object' ? link.source.id : link.source;
-        const targetId = typeof link.target === 'object' ? link.target.id : link.target;
-        
-        if (sourceId === selectedNode.id) {
-          connectedNodeIds.add(targetId);
-        }
-        if (targetId === selectedNode.id) {
-          connectedNodeIds.add(sourceId);
-        }
-      });
-      
-      return !connectedNodeIds.has(node.id);
+      return false;
+    }
+    // In expanded mode, only the selected node is fully highlighted, connected nodes are enabled
+    if (currentViewMode === 'expanded' && selectedNode) {
+      return false; // All visible nodes in expanded mode are enabled
     }
     return false;
   }
@@ -266,13 +653,13 @@ console.log('Document ready state:', document.readyState);
   function updateModeIndicator() {
     const modeIndicator = document.getElementById('modeIndicator');
     if (modeIndicator) {
-      let modeText = 'Mode: Default View';
+      let modeText = 'Mode: Primary Keywords';
       if (currentViewMode === 'expanded' && selectedNode) {
-        modeText = `Mode: Expanded from "${selectedNode.id}"`;
+        modeText = `Mode: "${selectedNode.id}" + Connected Keywords`;
       } else if (currentViewMode === 'filtered') {
         modeText = 'Mode: Filtered View';
       } else if (currentViewMode === 'all') {
-        modeText = 'Mode: Show All';
+        modeText = 'Mode: All Keywords';
       }
       modeIndicator.querySelector('span').textContent = modeText;
     }
@@ -451,22 +838,25 @@ console.log('Document ready state:', document.readyState);
     }
     
     if (currentViewMode === 'default' && d.group === 1) {
-      // If clicking on a top-level node in default mode, expand to show connected nodes AND open side panel
+      // If clicking on a primary keyword in default mode, expand to show connected secondary keywords
       selectedNode = d;
       currentViewMode = 'expanded';
       setGraphData(allNodes, allLinks);
       openDrawer(d); // Also open the side panel
     } else if (currentViewMode === 'expanded' && selectedNode && selectedNode.id === d.id) {
-      // If clicking on the same expanded node, reset to default view and close drawer
+      // If clicking on the same expanded primary node, collapse back to default view
       selectedNode = null;
       currentViewMode = 'default';
       setGraphData(allNodes, allLinks);
       closeDrawer();
     } else if (currentViewMode === 'expanded' && d.group === 1) {
-      // If clicking on a different top-level node while expanded, switch to that node and update drawer
+      // If clicking on a different primary keyword while expanded, switch to that keyword
       selectedNode = d;
       setGraphData(allNodes, allLinks);
       openDrawer(d); // Update the side panel to show the new node
+    } else if (currentViewMode === 'expanded') {
+      // Clicking on a secondary keyword just opens its drawer
+      openDrawer(d);
     } else {
       // Otherwise just open the drawer
       openDrawer(d);
