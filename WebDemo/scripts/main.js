@@ -229,9 +229,9 @@
   .chatbot-product-card-link:hover{color:#357ABD}
   .chatbot-product-card-link svg{width:14px;height:14px}
   .chatbot-wrapper{position:fixed;bottom:104px;right:20px;z-index:999;transition:bottom 0.3s ease}
-  .chatbot-wrapper.expanded{bottom:190px}
-  .image-gallery-wrapper{position:fixed;top:auto;bottom:-200px;right:20px;z-index:997;width:562.5px;opacity:0;transform:translateY(20px);pointer-events:none;transition:opacity 300ms ease,transform 300ms ease,bottom 0.3s ease}
-  .image-gallery-wrapper.is-visible{opacity:1;transform:translateY(0);pointer-events:auto;bottom:-6px}
+  .chatbot-wrapper.expanded{bottom:104px}
+  .image-gallery-wrapper{position:fixed;top:auto;bottom:-200px;left:20px;z-index:997;width:562.5px;opacity:0;transform:translateY(20px);pointer-events:none;transition:opacity 300ms ease,transform 300ms ease,bottom 0.3s ease}
+  .image-gallery-wrapper.is-visible{opacity:1;transform:translateY(0);pointer-events:auto;bottom:20px}
   .image-gallery-wrapper[hidden]{display:none}
   .image-gallery{background:linear-gradient(135deg,rgba(255,255,255,0.4),rgba(255,255,255,0.22));border:1px solid rgba(255,255,255,0.35);border-radius:12px;padding:12px 40px;min-height:144px;box-shadow:0 8px 32px 0 rgba(31,38,135,0.3);backdrop-filter:blur(16px) saturate(180%);-webkit-backdrop-filter:blur(16px) saturate(180%);position:relative;overflow:visible}
   .image-gallery-title{position:absolute;top:12px;left:12px;font-size:16px;font-weight:600;color:#111;pointer-events:none;z-index:1}
@@ -291,7 +291,7 @@
   .chatbot-map-product-link{display:inline-flex;align-items:center;gap:4px;font-size:12px;color:#4A90E2;text-decoration:none;margin-top:0;transition:color 0.2s ease;flex-shrink:0}
   .chatbot-map-product-link:hover{color:#357ABD}
   .chatbot-map-product-link svg{width:13px;height:13px;flex-shrink:0}
-  .chatbot-location-explorer{display:none !important;background:rgba(255,255,255,0.98);border-radius:12px;padding:16px;margin:0;box-shadow:0 2px 12px rgba(0,0,0,0.08);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);flex-direction:column;flex-shrink:0;min-height:220px}
+  .chatbot-location-explorer{display:none !important;background:rgba(255,255,255,0.98);border-radius:12px;padding:16px;padding-bottom:24px;margin:0;box-shadow:0 2px 12px rgba(0,0,0,0.08);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);flex-direction:column;flex-shrink:0;min-height:250px}
   .chatbot-location-explorer.is-visible:not([hidden]){display:flex !important}
   .chatbot-explorer-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
   .chatbot-explorer-header h3{font-size:16px;font-weight:600;color:#111;margin:0}
@@ -302,18 +302,19 @@
   .chatbot-explorer-tab{padding:8px 16px;border:none;background:transparent;font-size:12px;font-weight:500;color:#666;cursor:pointer;transition:all 0.2s ease;border-bottom:2px solid transparent;margin-bottom:-2px;white-space:nowrap}
   .chatbot-explorer-tab:hover{color:#111}
   .chatbot-explorer-tab.is-active{color:#111;border-bottom-color:#111}
-  .chatbot-explorer-content{display:flex;gap:10px;overflow-x:auto;overflow-y:hidden;padding-bottom:0px;scroll-behavior:smooth;scrollbar-width:none;-ms-overflow-style:none}
+  .chatbot-explorer-content{display:flex;gap:10px;overflow-x:auto;overflow-y:visible;padding-bottom:8px;scroll-behavior:smooth;scrollbar-width:none;-ms-overflow-style:none}
   .chatbot-explorer-content::-webkit-scrollbar{display:none}
   .chatbot-explorer-item{cursor:pointer;border-radius:10px;overflow:hidden;transition:all 0.2s ease;background:#f8f8f8;flex:0 0 auto;width:140px}
   .chatbot-explorer-item:hover{transform:translateY(-3px);box-shadow:0 4px 12px rgba(0,0,0,0.12)}
   .chatbot-explorer-image{width:140px;height:110px;object-fit:cover;display:block}
   .chatbot-explorer-name{padding:8px 6px;font-size:11px;font-weight:500;color:#111;margin:0;text-align:center;background:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .chatbot-toggle{background:#000;color:#fff;border-radius:50%;cursor:pointer;position:absolute;bottom:-80px;right:8px;border:0;outline:none;box-shadow:none;display:grid;place-items:center;width:56px;height:56px;padding:0}
+  .chatbot-toggle{background:#000;color:#fff;border-radius:50%;cursor:pointer;position:absolute;bottom:-80px;right:8px;border:0;outline:none;box-shadow:none;display:grid;place-items:center;width:56px;height:56px;padding:0;transition:bottom 0.3s ease}
   .chatbot-toggle:focus{outline:none}
   .chatbot-toggle img{width:24px;height:24px;filter:brightness(0) invert(1)}
   .chatbot-toggle--glass{background: linear-gradient(135deg, rgba(255,255,255,0.9), rgba(255,255,255,0.7)); color:#111; border:1px solid rgba(0,0,0,0.15); box-shadow:0 8px 32px 0 rgba(31,38,135,0.2); backdrop-filter: blur(12px) saturate(160%); -webkit-backdrop-filter: blur(12px) saturate(160%)}
   .chatbot-toggle--glass img{filter:none}
-  .chatbot-box{height:781.25px;width:562.5px;color:#111;border-radius:12px;padding:28px 12px 20px 12px;display:flex;flex-direction:column;position:relative;box-sizing:border-box;overflow:hidden;
+  .chatbot-wrapper.expanded .chatbot-toggle{bottom:-80px}
+  .chatbot-box{height:781.25px;width:562.5px;color:#111;border-radius:12px;padding:28px 12px 20px 12px;display:flex;flex-direction:column;position:relative;box-sizing:border-box;overflow-x:hidden;overflow-y:visible;
     background: linear-gradient(135deg, rgba(255,255,255,0.4), rgba(255,255,255,0.22));
     border: 1px solid rgba(255,255,255,0.35);
     box-shadow: 0 8px 32px 0 rgba(31,38,135,0.3);
@@ -392,10 +393,10 @@
   .product-list-title{font-size:14px;font-weight:600;margin:0 0 4px;color:#111;line-height:1.3}
   .product-list-model{font-size:12px;color:#666;margin:0 0 4px}
   .product-list-price{font-size:14px;font-weight:600;color:#111;margin:0}
-  .product-list-heart{position:absolute;top:8px;right:8px;width:32px;height:32px;border-radius:50%;border:none;background:rgba(255,255,255,0.95);cursor:pointer;display:grid;place-items:center;transition:all 0.2s ease;z-index:2}
-  .product-list-heart:hover{background:#fff;transform:scale(1.1)}
-  .product-list-heart svg{width:18px;height:18px;color:#e74c3c}
-  .product-list-heart.is-active svg{fill:#e74c3c}
+  .product-list-bookmark{position:absolute;top:8px;right:8px;width:32px;height:32px;border-radius:50%;border:none;background:rgba(255,255,255,0.95);cursor:pointer;display:grid;place-items:center;transition:all 0.2s ease;z-index:2}
+  .product-list-bookmark:hover{background:#fff;transform:scale(1.1)}
+  .product-list-bookmark svg{width:18px;height:18px;color:#4A90E2}
+  .product-list-bookmark.is-active svg{fill:#4A90E2}
   .nav-badge{position:absolute;top:-4px;right:-4px;background:#e74c3c;color:#fff;border-radius:10px;padding:0 6px;font-size:10px;line-height:18px;height:18px;min-width:18px;display:inline-grid;place-items:center;font-weight:600}
   .chatbot-product-item--filled{background:transparent;border:1px solid rgba(0,0,0,0.15);position:relative;overflow:hidden}
   .chatbot-product-item--filled img{width:100%;height:100%;object-fit:cover}
@@ -575,8 +576,8 @@
         case 'map':
           path.setAttribute('d', 'M9 6.75V15m6-6v8.25m.503 3.498 4.875-2.437c.381-.19.622-.58.622-1.006V4.82c0-.836-.88-1.38-1.628-1.006l-3.869 1.934c-.317.159-.69.159-1.006 0L9.503 3.252a1.125 1.125 0 0 0-1.006 0L3.622 5.689C3.24 5.88 3 6.27 3 6.695V19.18c0 .836.88 1.38 1.628 1.006l3.869-1.934c.317-.159.69-.159 1.006 0l4.994 2.497c.317.158.69.158 1.006 0Z');
           break;
-        case 'heart':
-          path.setAttribute('d', 'M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z');
+        case 'bookmark':
+          path.setAttribute('d', 'M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0 1 11.186 0Z');
           break;
         case 'grid':
           path.setAttribute('d', 'M3.75 6A2.25 2.25 0 0 1 6 3.75h2.25A2.25 2.25 0 0 1 10.5 6v2.25a2.25 2.25 0 0 1-2.25 2.25H6a2.25 2.25 0 0 1-2.25-2.25V6ZM3.75 15.75A2.25 2.25 0 0 1 6 13.5h2.25a2.25 2.25 0 0 1 2.25 2.25V18a2.25 2.25 0 0 1-2.25 2.25H6A2.25 2.25 0 0 1 3.75 18v-2.25ZM13.5 6a2.25 2.25 0 0 1 2.25-2.25H18A2.25 2.25 0 0 1 20.25 6v2.25A2.25 2.25 0 0 1 18 10.5h-2.25a2.25 2.25 0 0 1-2.25-2.25V6ZM13.5 15.75a2.25 2.25 0 0 1 2.25-2.25H18a2.25 2.25 0 0 1 2.25 2.25V18A2.25 2.25 0 0 1 18 20.25h-2.25A2.25 2.25 0 0 1 13.5 18v-2.25Z');
@@ -593,7 +594,7 @@
       { icon: 'book', id: 'nav-library', title: 'Library', view: 'library', closeNav: false },
       { icon: 'globe', id: 'nav-search', title: 'Search', view: 'search', closeNav: false },
       { icon: 'map', id: 'nav-map', title: 'Map', view: 'map', closeNav: false },
-      { icon: 'heart', id: 'nav-favorites', title: 'Favorites', view: 'favorites', closeNav: false },
+      { icon: 'bookmark', id: 'nav-favorites', title: 'Favorites', view: 'favorites', closeNav: false },
       { icon: 'grid', id: 'nav-grid', title: 'Grid View', view: 'grid', closeNav: true }
     ];
     
@@ -648,46 +649,52 @@
     let leafletMap = null;
     let chatbotLocationMarkers = []; // Store location markers for cleanup
     
-    // Location data for chatbot explorer - Real locations near LV stores
+    // Location data for chatbot explorer - Real locations near LV stores (matches product-dashboard)
     const chatbotLocationData = {
-      stores: [
+      restaurants: [
+        // Fine Dining & Luxury Restaurants
+        { lat: 40.7614, lng: -73.9776, name: 'The Modern', address: '9 W 53rd St (at MoMA)', image: 'assets/restaurants/the-modern.jpg', keywords: ['The Modern', 'Restaurant', 'MoMA Museum', 'Sculpture Garden', 'lobster', 'truffles', 'cocktails', 'lunch', 'dinner', 'New York', '57th Street'] },
+        { lat: 40.7619, lng: -73.9816, name: 'Le Bernardin', address: '155 W 51st St', image: 'assets/restaurants/le-bernardin.jpg', keywords: ['Le Bernardin', 'Elite French', 'Restaurant', 'Chef Eric Ripert', 'Michelin Star', 'seafood', 'wine', 'sommelier', 'expert service', 'luxurious decor', 'New York', '57th Street'] },
+        { lat: 40.7741, lng: -73.9626, name: 'Cafe Carlyle', address: '35 E 76th St (The Carlyle)', image: 'assets/restaurants/cafe-carlyle.jpg', keywords: ['Cafe Carlyle', 'classic cabaret', 'concerts', 'iconic', 'cocktails', 'dress code', 'celebrities', 'evenings', '57th Street', 'New York'] },
+        { lat: 40.7670, lng: -73.9800, name: 'Marea', address: '240 Central Park South', image: 'assets/restaurants/marea.jpg', keywords: ['Marea', 'High-end Italian seafood', 'housemade pastas', 'Central Park South', 'New York', '57th Street'] },
+        { lat: 40.7754, lng: -73.9625, name: 'The Mark Restaurant by Jean-Georges', address: '25 E 77th St', image: 'assets/restaurants/the-mark-restaurant.jpg', keywords: ['Jean-Georges Vongerichten', 'Restaurant', 'Fresh from the market', 'The Mark Hotel', 'world class', 'innovative seasonings', 'hand crafted bar', 'comfortable dining room', '57th Street', 'New York'] },
+        { lat: 40.7643, lng: -73.9683, name: 'Le Bilboquet', address: '20 E 60th St', image: 'assets/restaurants/le-bilboquet.jpg', keywords: ['Le Bilboquet', 'Upper East Side', 'French-inspired', 'global bistro', 'people watching', 'iconic', 'lunch', 'brunch', 'dinner', '57th Street', 'New York'] },
+        // Luxury Hotels with Dining
+        { lat: 40.7741, lng: -73.9626, name: 'The Carlyle Hotel', address: '35 E 76th St', image: 'assets/restaurants/carlyle-hotel.jpg', keywords: ['The Carlyle', 'most famous hotel', 'Upper East Side', 'old-world Manhattan sophistication', 'JFK\'s New York White House', 'Hotel', 'iconic', 'cabaret', '57th Street', 'New York'] },
+        { lat: 40.7754, lng: -73.9625, name: 'The Mark Hotel', address: '25 E 77th St', image: 'assets/restaurants/mark-hotel.jpg', keywords: ['The Mark Hotel', 'Luxury', 'Hotel', 'Central Park', 'Metropolitan Museum of Art', 'Polished', 'art deco-inspired', 'fitness center', 'salon', 'swanky bar', 'restaurant', '57th Street', 'New York'] },
+        { lat: 40.7644, lng: -73.9747, name: 'The Plaza', address: '768 5th Ave', image: 'assets/restaurants/the-plaza.jpg', keywords: ['The Plaza', 'Luxury', 'Hotel', 'Landmark 19th-century building', 'Central Park', 'Afternoon tea', 'spa', 'gym', '57th Street', 'New York'] },
+        { lat: 40.7611, lng: -73.9738, name: 'The St. Regis', address: '2 E 55th St', image: 'assets/restaurants/st-regis.jpg', keywords: ['The St Regis', 'luxury', 'hotel', 'Midtown Manhattan', 'MoMA', 'Central Park', 'gym', 'steam room', 'iconic bar', '57th Street', 'New York'] },
+        { lat: 40.7617, lng: -73.9789, name: 'The Baccarat Hotel', address: '28 W 53rd St', image: 'assets/restaurants/baccarat.jpg', keywords: ['The Baccarat', 'luxury', 'hotel', 'Museum of Modern Art', 'Central Park', 'Empire State Building', 'French cuisine', 'elegant bar', 'Afternoon tea', 'spa', 'gym', 'indoor pool'] }
+      ],
+      museums: [
+        { lat: 40.7794, lng: -73.9632, name: 'The Metropolitan Museum', address: '1000 5th Ave', image: 'assets/museums/met-museum.jpg', keywords: ['The Met', 'Metropolitan Museum of Art', 'Museum', 'art', 'ancient art', 'European paintings', 'American art', 'Egyptian art', 'Central Park', 'Fifth Avenue', '57th Street', 'New York'] },
+        { lat: 40.7614, lng: -73.9776, name: 'The Museum of Modern Art', address: '11 W 53rd St', image: 'assets/museums/moma.jpg', keywords: ['MoMA', 'Museum of Modern Art', 'Museum', 'modern art', 'contemporary art', 'Van Gogh', 'Picasso', 'Warhol', 'sculpture garden', 'Midtown', '57th Street', 'New York'] },
+        { lat: 40.7829, lng: -73.9589, name: 'The Guggenheim', address: '1071 5th Ave', image: 'assets/museums/guggenheim.jpg', keywords: ['The Guggenheim', 'Solomon R. Guggenheim Museum', 'Museum', 'Frank Lloyd Wright', 'spiral architecture', 'modern art', 'contemporary art', 'Kandinsky', 'Upper East Side', '57th Street', 'New York'] },
+        { lat: 40.7711, lng: -73.9673, name: 'The Frick Collection', address: '1 E 70th St', image: 'assets/museums/frick.jpg', keywords: ['The Frick', 'Frick Collection', 'Museum', 'European art', 'Old Masters', 'Vermeer', 'Rembrandt', 'mansion', 'gilded age', 'Upper East Side', '57th Street', 'New York'] }
+      ],
+      galleries: [
         // Near Louis Vuitton 57th Street
+        { lat: 40.7571, lng: -73.9714, name: 'Pace Gallery', address: '540 W 25th St', image: 'assets/kusama-gal1.png' },
+        { lat: 40.7605, lng: -73.9700, name: 'David Zwirner', address: '533 W 19th St', image: 'assets/kusama-gal2.png' },
+        { lat: 40.7481, lng: -73.9940, name: 'Gagosian Gallery', address: '555 W 24th St', image: 'assets/kusama-gal3.png' },
+        { lat: 40.7509, lng: -73.9975, name: 'Hauser & Wirth', address: '548 W 22nd St', image: 'assets/kusama-gal4.png' },
+        // Near Louis Vuitton SoHo
+        { lat: 40.7214, lng: -74.0018, name: 'Drawing Center', address: '35 Wooster St', image: 'assets/kusama-gal2.png' },
+        { lat: 40.7235, lng: -73.9992, name: 'Team Gallery', address: '83 Grand St', image: 'assets/kusama-gal1.png' },
+        { lat: 40.7228, lng: -74.0005, name: 'Peter Freeman Gallery', address: '140 Grand St', image: 'assets/kusama-gal3.png' }
+      ],
+      others: [
+        // Luxury Shopping
         { lat: 40.7638, lng: -73.9744, name: 'Bergdorf Goodman', address: '754 5th Ave', image: 'assets/kusama1.png' },
         { lat: 40.7577, lng: -73.9788, name: 'Saks Fifth Avenue', address: '611 5th Ave', image: 'assets/kusama2.png' },
         { lat: 40.7625, lng: -73.9735, name: 'Tiffany & Co.', address: 'Fifth Avenue & 57th St', image: 'assets/kusama4.webp' },
         { lat: 40.7590, lng: -73.9775, name: 'Cartier', address: '653 5th Ave', image: 'assets/kusama3.png' },
-        { lat: 40.7635, lng: -73.9745, name: 'Van Cleef & Arpels', address: '744 5th Ave', image: 'assets/kusama1.png' },
-        // Near Louis Vuitton SoHo
-        { lat: 40.7244, lng: -73.9976, name: 'Aesop', address: '113 Greene St', image: 'assets/kusama2.png' },
-        { lat: 40.7241, lng: -74.0003, name: 'The Mercer', address: '147 Mercer St', image: 'assets/kusama3.png' },
-        { lat: 40.7247, lng: -73.9985, name: 'COS', address: '129 Spring St', image: 'assets/kusama4.webp' },
-        { lat: 40.7196, lng: -73.9990, name: 'Glossier', address: '123 Lafayette St', image: 'assets/kusama1.png' }
-      ],
-      museums: [
-        // Near Louis Vuitton 57th Street
-        { lat: 40.7614, lng: -73.9776, name: 'Museum of Modern Art (MoMA)', address: '11 W 53rd St', image: 'assets/kusama-gal2.png' },
-        { lat: 40.7794, lng: -73.9632, name: 'Metropolitan Museum of Art', address: '1000 5th Ave', image: 'assets/kusama-gal1.png' },
-        { lat: 40.7829, lng: -73.9589, name: 'Guggenheim Museum', address: '1071 5th Ave', image: 'assets/kusama-gal3.png' },
-        { lat: 40.7813, lng: -73.9740, name: 'American Museum of Natural History', address: 'Central Park West at 79th St', image: 'assets/kusama-gal4.png' },
-        // Near Louis Vuitton SoHo
-        { lat: 40.7221, lng: -73.9915, name: 'New Museum', address: '235 Bowery', image: 'assets/kusama-gal1.png' },
-        { lat: 40.7214, lng: -74.0018, name: 'Drawing Center', address: '35 Wooster St', image: 'assets/kusama-gal2.png' },
-        { lat: 40.7195, lng: -73.9989, name: 'Museum of Chinese in America', address: '215 Centre St', image: 'assets/kusama-gal3.png' },
-        { lat: 40.7264, lng: -74.0051, name: 'New York City Fire Museum', address: '278 Spring St', image: 'assets/kusama-gal4.png' }
-      ],
-      restaurants: [
-        // Near Louis Vuitton 57th Street
-        { lat: 40.7619, lng: -73.9816, name: 'Le Bernardin', address: '155 W 51st St', image: 'assets/image1.png' },
-        { lat: 40.7614, lng: -73.9776, name: 'The Modern', address: '9 W 53rd St (at MoMA)', image: 'assets/image4.png' },
-        { lat: 40.7655, lng: -73.9682, name: 'Daniel', address: '60 E 65th St', image: 'assets/image2.png' },
-        { lat: 40.7589, lng: -73.9754, name: 'La Grenouille', address: '3 E 52nd St', image: 'assets/image3.png' },
-        { lat: 40.7611, lng: -73.9738, name: 'The Polo Bar', address: '1 E 55th St', image: 'assets/image1.png' },
-        // Near Louis Vuitton SoHo
-        { lat: 40.7222, lng: -74.0000, name: 'Balthazar', address: '80 Spring St', image: 'assets/image2.png' },
-        { lat: 40.7242, lng: -74.0003, name: "Sadelle's", address: '463 W Broadway', image: 'assets/image3.png' },
-        { lat: 40.7248, lng: -73.9979, name: "Raoul's", address: '180 Prince St', image: 'assets/image4.png' },
-        { lat: 40.7260, lng: -74.0012, name: 'The Dutch', address: '131 Sullivan St', image: 'assets/image1.png' },
-        { lat: 40.7246, lng: -73.9996, name: 'Cipriani Downtown', address: '376 West Broadway', image: 'assets/image2.png' }
+        // Hotels & Landmarks
+        { lat: 40.7644, lng: -73.9747, name: 'The Plaza Hotel', address: '768 5th Ave', image: 'assets/kusama1.png' },
+        { lat: 40.7587, lng: -73.9787, name: 'Rockefeller Center', address: '45 Rockefeller Plaza', image: 'assets/kusama2.png' },
+        // Near SoHo
+        { lat: 40.7244, lng: -73.9976, name: 'Aesop', address: '113 Greene St', image: 'assets/kusama3.png' },
+        { lat: 40.7241, lng: -74.0003, name: 'The Mercer Hotel', address: '147 Mercer St', image: 'assets/kusama4.webp' }
       ]
     };
     
@@ -762,9 +769,9 @@
           // Add all nearby locations to map by default with color-coded markers
           const addNearbyLocations = () => {
             // Create custom icons for different categories
-            const storeIcon = L.divIcon({
-              className: 'custom-store-marker',
-              html: '<div style="width: 12px; height: 12px; background: #3b82f6; border-radius: 50%; border: 2px solid white; box-shadow: 0 1px 3px rgba(0,0,0,0.4);"></div>',
+            const restaurantIcon = L.divIcon({
+              className: 'custom-restaurant-marker',
+              html: '<div style="width: 12px; height: 12px; background: #10b981; border-radius: 50%; border: 2px solid white; box-shadow: 0 1px 3px rgba(0,0,0,0.4);"></div>',
               iconSize: [12, 12],
               iconAnchor: [6, 6]
             });
@@ -776,19 +783,26 @@
               iconAnchor: [6, 6]
             });
             
-            const restaurantIcon = L.divIcon({
-              className: 'custom-restaurant-marker',
-              html: '<div style="width: 12px; height: 12px; background: #10b981; border-radius: 50%; border: 2px solid white; box-shadow: 0 1px 3px rgba(0,0,0,0.4);"></div>',
+            const galleryIcon = L.divIcon({
+              className: 'custom-gallery-marker',
+              html: '<div style="width: 12px; height: 12px; background: #f59e0b; border-radius: 50%; border: 2px solid white; box-shadow: 0 1px 3px rgba(0,0,0,0.4);"></div>',
               iconSize: [12, 12],
               iconAnchor: [6, 6]
             });
             
-            // Add stores
-            chatbotLocationData.stores.forEach(location => {
+            const otherIcon = L.divIcon({
+              className: 'custom-other-marker',
+              html: '<div style="width: 12px; height: 12px; background: #3b82f6; border-radius: 50%; border: 2px solid white; box-shadow: 0 1px 3px rgba(0,0,0,0.4);"></div>',
+              iconSize: [12, 12],
+              iconAnchor: [6, 6]
+            });
+            
+            // Add restaurants
+            chatbotLocationData.restaurants.forEach(location => {
               const popupContent = location.address 
                 ? `<b>${location.name}</b><br><small>${location.address}</small>`
                 : `<b>${location.name}</b>`;
-              L.marker([location.lat, location.lng], { icon: storeIcon })
+              L.marker([location.lat, location.lng], { icon: restaurantIcon })
                 .bindPopup(popupContent)
                 .addTo(leafletMap);
             });
@@ -803,12 +817,22 @@
                 .addTo(leafletMap);
             });
             
-            // Add restaurants
-            chatbotLocationData.restaurants.forEach(location => {
+            // Add galleries
+            chatbotLocationData.galleries.forEach(location => {
               const popupContent = location.address 
                 ? `<b>${location.name}</b><br><small>${location.address}</small>`
                 : `<b>${location.name}</b>`;
-              L.marker([location.lat, location.lng], { icon: restaurantIcon })
+              L.marker([location.lat, location.lng], { icon: galleryIcon })
+                .bindPopup(popupContent)
+                .addTo(leafletMap);
+            });
+            
+            // Add others
+            chatbotLocationData.others.forEach(location => {
+              const popupContent = location.address 
+                ? `<b>${location.name}</b><br><small>${location.address}</small>`
+                : `<b>${location.name}</b>`;
+              L.marker([location.lat, location.lng], { icon: otherIcon })
                 .bindPopup(popupContent)
                 .addTo(leafletMap);
             });
@@ -827,16 +851,20 @@
                 <span>Louis Vuitton</span>
               </div>
               <div class="map-legend-item">
-                <div class="map-legend-marker" style="background: #3b82f6;"></div>
-                <span>Curated Stores</span>
+                <div class="map-legend-marker" style="background: #10b981;"></div>
+                <span>Restaurants</span>
               </div>
               <div class="map-legend-item">
                 <div class="map-legend-marker" style="background: #8b5cf6;"></div>
                 <span>Museums</span>
               </div>
               <div class="map-legend-item">
-                <div class="map-legend-marker" style="background: #10b981;"></div>
-                <span>Restaurants</span>
+                <div class="map-legend-marker" style="background: #f59e0b;"></div>
+                <span>Galleries</span>
+              </div>
+              <div class="map-legend-item">
+                <div class="map-legend-marker" style="background: #3b82f6;"></div>
+                <span>Others Nearby</span>
               </div>
             </div>
           `;
@@ -905,9 +933,10 @@
         productGallery.classList.add('is-visible');
         // Don't add is-visible to explorer yet - it opens when clicking a product card
 
-        // Set appropriate height for map view with product cards
-        // Map (400px) + Product Gallery (~250px) + padding (~100px) = ~750px
-        const mapViewHeight = Math.min(850, getMaxChatbotHeight());
+        // Set appropriate height for map view with product cards (no explorer)
+        // Map (350px) + Product Gallery (~170px) + padding (~80px) = ~600px
+        // Use larger height to prepare for explorer opening
+        const mapViewHeight = Math.min(700, getMaxChatbotHeight());
         setBoxSize(FULL_W, mapViewHeight);
 
         // Initialize map and render products
@@ -961,12 +990,14 @@
     explorerHeader.appendChild(explorerClose);
     
     const explorerTabs = createEl('div', { class: 'chatbot-explorer-tabs' });
-    const tabStores = createEl('button', { class: 'chatbot-explorer-tab is-active', 'data-category': 'stores', text: 'Curated Stores' });
+    const tabRestaurants = createEl('button', { class: 'chatbot-explorer-tab is-active', 'data-category': 'restaurants', text: 'Restaurants' });
     const tabMuseums = createEl('button', { class: 'chatbot-explorer-tab', 'data-category': 'museums', text: 'Museums' });
-    const tabRestaurants = createEl('button', { class: 'chatbot-explorer-tab', 'data-category': 'restaurants', text: 'Restaurants' });
-    explorerTabs.appendChild(tabStores);
-    explorerTabs.appendChild(tabMuseums);
+    const tabGalleries = createEl('button', { class: 'chatbot-explorer-tab', 'data-category': 'galleries', text: 'Galleries' });
+    const tabOthers = createEl('button', { class: 'chatbot-explorer-tab', 'data-category': 'others', text: 'Others Nearby' });
     explorerTabs.appendChild(tabRestaurants);
+    explorerTabs.appendChild(tabMuseums);
+    explorerTabs.appendChild(tabGalleries);
+    explorerTabs.appendChild(tabOthers);
     
     const explorerContent = createEl('div', { class: 'chatbot-explorer-content', id: 'chatbot-explorer-content' });
     
@@ -1981,7 +2012,7 @@
         const emptyMessage = createEl('div', {
           style: 'text-align: center; padding: 48px 20px; color: #666; font-size: 14px; width: 100%;'
         });
-        emptyMessage.textContent = 'Click the heart icon on any product to add it to your favorites!';
+        emptyMessage.textContent = 'Click the bookmark icon on any product to add it to your favorites!';
         galleryTrack.appendChild(emptyMessage);
       } else {
         // Create gallery items from favorited images
@@ -2276,26 +2307,26 @@
           const model = createEl('p', { class: 'product-list-model', text: product.model });
           const price = createEl('p', { class: 'product-list-price', text: product.price });
 
-          const heartBtn = createEl('button', { class: 'product-list-heart', 'aria-label': 'Add to wishlist' });
-          const heartSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-          heartSvg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
-          heartSvg.setAttribute('viewBox', '0 0 24 24');
-          heartSvg.setAttribute('fill', wishlistProducts.some(p => p.id === product.id) ? 'currentColor' : 'none');
-          heartSvg.setAttribute('stroke', 'currentColor');
-          heartSvg.setAttribute('stroke-width', '2');
-          const heartPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-          heartPath.setAttribute('d', 'M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z');
-          heartSvg.appendChild(heartPath);
-          heartBtn.appendChild(heartSvg);
+          const bookmarkBtn = createEl('button', { class: 'product-list-bookmark', 'aria-label': 'Add to bookmarks' });
+          const bookmarkSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+          bookmarkSvg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+          bookmarkSvg.setAttribute('viewBox', '0 0 24 24');
+          bookmarkSvg.setAttribute('fill', wishlistProducts.some(p => p.id === product.id) ? 'currentColor' : 'none');
+          bookmarkSvg.setAttribute('stroke', 'currentColor');
+          bookmarkSvg.setAttribute('stroke-width', '1.5');
+          const bookmarkPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+          bookmarkPath.setAttribute('d', 'M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0 1 11.186 0Z');
+          bookmarkSvg.appendChild(bookmarkPath);
+          bookmarkBtn.appendChild(bookmarkSvg);
 
-          heartBtn.addEventListener('click', () => {
+          bookmarkBtn.addEventListener('click', () => {
             const index = wishlistProducts.findIndex(p => p.id === product.id);
             if (index > -1) {
               wishlistProducts.splice(index, 1);
-              heartSvg.setAttribute('fill', 'none');
+              bookmarkSvg.setAttribute('fill', 'none');
             } else {
               wishlistProducts.push(product);
-              heartSvg.setAttribute('fill', 'currentColor');
+              bookmarkSvg.setAttribute('fill', 'currentColor');
             }
             saveWishlist(); // Save to localStorage
             updateWishlistBadge();
@@ -2310,7 +2341,7 @@
           info.appendChild(price);
 
           card.appendChild(img);
-          card.appendChild(heartBtn);
+          card.appendChild(bookmarkBtn);
           card.appendChild(info);
           grid.appendChild(card);
         });
@@ -2326,7 +2357,7 @@
       if (wishlistProducts.length === 0) {
         const emptyMsg = createEl('div', {
           class: 'no-products-message',
-          text: 'No favorites yet. Add products to your wishlist from the product list.'
+          text: 'No bookmarks yet. Add products to your bookmarks from the product list.'
         });
         messages.appendChild(emptyMsg);
       } else {
@@ -2341,17 +2372,17 @@
           const model = createEl('p', { class: 'product-list-model', text: product.model });
           const price = createEl('p', { class: 'product-list-price', text: product.price });
 
-          const removeBtn = createEl('button', { class: 'product-list-heart is-active', 'aria-label': 'Remove from wishlist' });
-          const heartSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-          heartSvg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
-          heartSvg.setAttribute('viewBox', '0 0 24 24');
-          heartSvg.setAttribute('fill', 'currentColor');
-          heartSvg.setAttribute('stroke', 'currentColor');
-          heartSvg.setAttribute('stroke-width', '2');
-          const heartPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-          heartPath.setAttribute('d', 'M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z');
-          heartSvg.appendChild(heartPath);
-          removeBtn.appendChild(heartSvg);
+          const removeBtn = createEl('button', { class: 'product-list-bookmark is-active', 'aria-label': 'Remove from bookmarks' });
+          const bookmarkSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+          bookmarkSvg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+          bookmarkSvg.setAttribute('viewBox', '0 0 24 24');
+          bookmarkSvg.setAttribute('fill', 'currentColor');
+          bookmarkSvg.setAttribute('stroke', 'currentColor');
+          bookmarkSvg.setAttribute('stroke-width', '1.5');
+          const bookmarkPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+          bookmarkPath.setAttribute('d', 'M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0 1 11.186 0Z');
+          bookmarkSvg.appendChild(bookmarkPath);
+          removeBtn.appendChild(bookmarkSvg);
 
           removeBtn.addEventListener('click', () => {
             const index = wishlistProducts.findIndex(p => p.id === product.id);
@@ -2476,7 +2507,11 @@
             if (e.target.tagName === 'A' || e.target.closest('a')) return;
             
             if (leafletMap && product.location) {
-              leafletMap.setView([product.location.lat, product.location.lng], 15);
+              leafletMap.invalidateSize();
+              leafletMap.flyTo([product.location.lat, product.location.lng], 15, {
+                animate: true,
+                duration: 0.5
+              });
             }
             
             // Open location explorer
@@ -2502,16 +2537,22 @@
     function openChatbotLocationExplorer() {
       chatbotLocationExplorer.removeAttribute('hidden');
       chatbotLocationExplorer.classList.add('is-visible');
-      loadChatbotLocationCategory('stores');
+      loadChatbotLocationCategory('restaurants');
       
-      // Expand chatbot to nearly full viewport height for map view
-      const viewportHeight = window.innerHeight;
-      const expandedHeight = viewportHeight - 40; // 20px margin top and bottom
-      
-      // Move wrapper closer to bottom to allow more expansion
+      // Mark wrapper as expanded (keeps bottom aligned with nav at 104px)
       wrapper.classList.add('expanded');
       
-      setBoxSize(FULL_W, expandedHeight, true); // Skip constraint to allow full expansion
+      // Calculate height to fit all content without scrolling:
+      // Map (~350px) + Products (~170px) + Explorer header/tabs (~80px) + Gallery images+names (~160px) + padding (~90px)
+      // Total: ~850px, but constrain to viewport
+      const viewportHeight = window.innerHeight;
+      const wrapperBottomPosition = 104;
+      const topMargin = 20;
+      const maxAvailableHeight = viewportHeight - wrapperBottomPosition - topMargin;
+      const contentHeight = 900; // map + products + explorer with full gallery + padding
+      const expandedHeight = Math.min(contentHeight, maxAvailableHeight);
+      
+      setBoxSize(FULL_W, expandedHeight, true);
       
       // Ensure map resizes properly
       setTimeout(() => {
@@ -2532,8 +2573,8 @@
       // Only resize if we're still in map view
       // (other view switches handle their own sizing)
       if (mapContainer.classList.contains('is-visible')) {
-        // Return to normal map view height
-        const normalHeight = Math.min(850, getMaxChatbotHeight());
+        // Return to compact map view height (map + products only)
+        const normalHeight = Math.min(700, getMaxChatbotHeight());
         setBoxSize(FULL_W, normalHeight);
         
         // Ensure map resizes properly
@@ -2587,11 +2628,20 @@
         item.appendChild(name);
         content.appendChild(item);
         
-        // Click to zoom to location
+        // Click to zoom to location and center map
         item.addEventListener('click', () => {
           if (leafletMap) {
-            leafletMap.setView([location.lat, location.lng], 15);
-            marker.openPopup();
+            // Invalidate size first to ensure proper centering
+            leafletMap.invalidateSize();
+            // Use flyTo for smooth animation and proper centering
+            leafletMap.flyTo([location.lat, location.lng], 16, {
+              animate: true,
+              duration: 0.5
+            });
+            // Open popup after animation completes
+            setTimeout(() => {
+              marker.openPopup();
+            }, 500);
           }
         });
       });
