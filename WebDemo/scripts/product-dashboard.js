@@ -135,7 +135,10 @@
       setupMyMediaDrawer();
       setupAIChat();
     }
-    else if (viewName === 'map') renderMap();
+    else if (viewName === 'map') {
+      renderMap();
+      setupMapAIChat();
+    }
     else if (viewName === 'favorites') renderFavorites();
   }
 
@@ -587,6 +590,187 @@
     
     // Make handleDroppedImage available globally for canvas card drops
     window.handleDroppedImageFromCard = handleDroppedImage;
+  }
+
+  // Setup Map View AI Chat (minimized by default)
+  function setupMapAIChat() {
+    const chatPrompt = document.getElementById('mapAiChatPrompt');
+    const chatToggle = document.getElementById('mapAiChatToggle');
+    const minimizeBtn = document.getElementById('mapAiChatMinimize');
+    const chatInput = document.getElementById('mapAiChatInput');
+    const chatSend = document.getElementById('mapAiChatSend');
+    const chatMessages = document.getElementById('mapAiChatMessages');
+    const newChatBtn = document.getElementById('mapNewChatBtn');
+    const viewHistoryBtn = document.getElementById('mapViewHistoryBtn');
+    const closeHistoryBtn = document.getElementById('mapCloseHistoryBtn');
+    
+    if (!chatPrompt || !chatToggle) {
+      console.error('Map AI chat elements not found');
+      return;
+    }
+    
+    // Start minimized by default
+    chatPrompt.classList.add('minimized');
+    chatToggle.classList.add('visible');
+    
+    // Sample AI responses for map view
+    const sampleResponses = [
+      "The nearby restaurants offer excellent dining options for luxury shoppers visiting the Louis Vuitton flagship store.",
+      "This museum is known for its contemporary art exhibitions that often complement fashion and design.",
+      "The gallery features rotating exhibitions that frequently showcase fashion photography and luxury brand collaborations.",
+      "This location is a popular spot among fashion enthusiasts and offers great photo opportunities.",
+      "Many visitors to this area combine shopping at nearby luxury boutiques with cultural experiences."
+    ];
+    
+    // Minimize/maximize functionality
+    if (minimizeBtn) {
+      minimizeBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        chatPrompt.classList.add('minimized');
+        chatToggle.classList.add('visible');
+      });
+    }
+    
+    if (chatToggle) {
+      chatToggle.addEventListener('click', () => {
+        chatPrompt.classList.remove('minimized');
+        chatToggle.classList.remove('visible');
+        // Add loaded class for animation
+        chatPrompt.classList.add('loaded');
+      });
+    }
+    
+    // Update button states
+    function updateButtonStates() {
+      const hasMessages = chatMessages && chatMessages.children.length > 0;
+      if (newChatBtn) {
+        newChatBtn.disabled = !hasMessages;
+      }
+    }
+    
+    // Add message to chat
+    function addMessage(text, isUser = true) {
+      if (!chatMessages) return;
+      const messageEl = createEl('div', {
+        class: `ai-chat-message ${isUser ? 'user' : 'ai'}`,
+        text: text
+      });
+      chatMessages.appendChild(messageEl);
+      updateButtonStates();
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+    
+    // New Chat button
+    if (newChatBtn) {
+      newChatBtn.addEventListener('click', () => {
+        if (!newChatBtn.disabled && chatMessages) {
+          chatMessages.replaceChildren();
+          updateButtonStates();
+        }
+      });
+    }
+    
+    // Initialize button states
+    updateButtonStates();
+    
+    // Toggle history view
+    function toggleHistoryView() {
+      if (!chatPrompt) return;
+      const isExpanded = chatPrompt.classList.contains('expanded');
+      if (isExpanded) {
+        chatPrompt.classList.remove('expanded');
+      } else {
+        chatPrompt.classList.add('expanded');
+        populateHistory();
+      }
+    }
+    
+    // View History button
+    if (viewHistoryBtn) {
+      viewHistoryBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        toggleHistoryView();
+      });
+    }
+    
+    // Close history button
+    if (closeHistoryBtn) {
+      closeHistoryBtn.addEventListener('click', () => {
+        toggleHistoryView();
+      });
+    }
+    
+    // Populate chat history
+    function populateHistory() {
+      const historyList = document.getElementById('mapChatHistoryList');
+      if (!historyList) return;
+      
+      historyList.replaceChildren();
+      
+      const sampleHistory = [
+        { title: 'Nearby Restaurants', preview: 'What restaurants are nearby?', date: 'Today' },
+        { title: 'Museum Info', preview: 'Tell me about the museums...', date: 'Yesterday' },
+        { title: 'Gallery Locations', preview: 'Where are the art galleries?', date: '2 days ago' }
+      ];
+      
+      sampleHistory.forEach(chat => {
+        const item = createEl('div', { class: 'ai-chat-history-item' });
+        const title = createEl('p', { 
+          class: 'ai-chat-history-item-title', 
+          text: chat.title 
+        });
+        const preview = createEl('p', { 
+          class: 'ai-chat-history-item-preview', 
+          text: chat.preview 
+        });
+        
+        item.appendChild(title);
+        item.appendChild(preview);
+        
+        item.addEventListener('click', () => {
+          toggleHistoryView();
+        });
+        
+        historyList.appendChild(item);
+      });
+    }
+    
+    // Handle send
+    function sendMessage() {
+      if (!chatInput) return;
+      const message = chatInput.value.trim();
+      if (message) {
+        addMessage(message, true);
+        chatInput.value = '';
+        
+        if (chatSend) {
+          chatSend.style.transform = 'scale(0.9)';
+          setTimeout(() => {
+            chatSend.style.transform = '';
+          }, 200);
+        }
+        
+        setTimeout(() => {
+          const randomResponse = sampleResponses[Math.floor(Math.random() * sampleResponses.length)];
+          addMessage(randomResponse, false);
+        }, 800);
+      }
+    }
+    
+    // Send on button click
+    if (chatSend) {
+      chatSend.addEventListener('click', sendMessage);
+    }
+    
+    // Send on Enter key
+    if (chatInput) {
+      chatInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+          sendMessage();
+        }
+      });
+    }
   }
 
   // Drawer image sets - different images load based on which card is clicked

@@ -290,6 +290,65 @@
             <!-- Map-related products -->
           </div>
         </div>
+        
+        <!-- AI Chat Prompt for Map View -->
+        <!-- Chat Toggle Button (minimized state) -->
+        <button class="ai-chat-toggle" id="mapAiChatToggle">
+          <img src="assets/louis-vuitton.svg" alt="LV">
+        </button>
+        
+        <div class="ai-chat-prompt" id="mapAiChatPrompt">
+          <button class="ai-chat-minimize-btn" id="mapAiChatMinimize" title="Minimize">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M19.5 12h-15" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+          <div class="ai-chat-actions">
+            <button class="ai-chat-action-btn" id="mapNewChatBtn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 4.5v15m7.5-7.5h-15" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              <span>New Chat</span>
+            </button>
+            <button class="ai-chat-action-btn" id="mapViewHistoryBtn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              <span>History</span>
+            </button>
+          </div>
+          <div class="ai-chat-main-view">
+            <div class="ai-chat-messages" id="mapAiChatMessages">
+              <!-- Chat messages will appear here -->
+            </div>
+            <div class="ai-chat-input-container">
+              <input 
+                type="text" 
+                class="ai-chat-input" 
+                placeholder="Ask about locations..." 
+                id="mapAiChatInput"
+              />
+              <button class="ai-chat-send" id="mapAiChatSend">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M6 12h12m0 0l-6-6m6 6l-6 6" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+          <div class="ai-chat-history-view" id="mapChatHistoryView">
+            <div class="ai-chat-history-header">
+              <h4>Chat History</h4>
+              <button class="ai-chat-close-history" id="mapCloseHistoryBtn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M6 18L18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </button>
+            </div>
+            <div class="ai-chat-history-list" id="mapChatHistoryList">
+              <!-- History items will be populated here -->
+            </div>
+          </div>
+        </div>
       </section>
 
       <!-- Favorites View -->
