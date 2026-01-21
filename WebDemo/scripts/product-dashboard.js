@@ -278,6 +278,23 @@
       "The campaign blends contemporary art with haute couture, creating collectible pieces that transcend traditional fashion."
     ];
     
+    // Chat minimize/maximize functionality
+    const minimizeBtn = document.getElementById('aiChatMinimize');
+    const chatToggle = document.getElementById('aiChatToggle');
+    
+    // Check localStorage for saved state (default to minimized)
+    const savedState = localStorage.getItem('exploreChatOpen');
+    const isOpen = savedState === 'true';
+    
+    // Apply initial state
+    if (isOpen) {
+      chatPrompt.classList.remove('minimized');
+      chatToggle.classList.remove('visible');
+    } else {
+      chatPrompt.classList.add('minimized');
+      chatToggle.classList.add('visible');
+    }
+    
     // Fade in chat prompt
     setTimeout(() => {
       if (chatPrompt) {
@@ -285,24 +302,18 @@
       }
     }, 400);
     
-    // Chat minimize/maximize functionality
-    const minimizeBtn = document.getElementById('aiChatMinimize');
-    const chatToggle = document.getElementById('aiChatToggle');
-    
-    console.log('Minimize setup - btn:', !!minimizeBtn, 'toggle:', !!chatToggle);
-    
     if (minimizeBtn && chatToggle) {
       minimizeBtn.addEventListener('click', (e) => {
         e.stopPropagation();
-        console.log('Minimize clicked');
         chatPrompt.classList.add('minimized');
         chatToggle.classList.add('visible');
+        localStorage.setItem('exploreChatOpen', 'false');
       });
       
       chatToggle.addEventListener('click', () => {
-        console.log('Toggle clicked - expanding');
         chatPrompt.classList.remove('minimized');
         chatToggle.classList.remove('visible');
+        localStorage.setItem('exploreChatOpen', 'true');
       });
     }
     
@@ -609,9 +620,19 @@
       return;
     }
     
-    // Start minimized by default
-    chatPrompt.classList.add('minimized');
-    chatToggle.classList.add('visible');
+    // Check localStorage for saved state (default to minimized)
+    const savedState = localStorage.getItem('mapChatOpen');
+    const isOpen = savedState === 'true';
+    
+    // Apply initial state
+    if (isOpen) {
+      chatPrompt.classList.remove('minimized');
+      chatToggle.classList.remove('visible');
+      chatPrompt.classList.add('loaded');
+    } else {
+      chatPrompt.classList.add('minimized');
+      chatToggle.classList.add('visible');
+    }
     
     // Sample AI responses for map view
     const sampleResponses = [
@@ -628,6 +649,7 @@
         e.stopPropagation();
         chatPrompt.classList.add('minimized');
         chatToggle.classList.add('visible');
+        localStorage.setItem('mapChatOpen', 'false');
       });
     }
     
@@ -635,8 +657,8 @@
       chatToggle.addEventListener('click', () => {
         chatPrompt.classList.remove('minimized');
         chatToggle.classList.remove('visible');
-        // Add loaded class for animation
         chatPrompt.classList.add('loaded');
+        localStorage.setItem('mapChatOpen', 'true');
       });
     }
     
