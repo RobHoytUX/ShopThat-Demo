@@ -109,21 +109,13 @@
     <script src="scripts/shared-data.js"></script>
     <script src="scripts/keywords-manage.js" defer></script>
     <script>
-      // Back button functionality
+      // Back button functionality - use browser history to preserve previous state
       document.addEventListener('DOMContentLoaded', function() {
         const backBtn = document.getElementById('backBtn');
         if (backBtn) {
           backBtn.addEventListener('click', function(e) {
             e.preventDefault();
-            
-            // Check if user came from keywords.html or dashboard.html
-            const referrer = document.referrer;
-            if (referrer.includes('/keywords.html')) {
-              window.location.href = '/keywords.html';
-            } else {
-              // Default to dashboard if came from dashboard or direct access
-              window.location.href = '/dashboard.html';
-            }
+            history.back();
           });
         }
         

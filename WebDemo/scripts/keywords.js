@@ -817,10 +817,13 @@ console.log('Document ready state:', document.readyState);
 
   const centerForce = d3.forceCenter(0, 0);
   const sim = d3.forceSimulation(graphNodes)
-    .force('link', d3.forceLink(graphLinks).id(d => d.id).distance(80).strength(0.15))
-    .force('charge', d3.forceManyBody().strength(-150))
+    .force('link', d3.forceLink(graphLinks).id(d => d.id).distance(100).strength(0.1))
+    .force('charge', d3.forceManyBody().strength(-80))
     .force('center', centerForce)
-    .force('collision', d3.forceCollide().radius(d => radius(d.value, d.group)+6))
+    .force('collision', d3.forceCollide().radius(d => radius(d.value, d.group)+10).strength(0.8))
+    .alphaDecay(0.03)      // Slower decay for smoother settling
+    .velocityDecay(0.4)    // Higher damping to reduce oscillation
+    .alphaMin(0.001)       // Stop simulation when very settled
     .force('bounds', () => {
       // Keep nodes clustered toward center with gentle bounds
       const w = width();
@@ -836,8 +839,8 @@ console.log('Document ready state:', document.readyState);
         
         if (distance > maxDistance) {
           const scale = maxDistance / distance;
-          node.x = centerX + dx * scale;
-          node.y = centerY + dy * scale;
+          node.x = centerX + dx * scale * 0.95; // Gentler pull back
+          node.y = centerY + dy * scale * 0.95;
         }
       });
     });
@@ -849,7 +852,7 @@ console.log('Document ready state:', document.readyState);
     const tx = 0;
     gNodes.attr('transform', `translate(${tx},0) scale(${scale})`);
     gLinks.attr('transform', `translate(${tx},0) scale(${scale})`);
-    sim.alpha(0.3).restart();
+    sim.alpha(0.1).alphaTarget(0).restart();
   }
 
   function ticked(){
@@ -1000,7 +1003,7 @@ console.log('Document ready state:', document.readyState);
       }
     });
     
-    sim.alpha(0.9).restart();
+    sim.alpha(0.3).alphaTarget(0).restart();
     
     updateModeIndicator();
   }
@@ -1059,7 +1062,7 @@ console.log('Document ready state:', document.readyState);
       });
     }
     
-    sim.alpha(0.7).restart();
+    sim.alpha(0.2).alphaTarget(0).restart();
     rescaleForDrawer();
   }
   
