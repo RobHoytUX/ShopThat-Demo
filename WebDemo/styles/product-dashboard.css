@@ -76,6 +76,19 @@ html, body {
   background: #e0e0e0;
 }
 
+.dashboard-btn--admin {
+  background: transparent;
+  color: #111;
+  border: 1px solid #ccc;
+  text-decoration: none;
+  margin-left: 16px;
+}
+
+.dashboard-btn--admin:hover {
+  background: #f5f5f5;
+  border-color: #999;
+}
+
 /* Main Layout */
 .dashboard-main {
   display: grid;
@@ -604,7 +617,7 @@ html, body {
 /* Media Filters */
 .media-filters {
   position: fixed;
-  top: 20px;
+  top: 100px;
   right: 32px;
   z-index: 200;
 }

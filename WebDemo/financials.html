@@ -40,7 +40,11 @@
 
     <header class="appbar" role="banner">
       <div class="appbar__inner">
-        <h1 class="appbar__title">Financials</h1>
+        <h1 class="appbar__title">
+          <span class="appbar__title-row">Financials
+            <button class="icon-btn icon-btn--sm" id="calculatorBackBtn" aria-label="Back to Financials" title="Back to Financials" style="display: none;">←</button>
+          </span>
+        </h1>
         <div class="appbar__search">
           <input type="search" placeholder="Search here..." aria-label="Search" />
         </div>
@@ -65,7 +69,7 @@
 
     <main id="main" class="dashboard" role="main">
       <!-- Page Title with Campaign Switcher -->
-      <div class="page-header">
+      <div class="page-header" style="display: flex; justify-content: space-between; align-items: center;">
         <div class="campaign-selector">
           <div class="campaign-dropdown-wrapper">
             <div class="campaign-arrow">
@@ -81,6 +85,16 @@
             </div>
           </div>
         </div>
+        <button class="btn btn--primary" id="rewardsCalcBtn" style="padding: 10px 20px; font-size: 14px; display: flex; align-items: center; gap: 8px;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="4" y="2" width="16" height="20" rx="2"/>
+            <line x1="8" y1="6" x2="16" y2="6"/>
+            <line x1="8" y1="10" x2="16" y2="10"/>
+            <line x1="8" y1="14" x2="12" y2="14"/>
+            <line x1="8" y1="18" x2="12" y2="18"/>
+          </svg>
+          Rewards Calculator
+        </button>
       </div>
 
       <!-- First Row - Spend Circle and Performance Metrics -->
@@ -288,6 +302,613 @@
       </div>
 
     </main>
+
+    <!-- Rewards Calculator View (Hidden by default) -->
+    <div id="calculatorView" class="calculator-view">
+      <div class="calculator-content">
+        <!-- Live Price Reference -->
+        <div class="calc-section live-reference">
+          <div class="live-reference-row">
+            <h2 class="live-reference-title">📊 Real-Time Tokenomics Analyzer</h2>
+            <div class="live-stats">
+              <div class="live-stat token-selector">
+                <span class="stat-label">Token</span>
+                <select id="volatilityRef" class="token-dropdown">
+                  <option value="BTC">BTC</option>
+                  <option value="ETH">ETH</option>
+                  <option value="SOL">SOL</option>
+                  <option value="DOGE">DOGE</option>
+                  <option value="SHIB">SHIB</option>
+                </select>
+              </div>
+              <div class="live-stat">
+                <span class="stat-label">Live Price</span>
+                <span class="stat-value" id="livePrice">$0.00</span>
+              </div>
+              <div class="live-stat">
+                <span class="stat-label">24h Change</span>
+                <span class="stat-value" id="liveChange">0.00%</span>
+              </div>
+              <div class="live-stat live-indicator">
+                <span class="stat-label">Live Updates</span>
+                <span class="pulse-dot"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="calc-grid">
+          <!-- Left Column: Parameters -->
+          <div class="calc-params">
+            <div class="calc-section">
+              <h3>⚙️ Token Parameters</h3>
+              
+              <h4>Token Supply</h4>
+              <div class="param-group">
+                <label>Total Supply (tokens)
+                  <span class="tooltip" title="The total number of tokens that will ever exist.">?</span>
+                </label>
+                <input type="number" id="totalSupply" value="1000000000" step="1000000">
+              </div>
+              <div class="param-group">
+                <label>Initial Token Price ($)
+                  <span class="tooltip" title="The starting price of your token at launch.">?</span>
+                </label>
+                <input type="number" id="initialPrice" value="0.10" step="0.01">
+              </div>
+              <div class="param-group">
+                <label>End Token Price ($)
+                  <span class="tooltip" title="Target token price at the end of the projection period.">?</span>
+                </label>
+                <input type="number" id="endPrice" value="0.50" step="0.01">
+              </div>
+              <div class="param-group">
+                <label>Projection Period (months)
+                  <span class="tooltip" title="How many months into the future to simulate.">?</span>
+                </label>
+                <input type="number" id="projectionMonths" value="24" min="1" max="60">
+              </div>
+
+              <h4>Business Metrics</h4>
+              <div class="param-group">
+                <label>Monthly Transaction Volume
+                  <span class="tooltip" title="The number of transactions processed each month.">?</span>
+                </label>
+                <input type="number" id="monthlyVolume" value="100000" step="10000">
+              </div>
+              <div class="param-group">
+                <label>Average Order Value ($)
+                  <span class="tooltip" title="The average dollar amount per transaction.">?</span>
+                </label>
+                <input type="number" id="avgOrderValue" value="50" step="5">
+              </div>
+              <div class="param-group">
+                <label>Cashback Rate (%)
+                  <span class="tooltip" title="The percentage of GMV returned as rewards.">?</span>
+                </label>
+                <input type="number" id="cashbackRate" value="1" step="0.1" min="0" max="10">
+              </div>
+              <div class="param-group">
+                <label>Monthly Growth Rate (%)
+                  <span class="tooltip" title="Average growth rate for transaction volume.">?</span>
+                </label>
+                <input type="number" id="growthRate" value="5" step="1" min="-10" max="50">
+              </div>
+              <div class="param-group">
+                <label>Growth Variability (%)
+                  <span class="tooltip" title="How much growth fluctuates month-to-month.">?</span>
+                </label>
+                <input type="number" id="growthVariability" value="3" step="1" min="0" max="20">
+              </div>
+              <div class="param-group">
+                <label>Growth Pattern
+                  <span class="tooltip" title="Choose how growth behaves over time.">?</span>
+                </label>
+                <select id="growthPattern">
+                  <option value="steady">Steady Growth</option>
+                  <option value="seasonal">Seasonal Fluctuations</option>
+                  <option value="volatile">Volatile (Random)</option>
+                </select>
+              </div>
+
+              <h4>Treasury & Economics</h4>
+              <div class="param-group">
+                <label>Treasury Take Rate (%)
+                  <span class="tooltip" title="The portion of total cashback that goes to your treasury.">?</span>
+                </label>
+                <input type="number" id="treasuryRate" value="20" step="1" min="0" max="50">
+              </div>
+              <div class="param-group">
+                <label>Treasury Investment Return (%/year)
+                  <span class="tooltip" title="Annual yield on treasury funds through investments.">?</span>
+                </label>
+                <input type="number" id="investmentReturn" value="5" step="0.5" min="0" max="30">
+              </div>
+              <div class="param-group">
+                <label>Burn Rate (%)
+                  <span class="tooltip" title="Percentage of reward tokens permanently removed from circulation.">?</span>
+                </label>
+                <input type="number" id="burnRate" value="0.1" step="0.05" min="0" max="5">
+              </div>
+
+              <h4>Volatility Model</h4>
+              <div class="param-group">
+                <label>Apply Real Crypto Volatility
+                  <span class="tooltip" title="Simulates price fluctuations based on real crypto market data.">?</span>
+                </label>
+                <select id="volatilityLevel">
+                  <option value="0">No Volatility (Fixed Price)</option>
+                  <option value="50">50% of Reference Crypto</option>
+                  <option value="100" selected>100% of Reference Crypto</option>
+                  <option value="200">200% of Reference Crypto</option>
+                </select>
+              </div>
+              <div class="volatility-impact">
+                <h5>Estimated Volatility Impact</h5>
+                <p id="volatilityImpactText">Moderate volatility applied</p>
+              </div>
+            </div>
+
+            <div class="calc-controls">
+              <button class="btn btn--primary calc-btn" id="runSimulation">Run Full Simulation</button>
+              <button class="btn btn--secondary calc-btn" id="exportData">📥 Export Data (CSV)</button>
+            </div>
+          </div>
+
+          <!-- Right Column: Results -->
+          <div class="calc-results">
+            <div class="results-grid">
+              <div class="result-card">
+                <span class="result-label">Token Price (Current)</span>
+                <span class="result-value" id="resultPrice">$0.10</span>
+                <span class="result-sub" id="resultVolatility">Volatility: 0%</span>
+              </div>
+              <div class="result-card">
+                <span class="result-label">Ecosystem Reserve</span>
+                <span class="result-value" id="resultReserve">350M</span>
+                <span class="result-sub">Available for rewards</span>
+              </div>
+              <div class="result-card">
+                <span class="result-label">Treasury Value</span>
+                <span class="result-value" id="resultTreasury">$0</span>
+                <span class="result-sub" id="resultROI">ROI: 0%</span>
+              </div>
+              <div class="result-card">
+                <span class="result-label">Total Buyback Cost</span>
+                <span class="result-value" id="resultBuyback">$0</span>
+                <span class="result-sub" id="resultTokens">0 tokens purchased</span>
+              </div>
+              <div class="result-card highlight">
+                <span class="result-label">Net Profit</span>
+                <span class="result-value" id="resultProfit">$0</span>
+                <span class="result-sub">Treasury - Buyback Costs</span>
+              </div>
+              <div class="result-card">
+                <span class="result-label">Months Until Depletion</span>
+                <span class="result-value" id="resultDepletion">36+</span>
+                <span class="result-sub">At current burn rate</span>
+              </div>
+            </div>
+
+            <div class="alert-box" id="supplyAlert" style="display: none;">
+              <h4>⚠️ Critical Supply Alert</h4>
+              <p id="alertMessage"></p>
+            </div>
+
+            <div class="chart-section">
+              <h4>Token Price Projection (with Real Volatility)</h4>
+              <canvas id="priceChart"></canvas>
+            </div>
+
+            <div class="chart-section">
+              <h4>Monthly GMV & Growth Rate</h4>
+              <canvas id="gmvChart"></canvas>
+            </div>
+
+            <div class="chart-section">
+              <h4>Token Buyback Cost by Month</h4>
+              <canvas id="buybackChart"></canvas>
+            </div>
+
+            <div class="chart-section">
+              <h4>Treasury Value vs Net Profit</h4>
+              <canvas id="treasuryChart"></canvas>
+            </div>
+
+            <div class="chart-section">
+              <h4>Ecosystem Reserve vs. Demand</h4>
+              <canvas id="reserveChart"></canvas>
+            </div>
+
+            <div class="breakdown-section">
+              <div class="breakdown-header">
+                <h4>📊 Monthly Breakdown</h4>
+                <button class="btn btn--secondary" id="exportCSV">📥 Export CSV</button>
+              </div>
+              <div class="table-container">
+                <table class="breakdown-table" id="breakdownTable">
+                  <thead>
+                    <tr>
+                      <th>Month</th>
+                      <th>Token Price</th>
+                      <th>Reserve Pool</th>
+                      <th>Tokens Needed</th>
+                      <th>To Purchase</th>
+                      <th>Cost</th>
+                      <th>Treasury</th>
+                    </tr>
+                  </thead>
+                  <tbody id="breakdownBody">
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <style>
+      /* Calculator View Styles */
+      .calculator-view {
+        display: none;
+        padding: 16px;
+        grid-column: 2 / -1;
+        grid-row: 2;
+        height: calc(100vh - 64px);
+        overflow: auto;
+        background: #f6f7fb;
+      }
+      .calculator-view.active {
+        display: block;
+      }
+      .dark-mode .calculator-view {
+        background: #1a1a2e;
+      }
+      .calculator-content {
+        max-width: 100%;
+        margin: 0;
+        padding: 0;
+      }
+      .live-reference {
+        background: #fff;
+        border-radius: 12px;
+        padding: 16px 24px;
+        margin-bottom: 16px;
+        color: #1a1a2e;
+        border: 1px solid #e8e8ef;
+      }
+      .live-reference-row {
+        display: flex;
+        align-items: center;
+        gap: 24px;
+        flex-wrap: wrap;
+      }
+      .live-reference-title {
+        font-size: 18px;
+        font-weight: 600;
+        margin: 0;
+        white-space: nowrap;
+        color: #1a1a2e;
+      }
+      .live-stats {
+        display: flex;
+        gap: 24px;
+        margin-left: auto;
+        align-items: center;
+      }
+      .live-stat {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+      .live-stat .stat-label {
+        font-size: 11px;
+        color: #6a6a8a;
+        text-transform: uppercase;
+        font-weight: 500;
+      }
+      .live-stat .stat-value {
+        font-size: 18px;
+        font-weight: 700;
+        color: #1a1a2e;
+      }
+      .token-selector {
+        min-width: 80px;
+      }
+      .token-dropdown {
+        padding: 8px 12px;
+        border-radius: 8px;
+        border: 1px solid #e8e8ef;
+        background: #fff;
+        color: #1a1a2e;
+        font-weight: 600;
+        font-size: 14px;
+        cursor: pointer;
+        margin-top: 4px;
+      }
+      .token-dropdown:focus {
+        outline: none;
+        border-color: #6366f1;
+      }
+      .token-dropdown option {
+        color: #1a1a2e;
+        background: #fff;
+      }
+      .pulse-dot {
+        width: 12px;
+        height: 12px;
+        background: #10b981;
+        border-radius: 50%;
+        animation: pulse 2s infinite;
+      }
+      @keyframes pulse {
+        0%, 100% { opacity: 1; transform: scale(1); }
+        50% { opacity: 0.5; transform: scale(1.2); }
+      }
+      .calc-grid {
+        display: grid;
+        grid-template-columns: 340px 1fr;
+        gap: 16px;
+      }
+      @media (max-width: 1100px) {
+        .calc-grid { grid-template-columns: 1fr; }
+      }
+      .calc-section {
+        background: #fff;
+        border-radius: 12px;
+        padding: 20px;
+        border: 1px solid #e8e8ef;
+      }
+      .dark-mode .calc-section {
+        background: #16213e;
+        border-color: #2a2a4a;
+      }
+      .calc-section h3 {
+        margin: 0 0 20px;
+        font-size: 18px;
+        color: #1a1a2e;
+      }
+      .dark-mode .calc-section h3 {
+        color: #fff;
+      }
+      .calc-section h4 {
+        margin: 24px 0 12px;
+        font-size: 14px;
+        font-weight: 600;
+        color: #6366f1;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+      .param-group {
+        margin-bottom: 12px;
+      }
+      .param-group label {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 13px;
+        font-weight: 500;
+        margin-bottom: 6px;
+        color: #4a4a6a;
+      }
+      .dark-mode .param-group label {
+        color: #a0a0c0;
+      }
+      .param-group .tooltip {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 16px;
+        height: 16px;
+        background: #e8e8ef;
+        border-radius: 50%;
+        font-size: 10px;
+        color: #6a6a8a;
+        cursor: help;
+      }
+      .param-group input, .param-group select {
+        width: 100%;
+        padding: 10px 12px;
+        border: 1px solid #e8e8ef;
+        border-radius: 8px;
+        font-size: 14px;
+        background: #fff;
+        transition: border-color 0.2s;
+      }
+      .param-group input:focus, .param-group select:focus {
+        outline: none;
+        border-color: #6366f1;
+      }
+      .dark-mode .param-group input, .dark-mode .param-group select {
+        background: #1a1a2e;
+        border-color: #3a3a5a;
+        color: #fff;
+      }
+      .volatility-impact {
+        background: #f6f7fb;
+        border-radius: 8px;
+        padding: 12px;
+        margin-top: 12px;
+      }
+      .dark-mode .volatility-impact {
+        background: #1a1a2e;
+      }
+      .volatility-impact h5 {
+        margin: 0 0 6px;
+        font-size: 12px;
+        font-weight: 600;
+        color: #6a6a8a;
+      }
+      .volatility-impact p {
+        margin: 0;
+        font-size: 13px;
+        color: #4a4a6a;
+      }
+      .calc-controls {
+        display: flex;
+        gap: 12px;
+        margin-top: 20px;
+      }
+      .calc-btn {
+        flex: 1;
+        padding: 12px 16px;
+        font-size: 14px;
+        font-weight: 600;
+      }
+      .results-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+        margin-bottom: 24px;
+      }
+      @media (max-width: 900px) {
+        .results-grid { grid-template-columns: repeat(2, 1fr); }
+      }
+      .result-card {
+        background: #fff;
+        border: 1px solid #e8e8ef;
+        border-radius: 12px;
+        padding: 16px;
+        display: flex;
+        flex-direction: column;
+      }
+      .dark-mode .result-card {
+        background: #16213e;
+        border-color: #2a2a4a;
+      }
+      .result-card.highlight {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        border: none;
+        color: #fff;
+      }
+      .result-label {
+        font-size: 12px;
+        font-weight: 500;
+        color: #6a6a8a;
+        margin-bottom: 4px;
+      }
+      .result-card.highlight .result-label {
+        color: rgba(255,255,255,0.8);
+      }
+      .dark-mode .result-label {
+        color: #a0a0c0;
+      }
+      .result-value {
+        font-size: 24px;
+        font-weight: 700;
+        color: #1a1a2e;
+      }
+      .result-card.highlight .result-value {
+        color: #fff;
+      }
+      .dark-mode .result-value {
+        color: #fff;
+      }
+      .result-sub {
+        font-size: 11px;
+        color: #8a8aaa;
+        margin-top: 4px;
+      }
+      .result-card.highlight .result-sub {
+        color: rgba(255,255,255,0.7);
+      }
+      .alert-box {
+        background: #fef3c7;
+        border: 1px solid #f59e0b;
+        border-radius: 12px;
+        padding: 16px;
+        margin-bottom: 24px;
+      }
+      .alert-box h4 {
+        margin: 0 0 8px;
+        color: #b45309;
+      }
+      .alert-box p {
+        margin: 0;
+        color: #92400e;
+        font-size: 14px;
+      }
+      .chart-section {
+        background: #fff;
+        border: 1px solid #e8e8ef;
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 24px;
+      }
+      .dark-mode .chart-section {
+        background: #16213e;
+        border-color: #2a2a4a;
+      }
+      .chart-section h4 {
+        margin: 0 0 16px;
+        font-size: 16px;
+        font-weight: 600;
+        color: #1a1a2e;
+      }
+      .dark-mode .chart-section h4 {
+        color: #fff;
+      }
+      .chart-section canvas {
+        max-height: 300px;
+      }
+      .breakdown-section {
+        background: #fff;
+        border: 1px solid #e8e8ef;
+        border-radius: 12px;
+        padding: 20px;
+      }
+      .dark-mode .breakdown-section {
+        background: #16213e;
+        border-color: #2a2a4a;
+      }
+      .breakdown-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 16px;
+      }
+      .breakdown-header h4 {
+        margin: 0;
+        font-size: 16px;
+        font-weight: 600;
+        color: #1a1a2e;
+      }
+      .dark-mode .breakdown-header h4 {
+        color: #fff;
+      }
+      .table-container {
+        overflow-x: auto;
+      }
+      .breakdown-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 13px;
+      }
+      .breakdown-table th, .breakdown-table td {
+        padding: 12px;
+        text-align: left;
+        border-bottom: 1px solid #e8e8ef;
+      }
+      .dark-mode .breakdown-table th, .dark-mode .breakdown-table td {
+        border-bottom-color: #2a2a4a;
+      }
+      .breakdown-table th {
+        font-weight: 600;
+        color: #6a6a8a;
+        background: #f6f7fb;
+      }
+      .dark-mode .breakdown-table th {
+        background: #1a1a2e;
+        color: #a0a0c0;
+      }
+      .breakdown-table td {
+        color: #4a4a6a;
+      }
+      .dark-mode .breakdown-table td {
+        color: #d0d0e0;
+      }
+    </style>
     
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
@@ -614,17 +1235,565 @@
         }
       }
       
+      // =====================================================
+      // REWARDS CALCULATOR FUNCTIONALITY
+      // =====================================================
+      
+      let simulationData = [];
+      let priceChartInstance = null;
+      let gmvChartInstance = null;
+      let buybackChartInstance = null;
+      let treasuryChartInstance = null;
+      let reserveChartInstance = null;
+      
+      // Simulated crypto prices (in production, fetch from API)
+      const cryptoPrices = {
+        BTC: { price: 67432.50, change: 2.34 },
+        ETH: { price: 3521.80, change: -1.12 },
+        SOL: { price: 142.65, change: 5.67 },
+        DOGE: { price: 0.1234, change: -3.45 },
+        SHIB: { price: 0.00002156, change: 8.92 }
+      };
+      
+      // Volatility patterns based on real crypto data
+      const volatilityPatterns = {
+        BTC: 0.45,   // Bitcoin volatility factor
+        ETH: 0.55,   // Ethereum volatility factor
+        SOL: 0.75,   // Solana volatility factor
+        DOGE: 0.90,  // Dogecoin volatility factor
+        SHIB: 1.20   // Shiba Inu volatility factor
+      };
+
+      function initRewardsCalculator() {
+        const calcBtn = document.getElementById('rewardsCalcBtn');
+        const backBtn = document.getElementById('calculatorBackBtn');
+        const calcView = document.getElementById('calculatorView');
+        const mainView = document.getElementById('main');
+        const pageTitle = document.getElementById('pageTitle');
+        const runSimBtn = document.getElementById('runSimulation');
+        const exportBtn = document.getElementById('exportData');
+        const exportCSVBtn = document.getElementById('exportCSV');
+        const volatilityRef = document.getElementById('volatilityRef');
+        
+        // Switch to calculator view
+        if (calcBtn) {
+          calcBtn.addEventListener('click', () => {
+            mainView.style.display = 'none';
+            calcView.classList.add('active');
+            backBtn.style.display = 'inline-grid';
+            updateLivePrice();
+            runSimulation();
+          });
+        }
+        
+        // Switch back to financials view
+        if (backBtn) {
+          backBtn.addEventListener('click', () => {
+            calcView.classList.remove('active');
+            mainView.style.display = 'block';
+            backBtn.style.display = 'none';
+          });
+        }
+        
+        // Update live price when reference changes
+        if (volatilityRef) {
+          volatilityRef.addEventListener('change', updateLivePrice);
+        }
+        
+        // Run simulation
+        if (runSimBtn) {
+          runSimBtn.addEventListener('click', runSimulation);
+        }
+        
+        // Export buttons
+        if (exportBtn) {
+          exportBtn.addEventListener('click', exportToCSV);
+        }
+        if (exportCSVBtn) {
+          exportCSVBtn.addEventListener('click', exportToCSV);
+        }
+        
+        // Auto-run simulation when parameters change
+        document.querySelectorAll('.calc-params input, .calc-params select').forEach(input => {
+          input.addEventListener('change', runSimulation);
+        });
+      }
+      
+      function updateLivePrice() {
+        const ref = document.getElementById('volatilityRef').value;
+        const priceEl = document.getElementById('livePrice');
+        const changeEl = document.getElementById('liveChange');
+        
+        if (cryptoPrices[ref]) {
+          const data = cryptoPrices[ref];
+          priceEl.textContent = formatCurrency(data.price);
+          changeEl.textContent = (data.change >= 0 ? '+' : '') + data.change.toFixed(2) + '%';
+          changeEl.style.color = data.change >= 0 ? '#10b981' : '#ef4444';
+        }
+        
+        // Update volatility impact text
+        const level = parseInt(document.getElementById('volatilityLevel').value);
+        const impactText = document.getElementById('volatilityImpactText');
+        if (level === 0) {
+          impactText.textContent = 'No volatility - fixed price growth';
+        } else if (level <= 50) {
+          impactText.textContent = 'Low volatility applied - mild price fluctuations';
+        } else if (level <= 100) {
+          impactText.textContent = 'Moderate volatility applied';
+        } else {
+          impactText.textContent = 'High volatility applied - significant price swings';
+        }
+      }
+      
+      function runSimulation() {
+        // Get all input values
+        const totalSupply = parseFloat(document.getElementById('totalSupply').value) || 1000000000;
+        const initialPrice = parseFloat(document.getElementById('initialPrice').value) || 0.10;
+        const endPrice = parseFloat(document.getElementById('endPrice').value) || 0.50;
+        const months = parseInt(document.getElementById('projectionMonths').value) || 24;
+        const monthlyVolume = parseFloat(document.getElementById('monthlyVolume').value) || 100000;
+        const avgOrderValue = parseFloat(document.getElementById('avgOrderValue').value) || 50;
+        const cashbackRate = parseFloat(document.getElementById('cashbackRate').value) / 100 || 0.01;
+        const growthRate = parseFloat(document.getElementById('growthRate').value) / 100 || 0.05;
+        const growthVariability = parseFloat(document.getElementById('growthVariability').value) / 100 || 0.03;
+        const growthPattern = document.getElementById('growthPattern').value;
+        const treasuryRate = parseFloat(document.getElementById('treasuryRate').value) / 100 || 0.20;
+        const investmentReturn = parseFloat(document.getElementById('investmentReturn').value) / 100 / 12 || 0.00417;
+        const burnRate = parseFloat(document.getElementById('burnRate').value) / 100 || 0.001;
+        const volatilityLevel = parseInt(document.getElementById('volatilityLevel').value) / 100 || 1;
+        const volatilityRef = document.getElementById('volatilityRef').value;
+        
+        // Calculate ecosystem reserve (35% of total supply)
+        let ecosystemReserve = totalSupply * 0.35;
+        
+        // Initialize simulation data
+        simulationData = [];
+        let treasury = 0;
+        let totalBuybackCost = 0;
+        let totalTokensPurchased = 0;
+        let currentVolume = monthlyVolume;
+        
+        // Generate monthly data
+        for (let month = 1; month <= months; month++) {
+          // Calculate price for this month with volatility
+          const priceProgress = month / months;
+          let basePrice = initialPrice + (endPrice - initialPrice) * priceProgress;
+          
+          // Apply volatility
+          let volatilityFactor = 0;
+          if (volatilityLevel > 0) {
+            const refVolatility = volatilityPatterns[volatilityRef] || 0.5;
+            volatilityFactor = (Math.random() - 0.5) * 2 * refVolatility * volatilityLevel;
+          }
+          const tokenPrice = basePrice * (1 + volatilityFactor);
+          
+          // Calculate growth for this month
+          let monthGrowth = growthRate;
+          if (growthPattern === 'seasonal') {
+            // Seasonal pattern: higher in winter (months 11,12,1,2), lower in summer
+            const monthOfYear = ((month - 1) % 12) + 1;
+            const seasonalFactor = Math.cos((monthOfYear - 1) * Math.PI / 6) * 0.5;
+            monthGrowth += seasonalFactor * growthRate;
+          } else if (growthPattern === 'volatile') {
+            // Random volatility including potential negative months
+            monthGrowth += (Math.random() - 0.4) * growthVariability * 3;
+          }
+          monthGrowth += (Math.random() - 0.5) * growthVariability;
+          
+          // Update volume
+          currentVolume = currentVolume * (1 + monthGrowth);
+          
+          // Calculate GMV and rewards
+          const gmv = currentVolume * avgOrderValue;
+          const totalCashback = gmv * cashbackRate;
+          const userCashback = totalCashback * (1 - treasuryRate);
+          const treasuryIncome = totalCashback * treasuryRate;
+          
+          // Calculate tokens needed for rewards
+          const tokensNeeded = userCashback / tokenPrice;
+          
+          // Determine if we need to buy from market
+          let tokensToPurchase = 0;
+          let purchaseCost = 0;
+          
+          if (tokensNeeded > ecosystemReserve) {
+            tokensToPurchase = tokensNeeded - ecosystemReserve;
+            purchaseCost = tokensToPurchase * tokenPrice;
+            ecosystemReserve = 0;
+          } else {
+            ecosystemReserve -= tokensNeeded;
+          }
+          
+          // Apply burn
+          const tokensBurned = tokensNeeded * burnRate;
+          
+          // Update treasury with investment returns
+          treasury = treasury * (1 + investmentReturn) + treasuryIncome;
+          totalBuybackCost += purchaseCost;
+          totalTokensPurchased += tokensToPurchase;
+          
+          simulationData.push({
+            month,
+            tokenPrice,
+            ecosystemReserve,
+            gmv,
+            growthRate: monthGrowth,
+            tokensNeeded,
+            tokensToPurchase,
+            purchaseCost,
+            treasury,
+            totalBuybackCost,
+            netProfit: treasury - totalBuybackCost
+          });
+        }
+        
+        // Update results display
+        updateResultsDisplay();
+        updateCharts();
+        updateBreakdownTable();
+      }
+      
+      function updateResultsDisplay() {
+        const lastMonth = simulationData[simulationData.length - 1];
+        const firstMonth = simulationData[0];
+        
+        document.getElementById('resultPrice').textContent = formatCurrency(lastMonth.tokenPrice);
+        document.getElementById('resultVolatility').textContent = 'Volatility: ' + document.getElementById('volatilityLevel').value + '%';
+        document.getElementById('resultReserve').textContent = formatNumber(lastMonth.ecosystemReserve);
+        document.getElementById('resultTreasury').textContent = formatCurrency(lastMonth.treasury);
+        
+        const roi = firstMonth.treasury > 0 
+          ? ((lastMonth.treasury - firstMonth.treasury) / firstMonth.treasury * 100).toFixed(1)
+          : (lastMonth.treasury > 0 ? '∞' : '0');
+        document.getElementById('resultROI').textContent = 'ROI: ' + roi + '%';
+        
+        document.getElementById('resultBuyback').textContent = formatCurrency(lastMonth.totalBuybackCost);
+        document.getElementById('resultTokens').textContent = formatNumber(simulationData.reduce((sum, m) => sum + m.tokensToPurchase, 0)) + ' tokens purchased';
+        document.getElementById('resultProfit').textContent = formatCurrency(lastMonth.netProfit);
+        
+        // Calculate months until depletion
+        const avgMonthlyTokens = simulationData.reduce((sum, m) => sum + m.tokensNeeded, 0) / simulationData.length;
+        const monthsUntilDepletion = avgMonthlyTokens > 0 
+          ? Math.floor(lastMonth.ecosystemReserve / avgMonthlyTokens)
+          : 999;
+        document.getElementById('resultDepletion').textContent = monthsUntilDepletion > 36 ? '36+' : monthsUntilDepletion;
+        
+        // Show alert if reserve is critically low
+        const alertBox = document.getElementById('supplyAlert');
+        const alertMsg = document.getElementById('alertMessage');
+        if (lastMonth.ecosystemReserve < 10000000) {
+          alertBox.style.display = 'block';
+          alertMsg.textContent = 'Ecosystem reserve is critically low at ' + formatNumber(lastMonth.ecosystemReserve) + ' tokens. Consider reducing cashback rate or increasing burn rate.';
+        } else if (monthsUntilDepletion < 12) {
+          alertBox.style.display = 'block';
+          alertMsg.textContent = 'At current rates, ecosystem reserve will be depleted in approximately ' + monthsUntilDepletion + ' months.';
+        } else {
+          alertBox.style.display = 'none';
+        }
+      }
+      
+      function updateCharts() {
+        const labels = simulationData.map(d => 'M' + d.month);
+        const isDarkMode = document.body.classList.contains('dark-mode');
+        const gridColor = isDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)';
+        const textColor = isDarkMode ? '#a0a0c0' : '#6a6a8a';
+        
+        // Destroy existing charts
+        [priceChartInstance, gmvChartInstance, buybackChartInstance, treasuryChartInstance, reserveChartInstance].forEach(chart => {
+          if (chart) chart.destroy();
+        });
+        
+        // Price Chart
+        const priceCtx = document.getElementById('priceChart');
+        if (priceCtx) {
+          priceChartInstance = new Chart(priceCtx, {
+            type: 'line',
+            data: {
+              labels,
+              datasets: [{
+                label: 'Token Price',
+                data: simulationData.map(d => d.tokenPrice),
+                borderColor: '#6366f1',
+                backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                fill: true,
+                tension: 0.4
+              }]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: { legend: { display: false } },
+              scales: {
+                y: { 
+                  beginAtZero: false,
+                  grid: { color: gridColor },
+                  ticks: { color: textColor }
+                },
+                x: { 
+                  grid: { color: gridColor },
+                  ticks: { color: textColor }
+                }
+              }
+            }
+          });
+        }
+        
+        // GMV Chart
+        const gmvCtx = document.getElementById('gmvChart');
+        if (gmvCtx) {
+          gmvChartInstance = new Chart(gmvCtx, {
+            type: 'bar',
+            data: {
+              labels,
+              datasets: [
+                {
+                  label: 'GMV',
+                  data: simulationData.map(d => d.gmv),
+                  backgroundColor: 'rgba(16, 185, 129, 0.8)',
+                  yAxisID: 'y'
+                },
+                {
+                  label: 'Growth Rate',
+                  data: simulationData.map(d => d.growthRate * 100),
+                  type: 'line',
+                  borderColor: '#f59e0b',
+                  backgroundColor: 'transparent',
+                  tension: 0.4,
+                  yAxisID: 'y1'
+                }
+              ]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: { legend: { labels: { color: textColor } } },
+              scales: {
+                y: { 
+                  position: 'left',
+                  grid: { color: gridColor },
+                  ticks: { color: textColor }
+                },
+                y1: {
+                  position: 'right',
+                  grid: { display: false },
+                  ticks: { color: textColor }
+                },
+                x: { 
+                  grid: { color: gridColor },
+                  ticks: { color: textColor }
+                }
+              }
+            }
+          });
+        }
+        
+        // Buyback Chart
+        const buybackCtx = document.getElementById('buybackChart');
+        if (buybackCtx) {
+          buybackChartInstance = new Chart(buybackCtx, {
+            type: 'bar',
+            data: {
+              labels,
+              datasets: [{
+                label: 'Buyback Cost',
+                data: simulationData.map(d => d.purchaseCost),
+                backgroundColor: 'rgba(239, 68, 68, 0.8)'
+              }]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: { legend: { display: false } },
+              scales: {
+                y: { 
+                  beginAtZero: true,
+                  grid: { color: gridColor },
+                  ticks: { color: textColor }
+                },
+                x: { 
+                  grid: { color: gridColor },
+                  ticks: { color: textColor }
+                }
+              }
+            }
+          });
+        }
+        
+        // Treasury Chart
+        const treasuryCtx = document.getElementById('treasuryChart');
+        if (treasuryCtx) {
+          treasuryChartInstance = new Chart(treasuryCtx, {
+            type: 'line',
+            data: {
+              labels,
+              datasets: [
+                {
+                  label: 'Treasury Value',
+                  data: simulationData.map(d => d.treasury),
+                  borderColor: '#8b5cf6',
+                  backgroundColor: 'rgba(139, 92, 246, 0.1)',
+                  fill: true,
+                  tension: 0.4
+                },
+                {
+                  label: 'Net Profit',
+                  data: simulationData.map(d => d.netProfit),
+                  borderColor: '#10b981',
+                  backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                  fill: true,
+                  tension: 0.4
+                }
+              ]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: { legend: { labels: { color: textColor } } },
+              scales: {
+                y: { 
+                  beginAtZero: true,
+                  grid: { color: gridColor },
+                  ticks: { color: textColor }
+                },
+                x: { 
+                  grid: { color: gridColor },
+                  ticks: { color: textColor }
+                }
+              }
+            }
+          });
+        }
+        
+        // Reserve Chart
+        const reserveCtx = document.getElementById('reserveChart');
+        if (reserveCtx) {
+          reserveChartInstance = new Chart(reserveCtx, {
+            type: 'line',
+            data: {
+              labels,
+              datasets: [
+                {
+                  label: 'Ecosystem Reserve',
+                  data: simulationData.map(d => d.ecosystemReserve),
+                  borderColor: '#06b6d4',
+                  backgroundColor: 'rgba(6, 182, 212, 0.1)',
+                  fill: true,
+                  tension: 0.4
+                },
+                {
+                  label: 'Tokens Needed',
+                  data: simulationData.map(d => d.tokensNeeded),
+                  borderColor: '#f59e0b',
+                  backgroundColor: 'transparent',
+                  tension: 0.4
+                }
+              ]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: { legend: { labels: { color: textColor } } },
+              scales: {
+                y: { 
+                  beginAtZero: true,
+                  grid: { color: gridColor },
+                  ticks: { color: textColor }
+                },
+                x: { 
+                  grid: { color: gridColor },
+                  ticks: { color: textColor }
+                }
+              }
+            }
+          });
+        }
+      }
+      
+      function updateBreakdownTable() {
+        const tbody = document.getElementById('breakdownBody');
+        if (!tbody) return;
+        
+        tbody.innerHTML = simulationData.map(d => `
+          <tr>
+            <td>Month ${d.month}</td>
+            <td>${formatCurrency(d.tokenPrice)}</td>
+            <td>${formatNumber(d.ecosystemReserve)}</td>
+            <td>${formatNumber(d.tokensNeeded)}</td>
+            <td>${formatNumber(d.tokensToPurchase)}</td>
+            <td>${formatCurrency(d.purchaseCost)}</td>
+            <td>${formatCurrency(d.treasury)}</td>
+          </tr>
+        `).join('');
+      }
+      
+      function exportToCSV() {
+        if (simulationData.length === 0) {
+          alert('Please run a simulation first');
+          return;
+        }
+        
+        const headers = ['Month', 'Token Price', 'Reserve Pool', 'GMV', 'Growth Rate', 'Tokens Needed', 'Tokens To Purchase', 'Purchase Cost', 'Treasury', 'Total Buyback Cost', 'Net Profit'];
+        const rows = simulationData.map(d => [
+          d.month,
+          d.tokenPrice.toFixed(4),
+          d.ecosystemReserve.toFixed(0),
+          d.gmv.toFixed(2),
+          (d.growthRate * 100).toFixed(2) + '%',
+          d.tokensNeeded.toFixed(0),
+          d.tokensToPurchase.toFixed(0),
+          d.purchaseCost.toFixed(2),
+          d.treasury.toFixed(2),
+          d.totalBuybackCost.toFixed(2),
+          d.netProfit.toFixed(2)
+        ]);
+        
+        const csv = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'tokenomics_simulation.csv';
+        a.click();
+        URL.revokeObjectURL(url);
+      }
+      
+      function formatCurrency(value) {
+        if (value >= 1000000) {
+          return '$' + (value / 1000000).toFixed(2) + 'M';
+        } else if (value >= 1000) {
+          return '$' + (value / 1000).toFixed(2) + 'K';
+        } else if (value < 0.01) {
+          return '$' + value.toFixed(6);
+        } else {
+          return '$' + value.toFixed(2);
+        }
+      }
+      
+      function formatNumber(value) {
+        if (value >= 1000000000) {
+          return (value / 1000000000).toFixed(1) + 'B';
+        } else if (value >= 1000000) {
+          return (value / 1000000).toFixed(1) + 'M';
+        } else if (value >= 1000) {
+          return (value / 1000).toFixed(1) + 'K';
+        } else {
+          return value.toFixed(0);
+        }
+      }
+
       // Initialize when DOM is ready
       if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', () => {
           initDarkMode();
           initCampaignSwitcher();
           initCharts();
+          initRewardsCalculator();
         });
       } else {
         initDarkMode();
         initCampaignSwitcher();
         initCharts();
+        initRewardsCalculator();
       }
     </script>
     <script src="scripts/auth.js"></script>
