@@ -557,13 +557,63 @@ console.log('Document ready state:', document.readyState);
     visibleNodesSample: visibleNodes.slice(0, 3)
   });
 
+  // Create gradient definitions for primary and secondary nodes
+  const defs = svg.append('defs');
+  
+  // Primary gradient (Group 1) - Blue/Purple/Cyan like in screenshots
+  const primaryGradient = defs.append('linearGradient')
+    .attr('id', 'primaryGradient')
+    .attr('x1', '0%').attr('y1', '0%')
+    .attr('x2', '100%').attr('y2', '100%');
+  primaryGradient.append('stop').attr('offset', '0%').attr('stop-color', '#06b6d4'); // cyan
+  primaryGradient.append('stop').attr('offset', '50%').attr('stop-color', '#8b5cf6'); // purple
+  primaryGradient.append('stop').attr('offset', '100%').attr('stop-color', '#6366f1'); // indigo
+  
+  // Secondary gradient (Group 2) - Blue/Purple variant
+  const secondaryGradient = defs.append('linearGradient')
+    .attr('id', 'secondaryGradient')
+    .attr('x1', '0%').attr('y1', '100%')
+    .attr('x2', '100%').attr('y2', '0%');
+  secondaryGradient.append('stop').attr('offset', '0%').attr('stop-color', '#3b82f6'); // blue
+  secondaryGradient.append('stop').attr('offset', '50%').attr('stop-color', '#8b5cf6'); // purple
+  secondaryGradient.append('stop').attr('offset', '100%').attr('stop-color', '#a855f7'); // violet
+  
+  // Tertiary gradient (Group 3) - Pink/Orange/Coral for Talent-like nodes
+  const tertiaryGradient = defs.append('linearGradient')
+    .attr('id', 'tertiaryGradient')
+    .attr('x1', '0%').attr('y1', '100%')
+    .attr('x2', '100%').attr('y2', '0%');
+  tertiaryGradient.append('stop').attr('offset', '0%').attr('stop-color', '#f97316'); // orange
+  tertiaryGradient.append('stop').attr('offset', '50%').attr('stop-color', '#ec4899'); // pink
+  tertiaryGradient.append('stop').attr('offset', '100%').attr('stop-color', '#f472b6'); // light pink
+  
+  // Quaternary gradient (Group 4) - Green/Teal variant
+  const quaternaryGradient = defs.append('linearGradient')
+    .attr('id', 'quaternaryGradient')
+    .attr('x1', '0%').attr('y1', '0%')
+    .attr('x2', '100%').attr('y2', '100%');
+  quaternaryGradient.append('stop').attr('offset', '0%').attr('stop-color', '#10b981'); // emerald
+  quaternaryGradient.append('stop').attr('offset', '50%').attr('stop-color', '#06b6d4'); // cyan
+  quaternaryGradient.append('stop').attr('offset', '100%').attr('stop-color', '#8b5cf6'); // purple
+
   const color = d3.scaleOrdinal()
     .domain([1, 2, 3, 4])
-    .range(['#6366F1', '#5B21B6', '#F59E0B', '#10B981']);
-  const radius = d3.scaleSqrt().domain([10, 90]).range([16, 90]);
+    .range(['url(#primaryGradient)', 'url(#secondaryGradient)', 'url(#tertiaryGradient)', 'url(#quaternaryGradient)']);
+  const baseRadius = d3.scaleSqrt().domain([10, 90]).range([16, 90]);
+  
+  // Primary nodes (group 1) are 25% larger than secondary nodes
+  function radius(value, group) {
+    const base = baseRadius(value);
+    return group === 1 ? base * 1.25 : base;
+  }
+
+  // State for hover/click highlighting
+  let hoveredNode = null;
+  let clickedNode = null;
 
   function computeFontSizeForRadius(r){
-    return Math.max(10, Math.min(18, Math.round(r * 0.28)));
+    // Reduced by 2px from original
+    return Math.max(8, Math.min(16, Math.round(r * 0.28) - 2));
   }
 
   function wrapText(textSel, label, maxWidth){
@@ -649,6 +699,98 @@ console.log('Document ready state:', document.readyState);
     return false;
   }
 
+  // Get connected node IDs for a given node
+  function getConnectedNodeIds(nodeData) {
+    const connectedIds = new Set();
+    connectedIds.add(nodeData.id);
+    
+    allLinks.forEach(link => {
+      const sourceId = typeof link.source === 'object' ? link.source.id : link.source;
+      const targetId = typeof link.target === 'object' ? link.target.id : link.target;
+      
+      if (sourceId === nodeData.id) {
+        connectedIds.add(targetId);
+      }
+      if (targetId === nodeData.id) {
+        connectedIds.add(sourceId);
+      }
+    });
+    
+    return connectedIds;
+  }
+
+  // Highlight connections for a node (on hover or click)
+  function highlightConnections(nodeData) {
+    const connectedIds = getConnectedNodeIds(nodeData);
+    
+    // Update node styling
+    node.each(function(d) {
+      const nodeElement = d3.select(this);
+      const isConnected = connectedIds.has(d.id);
+      
+      nodeElement.select('circle')
+        .transition()
+        .duration(200)
+        .attr('opacity', isConnected ? 1 : 0.15)
+        .style('filter', isConnected ? 'none' : 'grayscale(0.8) brightness(1.2)');
+      
+      nodeElement.select('text')
+        .transition()
+        .duration(200)
+        .attr('opacity', isConnected ? 1 : 0.3);
+    });
+    
+    // Update link styling
+    link.each(function(l) {
+      const linkElement = d3.select(this);
+      const sourceId = typeof l.source === 'object' ? l.source.id : l.source;
+      const targetId = typeof l.target === 'object' ? l.target.id : l.target;
+      
+      const isConnectedLink = (sourceId === nodeData.id || targetId === nodeData.id);
+      
+      linkElement
+        .transition()
+        .duration(200)
+        .attr('opacity', isConnectedLink ? 0.8 : 0.05)
+        .attr('stroke-width', isConnectedLink ? 3 : 1.5);
+    });
+  }
+
+  // Reset highlighting to default state
+  function resetHighlighting() {
+    // Reset node styling
+    node.each(function(d) {
+      const nodeElement = d3.select(this);
+      const isDisabled = isNodeDisabled(d);
+      
+      nodeElement.select('circle')
+        .transition()
+        .duration(200)
+        .attr('opacity', isDisabled ? 0.15 : 0.9)
+        .style('filter', isDisabled ? 'grayscale(1) brightness(1.5)' : 'none');
+      
+      nodeElement.select('text')
+        .transition()
+        .duration(200)
+        .attr('opacity', isDisabled ? 0.8 : 1);
+    });
+    
+    // Reset link styling
+    link.each(function(l) {
+      const linkElement = d3.select(this);
+      const sourceNode = graphNodes.find(n => n.id === (typeof l.source === 'object' ? l.source.id : l.source));
+      const targetNode = graphNodes.find(n => n.id === (typeof l.target === 'object' ? l.target.id : l.target));
+      
+      const isLinkDisabled = (sourceNode && isNodeDisabled(sourceNode)) || (targetNode && isNodeDisabled(targetNode));
+      
+      linkElement
+        .transition()
+        .duration(200)
+        .attr('opacity', isLinkDisabled ? 0.05 : 0.7)
+        .attr('stroke-width', isLinkDisabled ? 1.5 : 2.5);
+    });
+  }
+
   // Function to update mode indicator
   function updateModeIndicator() {
     const modeIndicator = document.getElementById('modeIndicator');
@@ -678,7 +820,7 @@ console.log('Document ready state:', document.readyState);
     .force('link', d3.forceLink(graphLinks).id(d => d.id).distance(80).strength(0.15))
     .force('charge', d3.forceManyBody().strength(-150))
     .force('center', centerForce)
-    .force('collision', d3.forceCollide().radius(d => radius(d.value)+6))
+    .force('collision', d3.forceCollide().radius(d => radius(d.value, d.group)+6))
     .force('bounds', () => {
       // Keep nodes clustered toward center with gentle bounds
       const w = width();
@@ -770,7 +912,7 @@ console.log('Document ready state:', document.readyState);
       console.log('Creating node:', enter.data());
       const g = enter.append('g').attr('class','node').style('cursor','pointer');
       const circle = g.append('circle')
-        .attr('r', d => radius(d.value))
+        .attr('r', d => radius(d.value, d.group))
         .attr('fill', d => {
           console.log(`Node ${d.id} has group ${d.group}, color: ${color(d.group)}`);
           return color(d.group);
@@ -781,7 +923,7 @@ console.log('Document ready state:', document.readyState);
         .attr('fill','#fff')
         .style('font-weight','700');
       text.each(function(d){
-        const r = radius(d.value);
+        const r = radius(d.value, d.group);
         d3.select(this).style('font-size', `${computeFontSizeForRadius(r)}px`);
         wrapText(d3.select(this), d.id, r * 1.6);
       });
@@ -804,7 +946,40 @@ console.log('Document ready state:', document.readyState);
       nodeElement.style('cursor', isDisabled ? 'default' : 'pointer');
     });
     
-    node.on('click', (_, d) => handleNodeClick(d));
+    // Add hover handlers for highlighting connections
+    node.on('mouseenter', (event, d) => {
+      if (clickedNode) return; // Don't change on hover if a node is clicked
+      hoveredNode = d;
+      highlightConnections(d);
+    });
+    
+    node.on('mouseleave', (event, d) => {
+      if (clickedNode) return; // Don't reset on leave if a node is clicked
+      hoveredNode = null;
+      resetHighlighting();
+    });
+    
+    node.on('click', (event, d) => {
+      event.stopPropagation();
+      if (clickedNode && clickedNode.id === d.id) {
+        // Clicking the same node again - deselect
+        clickedNode = null;
+        resetHighlighting();
+      } else {
+        clickedNode = d;
+        highlightConnections(d);
+      }
+      handleNodeClick(d);
+    });
+    
+    // Click on background to reset
+    svg.on('click', (event) => {
+      if (event.target === svg.node()) {
+        clickedNode = null;
+        hoveredNode = null;
+        resetHighlighting();
+      }
+    });
     
     console.log('Nodes created in DOM:', node.size());
     console.log('SVG container has nodes:', gNodes.selectAll('g.node').size());
