@@ -2437,20 +2437,20 @@
       'aria-label': 'Toggle favorite'
     });
     
-    const heartSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-    heartSvg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
-    heartSvg.setAttribute('viewBox', '0 0 24 24');
-    heartSvg.setAttribute('fill', isFavorite ? 'currentColor' : 'none');
-    heartSvg.setAttribute('stroke', 'currentColor');
-    heartSvg.setAttribute('stroke-width', '2');
-    const heartPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-    heartPath.setAttribute('d', 'M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z');
-    heartSvg.appendChild(heartPath);
-    favoriteBtn.appendChild(heartSvg);
+    const bookmarkSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    bookmarkSvg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+    bookmarkSvg.setAttribute('viewBox', '0 0 24 24');
+    bookmarkSvg.setAttribute('fill', isFavorite ? 'currentColor' : 'none');
+    bookmarkSvg.setAttribute('stroke', 'currentColor');
+    bookmarkSvg.setAttribute('stroke-width', '2');
+    const bookmarkPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    bookmarkPath.setAttribute('d', 'M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0 1 11.186 0Z');
+    bookmarkSvg.appendChild(bookmarkPath);
+    favoriteBtn.appendChild(bookmarkSvg);
     
     favoriteBtn.addEventListener('click', (e) => {
       e.stopPropagation();
-      toggleWishlist(product, favoriteBtn, heartSvg);
+      toggleWishlist(product, favoriteBtn, bookmarkSvg);
     });
     
     // Info
