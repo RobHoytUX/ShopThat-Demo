@@ -60,7 +60,7 @@
               <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
             </svg>
           </button>
-          <div class="avatar" role="img" aria-label="Person, Admin"></div>
+          <a href="/product-dashboard.html" class="avatar" role="img" aria-label="Person, Admin" title="Open Dashboard"></a>
         </div>
       </div>
     </header>
@@ -97,14 +97,17 @@
                 <path d="M5 12h14"></path>
               </svg>
             </button>
-            <button class="btn btn--secondary" id="fit" aria-label="Fit to screen">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
-              </svg>
-            </button>
             <button class="btn btn--secondary" id="zoomIn" aria-label="Zoom in">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M12 5v14m-7-7h14"></path>
+              </svg>
+            </button>
+            <button class="btn btn--secondary" id="fullscreenToggle" aria-label="Toggle fullscreen">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="fullscreen-expand-icon">
+                <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
+              </svg>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="fullscreen-collapse-icon" style="display: none;">
+                <path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"></path>
               </svg>
             </button>
           </div>
@@ -135,13 +138,19 @@
         </div>
       </section>
       <div class="keywords__canvas">
+        <button class="fullscreen-exit-btn" id="fullscreenExit">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"></path>
+          </svg>
+          Exit Fullscreen
+        </button>
         <div class="graph-legend">
           <div class="legend-item">
             <div class="legend-color" style="background: linear-gradient(135deg, #06b6d4, #8b5cf6, #6366f1);"></div>
             <span>Primary (Most Connected)</span>
           </div>
           <div class="legend-item">
-            <div class="legend-color" style="background: linear-gradient(135deg, #3b82f6, #8b5cf6, #a855f7);"></div>
+            <div class="legend-color" style="background: linear-gradient(135deg, #10b981, #34d399, #06b6d4);"></div>
             <span>Connected to Primary</span>
           </div>
           <div class="legend-item">

@@ -454,14 +454,250 @@
 /* Hide Neo4j button on Keywords page */
 .keywords #openNeo4j { display: none; }
 .keywords__canvas { background: #fff; border: 1px solid #e8e8ef; border-radius: 16px; margin: 0 0 16px 0; width: 100%; transition: transform .25s ease; position: relative; }
-.keywords.drawer-open .toolbar { margin-left: 20px; margin-right: 380px; }
-.keywords.drawer-open .keywords__canvas { margin: 8px 400px 16px 20px; border-right: 20px solid transparent; }
-.drawer { background: #fff; border: 1px solid #e8e8ef; border-right: none; border-radius: 16px 0 0 16px; transform: translateX(100%); transition: transform .25s ease; position: fixed; right: 0; top: 0; width: 360px; height: 100vh; overflow: auto; z-index: 20; margin: 0; }
-.drawer[aria-hidden="false"] { transform: translateX(0); }
-.drawer__header { display: flex; align-items: center; justify-content: space-between; padding: 16px; border-bottom: 1px solid #f0f0f6; }
-.drawer__body { padding: 16px; display: grid; gap: 10px; }
+.keywords.drawer-open .toolbar { margin-left: 20px; margin-right: 20px; }
+.keywords.drawer-open .keywords__canvas { margin: 8px 20px 16px 20px; }
+
+/* Bottom Sheet Drawer for Keywords Details */
+.drawer#detailsDrawer { 
+  background: #fff; 
+  border: 1px solid #e8e8ef; 
+  border-radius: 24px 24px 0 0; 
+  transform: translateY(100%); 
+  transition: transform .3s cubic-bezier(0.4, 0, 0.2, 1); 
+  position: fixed; 
+  right: 24px;
+  bottom: 0; 
+  width: 500px;
+  max-width: calc(50% - 24px);
+  max-height: 30vh;
+  overflow: hidden; 
+  z-index: 10001; 
+  margin: 0;
+  box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.12);
+  display: flex;
+  flex-direction: column;
+}
+.drawer#detailsDrawer[aria-hidden="false"] { 
+  transform: translateY(0); 
+}
+
+.drawer#detailsDrawer .drawer__header {
+  flex-shrink: 0;
+}
+
+.drawer#detailsDrawer .drawer__body {
+  overflow-y: auto;
+  overflow-x: hidden;
+  margin: 0 8px 8px 0;
+  padding-right: 8px;
+}
+
+/* Custom scrollbar for bottom sheet */
+.drawer#detailsDrawer .drawer__body::-webkit-scrollbar {
+  width: 6px;
+}
+
+.drawer#detailsDrawer .drawer__body::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.drawer#detailsDrawer .drawer__body::-webkit-scrollbar-thumb {
+  background: #ddd;
+  border-radius: 3px;
+}
+
+.drawer#detailsDrawer .drawer__body::-webkit-scrollbar-thumb:hover {
+  background: #ccc;
+}
+
+/* Neo4j drawer stays as side panel */
+.drawer#neo4jDrawer { 
+  background: #fff; 
+  border: 1px solid #e8e8ef; 
+  border-right: none; 
+  border-radius: 16px 0 0 16px; 
+  transform: translateX(100%); 
+  transition: transform .25s ease; 
+  position: fixed; 
+  right: 0; 
+  top: 0; 
+  width: 360px; 
+  height: 100vh; 
+  overflow: auto; 
+  z-index: 20; 
+  margin: 0; 
+}
+.drawer#neo4jDrawer[aria-hidden="false"] { transform: translateX(0); }
+
+.drawer__header { 
+  display: flex; 
+  align-items: center; 
+  justify-content: space-between; 
+  padding: 16px 20px; 
+  border-bottom: 1px solid #f0f0f6;
+  position: sticky;
+  top: 0;
+  background: #fff;
+  z-index: 1;
+}
+
+/* Bottom sheet drag handle */
+.drawer#detailsDrawer .drawer__header::before {
+  content: '';
+  position: absolute;
+  top: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 32px;
+  height: 4px;
+  background: #ddd;
+  border-radius: 2px;
+}
+
+.drawer#detailsDrawer .drawer__header {
+  padding: 20px 16px 12px;
+}
+
+.drawer#detailsDrawer .drawer__header h2 {
+  font-size: 16px;
+}
+
+.drawer__body { padding: 12px 16px 16px; display: grid; gap: 10px; }
+
+/* Bottom Sheet Content Layout */
+.drawer-content-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.drawer-stats {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+  align-items: flex-start;
+}
+
+.drawer-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.drawer-stat--wide {
+  flex: 1;
+  min-width: 200px;
+}
+
+.drawer-stat-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.drawer-stat-value {
+  font-size: 20px;
+  font-weight: 700;
+  color: #111;
+}
+
+.drawer-stat-desc {
+  font-size: 13px;
+  color: #555;
+  line-height: 1.4;
+}
+
+.drawer-related {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.drawer-related-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.drawer-related-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.drawer-related-chips .chip {
+  background: #f0f0f6;
+  color: #333;
+  padding: 5px 12px;
+  border-radius: 16px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.drawer-related-chips .chip:hover {
+  background: #6366f1;
+  color: #fff;
+}
 
 svg#bubbleGraph { width: 100%; height: 70vh; display: block; padding-top: 60px; }
+
+/* Fullscreen Mode for Keywords Canvas */
+.keywords__canvas.is-fullscreen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100vw;
+  height: 100vh;
+  margin: 0;
+  border-radius: 0;
+  z-index: 9999;
+  background: #fff;
+}
+
+.keywords__canvas.is-fullscreen svg#bubbleGraph {
+  height: 100vh;
+  padding-top: 80px;
+}
+
+.keywords__canvas.is-fullscreen .graph-legend {
+  top: 24px;
+}
+
+/* Fullscreen Exit Button */
+.fullscreen-exit-btn {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 10000;
+  display: none;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: rgba(0, 0, 0, 0.8);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.fullscreen-exit-btn:hover {
+  background: rgba(0, 0, 0, 0.9);
+}
+
+.keywords__canvas.is-fullscreen .fullscreen-exit-btn {
+  display: flex;
+}
 
 /* Graph Legend Styles */
 .graph-legend { 

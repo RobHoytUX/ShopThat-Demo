@@ -569,14 +569,14 @@ console.log('Document ready state:', document.readyState);
   primaryGradient.append('stop').attr('offset', '50%').attr('stop-color', '#8b5cf6'); // purple
   primaryGradient.append('stop').attr('offset', '100%').attr('stop-color', '#6366f1'); // indigo
   
-  // Secondary gradient (Group 2) - Blue/Purple variant
+  // Secondary gradient (Group 2) - Green gradient
   const secondaryGradient = defs.append('linearGradient')
     .attr('id', 'secondaryGradient')
     .attr('x1', '0%').attr('y1', '100%')
     .attr('x2', '100%').attr('y2', '0%');
-  secondaryGradient.append('stop').attr('offset', '0%').attr('stop-color', '#3b82f6'); // blue
-  secondaryGradient.append('stop').attr('offset', '50%').attr('stop-color', '#8b5cf6'); // purple
-  secondaryGradient.append('stop').attr('offset', '100%').attr('stop-color', '#a855f7'); // violet
+  secondaryGradient.append('stop').attr('offset', '0%').attr('stop-color', '#10b981'); // emerald
+  secondaryGradient.append('stop').attr('offset', '50%').attr('stop-color', '#34d399'); // light emerald
+  secondaryGradient.append('stop').attr('offset', '100%').attr('stop-color', '#06b6d4'); // cyan
   
   // Tertiary gradient (Group 3) - Pink/Orange/Coral for Talent-like nodes
   const tertiaryGradient = defs.append('linearGradient')
@@ -817,20 +817,20 @@ console.log('Document ready state:', document.readyState);
 
   const centerForce = d3.forceCenter(0, 0);
   const sim = d3.forceSimulation(graphNodes)
-    .force('link', d3.forceLink(graphLinks).id(d => d.id).distance(100).strength(0.1))
-    .force('charge', d3.forceManyBody().strength(-80))
+    .force('link', d3.forceLink(graphLinks).id(d => d.id).distance(80).strength(0.15))
+    .force('charge', d3.forceManyBody().strength(-60))
     .force('center', centerForce)
-    .force('collision', d3.forceCollide().radius(d => radius(d.value, d.group)+10).strength(0.8))
-    .alphaDecay(0.03)      // Slower decay for smoother settling
-    .velocityDecay(0.4)    // Higher damping to reduce oscillation
-    .alphaMin(0.001)       // Stop simulation when very settled
+    .force('collision', d3.forceCollide().radius(d => radius(d.value, d.group)+8).strength(0.7))
+    .alphaDecay(0.02)      // Slower decay for smoother settling with motion
+    .velocityDecay(0.5)    // Moderate damping
+    .alphaMin(0.005)       // Let simulation run a bit longer for natural motion
     .force('bounds', () => {
-      // Keep nodes clustered toward center with gentle bounds
+      // Keep nodes clustered toward center
       const w = width();
       const h = height();
       const centerX = w / 2;
       const centerY = h / 2;
-      const maxDistance = Math.min(w, h) * 0.4; // Allow spreading but keep clustered
+      const maxDistance = Math.min(w, h) * 0.35;
       
       graphNodes.forEach(node => {
         const dx = node.x - centerX;
@@ -839,26 +839,37 @@ console.log('Document ready state:', document.readyState);
         
         if (distance > maxDistance) {
           const scale = maxDistance / distance;
-          node.x = centerX + dx * scale * 0.95; // Gentler pull back
-          node.y = centerY + dy * scale * 0.95;
+          // Smooth pull back instead of snapping
+          node.vx -= dx * 0.01;
+          node.vy -= dy * 0.01;
         }
       });
     });
+  
+  // Stop simulation completely when it's settled
+  sim.on('end', () => {
+    console.log('Simulation settled and stopped');
+  });
 
   function rescaleForDrawer(){
-    const openDetails = detailsDrawer.getAttribute('aria-hidden') === 'false';
+    // Only scale for neo4j side drawer, not for bottom sheet
     const openNeo = neo4jDrawer.getAttribute('aria-hidden') === 'false';
-    const scale = (openDetails || openNeo) ? 0.88 : 1;
+    const scale = openNeo ? 0.88 : 1;
     const tx = 0;
     gNodes.attr('transform', `translate(${tx},0) scale(${scale})`);
     gLinks.attr('transform', `translate(${tx},0) scale(${scale})`);
-    sim.alpha(0.1).alphaTarget(0).restart();
+    if (openNeo) {
+      sim.alpha(0.1).alphaTarget(0).restart();
+    }
   }
 
   function ticked(){
-    link.attr('x1', d => d.source.x).attr('y1', d => d.source.y)
-        .attr('x2', d => d.target.x).attr('y2', d => d.target.y);
-    node.attr('transform', d => `translate(${d.x},${d.y})`);
+    // Round positions to avoid sub-pixel rendering jitter
+    link.attr('x1', d => Math.round(d.source.x * 10) / 10)
+        .attr('y1', d => Math.round(d.source.y * 10) / 10)
+        .attr('x2', d => Math.round(d.target.x * 10) / 10)
+        .attr('y2', d => Math.round(d.target.y * 10) / 10);
+    node.attr('transform', d => `translate(${Math.round(d.x * 10) / 10},${Math.round(d.y * 10) / 10})`);
   }
 
   // Initialize empty selections - these will be populated by setGraphData
@@ -1110,12 +1121,33 @@ console.log('Document ready state:', document.readyState);
 
   function openDrawer(d){
     drawerTitle.textContent = d.id;
-    drawerBody.innerHTML = ''+
-      `<div><strong>Volume:</strong> ${d.value}</div>`+
-      `<div><strong>Connections:</strong> ${graphLinks.filter(l=> (l.source.id?l.source.id:l.source)===d.id || (l.target.id?l.target.id:l.target)===d.id).length}</div>`+
-      `<div><strong>Description:</strong> Placeholder description about ${d.id} with sample insights.</div>`+
-      `<hr /><div><strong>Related Keywords</strong></div>`+
-      `${graphLinks.filter(l=> (l.source.id?l.source.id:l.source)===d.id || (l.target.id?l.target.id:l.target)===d.id).map(l=>`<span class="chip" style="margin:4px 6px 0 0">${(l.source.id?l.source.id:l.source)===d.id ? (l.target.id?l.target.id:l.target) : (l.source.id?l.source.id:l.source)}</span>`).join('')}`;
+    const connections = graphLinks.filter(l=> (l.source.id?l.source.id:l.source)===d.id || (l.target.id?l.target.id:l.target)===d.id);
+    const relatedKeywords = connections.map(l => (l.source.id?l.source.id:l.source)===d.id ? (l.target.id?l.target.id:l.target) : (l.source.id?l.source.id:l.source));
+    
+    drawerBody.innerHTML = `
+      <div class="drawer-content-grid">
+        <div class="drawer-stats">
+          <div class="drawer-stat">
+            <span class="drawer-stat-label">Volume</span>
+            <span class="drawer-stat-value">${d.value}</span>
+          </div>
+          <div class="drawer-stat">
+            <span class="drawer-stat-label">Connections</span>
+            <span class="drawer-stat-value">${connections.length}</span>
+          </div>
+          <div class="drawer-stat drawer-stat--wide">
+            <span class="drawer-stat-label">Description</span>
+            <span class="drawer-stat-desc">Placeholder description about ${d.id} with sample insights.</span>
+          </div>
+        </div>
+        <div class="drawer-related">
+          <div class="drawer-related-label">Related Keywords</div>
+          <div class="drawer-related-chips">
+            ${relatedKeywords.map(kw => `<span class="chip">${kw}</span>`).join('')}
+          </div>
+        </div>
+      </div>
+    `;
     detailsDrawer.setAttribute('aria-hidden','false');
     container.classList.add('drawer-open');
     rescaleForDrawer();
@@ -1142,26 +1174,34 @@ console.log('Document ready state:', document.readyState);
   filterInput && filterInput.addEventListener('input', (e)=> applyFilter(e.target.value));
   resetBtn && resetBtn.addEventListener('click', ()=>{ 
     filterInput && (filterInput.value=''); 
-    applyFilter(''); 
     closeDrawer(); 
+    
     // Reset to default view
     currentViewMode = 'default';
     selectedNode = null;
+    clickedNode = null;
+    hoveredNode = null;
     
     // Reset node positions to center cluster
     const w = width();
     const h = height();
     graphNodes.forEach((node, i) => {
       const angle = (i / graphNodes.length) * 2 * Math.PI;
-      const radius = Math.min(40, graphNodes.length * 3);
-      node.x = w/2 + Math.cos(angle) * radius;
-      node.y = h/2 + Math.sin(angle) * radius;
+      const r = Math.min(40, graphNodes.length * 3);
+      node.x = w/2 + Math.cos(angle) * r;
+      node.y = h/2 + Math.sin(angle) * r;
       // Clear velocity
       node.vx = 0;
       node.vy = 0;
     });
     
     setGraphData(allNodes, allLinks);
+    
+    // Reset highlighting after graph is rebuilt
+    setTimeout(() => {
+      resetHighlighting();
+    }, 50);
+    
     svg.transition().duration(250).call(zoom.transform, d3.zoomIdentity); 
   });
   
@@ -1225,6 +1265,37 @@ console.log('Document ready state:', document.readyState);
   zoomIn && zoomIn.addEventListener('click', ()=> svg.transition().duration(200).call(zoom.scaleBy, 1.2));
   zoomOut && zoomOut.addEventListener('click', ()=> svg.transition().duration(200).call(zoom.scaleBy, 0.8));
   fitBtn && fitBtn.addEventListener('click', ()=> svg.transition().duration(250).call(zoom.transform, d3.zoomIdentity));
+
+  // Fullscreen toggle
+  const fullscreenToggle = document.getElementById('fullscreenToggle');
+  const fullscreenExit = document.getElementById('fullscreenExit');
+  const keywordsCanvas = document.querySelector('.keywords__canvas');
+  const expandIcon = fullscreenToggle?.querySelector('.fullscreen-expand-icon');
+  const collapseIcon = fullscreenToggle?.querySelector('.fullscreen-collapse-icon');
+
+  function toggleFullscreen() {
+    const isFullscreen = keywordsCanvas.classList.toggle('is-fullscreen');
+    
+    if (expandIcon && collapseIcon) {
+      expandIcon.style.display = isFullscreen ? 'none' : 'block';
+      collapseIcon.style.display = isFullscreen ? 'block' : 'none';
+    }
+    
+    // Re-fit the graph after a short delay to account for the size change
+    setTimeout(() => {
+      svg.transition().duration(250).call(zoom.transform, d3.zoomIdentity);
+    }, 100);
+  }
+
+  fullscreenToggle && fullscreenToggle.addEventListener('click', toggleFullscreen);
+  fullscreenExit && fullscreenExit.addEventListener('click', toggleFullscreen);
+
+  // Handle Escape key to exit fullscreen
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && keywordsCanvas?.classList.contains('is-fullscreen')) {
+      toggleFullscreen();
+    }
+  });
 
   // Neo4j integration
   const neo4jUriEl = document.getElementById('neo4jUri');
