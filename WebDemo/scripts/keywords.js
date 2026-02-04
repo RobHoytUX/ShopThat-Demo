@@ -727,7 +727,7 @@ console.log('Document ready state:', document.readyState);
     if (isTransitioning) return;
     
     const connectedIds = getConnectedNodeIds(nodeData);
-    isHoverClustering = true;
+      isHoverClustering = true;
     
     // Highlight connected nodes and fade others
     node.each(function(d) {
@@ -775,8 +775,8 @@ console.log('Document ready state:', document.readyState);
   // Reset highlighting to default state
   function resetHighlighting() {
     if (isTransitioning) return;
-    
-    isHoverClustering = false;
+      
+      isHoverClustering = false;
     
     // Reset node styling and scale
     node.each(function(d) {
@@ -851,7 +851,7 @@ console.log('Document ready state:', document.readyState);
       const h = height();
       const centerX = w / 2;
       const centerY = h / 2;
-      const maxDistance = Math.min(w, h) * 0.3;
+      const maxDistance = Math.min(w, h) * 0.25;
       
       graphNodes.forEach(node => {
         const dx = node.x - centerX;
@@ -859,13 +859,13 @@ console.log('Document ready state:', document.readyState);
         const distance = Math.sqrt(dx * dx + dy * dy);
         
         // Strong centering force to pull nodes together
-        const centeringForce = 0.02;
+        const centeringForce = 0.04;
         node.vx -= dx * centeringForce;
         node.vy -= dy * centeringForce;
         
         // Very strong force if outside bounds
         if (distance > maxDistance) {
-          const boundForce = (distance - maxDistance) * 0.05;
+          const boundForce = (distance - maxDistance) * 0.1;
           node.vx -= (dx / distance) * boundForce;
           node.vy -= (dy / distance) * boundForce;
         }
@@ -979,6 +979,16 @@ console.log('Document ready state:', document.readyState);
   function performGraphUpdate(newVisibleNodes, newVisibleLinks, centerX, centerY, animateEntry) {
     graphNodes = newVisibleNodes;
     graphLinks = newVisibleLinks;
+    
+    // Reset ALL node positions to center for tight grouping
+    graphNodes.forEach((n, i) => {
+      const angle = (i / graphNodes.length) * 2 * Math.PI;
+      const clusterRadius = 20;
+      n.x = centerX + Math.cos(angle) * clusterRadius;
+      n.y = centerY + Math.sin(angle) * clusterRadius;
+      n.vx = 0;
+      n.vy = 0;
+    });
 
     // Update links
     link = gLinks.selectAll('line').data(graphLinks, l => {
@@ -1009,53 +1019,47 @@ console.log('Document ready state:', document.readyState);
           .attr('transform', `translate(${centerX},${centerY}) scale(0.5)`);
         
         g.append('circle')
-          .attr('r', d => radius(d.value, d.group))
+        .attr('r', d => radius(d.value, d.group))
           .attr('fill', d => color(d.group))
           .attr('opacity', 0.9);
-        
-        const text = g.append('text')
+      
+      const text = g.append('text')
           .attr('text-anchor', 'middle')
           .attr('fill', '#fff')
           .style('font-weight', '700');
         
         text.each(function(d) {
-          const r = radius(d.value, d.group);
-          d3.select(this).style('font-size', `${computeFontSizeForRadius(r)}px`);
-          wrapText(d3.select(this), d.id, r * 1.6);
+        const r = radius(d.value, d.group);
+        d3.select(this).style('font-size', `${computeFontSizeForRadius(r)}px`);
+        wrapText(d3.select(this), d.id, r * 1.6);
         });
         
-        // Animate entry with subtle bounce
+        // Animate entry
         if (animateEntry) {
           g.transition('enter')
-            .duration(350)
-            .delay((d, i) => i * 30) // Stagger entries
-            .ease(d3.easeBackOut.overshoot(0.6)) // Subtle bounce
+            .duration(300)
+            .delay((d, i) => i * 20)
+            .ease(d3.easeCubicOut)
             .style('opacity', 1)
-            .attr('transform', d => {
-              // Position in tight cluster around center
-              const angle = (graphNodes.indexOf(d) / graphNodes.length) * 2 * Math.PI;
-              const clusterRadius = 15;
-              const x = centerX + Math.cos(angle) * clusterRadius;
-              const y = centerY + Math.sin(angle) * clusterRadius;
-              d.x = x;
-              d.y = y;
-              return `translate(${Math.round(x)},${Math.round(y)}) scale(1)`;
-            });
+            .attr('transform', d => `translate(${Math.round(d.x)},${Math.round(d.y)}) scale(1)`);
         } else {
-          g.style('opacity', 1).attr('transform', d => {
-            if (!d.x || !d.y || isNaN(d.x) || isNaN(d.y)) {
-              const angle = (graphNodes.indexOf(d) / graphNodes.length) * 2 * Math.PI;
-              const clusterRadius = 15;
-              d.x = centerX + Math.cos(angle) * clusterRadius;
-              d.y = centerY + Math.sin(angle) * clusterRadius;
-            }
-            return `translate(${Math.round(d.x)},${Math.round(d.y)})`;
-          });
+          g.style('opacity', 1).attr('transform', d => `translate(${Math.round(d.x)},${Math.round(d.y)})`);
         }
         
         return g;
       },
-      update => update,
+      update => {
+        // Animate existing nodes to new positions
+        if (animateEntry) {
+          update.transition('move')
+            .duration(300)
+            .ease(d3.easeCubicOut)
+            .attr('transform', d => `translate(${Math.round(d.x)},${Math.round(d.y)})`);
+        } else {
+          update.attr('transform', d => `translate(${Math.round(d.x)},${Math.round(d.y)})`);
+        }
+        return update;
+      },
       exit => exit.remove()
     );
     
@@ -1093,14 +1097,14 @@ console.log('Document ready state:', document.readyState);
         } else {
           // Just reset highlighting
           selectedNode = null;
-          clickedNode = null;
-          hoveredNode = null;
-          resetHighlighting();
+        clickedNode = null;
+        hoveredNode = null;
+        resetHighlighting();
           closeDrawer();
         }
       }
     });
-
+    
     // Update simulation
     sim.nodes(graphNodes);
     sim.force('link').links(graphLinks);
@@ -1115,8 +1119,8 @@ console.log('Document ready state:', document.readyState);
       }
     });
     
-    // Start simulation with low alpha for gentle settling
-    sim.alpha(animateEntry ? 0.08 : 0.12).alphaTarget(0).restart();
+    // Restart simulation with enough energy to properly settle nodes
+    sim.alpha(0.3).alphaTarget(0).restart();
   }
 
   // Node click handler - expand to show connected nodes
@@ -1176,7 +1180,7 @@ console.log('Document ready state:', document.readyState);
       });
     }
     
-    sim.alpha(0.15).alphaTarget(0).restart();
+    sim.alpha(0.3).alphaTarget(0).restart();
     rescaleForDrawer();
   }
   
@@ -1238,7 +1242,7 @@ console.log('Document ready state:', document.readyState);
             <span class="sidebar-stat-value">${connections.length}</span>
             <span class="sidebar-stat-label">Connections</span>
           </div>
-        </div>
+          </div>
         <div class="sidebar-section">
           <div class="sidebar-section-label">Description</div>
           <p class="sidebar-description">Placeholder description about ${d.id} with sample insights.</p>
