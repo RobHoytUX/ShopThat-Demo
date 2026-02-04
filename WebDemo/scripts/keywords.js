@@ -12,7 +12,6 @@ console.log('Document ready state:', document.readyState);
   const detailsDrawer = document.getElementById('detailsDrawer');
   const drawerTitle = document.getElementById('drawerTitle');
   const drawerBody = document.getElementById('drawerBody');
-  const detailsClose = document.getElementById('detailsClose');
   const neo4jDrawer = document.getElementById('neo4jDrawer');
   const neo4jClose = document.getElementById('neo4jClose');
   const openNeo4jBtn = document.getElementById('openNeo4j');
@@ -33,7 +32,7 @@ console.log('Document ready state:', document.readyState);
   const height = () => svg.node().clientHeight;
 
   // State management for hierarchical display
-  let currentViewMode = 'default'; // 'default' shows top-level + isolated, 'expanded' shows all, 'filtered' shows filtered
+  let currentViewMode = 'default'; // 'default' shows primary only, 'expanded' shows selected + connected, 'filtered' shows filtered, 'all' shows all
   let selectedNode = null;
   let allNodes = [];
   let allLinks = [];
@@ -540,7 +539,7 @@ console.log('Document ready state:', document.readyState);
   allNodes = initialNodes;
   allLinks = initialLinks;
   
-  // Initialize with default view
+  // Initialize showing only primary nodes
   currentViewMode = 'default';
   visibleNodes = getVisibleNodes();
   visibleLinks = getVisibleLinks(visibleNodes);
@@ -599,12 +598,12 @@ console.log('Document ready state:', document.readyState);
   const color = d3.scaleOrdinal()
     .domain([1, 2, 3, 4])
     .range(['url(#primaryGradient)', 'url(#secondaryGradient)', 'url(#tertiaryGradient)', 'url(#quaternaryGradient)']);
-  const baseRadius = d3.scaleSqrt().domain([10, 90]).range([16, 90]);
+  const baseRadius = d3.scaleSqrt().domain([10, 90]).range([30, 70]);
   
-  // Primary nodes (group 1) are 25% larger than secondary nodes
+  // Primary nodes (group 1) are slightly larger than secondary nodes
   function radius(value, group) {
     const base = baseRadius(value);
-    return group === 1 ? base * 1.25 : base;
+    return group === 1 ? base * 1.1 : base;
   }
 
   // State for hover/click highlighting
@@ -642,7 +641,7 @@ console.log('Document ready state:', document.readyState);
       // Only show primary keywords (Group 1) on page load
       return allNodes.filter(node => node.group === 1);
     } else if (currentViewMode === 'expanded' && selectedNode) {
-      // Show selected node and all connected nodes (expand to show secondary keywords)
+      // Show selected node and all connected nodes
       const connectedNodeIds = new Set();
       connectedNodeIds.add(selectedNode.id);
       
@@ -671,7 +670,7 @@ console.log('Document ready state:', document.readyState);
         }
       });
     } else {
-      // Show all nodes
+      // 'all' mode - show all nodes
       return allNodes;
     }
   }
@@ -719,76 +718,98 @@ console.log('Document ready state:', document.readyState);
     return connectedIds;
   }
 
-  // Highlight connections for a node (on hover or click)
+  // Store original positions for hover clustering
+  let originalPositions = {};
+  let isHoverClustering = false;
+  
+  // Highlight connections on hover - show connecting lines
   function highlightConnections(nodeData) {
-    const connectedIds = getConnectedNodeIds(nodeData);
+    if (isTransitioning) return;
     
-    // Update node styling
+    const connectedIds = getConnectedNodeIds(nodeData);
+    isHoverClustering = true;
+    
+    // Highlight connected nodes and fade others
     node.each(function(d) {
       const nodeElement = d3.select(this);
       const isConnected = connectedIds.has(d.id);
+      const isHovered = d.id === nodeData.id;
       
+      nodeElement.interrupt('style');
+      
+      // Scale up hovered node slightly
+      if (isHovered) {
+        nodeElement
+          .transition('style')
+          .duration(200)
+          .ease(d3.easeCubicOut)
+          .attr('transform', `translate(${Math.round(d.x)},${Math.round(d.y)}) scale(1.1)`);
+      }
+      
+      // Update styling - fade unconnected nodes
       nodeElement.select('circle')
-        .transition()
+        .transition('style')
         .duration(200)
-        .attr('opacity', isConnected ? 1 : 0.15)
-        .style('filter', isConnected ? 'none' : 'grayscale(0.8) brightness(1.2)');
+        .attr('opacity', isConnected ? 1 : 0.2)
+        .style('filter', isConnected ? 'none' : 'grayscale(0.7) brightness(1.2)');
       
       nodeElement.select('text')
-        .transition()
+        .transition('style')
         .duration(200)
-        .attr('opacity', isConnected ? 1 : 0.3);
+        .attr('opacity', isConnected ? 1 : 0.2);
     });
     
-    // Update link styling
-    link.each(function(l) {
-      const linkElement = d3.select(this);
-      const sourceId = typeof l.source === 'object' ? l.source.id : l.source;
-      const targetId = typeof l.target === 'object' ? l.target.id : l.target;
-      
-      const isConnectedLink = (sourceId === nodeData.id || targetId === nodeData.id);
-      
-      linkElement
-        .transition()
-        .duration(200)
-        .attr('opacity', isConnectedLink ? 0.8 : 0.05)
-        .attr('stroke-width', isConnectedLink ? 3 : 1.5);
-    });
+    // Highlight connected links, fade others
+    link.interrupt('links')
+      .transition('links')
+      .duration(200)
+      .attr('opacity', 0)
+      .attr('stroke-width', l => {
+        const sourceId = typeof l.source === 'object' ? l.source.id : l.source;
+        const targetId = typeof l.target === 'object' ? l.target.id : l.target;
+        const isConnectedLink = sourceId === nodeData.id || targetId === nodeData.id;
+        return isConnectedLink ? 2.5 : 1;
+      });
   }
 
   // Reset highlighting to default state
   function resetHighlighting() {
-    // Reset node styling
+    if (isTransitioning) return;
+    
+    isHoverClustering = false;
+    
+    // Reset node styling and scale
     node.each(function(d) {
       const nodeElement = d3.select(this);
       const isDisabled = isNodeDisabled(d);
       
+      nodeElement.interrupt('style');
+      
+      // Reset scale and position
+      nodeElement
+        .transition('style')
+        .duration(200)
+        .ease(d3.easeCubicOut)
+        .attr('transform', `translate(${Math.round(d.x)},${Math.round(d.y)}) scale(1)`);
+      
       nodeElement.select('circle')
-        .transition()
+        .transition('style')
         .duration(200)
         .attr('opacity', isDisabled ? 0.15 : 0.9)
         .style('filter', isDisabled ? 'grayscale(1) brightness(1.5)' : 'none');
       
       nodeElement.select('text')
-        .transition()
+        .transition('style')
         .duration(200)
         .attr('opacity', isDisabled ? 0.8 : 1);
     });
     
-    // Reset link styling
-    link.each(function(l) {
-      const linkElement = d3.select(this);
-      const sourceNode = graphNodes.find(n => n.id === (typeof l.source === 'object' ? l.source.id : l.source));
-      const targetNode = graphNodes.find(n => n.id === (typeof l.target === 'object' ? l.target.id : l.target));
-      
-      const isLinkDisabled = (sourceNode && isNodeDisabled(sourceNode)) || (targetNode && isNodeDisabled(targetNode));
-      
-      linkElement
-        .transition()
-        .duration(200)
-        .attr('opacity', isLinkDisabled ? 0.05 : 0.7)
-        .attr('stroke-width', isLinkDisabled ? 1.5 : 2.5);
-    });
+    // Show all links at normal opacity
+    link.interrupt('links')
+      .transition('links')
+      .duration(200)
+      .attr('opacity', 0)
+      .attr('stroke-width', 1.5);
   }
 
   // Function to update mode indicator
@@ -797,7 +818,7 @@ console.log('Document ready state:', document.readyState);
     if (modeIndicator) {
       let modeText = 'Mode: Primary Keywords';
       if (currentViewMode === 'expanded' && selectedNode) {
-        modeText = `Mode: "${selectedNode.id}" + Connected Keywords`;
+        modeText = `Mode: "${selectedNode.id}" + Connected`;
       } else if (currentViewMode === 'filtered') {
         modeText = 'Mode: Filtered View';
       } else if (currentViewMode === 'all') {
@@ -817,31 +838,36 @@ console.log('Document ready state:', document.readyState);
 
   const centerForce = d3.forceCenter(0, 0);
   const sim = d3.forceSimulation(graphNodes)
-    .force('link', d3.forceLink(graphLinks).id(d => d.id).distance(80).strength(0.15))
-    .force('charge', d3.forceManyBody().strength(-60))
+    .force('link', d3.forceLink(graphLinks).id(d => d.id).distance(20).strength(0.3))
+    .force('charge', d3.forceManyBody().strength(-15).distanceMax(150))
     .force('center', centerForce)
-    .force('collision', d3.forceCollide().radius(d => radius(d.value, d.group)+8).strength(0.7))
-    .alphaDecay(0.02)      // Slower decay for smoother settling with motion
-    .velocityDecay(0.5)    // Moderate damping
-    .alphaMin(0.005)       // Let simulation run a bit longer for natural motion
-    .force('bounds', () => {
-      // Keep nodes clustered toward center
+    .force('collision', d3.forceCollide().radius(d => radius(d.value, d.group) + 4).strength(0.9).iterations(3))
+    .alphaDecay(0.05)
+    .velocityDecay(0.85)
+    .alphaMin(0.005)
+    .force('cluster', () => {
+      // Strong force to keep nodes tightly clustered in center
       const w = width();
       const h = height();
       const centerX = w / 2;
       const centerY = h / 2;
-      const maxDistance = Math.min(w, h) * 0.35;
+      const maxDistance = Math.min(w, h) * 0.3;
       
       graphNodes.forEach(node => {
         const dx = node.x - centerX;
         const dy = node.y - centerY;
         const distance = Math.sqrt(dx * dx + dy * dy);
         
+        // Strong centering force to pull nodes together
+        const centeringForce = 0.02;
+        node.vx -= dx * centeringForce;
+        node.vy -= dy * centeringForce;
+        
+        // Very strong force if outside bounds
         if (distance > maxDistance) {
-          const scale = maxDistance / distance;
-          // Smooth pull back instead of snapping
-          node.vx -= dx * 0.01;
-          node.vy -= dy * 0.01;
+          const boundForce = (distance - maxDistance) * 0.05;
+          node.vx -= (dx / distance) * boundForce;
+          node.vy -= (dy / distance) * boundForce;
         }
       });
     });
@@ -852,24 +878,24 @@ console.log('Document ready state:', document.readyState);
   });
 
   function rescaleForDrawer(){
-    // Only scale for neo4j side drawer, not for bottom sheet
-    const openNeo = neo4jDrawer.getAttribute('aria-hidden') === 'false';
-    const scale = openNeo ? 0.88 : 1;
-    const tx = 0;
-    gNodes.attr('transform', `translate(${tx},0) scale(${scale})`);
-    gLinks.attr('transform', `translate(${tx},0) scale(${scale})`);
-    if (openNeo) {
-      sim.alpha(0.1).alphaTarget(0).restart();
-    }
+    // No longer needed - sidebar is always visible
+    // Keep function for compatibility with any remaining calls
   }
 
   function ticked(){
-    // Round positions to avoid sub-pixel rendering jitter
-    link.attr('x1', d => Math.round(d.source.x * 10) / 10)
-        .attr('y1', d => Math.round(d.source.y * 10) / 10)
-        .attr('x2', d => Math.round(d.target.x * 10) / 10)
-        .attr('y2', d => Math.round(d.target.y * 10) / 10);
-    node.attr('transform', d => `translate(${Math.round(d.x * 10) / 10},${Math.round(d.y * 10) / 10})`);
+    // Don't update during transitions
+    if (isTransitioning) return;
+    
+    // Round positions to whole pixels to avoid sub-pixel rendering jitter
+    link.attr('x1', d => Math.round(d.source.x))
+        .attr('y1', d => Math.round(d.source.y))
+        .attr('x2', d => Math.round(d.target.x))
+        .attr('y2', d => Math.round(d.target.y));
+    
+    // Only update position if not hovering (preserve hover scale)
+    if (!isHoverClustering) {
+      node.attr('transform', d => `translate(${Math.round(d.x)},${Math.round(d.y)})`);
+    }
   }
 
   // Initialize empty selections - these will be populated by setGraphData
@@ -878,11 +904,15 @@ console.log('Document ready state:', document.readyState);
 
   sim.on('tick', ticked);
 
-  function setGraphData(newNodes, newLinks){
+  // Track transition state
+  let isTransitioning = false;
+  
+  function setGraphData(newNodes, newLinks, animate = true){
     console.log('setGraphData called with:', {
       newNodesCount: (newNodes || []).length,
       newLinksCount: (newLinks || []).length,
-      currentMode: currentViewMode
+      currentMode: currentViewMode,
+      animate: animate
     });
     
     // Store all data
@@ -893,169 +923,242 @@ console.log('Document ready state:', document.readyState);
     visibleNodes = getVisibleNodes();
     visibleLinks = getVisibleLinks(visibleNodes);
     
-    console.log('After filtering:', {
-      allNodesCount: allNodes.length,
-      visibleNodesCount: visibleNodes.length,
-      visibleNodes: visibleNodes.map(n => n.id)
-    });
+    const w = width();
+    const h = height();
+    const centerX = w / 2;
+    const centerY = h / 2;
     
-    // Update the graph with visible data
-    graphNodes = visibleNodes;
-    graphLinks = visibleLinks;
+    // Calculate positions for new nodes in a tight cluster
+    const newNodeIds = new Set(visibleNodes.map(n => n.id));
+    const oldNodeIds = new Set(graphNodes.map(n => n.id));
+    
+    // Determine which nodes are entering, staying, or exiting
+    const enteringNodes = visibleNodes.filter(n => !oldNodeIds.has(n.id));
+    const exitingNodes = graphNodes.filter(n => !newNodeIds.has(n.id));
+    const stayingNodes = visibleNodes.filter(n => oldNodeIds.has(n.id));
+    
+    // If animating, handle transitions
+    if (animate && (enteringNodes.length > 0 || exitingNodes.length > 0)) {
+      isTransitioning = true;
+      
+      // First, fade out exiting nodes quickly
+      const exitSelection = gNodes.selectAll('g.node')
+        .filter(d => !newNodeIds.has(d.id));
+      
+      exitSelection
+        .transition('exit')
+        .duration(150)
+        .style('opacity', 0)
+        .attr('transform', d => `translate(${centerX},${centerY}) scale(0.3)`)
+        .remove();
+      
+      // Fade out exiting links
+      gLinks.selectAll('line')
+        .filter(l => {
+          const sourceId = typeof l.source === 'object' ? l.source.id : l.source;
+          const targetId = typeof l.target === 'object' ? l.target.id : l.target;
+          return !newNodeIds.has(sourceId) || !newNodeIds.has(targetId);
+        })
+        .transition('exit')
+        .duration(150)
+        .attr('opacity', 0)
+        .remove();
+      
+      // Wait for exit animations, then update
+      setTimeout(() => {
+        performGraphUpdate(visibleNodes, visibleLinks, centerX, centerY, true);
+        isTransitioning = false;
+      }, 160);
+    } else {
+      performGraphUpdate(visibleNodes, visibleLinks, centerX, centerY, false);
+    }
+    
+    updateModeIndicator();
+  }
+  
+  function performGraphUpdate(newVisibleNodes, newVisibleLinks, centerX, centerY, animateEntry) {
+    graphNodes = newVisibleNodes;
+    graphLinks = newVisibleLinks;
 
-    link = gLinks.selectAll('line').data(graphLinks);
+    // Update links
+    link = gLinks.selectAll('line').data(graphLinks, l => {
+      const sourceId = typeof l.source === 'object' ? l.source.id : l.source;
+      const targetId = typeof l.target === 'object' ? l.target.id : l.target;
+      return `${sourceId}-${targetId}`;
+    });
     link.exit().remove();
-    link = link.join('line');
-    
-    // Apply disabled state styling to links
-    link.each(function(l) {
-      const linkElement = d3.select(this);
-      const sourceNode = graphNodes.find(n => n.id === (typeof l.source === 'object' ? l.source.id : l.source));
-      const targetNode = graphNodes.find(n => n.id === (typeof l.target === 'object' ? l.target.id : l.target));
-      
-      const isLinkDisabled = (sourceNode && isNodeDisabled(sourceNode)) || (targetNode && isNodeDisabled(targetNode));
-      
-      linkElement
-        .attr('opacity', isLinkDisabled ? 0.05 : 0.7)
-        .attr('stroke-width', isLinkDisabled ? 1.5 : 2.5);
-    });
+    link = link.join(
+      enter => enter.append('line')
+        .attr('opacity', 0)
+        .attr('stroke-width', 1.5)
+        .call(el => el.transition('enter').duration(300).delay(100).attr('opacity', 0)),
+      update => update.transition('update').duration(200).attr('opacity', 0).attr('stroke-width', 1.5),
+      exit => exit.remove()
+    );
 
+    // Update nodes
     node = gNodes.selectAll('g.node').data(graphNodes, d => d.id);
     node.exit().remove();
-    node = node.join(enter => {
-      console.log('Creating node:', enter.data());
-      const g = enter.append('g').attr('class','node').style('cursor','pointer');
-      const circle = g.append('circle')
-        .attr('r', d => radius(d.value, d.group))
-        .attr('fill', d => {
-          console.log(`Node ${d.id} has group ${d.group}, color: ${color(d.group)}`);
-          return color(d.group);
-        });
-      
-      const text = g.append('text')
-        .attr('text-anchor','middle')
-        .attr('fill','#fff')
-        .style('font-weight','700');
-      text.each(function(d){
-        const r = radius(d.value, d.group);
-        d3.select(this).style('font-size', `${computeFontSizeForRadius(r)}px`);
-        wrapText(d3.select(this), d.id, r * 1.6);
-      });
-      return g;
-    });
     
-    // Apply disabled state styling
-    node.each(function(d) {
-      const nodeElement = d3.select(this);
-      const isDisabled = isNodeDisabled(d);
-      
-      nodeElement.select('circle')
-        .attr('opacity', isDisabled ? 0.15 : 0.9)
-        .style('filter', isDisabled ? 'grayscale(1) brightness(1.5)' : 'none');
-      
-      nodeElement.select('text')
-        .attr('opacity', isDisabled ? 0.8 : 1)
-        .attr('fill', isDisabled ? '#ffffff' : '#ffffff');
+    node = node.join(
+      enter => {
+        const g = enter.append('g')
+          .attr('class', 'node')
+          .style('cursor', 'pointer')
+          .style('opacity', 0)
+          .attr('transform', `translate(${centerX},${centerY}) scale(0.5)`);
         
-      nodeElement.style('cursor', isDisabled ? 'default' : 'pointer');
-    });
+        g.append('circle')
+          .attr('r', d => radius(d.value, d.group))
+          .attr('fill', d => color(d.group))
+          .attr('opacity', 0.9);
+        
+        const text = g.append('text')
+          .attr('text-anchor', 'middle')
+          .attr('fill', '#fff')
+          .style('font-weight', '700');
+        
+        text.each(function(d) {
+          const r = radius(d.value, d.group);
+          d3.select(this).style('font-size', `${computeFontSizeForRadius(r)}px`);
+          wrapText(d3.select(this), d.id, r * 1.6);
+        });
+        
+        // Animate entry with subtle bounce
+        if (animateEntry) {
+          g.transition('enter')
+            .duration(350)
+            .delay((d, i) => i * 30) // Stagger entries
+            .ease(d3.easeBackOut.overshoot(0.6)) // Subtle bounce
+            .style('opacity', 1)
+            .attr('transform', d => {
+              // Position in tight cluster around center
+              const angle = (graphNodes.indexOf(d) / graphNodes.length) * 2 * Math.PI;
+              const clusterRadius = 15;
+              const x = centerX + Math.cos(angle) * clusterRadius;
+              const y = centerY + Math.sin(angle) * clusterRadius;
+              d.x = x;
+              d.y = y;
+              return `translate(${Math.round(x)},${Math.round(y)}) scale(1)`;
+            });
+        } else {
+          g.style('opacity', 1).attr('transform', d => {
+            if (!d.x || !d.y || isNaN(d.x) || isNaN(d.y)) {
+              const angle = (graphNodes.indexOf(d) / graphNodes.length) * 2 * Math.PI;
+              const clusterRadius = 15;
+              d.x = centerX + Math.cos(angle) * clusterRadius;
+              d.y = centerY + Math.sin(angle) * clusterRadius;
+            }
+            return `translate(${Math.round(d.x)},${Math.round(d.y)})`;
+          });
+        }
+        
+        return g;
+      },
+      update => update,
+      exit => exit.remove()
+    );
     
-    // Add hover handlers for highlighting connections
+    // Re-attach event handlers
     node.on('mouseenter', (event, d) => {
-      if (clickedNode) return; // Don't change on hover if a node is clicked
+      if (isTransitioning) return;
       hoveredNode = d;
       highlightConnections(d);
     });
     
     node.on('mouseleave', (event, d) => {
-      if (clickedNode) return; // Don't reset on leave if a node is clicked
+      if (isTransitioning) return;
       hoveredNode = null;
       resetHighlighting();
     });
     
     node.on('click', (event, d) => {
+      if (isTransitioning) return;
       event.stopPropagation();
-      if (clickedNode && clickedNode.id === d.id) {
-        // Clicking the same node again - deselect
-        clickedNode = null;
-        resetHighlighting();
-      } else {
-        clickedNode = d;
-        highlightConnections(d);
-      }
       handleNodeClick(d);
     });
     
-    // Click on background to reset
+    // Click on background to go back to default view
     svg.on('click', (event) => {
+      if (isTransitioning) return;
       if (event.target === svg.node()) {
-        clickedNode = null;
-        hoveredNode = null;
-        resetHighlighting();
+        if (currentViewMode === 'expanded') {
+          // Go back to showing only primary nodes
+          selectedNode = null;
+          currentViewMode = 'default';
+          clickedNode = null;
+          hoveredNode = null;
+          setGraphData(allNodes, allLinks, true);
+          closeDrawer();
+        } else {
+          // Just reset highlighting
+          selectedNode = null;
+          clickedNode = null;
+          hoveredNode = null;
+          resetHighlighting();
+          closeDrawer();
+        }
       }
     });
-    
-    console.log('Nodes created in DOM:', node.size());
-    console.log('SVG container has nodes:', gNodes.selectAll('g.node').size());
 
+    // Update simulation
     sim.nodes(graphNodes);
     sim.force('link').links(graphLinks);
     
-    // Ensure nodes start in reasonable positions - clustered in center
-    const w = width();
-    const h = height();
-    graphNodes.forEach((node, i) => {
-      if (!node.x || !node.y || isNaN(node.x) || isNaN(node.y)) {
-        // Arrange in a tight cluster in the center
+    // Position nodes in tight cluster centered on screen
+    graphNodes.forEach((n, i) => {
+      if (!n.x || !n.y || isNaN(n.x) || isNaN(n.y)) {
         const angle = (i / graphNodes.length) * 2 * Math.PI;
-        const radius = Math.min(40, graphNodes.length * 3); // Much smaller radius for tight clustering
-        node.x = w/2 + Math.cos(angle) * radius;
-        node.y = h/2 + Math.sin(angle) * radius;
+        const clusterRadius = 15;
+        n.x = centerX + Math.cos(angle) * clusterRadius;
+        n.y = centerY + Math.sin(angle) * clusterRadius;
       }
     });
     
-    sim.alpha(0.3).alphaTarget(0).restart();
-    
-    updateModeIndicator();
+    // Start simulation with low alpha for gentle settling
+    sim.alpha(animateEntry ? 0.08 : 0.12).alphaTarget(0).restart();
   }
 
-  // Updated node click handler
+  // Node click handler - expand to show connected nodes
   function handleNodeClick(d) {
-    // Don't handle clicks on disabled nodes
-    if (isNodeDisabled(d)) {
+    if (isNodeDisabled(d) || isTransitioning) {
       return;
     }
     
-    if (currentViewMode === 'default' && d.group === 1) {
-      // If clicking on a primary keyword in default mode, expand to show connected secondary keywords
+    clickedNode = d;
+    hoveredNode = null;
+    isHoverClustering = false;
+    
+    if (currentViewMode === 'default') {
+      // Clicking a primary node - expand to show connected nodes
       selectedNode = d;
       currentViewMode = 'expanded';
-      setGraphData(allNodes, allLinks);
-      openDrawer(d); // Also open the side panel
+      setGraphData(allNodes, allLinks, true);
+      openDrawer(d);
     } else if (currentViewMode === 'expanded' && selectedNode && selectedNode.id === d.id) {
-      // If clicking on the same expanded primary node, collapse back to default view
+      // Clicking the same node again - collapse back to default
       selectedNode = null;
       currentViewMode = 'default';
-      setGraphData(allNodes, allLinks);
+      clickedNode = null;
+      setGraphData(allNodes, allLinks, true);
       closeDrawer();
-    } else if (currentViewMode === 'expanded' && d.group === 1) {
-      // If clicking on a different primary keyword while expanded, switch to that keyword
-      selectedNode = d;
-      setGraphData(allNodes, allLinks);
-      openDrawer(d); // Update the side panel to show the new node
     } else if (currentViewMode === 'expanded') {
-      // Clicking on a secondary keyword just opens its drawer
+      // Clicking a different node while expanded - switch to that node's connections
+      selectedNode = d;
+      setGraphData(allNodes, allLinks, true);
       openDrawer(d);
     } else {
-      // Otherwise just open the drawer
+      // In 'all' or 'filtered' mode - just highlight and show drawer
+      selectedNode = d;
+      highlightConnections(d);
       openDrawer(d);
     }
   }
 
   function resize(){
     const canvasEl = container.querySelector('.keywords__canvas');
-    const w = canvasEl?.clientWidth || 800; // Fallback width
-    const h = Math.max(window.innerHeight * 0.7, 400); // Minimum height
+    const w = canvasEl?.clientWidth || 800;
+    const h = Math.max(window.innerHeight * 0.7, 400);
     console.log('Resize called with dimensions:', { w, h });
     svg.attr('viewBox', `0 0 ${w} ${h}`).attr('width', w).attr('height', h);
     centerForce.x(w/2).y(h/2);
@@ -1066,14 +1169,14 @@ console.log('Document ready state:', document.readyState);
         if (!node.x || !node.y) {
           // Arrange in a tight cluster in the center
           const angle = (i / graphNodes.length) * 2 * Math.PI;
-          const radius = Math.min(40, graphNodes.length * 3); // Much smaller radius for tight clustering
-          node.x = w/2 + Math.cos(angle) * radius;
-          node.y = h/2 + Math.sin(angle) * radius;
+          const clusterRadius = 15;
+          node.x = w/2 + Math.cos(angle) * clusterRadius;
+          node.y = h/2 + Math.sin(angle) * clusterRadius;
         }
       });
     }
     
-    sim.alpha(0.2).alphaTarget(0).restart();
+    sim.alpha(0.15).alphaTarget(0).restart();
     rescaleForDrawer();
   }
   
@@ -1099,8 +1202,8 @@ console.log('Document ready state:', document.readyState);
         sampleNodes: allNodes.slice(0, 2)
       });
       
-      // Initialize the graph data properly
-      setGraphData(allNodes, allLinks);
+      // Initialize the graph data properly (no animation on initial load)
+      setGraphData(allNodes, allLinks, false);
       resize();
       
       console.log('After initialization:');
@@ -1125,41 +1228,43 @@ console.log('Document ready state:', document.readyState);
     const relatedKeywords = connections.map(l => (l.source.id?l.source.id:l.source)===d.id ? (l.target.id?l.target.id:l.target) : (l.source.id?l.source.id:l.source));
     
     drawerBody.innerHTML = `
-      <div class="drawer-content-grid">
-        <div class="drawer-stats">
-          <div class="drawer-stat">
-            <span class="drawer-stat-label">Volume</span>
-            <span class="drawer-stat-value">${d.value}</span>
+      <div class="sidebar-content">
+        <div class="sidebar-stats">
+          <div class="sidebar-stat">
+            <span class="sidebar-stat-value">${d.value}</span>
+            <span class="sidebar-stat-label">Volume</span>
           </div>
-          <div class="drawer-stat">
-            <span class="drawer-stat-label">Connections</span>
-            <span class="drawer-stat-value">${connections.length}</span>
-          </div>
-          <div class="drawer-stat drawer-stat--wide">
-            <span class="drawer-stat-label">Description</span>
-            <span class="drawer-stat-desc">Placeholder description about ${d.id} with sample insights.</span>
+          <div class="sidebar-stat">
+            <span class="sidebar-stat-value">${connections.length}</span>
+            <span class="sidebar-stat-label">Connections</span>
           </div>
         </div>
-        <div class="drawer-related">
-          <div class="drawer-related-label">Related Keywords</div>
-          <div class="drawer-related-chips">
-            ${relatedKeywords.map(kw => `<span class="chip">${kw}</span>`).join('')}
+        <div class="sidebar-section">
+          <div class="sidebar-section-label">Description</div>
+          <p class="sidebar-description">Placeholder description about ${d.id} with sample insights.</p>
+        </div>
+        <div class="sidebar-section">
+          <div class="sidebar-section-label">Related Keywords</div>
+          <div class="sidebar-chips">
+            ${relatedKeywords.length > 0 
+              ? relatedKeywords.map(kw => `<span class="sidebar-chip">${kw}</span>`).join('')
+              : '<span class="sidebar-no-data">No related keywords</span>'
+            }
           </div>
         </div>
       </div>
     `;
-    detailsDrawer.setAttribute('aria-hidden','false');
-    container.classList.add('drawer-open');
-    rescaleForDrawer();
   }
+  
   function closeDrawer(){
-    detailsDrawer.setAttribute('aria-hidden','true');
-    container.classList.remove('drawer-open');
-    rescaleForDrawer();
+    // Reset sidebar to placeholder state
+    drawerTitle.textContent = 'Select a Keyword';
+    drawerBody.innerHTML = '<p class="sidebar__placeholder">Click on a node in the graph to see its details and connections.</p>';
   }
-  detailsClose && detailsClose.addEventListener('click', closeDrawer);
-  neo4jClose && neo4jClose.addEventListener('click', ()=>{ neo4jDrawer.setAttribute('aria-hidden','true'); container.classList.remove('drawer-open'); rescaleForDrawer(); });
-  openNeo4jBtn && openNeo4jBtn.addEventListener('click', ()=>{ neo4jDrawer.setAttribute('aria-hidden','false'); container.classList.add('drawer-open'); rescaleForDrawer(); });
+  
+  // Neo4j drawer handlers (keep as modal)
+  neo4jClose && neo4jClose.addEventListener('click', ()=>{ neo4jDrawer.setAttribute('aria-hidden','true'); });
+  openNeo4jBtn && openNeo4jBtn.addEventListener('click', ()=>{ neo4jDrawer.setAttribute('aria-hidden','false'); });
 
   // Filtering
   function applyFilter(term){
@@ -1168,7 +1273,7 @@ console.log('Document ready state:', document.readyState);
     link.style('opacity', l => {
       const s = (l.source.id?l.source.id:l.source).toLowerCase();
       const tg = (l.target.id?l.target.id:l.target).toLowerCase();
-      return (s.includes(t) || tg.includes(t)) ? 1 : 0.15;
+      return (s.includes(t) || tg.includes(t)) ? 0.15 : 0.05;
     });
   }
   filterInput && filterInput.addEventListener('input', (e)=> applyFilter(e.target.value));
@@ -1176,31 +1281,23 @@ console.log('Document ready state:', document.readyState);
     filterInput && (filterInput.value=''); 
     closeDrawer(); 
     
-    // Reset to default view
+    // Reset to default view (primary nodes only)
     currentViewMode = 'default';
     selectedNode = null;
     clickedNode = null;
     hoveredNode = null;
+    isHoverClustering = false;
+    originalPositions = {};
     
-    // Reset node positions to center cluster
-    const w = width();
-    const h = height();
-    graphNodes.forEach((node, i) => {
-      const angle = (i / graphNodes.length) * 2 * Math.PI;
-      const r = Math.min(40, graphNodes.length * 3);
-      node.x = w/2 + Math.cos(angle) * r;
-      node.y = h/2 + Math.sin(angle) * r;
-      // Clear velocity
-      node.vx = 0;
-      node.vy = 0;
+    // Reset node positions to force re-centering
+    allNodes.forEach(node => {
+      delete node.x;
+      delete node.y;
+      delete node.vx;
+      delete node.vy;
     });
     
-    setGraphData(allNodes, allLinks);
-    
-    // Reset highlighting after graph is rebuilt
-    setTimeout(() => {
-      resetHighlighting();
-    }, 50);
+    setGraphData(allNodes, allLinks, true);
     
     svg.transition().duration(250).call(zoom.transform, d3.zoomIdentity); 
   });
@@ -1210,7 +1307,9 @@ console.log('Document ready state:', document.readyState);
   showAllBtn && showAllBtn.addEventListener('click', () => {
     currentViewMode = 'all';
     selectedNode = null;
-    setGraphData(allNodes, allLinks);
+    clickedNode = null;
+    hoveredNode = null;
+    setGraphData(allNodes, allLinks, true);
   });
 
   // Filter by Level button functionality
@@ -1257,7 +1356,9 @@ console.log('Document ready state:', document.readyState);
     
     currentViewMode = 'filtered';
     selectedNode = null;
-    setGraphData(allNodes, allLinks);
+    clickedNode = null;
+    hoveredNode = null;
+    setGraphData(allNodes, allLinks, true);
     filterModal.style.display = 'none';
   });
 
@@ -1368,18 +1469,17 @@ console.log('Document ready state:', document.readyState);
   if (window.ShopThatData) {
     // Listen for keyword changes from other pages
     window.ShopThatData.on('keywords', (keywords) => {
-      graphNodes = keywords.map(node => ({
+      const newNodes = keywords.map(node => ({
         id: node.id || node.name,
         group: node.group || 1,
         value: node.value || 50
       }));
-      setGraphData(graphNodes, graphLinks);
+      setGraphData(newNodes, allLinks, false);
     });
     
     // Listen for connection changes from other pages
     window.ShopThatData.on('connections', (connections) => {
-      graphLinks = connections.slice();
-      setGraphData(graphNodes, graphLinks);
+      setGraphData(allNodes, connections.slice(), false);
     });
   }
 
@@ -1390,14 +1490,13 @@ console.log('Document ready state:', document.readyState);
       const connections = window.ShopThatData.getConnections();
       
       // Convert keywords to D3 format
-      graphNodes = keywords.map(node => ({
+      const newNodes = keywords.map(node => ({
         id: node.id || node.name,
         group: node.group || 1,
         value: node.value || 50
       }));
       
-      graphLinks = connections.slice();
-      setGraphData(graphNodes, graphLinks);
+      setGraphData(newNodes, connections.slice(), false);
     }
   }
 

@@ -445,69 +445,175 @@
 .lower .card canvas { display: block; width: 100% !important; height: auto !important; aspect-ratio: 16 / 9; }
 
 /* Keywords Page */
-.keywords { --drawer-w: 360px; padding: 8px 16px 16px 16px; display: grid; gap: 4px; grid-column: 2 / -1; grid-row: 2; height: calc(100vh - 64px); overflow: auto; grid-template-columns: 1fr; }
-.keywords.drawer-open { grid-template-columns: 1fr; }
-.keywords .toolbar { width: 100%; margin: -8px 0 0 0; transition: transform .25s ease; }
+.keywords { padding: 8px 16px 16px 16px; display: flex; flex-direction: column; grid-column: 2 / -1; grid-row: 2; height: calc(100vh - 64px); overflow: hidden; }
+.keywords .toolbar { width: 100%; margin: -8px 0 0 0; flex-shrink: 0; }
 .neo4j-panel { display: grid; grid-template-columns: 1fr; gap: 8px; margin-top: 8px; }
 .neo4j-panel .btn { width: fit-content; }
 
 /* Hide Neo4j button on Keywords page */
 .keywords #openNeo4j { display: none; }
-.keywords__canvas { background: #fff; border: 1px solid #e8e8ef; border-radius: 16px; margin: 0 0 16px 0; width: 100%; transition: transform .25s ease; position: relative; }
-.keywords.drawer-open .toolbar { margin-left: 20px; margin-right: 20px; }
-.keywords.drawer-open .keywords__canvas { margin: 8px 20px 16px 20px; }
 
-/* Bottom Sheet Drawer for Keywords Details */
-.drawer#detailsDrawer { 
+/* Main content area with graph and sidebar */
+.keywords__main {
+  display: flex;
+  gap: 16px;
+  flex: 1;
+  min-height: 0;
+  margin-top: 8px;
+}
+
+.keywords__canvas { 
   background: #fff; 
   border: 1px solid #e8e8ef; 
-  border-radius: 24px 24px 0 0; 
-  transform: translateY(100%); 
-  transition: transform .3s cubic-bezier(0.4, 0, 0.2, 1); 
-  position: fixed; 
-  right: 24px;
-  bottom: 0; 
-  width: 500px;
-  max-width: calc(50% - 24px);
-  max-height: 30vh;
-  overflow: hidden; 
-  z-index: 10001; 
-  margin: 0;
-  box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.12);
+  border-radius: 16px; 
+  flex: 1;
+  min-width: 0;
+  position: relative;
   display: flex;
   flex-direction: column;
 }
-.drawer#detailsDrawer[aria-hidden="false"] { 
-  transform: translateY(0); 
+
+/* Keywords Sidebar - Always visible */
+.keywords__sidebar {
+  width: 320px;
+  flex-shrink: 0;
+  background: #fff;
+  border: 1px solid #e8e8ef;
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
-.drawer#detailsDrawer .drawer__header {
+.sidebar__header {
+  padding: 20px 20px 16px;
+  border-bottom: 1px solid #e8e8ef;
   flex-shrink: 0;
 }
 
-.drawer#detailsDrawer .drawer__body {
-  overflow-y: auto;
-  overflow-x: hidden;
-  margin: 0 8px 8px 0;
-  padding-right: 8px;
+.sidebar__header h2 {
+  font-size: 18px;
+  font-weight: 700;
+  margin: 0;
+  color: #111;
 }
 
-/* Custom scrollbar for bottom sheet */
-.drawer#detailsDrawer .drawer__body::-webkit-scrollbar {
+.sidebar__body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px 20px;
+}
+
+.sidebar__placeholder {
+  color: #9ca3af;
+  font-size: 14px;
+  text-align: center;
+  padding: 40px 20px;
+  line-height: 1.5;
+}
+
+/* Custom scrollbar for sidebar */
+.sidebar__body::-webkit-scrollbar {
   width: 6px;
 }
 
-.drawer#detailsDrawer .drawer__body::-webkit-scrollbar-track {
+.sidebar__body::-webkit-scrollbar-track {
   background: transparent;
 }
 
-.drawer#detailsDrawer .drawer__body::-webkit-scrollbar-thumb {
-  background: #ddd;
+.sidebar__body::-webkit-scrollbar-thumb {
+  background: #e5e5e5;
   border-radius: 3px;
 }
 
-.drawer#detailsDrawer .drawer__body::-webkit-scrollbar-thumb:hover {
-  background: #ccc;
+.sidebar__body::-webkit-scrollbar-thumb:hover {
+  background: #d4d4d4;
+}
+
+/* Sidebar Content Styles */
+.sidebar-content {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.sidebar-stats {
+  display: flex;
+  gap: 16px;
+}
+
+.sidebar-stat {
+  flex: 1;
+  background: #f8f9fa;
+  border-radius: 12px;
+  padding: 16px;
+  text-align: center;
+}
+
+.sidebar-stat-value {
+  display: block;
+  font-size: 28px;
+  font-weight: 700;
+  color: #111;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.sidebar-stat-label {
+  display: block;
+  font-size: 12px;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.sidebar-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sidebar-section-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.sidebar-description {
+  font-size: 14px;
+  color: #374151;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.sidebar-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.sidebar-chip {
+  background: #f3f4f6;
+  border: 1px solid #e5e7eb;
+  border-radius: 20px;
+  padding: 6px 12px;
+  font-size: 13px;
+  color: #374151;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.sidebar-chip:hover {
+  background: #e5e7eb;
+  border-color: #d1d5db;
+}
+
+.sidebar-no-data {
+  color: #9ca3af;
+  font-size: 13px;
+  font-style: italic;
 }
 
 /* Neo4j drawer stays as side panel */
@@ -541,30 +647,9 @@
   z-index: 1;
 }
 
-/* Bottom sheet drag handle */
-.drawer#detailsDrawer .drawer__header::before {
-  content: '';
-  position: absolute;
-  top: 8px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 32px;
-  height: 4px;
-  background: #ddd;
-  border-radius: 2px;
-}
-
-.drawer#detailsDrawer .drawer__header {
-  padding: 20px 16px 12px;
-}
-
-.drawer#detailsDrawer .drawer__header h2 {
-  font-size: 16px;
-}
-
 .drawer__body { padding: 12px 16px 16px; display: grid; gap: 10px; }
 
-/* Bottom Sheet Content Layout */
+/* Sidebar Content Layout */
 .drawer-content-grid {
   display: flex;
   flex-direction: column;
@@ -645,7 +730,7 @@
   color: #fff;
 }
 
-svg#bubbleGraph { width: 100%; height: 70vh; display: block; padding-top: 60px; }
+svg#bubbleGraph { width: 100%; flex: 1; display: block; padding-top: 60px; min-height: 400px; }
 
 /* Fullscreen Mode for Keywords Canvas */
 .keywords__canvas.is-fullscreen {

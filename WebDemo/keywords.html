@@ -137,43 +137,46 @@
           </div>
         </div>
       </section>
-      <div class="keywords__canvas">
-        <button class="fullscreen-exit-btn" id="fullscreenExit">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"></path>
-          </svg>
-          Exit Fullscreen
-        </button>
-        <div class="graph-legend">
-          <div class="legend-item">
-            <div class="legend-color" style="background: linear-gradient(135deg, #06b6d4, #8b5cf6, #6366f1);"></div>
-            <span>Primary (Most Connected)</span>
+      <div class="keywords__main">
+        <div class="keywords__canvas">
+          <button class="fullscreen-exit-btn" id="fullscreenExit">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"></path>
+            </svg>
+            Exit Fullscreen
+          </button>
+          <div class="graph-legend">
+            <div class="legend-item">
+              <div class="legend-color" style="background: linear-gradient(135deg, #06b6d4, #8b5cf6, #6366f1);"></div>
+              <span>Primary (Most Connected)</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-color" style="background: linear-gradient(135deg, #10b981, #34d399, #06b6d4);"></div>
+              <span>Connected to Primary</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-color" style="background: linear-gradient(135deg, #f97316, #ec4899, #f472b6);"></div>
+              <span>Secondary Connected</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-color" style="background: linear-gradient(135deg, #10b981, #06b6d4, #8b5cf6);"></div>
+              <span>Tertiary (Isolated)</span>
+            </div>
+            <div class="legend-item" id="modeIndicator" style="margin-left: 20px; font-weight: 600; color: #6366F1;">
+              <span>Mode: Default View</span>
+            </div>
           </div>
-          <div class="legend-item">
-            <div class="legend-color" style="background: linear-gradient(135deg, #10b981, #34d399, #06b6d4);"></div>
-            <span>Connected to Primary</span>
-          </div>
-          <div class="legend-item">
-            <div class="legend-color" style="background: linear-gradient(135deg, #f97316, #ec4899, #f472b6);"></div>
-            <span>Secondary Connected</span>
-          </div>
-          <div class="legend-item">
-            <div class="legend-color" style="background: linear-gradient(135deg, #10b981, #06b6d4, #8b5cf6);"></div>
-            <span>Tertiary (Isolated)</span>
-          </div>
-          <div class="legend-item" id="modeIndicator" style="margin-left: 20px; font-weight: 600; color: #6366F1;">
-            <span>Mode: Default View</span>
-          </div>
+          <svg id="bubbleGraph" role="img" aria-label="Keyword knowledge graph"></svg>
         </div>
-        <svg id="bubbleGraph" role="img" aria-label="Keyword knowledge graph"></svg>
+        <aside class="keywords__sidebar" id="detailsDrawer" aria-label="Keyword details">
+          <div class="sidebar__header">
+            <h2 id="drawerTitle">Select a Keyword</h2>
+          </div>
+          <div class="sidebar__body" id="drawerBody">
+            <p class="sidebar__placeholder">Click on a node in the graph to see its details and connections.</p>
+          </div>
+        </aside>
       </div>
-      <aside class="drawer" id="detailsDrawer" aria-label="Keyword details" aria-hidden="true">
-        <div class="drawer__header">
-          <h2 id="drawerTitle">Keyword</h2>
-          <button class="icon-btn" id="detailsClose" aria-label="Close">✕</button>
-        </div>
-        <div class="drawer__body" id="drawerBody"></div>
-      </aside>
       <aside class="drawer" id="neo4jDrawer" aria-label="Neo4j connection" aria-hidden="true">
         <div class="drawer__header">
           <h2>Neo4j</h2>

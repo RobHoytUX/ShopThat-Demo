@@ -269,7 +269,7 @@ button { font: inherit; }
   margin: 104px auto 0; 
   padding: 0 20px; 
   display: grid; 
-  grid-template-columns: repeat(4, 1fr); 
+  grid-template-columns: repeat(3, 1fr); 
   gap: 0;
 }
 

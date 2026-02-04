@@ -1284,89 +1284,72 @@
       showKeywordsAnimated(keywordsToShow);
     }
     
-    // Helper function to cycle through all keywords then show final 4
+    // Track whether products are in view for keyword display
+    let productsInView = false;
+    
+    // Helper function to show keywords based on scroll position
     function showKeywordsAnimated(allKeywords) {
-      // Get all keywords from ShopThatData
-      const cycleKeywords = window.ShopThatData ? window.ShopThatData.getKeywords() : allKeywords;
+      // Initial keyword - only show Capucines Bag when at top
+      const initialKeyword = 'Capucines Bag';
+      // Additional keywords to show when products are in view
+      const productKeywords = ['Capucines BB', 'Capucines White', 'Twist MM'];
       
-      // Final 4 keywords to end with
-      const finalKeywords = ['Kusama x LV Campaign', 'Kusama', 'Stores', 'Capucines Bag'];
+      // Show initial keyword
+      showKeywords([initialKeyword]);
       
-      let cycleIndex = 0;
-      let isInCyclePhase = true;
+      // Set up scroll listener for product visibility
+      setupProductScrollListener(initialKeyword, productKeywords);
+    }
+    
+    // Function to display keywords with animation
+    function showKeywords(keywordList) {
+      presets.replaceChildren();
       
-      // Function to cycle through keywords
-      function cycleNextKeyword() {
-        if (isInCyclePhase && cycleIndex < cycleKeywords.length) {
-          const kw = cycleKeywords[cycleIndex];
-          const label = titleCase(kw.name);
-          
-          // Clear previous keywords
-          presets.replaceChildren();
-          
-          // Show current keyword
-          const b = createEl('button', { type: 'button' }, [document.createTextNode(label)]);
-          b.style.opacity = '0';
-          b.style.transform = 'scale(0.9)';
-          b.style.transition = 'opacity 200ms ease, transform 200ms ease';
-          b.addEventListener('click', ()=> onKeywordSelect(label));
-          presets.appendChild(b);
-          
-          // Animate in
-          requestAnimationFrame(() => {
-            b.style.opacity = '1';
-            b.style.transform = 'scale(1)';
-          });
-          
-          cycleIndex++;
-          
-          // Continue cycling at 1 second intervals
-          setTimeout(cycleNextKeyword, 1000);
-        } else if (isInCyclePhase) {
-          // Cycling done, now show final 4 keywords
-          console.log('Cycling complete, showing final 4 keywords');
-          isInCyclePhase = false;
-          showFinalKeywords();
-        }
-      }
-      
-      // Function to show final 4 keywords one by one
-      function showFinalKeywords() {
-        presets.replaceChildren();
-        let finalIndex = 0;
+      keywordList.forEach((label, index) => {
+        const b = createEl('button', { type: 'button' }, [document.createTextNode(label)]);
+        b.style.opacity = '0';
+        b.style.transform = 'scale(0.8)';
+        b.style.transition = 'opacity 300ms ease, transform 300ms ease';
+        b.addEventListener('click', () => onKeywordSelect(label));
+        presets.appendChild(b);
         
-        function showNextFinalKeyword() {
-          if (finalIndex < finalKeywords.length) {
-            const label = finalKeywords[finalIndex];
-            console.log('Showing final keyword:', label);
-            
-            const b = createEl('button', { type: 'button' }, [document.createTextNode(label)]);
-            b.style.opacity = '0';
-            b.style.transform = 'scale(0.8)';
-            b.style.transition = 'opacity 300ms ease, transform 300ms ease';
-            b.addEventListener('click', ()=> onKeywordSelect(label));
-            presets.appendChild(b);
-            
-            // Animate in
-            requestAnimationFrame(() => {
-              b.style.opacity = '1';
-              b.style.transform = 'scale(1)';
-            });
-            
-            finalIndex++;
-            
-            // Show next final keyword after delay
-            setTimeout(showNextFinalKeyword, 300);
-          } else {
-            console.log('All final keywords displayed');
+        // Stagger animation
+        setTimeout(() => {
+          b.style.opacity = '1';
+          b.style.transform = 'scale(1)';
+        }, index * 150);
+      });
+      
+      ensureSizeForContent();
+    }
+    
+    // Set up scroll listener to detect when products section is visible
+    function setupProductScrollListener(initialKeyword, productKeywords) {
+      const productGrid = document.querySelector('.product-grid');
+      if (!productGrid) return;
+      
+      // Use Intersection Observer for efficient scroll detection
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting && !productsInView) {
+            // Products are now visible - show additional keywords
+            productsInView = true;
+            console.log('Products in view - showing additional keywords');
+            showKeywords([initialKeyword, ...productKeywords]);
+          } else if (!entry.isIntersecting && productsInView) {
+            // Products no longer visible - show only initial keyword
+            productsInView = false;
+            console.log('Products out of view - showing only initial keyword');
+            showKeywords([initialKeyword]);
           }
-        }
-        
-        showNextFinalKeyword();
-      }
+        });
+      }, {
+        root: null,
+        rootMargin: '0px',
+        threshold: 0.1 // Trigger when 10% of products section is visible
+      });
       
-      // Start the cycling animation
-      cycleNextKeyword();
+      observer.observe(productGrid);
     }
     
     // Load keywords from shared data (fallback)
