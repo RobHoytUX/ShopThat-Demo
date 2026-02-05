@@ -38,6 +38,70 @@ console.log('Document ready state:', document.readyState);
   let allLinks = [];
   let visibleNodes = [];
   let visibleLinks = [];
+  
+  // State history for back navigation
+  const stateHistory = [];
+  const MAX_HISTORY = 50;
+  
+  function pushState() {
+    const state = {
+      viewMode: currentViewMode,
+      selectedNodeId: selectedNode ? selectedNode.id : null,
+      hiddenGroups: new Set(hiddenGroups),
+      timestamp: Date.now()
+    };
+    stateHistory.push(state);
+    if (stateHistory.length > MAX_HISTORY) {
+      stateHistory.shift();
+    }
+    console.log('State pushed:', state.viewMode, state.selectedNodeId, 'History length:', stateHistory.length);
+  }
+  
+  function popState() {
+    if (stateHistory.length === 0) {
+      return null;
+    }
+    return stateHistory.pop();
+  }
+  
+  // Flag to prevent clearing hiddenGroups during state restoration
+  let isRestoringState = false;
+  
+  function restoreState(state) {
+    if (!state) return false;
+    
+    isRestoringState = true;
+    
+    currentViewMode = state.viewMode;
+    selectedNode = state.selectedNodeId ? allNodes.find(n => n.id === state.selectedNodeId) : null;
+    hiddenGroups.clear();
+    if (state.hiddenGroups) {
+      state.hiddenGroups.forEach(g => hiddenGroups.add(g));
+    }
+    
+    clickedNode = null;
+    hoveredNode = null;
+    isHoverClustering = false;
+    
+    // Call setGraphData - the wrapper will check isRestoringState flag
+    setGraphData(allNodes, allLinks, true);
+    setTimeout(() => {
+      updateFilterCheckboxes();
+      isRestoringState = false;
+    }, 250);
+    
+    if (selectedNode) {
+      openDrawer(selectedNode);
+    } else {
+      closeDrawer();
+    }
+    
+    console.log('State restored:', currentViewMode, selectedNode?.id);
+    return true;
+  }
+  
+  // Track hidden groups (will be defined later but declared here for state management)
+  let hiddenGroups = new Set();
   let filterState = {
     topLevel: true,
     connected: true,
@@ -1134,19 +1198,23 @@ console.log('Document ready state:', document.readyState);
     isHoverClustering = false;
     
     if (currentViewMode === 'default') {
+      // Save current state before expanding
+      pushState();
       // Clicking a primary node - expand to show connected nodes
       selectedNode = d;
       currentViewMode = 'expanded';
       setGraphData(allNodes, allLinks, true);
       openDrawer(d);
     } else if (currentViewMode === 'expanded' && selectedNode && selectedNode.id === d.id) {
-      // Clicking the same node again - collapse back to default
+      // Clicking the same node again - collapse back to default (don't push state, this is like going back)
       selectedNode = null;
       currentViewMode = 'default';
       clickedNode = null;
       setGraphData(allNodes, allLinks, true);
       closeDrawer();
     } else if (currentViewMode === 'expanded') {
+      // Save current state before switching nodes
+      pushState();
       // Clicking a different node while expanded - switch to that node's connections
       selectedNode = d;
       setGraphData(allNodes, allLinks, true);
@@ -1303,7 +1371,23 @@ console.log('Document ready state:', document.readyState);
     
     setGraphData(allNodes, allLinks, true);
     
+    // Clear state history on reset
+    stateHistory.length = 0;
+    
     svg.transition().duration(250).call(zoom.transform, d3.zoomIdentity); 
+  });
+  
+  // Back button - navigate through state history
+  const backBtn = document.getElementById('keywordsBackBtn');
+  backBtn && backBtn.addEventListener('click', () => {
+    const previousState = popState();
+    if (previousState) {
+      // Restore the previous state
+      restoreState(previousState);
+    } else {
+      // No more state history, go back to previous page
+      history.back();
+    }
   });
   
   // Show All button functionality
@@ -1316,9 +1400,6 @@ console.log('Document ready state:', document.readyState);
     setGraphData(allNodes, allLinks, true);
   });
 
-  // Track which node types are hidden (visibility toggles)
-  const hiddenGroups = new Set();
-  
   // Update checkbox states based on what node types exist in current view
   function updateFilterCheckboxes() {
     // Get current visible nodes based on view mode (before applying hidden filter)
@@ -1487,8 +1568,10 @@ console.log('Document ready state:', document.readyState);
   // Update checkboxes whenever graph data changes
   const originalSetGraphData = setGraphData;
   setGraphData = function(newNodes, newLinks, animate) {
-    // Clear hidden groups when view changes significantly
-    hiddenGroups.clear();
+    // Clear hidden groups when view changes (unless restoring state)
+    if (!isRestoringState) {
+      hiddenGroups.clear();
+    }
     originalSetGraphData(newNodes, newLinks, animate);
     // Update checkboxes after a short delay to let the graph render
     setTimeout(updateFilterCheckboxes, 200);
