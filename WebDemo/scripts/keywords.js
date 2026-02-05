@@ -1361,7 +1361,7 @@ console.log('Document ready state:', document.readyState);
     });
   }
   
-  // Toggle visibility of a node group
+  // Toggle visibility of a node group and regroup remaining nodes
   function toggleGroupVisibility(group, isVisible) {
     if (isVisible) {
       hiddenGroups.delete(group);
@@ -1369,31 +1369,104 @@ console.log('Document ready state:', document.readyState);
       hiddenGroups.add(group);
     }
     
-    // Update node visibility with animation
+    const w = width();
+    const h = height();
+    const centerX = w / 2;
+    const centerY = h / 2;
+    
+    // Get visible nodes (not in hidden groups)
+    const visibleNodeIds = new Set(
+      graphNodes.filter(n => !hiddenGroups.has(n.group)).map(n => n.id)
+    );
+    
+    // Animate hiding nodes
     node.each(function(d) {
       const nodeEl = d3.select(this);
       const shouldShow = !hiddenGroups.has(d.group);
       
-      nodeEl.transition()
-        .duration(200)
-        .style('opacity', shouldShow ? 1 : 0)
-        .style('pointer-events', shouldShow ? 'auto' : 'none');
+      if (!shouldShow) {
+        // Fade out and shrink toward center
+        nodeEl.transition()
+          .duration(250)
+          .ease(d3.easeCubicIn)
+          .style('opacity', 0)
+          .attr('transform', `translate(${centerX},${centerY}) scale(0.3)`)
+          .style('pointer-events', 'none');
+      }
     });
     
-    // Update links - hide if either end is hidden
-    link.each(function(l) {
-      const linkEl = d3.select(this);
-      const sourceNode = graphNodes.find(n => n.id === (typeof l.source === 'object' ? l.source.id : l.source));
-      const targetNode = graphNodes.find(n => n.id === (typeof l.target === 'object' ? l.target.id : l.target));
+    // After hiding animation, reposition visible nodes
+    setTimeout(() => {
+      // Reset positions of visible nodes to cluster
+      const visibleNodes = graphNodes.filter(n => !hiddenGroups.has(n.group));
+      visibleNodes.forEach((n, i) => {
+        const angle = (i / visibleNodes.length) * 2 * Math.PI;
+        const clusterRadius = 20;
+        n.x = centerX + Math.cos(angle) * clusterRadius;
+        n.y = centerY + Math.sin(angle) * clusterRadius;
+        n.vx = 0;
+        n.vy = 0;
+      });
       
-      const shouldShow = sourceNode && targetNode && 
-                         !hiddenGroups.has(sourceNode.group) && 
-                         !hiddenGroups.has(targetNode.group);
+      // Animate visible nodes to new positions
+      node.each(function(d) {
+        const nodeEl = d3.select(this);
+        const shouldShow = !hiddenGroups.has(d.group);
+        
+        if (shouldShow) {
+          nodeEl.transition()
+            .duration(300)
+            .ease(d3.easeCubicOut)
+            .style('opacity', 1)
+            .attr('transform', `translate(${Math.round(d.x)},${Math.round(d.y)}) scale(1)`)
+            .style('pointer-events', 'auto');
+        }
+      });
       
-      linkEl.transition()
-        .duration(200)
-        .attr('opacity', shouldShow ? 0 : 0); // Links are hidden anyway, but keep logic
-    });
+      // Update simulation with only visible nodes
+      sim.nodes(visibleNodes);
+      sim.alpha(0.3).alphaTarget(0).restart();
+    }, isVisible ? 0 : 260);
+    
+    // If showing nodes, animate them in from center
+    if (isVisible) {
+      // First position newly visible nodes at center
+      node.each(function(d) {
+        if (d.group === group) {
+          d.x = centerX;
+          d.y = centerY;
+          d3.select(this)
+            .attr('transform', `translate(${centerX},${centerY}) scale(0.3)`)
+            .style('opacity', 0);
+        }
+      });
+      
+      // Then animate them in after regrouping starts
+      setTimeout(() => {
+        const visibleNodes = graphNodes.filter(n => !hiddenGroups.has(n.group));
+        visibleNodes.forEach((n, i) => {
+          const angle = (i / visibleNodes.length) * 2 * Math.PI;
+          const clusterRadius = 20;
+          n.x = centerX + Math.cos(angle) * clusterRadius;
+          n.y = centerY + Math.sin(angle) * clusterRadius;
+        });
+        
+        node.each(function(d) {
+          const nodeEl = d3.select(this);
+          if (!hiddenGroups.has(d.group)) {
+            nodeEl.transition()
+              .duration(350)
+              .ease(d3.easeBackOut.overshoot(0.5))
+              .style('opacity', 1)
+              .attr('transform', `translate(${Math.round(d.x)},${Math.round(d.y)}) scale(1)`)
+              .style('pointer-events', 'auto');
+          }
+        });
+        
+        sim.nodes(visibleNodes);
+        sim.alpha(0.3).alphaTarget(0).restart();
+      }, 50);
+    }
   }
   
   // Add change listeners to filter checkboxes
