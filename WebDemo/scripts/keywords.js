@@ -1316,25 +1316,110 @@ console.log('Document ready state:', document.readyState);
     setGraphData(allNodes, allLinks, true);
   });
 
-  // Inline filter checkboxes - apply filter immediately on change
-  function applyFilters() {
-    filterState.topLevel = document.getElementById('filterTopLevel')?.checked ?? true;
-    filterState.connected = document.getElementById('filterConnected')?.checked ?? true;
-    filterState.secondary = document.getElementById('filterSecondary')?.checked ?? true;
-    filterState.isolated = document.getElementById('filterIsolated')?.checked ?? true;
+  // Track which node types are hidden (visibility toggles)
+  const hiddenGroups = new Set();
+  
+  // Update checkbox states based on what node types exist in current view
+  function updateFilterCheckboxes() {
+    // Get current visible nodes based on view mode (before applying hidden filter)
+    let availableNodes;
+    if (currentViewMode === 'default') {
+      availableNodes = allNodes.filter(n => n.group === 1);
+    } else if (currentViewMode === 'expanded' && selectedNode) {
+      const connectedIds = getConnectedNodeIds(selectedNode);
+      availableNodes = allNodes.filter(n => connectedIds.has(n.id));
+    } else {
+      availableNodes = allNodes;
+    }
     
-    currentViewMode = 'filtered';
-    selectedNode = null;
-    clickedNode = null;
-    hoveredNode = null;
-    setGraphData(allNodes, allLinks, true);
+    // Check which groups exist in available nodes
+    const availableGroups = new Set(availableNodes.map(n => n.group));
+    
+    // Update each checkbox
+    const checkboxMap = {
+      'filterTopLevel': 1,
+      'filterConnected': 2,
+      'filterSecondary': 3,
+      'filterIsolated': 4
+    };
+    
+    Object.entries(checkboxMap).forEach(([id, group]) => {
+      const checkbox = document.getElementById(id);
+      if (checkbox) {
+        const isAvailable = availableGroups.has(group);
+        checkbox.disabled = !isAvailable;
+        checkbox.parentElement.style.opacity = isAvailable ? '1' : '0.4';
+        checkbox.parentElement.style.pointerEvents = isAvailable ? 'auto' : 'none';
+        
+        // If available, check based on whether it's hidden
+        if (isAvailable) {
+          checkbox.checked = !hiddenGroups.has(group);
+        } else {
+          checkbox.checked = false;
+        }
+      }
+    });
   }
   
-  // Add change listeners to all filter checkboxes
-  ['filterTopLevel', 'filterConnected', 'filterSecondary', 'filterIsolated'].forEach(id => {
+  // Toggle visibility of a node group
+  function toggleGroupVisibility(group, isVisible) {
+    if (isVisible) {
+      hiddenGroups.delete(group);
+    } else {
+      hiddenGroups.add(group);
+    }
+    
+    // Update node visibility with animation
+    node.each(function(d) {
+      const nodeEl = d3.select(this);
+      const shouldShow = !hiddenGroups.has(d.group);
+      
+      nodeEl.transition()
+        .duration(200)
+        .style('opacity', shouldShow ? 1 : 0)
+        .style('pointer-events', shouldShow ? 'auto' : 'none');
+    });
+    
+    // Update links - hide if either end is hidden
+    link.each(function(l) {
+      const linkEl = d3.select(this);
+      const sourceNode = graphNodes.find(n => n.id === (typeof l.source === 'object' ? l.source.id : l.source));
+      const targetNode = graphNodes.find(n => n.id === (typeof l.target === 'object' ? l.target.id : l.target));
+      
+      const shouldShow = sourceNode && targetNode && 
+                         !hiddenGroups.has(sourceNode.group) && 
+                         !hiddenGroups.has(targetNode.group);
+      
+      linkEl.transition()
+        .duration(200)
+        .attr('opacity', shouldShow ? 0 : 0); // Links are hidden anyway, but keep logic
+    });
+  }
+  
+  // Add change listeners to filter checkboxes
+  const checkboxGroupMap = {
+    'filterTopLevel': 1,
+    'filterConnected': 2,
+    'filterSecondary': 3,
+    'filterIsolated': 4
+  };
+  
+  Object.entries(checkboxGroupMap).forEach(([id, group]) => {
     const checkbox = document.getElementById(id);
-    checkbox && checkbox.addEventListener('change', applyFilters);
+    checkbox && checkbox.addEventListener('change', (e) => {
+      toggleGroupVisibility(group, e.target.checked);
+    });
   });
+  
+  // Update checkboxes whenever graph data changes
+  const originalSetGraphData = setGraphData;
+  setGraphData = function(newNodes, newLinks, animate) {
+    // Clear hidden groups when view changes significantly
+    hiddenGroups.clear();
+    originalSetGraphData(newNodes, newLinks, animate);
+    // Update checkboxes after a short delay to let the graph render
+    setTimeout(updateFilterCheckboxes, 200);
+  };
 
   // Zoom controls
   zoomIn && zoomIn.addEventListener('click', ()=> svg.transition().duration(200).call(zoom.scaleBy, 1.2));

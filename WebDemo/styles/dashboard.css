@@ -861,8 +861,13 @@ svg#bubbleGraph { width: 100%; flex: 1; display: block; padding-top: 60px; min-h
   transform: rotate(45deg);
 }
 
-.legend-filter-item input[type="checkbox"]:hover {
+.legend-filter-item input[type="checkbox"]:hover:not(:disabled) {
   border-color: #6366f1;
+}
+
+.legend-filter-item input[type="checkbox"]:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
 }
 
 .legend-filter-item.legend-mode {
