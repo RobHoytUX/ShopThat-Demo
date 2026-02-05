@@ -72,12 +72,6 @@
             <button type="button" id="resetKw" class="btn btn--secondary">Reset</button>
           </div>
           <div class="control-group">
-            <button type="button" id="filterByLevel" class="btn btn--secondary">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <polygon points="22,3 2,3 10,12.46 10,19 14,21 14,12.46"></polygon>
-              </svg>
-              Filter by Level
-            </button>
             <button type="button" id="showAll" class="btn btn--secondary">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <circle cx="12" cy="12" r="10"></circle>
@@ -143,25 +137,29 @@
             </svg>
             Exit Fullscreen
           </button>
-          <div class="graph-legend">
-            <div class="legend-item">
-              <div class="legend-color" style="background: linear-gradient(135deg, #06b6d4, #8b5cf6, #6366f1);"></div>
+          <div class="graph-legend-filter">
+            <label class="legend-filter-item">
+              <input type="checkbox" id="filterTopLevel" checked>
+              <span class="legend-color" style="background: linear-gradient(135deg, #06b6d4, #8b5cf6, #6366f1);"></span>
               <span>Primary (Most Connected)</span>
-            </div>
-            <div class="legend-item">
-              <div class="legend-color" style="background: linear-gradient(135deg, #10b981, #34d399, #06b6d4);"></div>
+            </label>
+            <label class="legend-filter-item">
+              <input type="checkbox" id="filterConnected" checked>
+              <span class="legend-color" style="background: linear-gradient(135deg, #10b981, #34d399, #06b6d4);"></span>
               <span>Connected to Primary</span>
-            </div>
-            <div class="legend-item">
-              <div class="legend-color" style="background: linear-gradient(135deg, #f97316, #ec4899, #f472b6);"></div>
+            </label>
+            <label class="legend-filter-item">
+              <input type="checkbox" id="filterSecondary" checked>
+              <span class="legend-color" style="background: linear-gradient(135deg, #f97316, #ec4899, #f472b6);"></span>
               <span>Secondary Connected</span>
-            </div>
-            <div class="legend-item">
-              <div class="legend-color" style="background: linear-gradient(135deg, #10b981, #06b6d4, #8b5cf6);"></div>
+            </label>
+            <label class="legend-filter-item">
+              <input type="checkbox" id="filterIsolated" checked>
+              <span class="legend-color" style="background: linear-gradient(135deg, #10b981, #06b6d4, #8b5cf6);"></span>
               <span>Tertiary (Isolated)</span>
-            </div>
-            <div class="legend-item" id="modeIndicator" style="margin-left: 20px; font-weight: 600; color: #6366F1;">
-              <span>Mode: Default View</span>
+            </label>
+            <div class="legend-filter-item legend-mode" id="modeIndicator">
+              <span>Mode: Primary Keywords</span>
             </div>
           </div>
           <svg id="bubbleGraph" role="img" aria-label="Keyword knowledge graph"></svg>
@@ -192,45 +190,6 @@
           </div>
         </div>
       </aside>
-      
-      <!-- Filter Modal -->
-      <div class="modal-overlay" id="filterModal" style="display: none;">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h2>Filter by Hierarchy Level</h2>
-            <button class="icon-btn" id="filterModalClose" aria-label="Close">✕</button>
-          </div>
-          <div class="modal-body" style="padding: 20px;">
-            <div class="filter-options">
-              <label class="filter-option">
-                <input type="checkbox" id="filterTopLevel" checked>
-                <span class="filter-option__indicator" style="background-color: #6366F1;"></span>
-                <span>Top Level (Most Connected)</span>
-              </label>
-              <label class="filter-option">
-                <input type="checkbox" id="filterConnected" checked>
-                <span class="filter-option__indicator" style="background-color: #5B21B6;"></span>
-                <span>Connected to Top Level</span>
-              </label>
-              <label class="filter-option">
-                <input type="checkbox" id="filterSecondary" checked>
-                <span class="filter-option__indicator" style="background-color: #F59E0B;"></span>
-                <span>Secondary Connected</span>
-              </label>
-              <label class="filter-option">
-                <input type="checkbox" id="filterIsolated" checked>
-                <span class="filter-option__indicator" style="background-color: #10B981;"></span>
-                <span>Isolated (No Connections)</span>
-              </label>
-            </div>
-            <div class="modal-actions" style="margin-top: 20px; display: flex; gap: 12px; justify-content: flex-end;">
-              <button class="btn btn--secondary" id="filterSelectAll">Select All</button>
-              <button class="btn btn--secondary" id="filterSelectNone">Select None</button>
-              <button class="btn btn--primary" id="applyFilter">Apply Filter</button>
-            </div>
-          </div>
-        </div>
-      </div>
 
       <!-- AI Chat Side Panel -->
       <aside class="ai-side-panel" id="aiSidePanel" aria-label="AI Chat" aria-hidden="true">

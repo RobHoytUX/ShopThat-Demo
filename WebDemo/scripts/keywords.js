@@ -1316,54 +1316,24 @@ console.log('Document ready state:', document.readyState);
     setGraphData(allNodes, allLinks, true);
   });
 
-  // Filter by Level button functionality
-  const filterByLevelBtn = document.getElementById('filterByLevel');
-  const filterModal = document.getElementById('filterModal');
-  const filterModalClose = document.getElementById('filterModalClose');
-  const applyFilterBtn = document.getElementById('applyFilter');
-  const filterSelectAll = document.getElementById('filterSelectAll');
-  const filterSelectNone = document.getElementById('filterSelectNone');
-  
-  filterByLevelBtn && filterByLevelBtn.addEventListener('click', () => {
-    filterModal.style.display = 'flex';
-  });
-  
-  filterModalClose && filterModalClose.addEventListener('click', () => {
-    filterModal.style.display = 'none';
-  });
-  
-  filterModal && filterModal.addEventListener('click', (e) => {
-    if (e.target === filterModal) {
-      filterModal.style.display = 'none';
-    }
-  });
-  
-  filterSelectAll && filterSelectAll.addEventListener('click', () => {
-    document.getElementById('filterTopLevel').checked = true;
-    document.getElementById('filterConnected').checked = true;
-    document.getElementById('filterSecondary').checked = true;
-    document.getElementById('filterIsolated').checked = true;
-  });
-  
-  filterSelectNone && filterSelectNone.addEventListener('click', () => {
-    document.getElementById('filterTopLevel').checked = false;
-    document.getElementById('filterConnected').checked = false;
-    document.getElementById('filterSecondary').checked = false;
-    document.getElementById('filterIsolated').checked = false;
-  });
-  
-  applyFilterBtn && applyFilterBtn.addEventListener('click', () => {
-    filterState.topLevel = document.getElementById('filterTopLevel').checked;
-    filterState.connected = document.getElementById('filterConnected').checked;
-    filterState.secondary = document.getElementById('filterSecondary').checked;
-    filterState.isolated = document.getElementById('filterIsolated').checked;
+  // Inline filter checkboxes - apply filter immediately on change
+  function applyFilters() {
+    filterState.topLevel = document.getElementById('filterTopLevel')?.checked ?? true;
+    filterState.connected = document.getElementById('filterConnected')?.checked ?? true;
+    filterState.secondary = document.getElementById('filterSecondary')?.checked ?? true;
+    filterState.isolated = document.getElementById('filterIsolated')?.checked ?? true;
     
     currentViewMode = 'filtered';
     selectedNode = null;
     clickedNode = null;
     hoveredNode = null;
     setGraphData(allNodes, allLinks, true);
-    filterModal.style.display = 'none';
+  }
+  
+  // Add change listeners to all filter checkboxes
+  ['filterTopLevel', 'filterConnected', 'filterSecondary', 'filterIsolated'].forEach(id => {
+    const checkbox = document.getElementById(id);
+    checkbox && checkbox.addEventListener('change', applyFilters);
   });
 
   // Zoom controls
