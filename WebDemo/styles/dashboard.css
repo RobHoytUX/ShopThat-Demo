@@ -788,65 +788,113 @@ svg#bubbleGraph { width: 100%; flex: 1; display: block; padding-top: 60px; min-h
 /* Combined Legend & Filter */
 .graph-legend-filter { 
   position: absolute; 
-  top: 16px; 
+  top: 20px; 
   left: 50%; 
   transform: translateX(-50%); 
   display: flex; 
   align-items: center; 
-  gap: 24px; 
+  gap: 8px; 
   z-index: 10; 
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 500;
-  color: #374151;
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(8px);
-  padding: 10px 20px;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  border: 1px solid rgba(0, 0, 0, 0.06);
+  color: #1f2937;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.95) 100%);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  padding: 8px 12px;
+  border-radius: 16px;
+  box-shadow: 
+    0 4px 20px rgba(0, 0, 0, 0.08),
+    0 1px 3px rgba(0, 0, 0, 0.05),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.6);
 }
 
 .legend-filter-item { 
   display: flex; 
   align-items: center; 
-  gap: 8px; 
+  gap: 6px; 
   white-space: nowrap;
   cursor: pointer;
-  transition: opacity 0.2s ease;
+  padding: 6px 10px;
+  border-radius: 10px;
+  transition: all 0.2s ease;
+  background: transparent;
+  position: relative;
 }
 
 .legend-filter-item:hover {
-  opacity: 0.8;
+  background: rgba(99, 102, 241, 0.08);
+}
+
+.legend-filter-item:has(input:checked) {
+  background: rgba(99, 102, 241, 0.1);
 }
 
 .legend-filter-item input[type="checkbox"] {
-  width: 14px;
-  height: 14px;
-  accent-color: #6366F1;
+  appearance: none;
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  border: 2px solid #d1d5db;
+  border-radius: 5px;
   cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.legend-filter-item input[type="checkbox"]:checked {
+  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+  border-color: #6366f1;
+}
+
+.legend-filter-item input[type="checkbox"]:checked::after {
+  content: '';
+  position: absolute;
+  left: 4px;
+  top: 1px;
+  width: 4px;
+  height: 8px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+.legend-filter-item input[type="checkbox"]:hover {
+  border-color: #6366f1;
 }
 
 .legend-filter-item.legend-mode {
   cursor: default;
-  margin-left: 8px;
-  padding-left: 16px;
-  border-left: 2px solid #e5e7eb;
+  margin-left: 4px;
+  padding-left: 12px;
+  border-left: 2px solid rgba(99, 102, 241, 0.2);
+  background: transparent !important;
 }
 
 .legend-filter-item.legend-mode:hover {
-  opacity: 1;
+  background: transparent !important;
 }
 
 .legend-color { 
-  width: 14px; 
-  height: 14px; 
+  width: 12px; 
+  height: 12px; 
   border-radius: 50%; 
   flex-shrink: 0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
 }
 
 #modeIndicator { 
   font-weight: 600; 
   color: #6366F1; 
+}
+
+#modeIndicator span {
+  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 /* Keep old classes for backward compatibility */
@@ -1760,17 +1808,40 @@ svg#bubbleGraph { width: 100%; flex: 1; display: block; padding-top: 60px; min-h
 }
 
 .dark-mode .graph-legend-filter {
-  background: rgba(31, 41, 55, 0.95);
+  background: linear-gradient(135deg, rgba(31, 41, 55, 0.95) 0%, rgba(17, 24, 39, 0.95) 100%);
   color: #e5e7eb;
   border-color: rgba(255, 255, 255, 0.1);
+  box-shadow: 
+    0 4px 20px rgba(0, 0, 0, 0.3),
+    0 1px 3px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.dark-mode .legend-filter-item:hover {
+  background: rgba(139, 92, 246, 0.15);
+}
+
+.dark-mode .legend-filter-item:has(input:checked) {
+  background: rgba(139, 92, 246, 0.2);
+}
+
+.dark-mode .legend-filter-item input[type="checkbox"] {
+  border-color: #4b5563;
+}
+
+.dark-mode .legend-filter-item input[type="checkbox"]:hover {
+  border-color: #818cf8;
 }
 
 .dark-mode .legend-filter-item.legend-mode {
-  border-left-color: #4b5563;
+  border-left-color: rgba(139, 92, 246, 0.3);
 }
 
-.dark-mode #modeIndicator {
-  color: #818cf8;
+.dark-mode #modeIndicator span {
+  background: linear-gradient(135deg, #818cf8 0%, #a78bfa 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 /* Document Gallery Styles */
