@@ -2,6 +2,9 @@
   const STORAGE_KEY = 'st_keywords_v1';
   const CONNECTIONS_KEY = 'st_connections_v1';
   
+  // Track selected keywords for bulk operations
+  let selectedKeywords = new Set();
+  
   function load(){ 
     if (window.ShopThatData) return window.ShopThatData.getKeywords();
     try { return JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]'); } catch { return []; } 
@@ -22,6 +25,108 @@
       window.ShopThatData.saveConnections(arr);
     } else {
       localStorage.setItem(CONNECTIONS_KEY, JSON.stringify(arr)); 
+    }
+  }
+  
+  // Confirmation modal
+  function showConfirmModal(title, message, onConfirm) {
+    // Remove existing modal if any
+    const existing = document.getElementById('confirmModal');
+    if (existing) existing.remove();
+    
+    const modal = document.createElement('div');
+    modal.id = 'confirmModal';
+    modal.className = 'confirm-modal-overlay';
+    modal.innerHTML = `
+      <div class="confirm-modal">
+        <div class="confirm-modal__header">
+          <h3>${title}</h3>
+        </div>
+        <div class="confirm-modal__body">
+          <p>${message}</p>
+        </div>
+        <div class="confirm-modal__footer">
+          <button class="btn btn--secondary" id="confirmCancel">Cancel</button>
+          <button class="btn btn--danger" id="confirmDelete">Delete</button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(modal);
+    
+    // Add event listeners
+    document.getElementById('confirmCancel').addEventListener('click', () => {
+      modal.remove();
+    });
+    
+    document.getElementById('confirmDelete').addEventListener('click', () => {
+      onConfirm();
+      modal.remove();
+    });
+    
+    // Close on overlay click
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) modal.remove();
+    });
+    
+    // Close on Escape
+    const escHandler = (e) => {
+      if (e.key === 'Escape') {
+        modal.remove();
+        document.removeEventListener('keydown', escHandler);
+      }
+    };
+    document.addEventListener('keydown', escHandler);
+  }
+  
+  // Update bulk action bar visibility
+  function updateBulkActionBar() {
+    let bar = document.getElementById('bulkActionBar');
+    if (selectedKeywords.size > 0) {
+      if (!bar) {
+        bar = document.createElement('div');
+        bar.id = 'bulkActionBar';
+        bar.className = 'bulk-action-bar';
+        bar.innerHTML = `
+          <span class="bulk-action-bar__count"><span id="selectedCount">0</span> selected</span>
+          <button class="btn btn--secondary" id="bulkDeselectAll">Deselect All</button>
+          <button class="btn btn--danger" id="bulkDelete">Delete Selected</button>
+        `;
+        document.querySelector('.keywords').insertBefore(bar, document.querySelector('.keywords-gallery'));
+        
+        document.getElementById('bulkDeselectAll').addEventListener('click', () => {
+          selectedKeywords.clear();
+          renderWithSearch(true);
+        });
+        
+        document.getElementById('bulkDelete').addEventListener('click', () => {
+          const count = selectedKeywords.size;
+          showConfirmModal(
+            'Delete Selected Keywords',
+            `Are you sure you want to delete ${count} keyword${count > 1 ? 's' : ''}? This will also remove all their connections.`,
+            () => {
+              const arr = load();
+              const conns = loadConnections();
+              
+              // Remove selected keywords
+              const newArr = arr.filter(k => !selectedKeywords.has(k.name));
+              
+              // Remove connections involving selected keywords
+              const newConns = conns.filter(c => 
+                !selectedKeywords.has(c.source) && !selectedKeywords.has(c.target)
+              );
+              
+              save(newArr);
+              saveConnections(newConns);
+              selectedKeywords.clear();
+              renderWithSearch(true);
+            }
+          );
+        });
+      }
+      document.getElementById('selectedCount').textContent = selectedKeywords.size;
+      bar.style.display = 'flex';
+    } else if (bar) {
+      bar.style.display = 'none';
     }
   }
 
@@ -121,10 +226,23 @@
     );
   }
   
-  function renderWithSearch() {
+  function renderWithSearch(preserveScroll = false) {
+    // The scrollable container is #main.keywords with overflow-y: auto
+    const mainEl = document.getElementById('main');
+    const savedScrollTop = preserveScroll && mainEl ? mainEl.scrollTop : 0;
+    
     const data = load();
     const filteredData = filterData(data);
     renderKeywords(filteredData);
+    
+    if (preserveScroll && mainEl && savedScrollTop > 0) {
+      // Use double RAF to ensure layout is complete before restoring scroll
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          mainEl.scrollTop = savedScrollTop;
+        });
+      });
+    }
   }
   
   function renderKeywords(data) {
@@ -165,34 +283,116 @@
           }).join('')
         : '<span style="color: #9ca3af; font-size: 12px;">No connections</span>';
       
+      const isSelected = selectedKeywords.has(k.name);
+      const isDisabled = k.disabled === true;
       card.innerHTML = `
-        <div class="keyword-card__header">
-          <h3 class="keyword-card__title">${k.name}</h3>
-          <span class="keyword-card__group keyword-card__group--${k.group || 1}">${groupLabels[k.group || 1]}</span>
+        <div class="keyword-card__select">
+          <label class="keyword-checkbox">
+            <input type="checkbox" data-select-keyword="${k.name}" ${isSelected ? 'checked' : ''} />
+            <span class="keyword-checkbox__mark"></span>
+          </label>
         </div>
-        <div class="keyword-card__connections">
-          <div style="font-size: 13px; color: #6b7280; margin-bottom: 4px;">Connections:</div>
-          <div class="keyword-card__connections-list">${connectionBadgesHtml}</div>
-        </div>
-        <div class="keyword-card__level-selector">
-          <label for="level-${actualIdx}">Level:</label>
-          <select id="level-${actualIdx}" class="level-selector" data-keyword-idx="${actualIdx}">
-            <option value="1" ${(k.group || 1) === 1 ? 'selected' : ''}>Top Level</option>
-            <option value="2" ${k.group === 2 ? 'selected' : ''}>Connected</option>
-            <option value="3" ${k.group === 3 ? 'selected' : ''}>Secondary</option>
-            <option value="4" ${k.group === 4 ? 'selected' : ''}>Isolated</option>
-          </select>
-        </div>
-        <div class="keyword-card__actions">
-          <div class="keyword-card__connect">
-            <input type="text" class="input" placeholder="Connect to..." data-keyword="${k.name}" />
-            <button class="btn btn--secondary" data-connect="${k.name}">Connect</button>
+        <div class="keyword-card__content">
+          <div class="keyword-card__header">
+            <h3 class="keyword-card__title">${k.name}</h3>
+            <div class="keyword-card__header-actions">
+              <span class="keyword-card__group keyword-card__group--${k.group || 1}">${groupLabels[k.group || 1]}</span>
+              <label class="keyword-toggle" title="${isDisabled ? 'Enable' : 'Disable'} keyword">
+                <input type="checkbox" data-toggle-keyword="${k.name}" ${!isDisabled ? 'checked' : ''} />
+                <span class="keyword-toggle__slider"></span>
+              </label>
+              <button class="keyword-card__delete-btn" data-delete-keyword="${k.name}" title="Delete keyword">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="3,6 5,6 21,6"></polyline>
+                  <path d="M19,6v14a2,2,0,0,1-2,2H7a2,2,0,0,1-2-2V6m3,0V4a2,2,0,0,1,2-2h4a2,2,0,0,1,2,2v2"></path>
+                </svg>
+              </button>
+            </div>
+          </div>
+          <div class="keyword-card__connections">
+            <div style="font-size: 13px; color: #6b7280; margin-bottom: 4px;">Connections:</div>
+            <div class="keyword-card__connections-list">${connectionBadgesHtml}</div>
+          </div>
+          <div class="keyword-card__level-selector">
+            <label for="level-${actualIdx}">Level:</label>
+            <select id="level-${actualIdx}" class="level-selector" data-keyword-idx="${actualIdx}">
+              <option value="1" ${(k.group || 1) === 1 ? 'selected' : ''}>Top Level</option>
+              <option value="2" ${k.group === 2 ? 'selected' : ''}>Connected</option>
+              <option value="3" ${k.group === 3 ? 'selected' : ''}>Secondary</option>
+              <option value="4" ${k.group === 4 ? 'selected' : ''}>Isolated</option>
+            </select>
+          </div>
+          <div class="keyword-card__actions">
+            <div class="keyword-card__connect">
+              <input type="text" class="input" placeholder="Connect to..." data-keyword="${k.name}" />
+              <button class="btn btn--secondary" data-connect="${k.name}">Connect</button>
+            </div>
           </div>
         </div>
       `;
+      if (isSelected) card.classList.add('keyword-card--selected');
+      if (isDisabled) card.classList.add('keyword-card--disabled');
       list.appendChild(card);
     });
 
+    // Handle checkbox selection
+    list.querySelectorAll('input[data-select-keyword]').forEach(checkbox => {
+      checkbox.addEventListener('change', () => {
+        const keyword = checkbox.getAttribute('data-select-keyword');
+        const card = checkbox.closest('.keyword-card');
+        if (checkbox.checked) {
+          selectedKeywords.add(keyword);
+          card.classList.add('keyword-card--selected');
+        } else {
+          selectedKeywords.delete(keyword);
+          card.classList.remove('keyword-card--selected');
+        }
+        updateBulkActionBar();
+      });
+    });
+    
+    // Handle disable/enable toggle
+    list.querySelectorAll('input[data-toggle-keyword]').forEach(toggle => {
+      toggle.addEventListener('change', () => {
+        const keyword = toggle.getAttribute('data-toggle-keyword');
+        const arr = load();
+        const kwIdx = arr.findIndex(k => k.name === keyword);
+        if (kwIdx !== -1) {
+          arr[kwIdx].disabled = !toggle.checked;
+          save(arr);
+          renderWithSearch(true);
+        }
+      });
+    });
+    
+    // Handle individual delete buttons
+    list.querySelectorAll('button[data-delete-keyword]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const keyword = btn.getAttribute('data-delete-keyword');
+        showConfirmModal(
+          'Delete Keyword',
+          `Are you sure you want to delete "${keyword}"? This will also remove all its connections.`,
+          () => {
+            const arr = load();
+            const conns = loadConnections();
+            
+            // Remove the keyword
+            const newArr = arr.filter(k => k.name !== keyword);
+            
+            // Remove connections involving this keyword
+            const newConns = conns.filter(c => 
+              c.source !== keyword && c.target !== keyword
+            );
+            
+            save(newArr);
+            saveConnections(newConns);
+            selectedKeywords.delete(keyword);
+            renderWithSearch(true);
+          }
+        );
+      });
+    });
+    
     // Handle connection badge removal
     list.querySelectorAll('button[data-remove-connection]').forEach(btn=>{
       btn.addEventListener('click', ()=>{
@@ -205,9 +405,12 @@
             (c.source === targetKeyword && c.target === sourceKeyword))
         );
         saveConnections(conns);
-        renderWithSearch();
+        renderWithSearch(true);
       });
     });
+    
+    // Update bulk action bar
+    updateBulkActionBar();
 
     // Handle level selector changes
     list.querySelectorAll('.level-selector').forEach(select=>{
@@ -219,7 +422,7 @@
         if (arr[keywordIdx]) {
           arr[keywordIdx].group = newLevel;
           save(arr);
-          renderWithSearch(); // Re-render to update the group badge
+          renderWithSearch(true); // Re-render to update the group badge
         }
       });
     });
@@ -248,7 +451,7 @@
           saveConnections(conns);
         }
         input.value = '';
-        renderWithSearch();
+        renderWithSearch(true);
       });
     });
   }

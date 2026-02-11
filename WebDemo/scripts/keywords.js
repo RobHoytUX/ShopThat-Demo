@@ -28,8 +28,29 @@ console.log('Document ready state:', document.readyState);
     containerExists: !!container
   });
 
-  const width = () => svg.node().clientWidth;
-  const height = () => svg.node().clientHeight;
+  // Get dimensions - use clientWidth/Height if available, otherwise parse viewBox
+  const width = () => {
+    const w = svg.node().clientWidth;
+    if (w > 0) return w;
+    // Fallback to viewBox width
+    const viewBox = svg.attr('viewBox');
+    if (viewBox) {
+      const parts = viewBox.split(' ');
+      return parseFloat(parts[2]) || 800;
+    }
+    return 800;
+  };
+  const height = () => {
+    const h = svg.node().clientHeight;
+    if (h > 0) return h;
+    // Fallback to viewBox height
+    const viewBox = svg.attr('viewBox');
+    if (viewBox) {
+      const parts = viewBox.split(' ');
+      return parseFloat(parts[3]) || 600;
+    }
+    return 600;
+  };
 
   // State management for hierarchical display
   let currentViewMode = 'default'; // 'default' shows primary only, 'expanded' shows selected + connected, 'filtered' shows filtered, 'all' shows all
@@ -102,6 +123,7 @@ console.log('Document ready state:', document.readyState);
   
   // Track hidden groups (will be defined later but declared here for state management)
   let hiddenGroups = new Set();
+  let disabledNodes = new Set(); // Track individually disabled nodes
   let filterState = {
     topLevel: true,
     connected: true,
@@ -111,6 +133,12 @@ console.log('Document ready state:', document.readyState);
 
   // Restaurant graph data (also used for seeding Neo4j). Will be overridden by localStorage if present.
   const defaultNodes = [
+    // ============================================
+    // LVMH ROOT NODE - Central hub connecting all primary nodes
+    // ============================================
+    // Group 0 - Root Node (LVMH) - Dark gradient blue, 4x larger
+    { id: 'LVMH', group: 0, value: 100, isRoot: true },
+    
     // ============================================
     // THE MODERN RESTAURANT
     // ============================================
@@ -314,6 +342,28 @@ console.log('Document ready state:', document.readyState);
     { id: 'Luxury', group: 2, value: 75 }
   ];
   const defaultLinks = [
+    // ============================================
+    // LVMH ROOT CONNECTIONS - Connects to all primary nodes
+    // ============================================
+    { source: 'LVMH', target: 'The Modern' },
+    { source: 'LVMH', target: 'Two Michelin Stars' },
+    { source: 'LVMH', target: 'MoMA Museum' },
+    { source: 'LVMH', target: 'Le Bernardin' },
+    { source: 'LVMH', target: 'Three Michelin Stars' },
+    { source: 'LVMH', target: 'Eric Ripert' },
+    { source: 'LVMH', target: 'Seafood' },
+    { source: 'LVMH', target: 'Cafe Carlyle' },
+    { source: 'LVMH', target: 'The Carlyle' },
+    { source: 'LVMH', target: 'Bemelmans Bar' },
+    { source: 'LVMH', target: 'Art Deco' },
+    { source: 'LVMH', target: 'Luxury Hotel' },
+    { source: 'LVMH', target: 'Jean-Georges Vongerichten' },
+    { source: 'LVMH', target: 'Jean-Georges at The Mark' },
+    { source: 'LVMH', target: 'The Mark Hotel' },
+    { source: 'LVMH', target: 'The Plaza' },
+    { source: 'LVMH', target: 'The St. Regis' },
+    { source: 'LVMH', target: 'The Baccarat' },
+    
     // ============================================
     // THE MODERN CONNECTIONS
     // ============================================
@@ -599,6 +649,28 @@ console.log('Document ready state:', document.readyState);
     }
   }
   
+  // ALWAYS ensure LVMH root node exists and is connected to all primary (group 1) nodes
+  const hasLVMH = initialNodes.some(n => n.id === 'LVMH');
+  if (!hasLVMH) {
+    console.log('Adding LVMH root node');
+    // Add LVMH as root node
+    initialNodes.unshift({ id: 'LVMH', group: 0, value: 100, isRoot: true });
+    
+    // Connect LVMH to all primary (group 1) nodes
+    const primaryNodes = initialNodes.filter(n => n.group === 1);
+    primaryNodes.forEach(node => {
+      // Check if link already exists
+      const linkExists = initialLinks.some(l => 
+        (l.source === 'LVMH' && l.target === node.id) ||
+        (l.source === node.id && l.target === 'LVMH')
+      );
+      if (!linkExists) {
+        initialLinks.push({ source: 'LVMH', target: node.id });
+      }
+    });
+    console.log('Added LVMH with', primaryNodes.length, 'connections');
+  }
+  
   // Set up initial graph data using the new system
   allNodes = initialNodes;
   allLinks = initialLinks;
@@ -622,6 +694,15 @@ console.log('Document ready state:', document.readyState);
 
   // Create gradient definitions for primary and secondary nodes
   const defs = svg.append('defs');
+  
+  // LVMH Root gradient (Group 0) - Dark blue gradient, stands out more
+  const lvmhGradient = defs.append('linearGradient')
+    .attr('id', 'lvmhGradient')
+    .attr('x1', '0%').attr('y1', '0%')
+    .attr('x2', '100%').attr('y2', '100%');
+  lvmhGradient.append('stop').attr('offset', '0%').attr('stop-color', '#1e3a8a'); // dark blue
+  lvmhGradient.append('stop').attr('offset', '50%').attr('stop-color', '#1e40af'); // blue-800
+  lvmhGradient.append('stop').attr('offset', '100%').attr('stop-color', '#312e81'); // indigo-900
   
   // Primary gradient (Group 1) - Blue/Purple/Cyan like in screenshots
   const primaryGradient = defs.append('linearGradient')
@@ -660,13 +741,14 @@ console.log('Document ready state:', document.readyState);
   quaternaryGradient.append('stop').attr('offset', '100%').attr('stop-color', '#8b5cf6'); // purple
 
   const color = d3.scaleOrdinal()
-    .domain([1, 2, 3, 4])
-    .range(['url(#primaryGradient)', 'url(#secondaryGradient)', 'url(#tertiaryGradient)', 'url(#quaternaryGradient)']);
-  const baseRadius = d3.scaleSqrt().domain([10, 90]).range([30, 70]);
+    .domain([0, 1, 2, 3, 4])
+    .range(['url(#lvmhGradient)', 'url(#primaryGradient)', 'url(#secondaryGradient)', 'url(#tertiaryGradient)', 'url(#quaternaryGradient)']);
+  const baseRadius = d3.scaleSqrt().domain([10, 100]).range([30, 70]);
   
-  // Primary nodes (group 1) are slightly larger than secondary nodes
+  // LVMH root node (group 0) is 3x larger, primary nodes slightly larger than others
   function radius(value, group) {
     const base = baseRadius(value);
+    if (group === 0) return 140; // LVMH is fixed at 140px radius (about 3x primary size)
     return group === 1 ? base * 1.1 : base;
   }
 
@@ -675,35 +757,104 @@ console.log('Document ready state:', document.readyState);
   let clickedNode = null;
 
   function computeFontSizeForRadius(r){
-    // Reduced by 2px from original
-    return Math.max(8, Math.min(16, Math.round(r * 0.28) - 2));
+    // Scale font size based on radius, with larger max for LVMH node
+    if (r >= 140) {
+      // Large LVMH node - bigger font
+      return 32;
+    }
+    // Base calculation - will be adjusted by wrapText if needed
+    return Math.max(8, Math.min(16, Math.round(r * 0.32)));
   }
 
-  function wrapText(textSel, label, maxWidth){
+  function wrapText(textSel, label, nodeRadius){
     textSel.text(null);
     const words = String(label||'').split(/\s+/).filter(Boolean);
-    let line = [];
-    let lineNumber = 0;
-    const lineHeight = 1.1;
-    let tspan = textSel.append('tspan').attr('x',0).attr('y',0).attr('dy','0em');
-    for(const word of words){
-      line.push(word);
-      tspan.text(line.join(' '));
-      if (tspan.node().getComputedTextLength() > maxWidth){
-        line.pop();
-        tspan.text(line.join(' '));
-        line = [word];
-        tspan = textSel.append('tspan').attr('x',0).attr('y',0).attr('dy', `${++lineNumber * lineHeight}em`).text(word);
+    if (words.length === 0) return;
+    
+    // Calculate available width (use ~80% of diameter for text)
+    const maxWidth = nodeRadius * 1.6;
+    const lineHeight = 1.15;
+    
+    // Get the current font size
+    let fontSize = parseFloat(textSel.style('font-size')) || 12;
+    const minFontSize = 7;
+    
+    // Try to fit text, reducing font size if necessary
+    let lines = [];
+    let attempts = 0;
+    const maxAttempts = 10;
+    
+    while (attempts < maxAttempts) {
+      lines = [];
+      let currentLine = [];
+      
+      // Create a temporary tspan to measure
+      const tempTspan = textSel.append('tspan').style('font-size', `${fontSize}px`);
+      
+      for (const word of words) {
+        currentLine.push(word);
+        tempTspan.text(currentLine.join(' '));
+        
+        if (tempTspan.node().getComputedTextLength() > maxWidth && currentLine.length > 1) {
+          currentLine.pop();
+          lines.push(currentLine.join(' '));
+          currentLine = [word];
+        }
       }
+      if (currentLine.length > 0) {
+        lines.push(currentLine.join(' '));
+      }
+      
+      tempTspan.remove();
+      
+      // Check if text height fits in the circle (use ~70% of diameter for height)
+      const maxHeight = nodeRadius * 1.4;
+      const textHeight = lines.length * fontSize * lineHeight;
+      
+      // Also check if any single line is too wide
+      let anyLineTooWide = false;
+      const checkTspan = textSel.append('tspan').style('font-size', `${fontSize}px`);
+      for (const line of lines) {
+        checkTspan.text(line);
+        if (checkTspan.node().getComputedTextLength() > maxWidth) {
+          anyLineTooWide = true;
+          break;
+        }
+      }
+      checkTspan.remove();
+      
+      if (textHeight <= maxHeight && !anyLineTooWide) {
+        break; // Text fits!
+      }
+      
+      // Reduce font size and try again
+      fontSize = Math.max(minFontSize, fontSize - 1);
+      if (fontSize <= minFontSize) break;
+      attempts++;
     }
-    textSel.attr('dy', `${-(lineNumber * lineHeight)/2}em`);
+    
+    // Apply the final font size
+    textSel.style('font-size', `${fontSize}px`);
+    
+    // Calculate vertical offset to center the text block
+    const totalLines = lines.length;
+    const startOffset = -((totalLines - 1) * lineHeight) / 2;
+    
+    // Create the actual tspans
+    lines.forEach((lineText, i) => {
+      textSel.append('tspan')
+        .attr('x', 0)
+        .attr('dy', i === 0 ? `${startOffset}em` : `${lineHeight}em`)
+        .attr('dominant-baseline', 'middle')
+        .text(lineText);
+    });
   }
 
   // Function to determine which nodes to show based on current mode
   function getVisibleNodes() {
     if (currentViewMode === 'default') {
-      // Only show primary keywords (Group 1) on page load
-      return allNodes.filter(node => node.group === 1);
+      // Show LVMH root node (Group 0) and all primary nodes (Group 1) on page load
+      return allNodes.filter(node => node.group === 0 || node.group === 1);
     } else if (currentViewMode === 'expanded' && selectedNode) {
       // Show selected node and all connected nodes
       const connectedNodeIds = new Set();
@@ -880,7 +1031,7 @@ console.log('Document ready state:', document.readyState);
   function updateModeIndicator() {
     const modeIndicator = document.getElementById('modeIndicator');
     if (modeIndicator) {
-      let modeText = 'Mode: Primary Keywords';
+      let modeText = 'Mode: LVMH + Primary';
       if (currentViewMode === 'expanded' && selectedNode) {
         modeText = `Mode: "${selectedNode.id}" + Connected`;
       } else if (currentViewMode === 'filtered') {
@@ -902,15 +1053,45 @@ console.log('Document ready state:', document.readyState);
 
   const centerForce = d3.forceCenter(0, 0);
   const sim = d3.forceSimulation(graphNodes)
-    .force('link', d3.forceLink(graphLinks).id(d => d.id).distance(20).strength(0.3))
-    .force('charge', d3.forceManyBody().strength(-15).distanceMax(150))
+    .force('link', d3.forceLink(graphLinks).id(d => d.id).distance(20).strength(0.2))
+    .force('charge', d3.forceManyBody().strength(-10).distanceMax(100))
     .force('center', centerForce)
-    .force('collision', d3.forceCollide().radius(d => radius(d.value, d.group) + 4).strength(0.9).iterations(3))
+    .force('collision', d3.forceCollide().radius(d => radius(d.value, d.group) + 2).strength(0.8).iterations(2))
     .alphaDecay(0.05)
     .velocityDecay(0.85)
     .alphaMin(0.005)
+    .force('orbit', () => {
+      // Solar system force: keep primary nodes in tight orbit around LVMH
+      if (currentViewMode !== 'default') return;
+      
+      const lvmhNode = graphNodes.find(n => n.group === 0);
+      if (!lvmhNode) return;
+      
+      const w = width();
+      const h = height();
+      const centerX = w / 2;
+      const centerY = h / 2;
+      const lvmhRadius = radius(lvmhNode.value, lvmhNode.group);
+      const orbitRadius = lvmhRadius + 30; // Tight orbit
+      
+      const otherNodes = graphNodes.filter(n => n.group !== 0);
+      
+      otherNodes.forEach((node, i) => {
+        const targetAngle = (i / otherNodes.length) * 2 * Math.PI - Math.PI / 2;
+        const targetX = centerX + Math.cos(targetAngle) * orbitRadius;
+        const targetY = centerY + Math.sin(targetAngle) * orbitRadius;
+        
+        // Stronger force toward target position for tighter grouping
+        const dx = targetX - node.x;
+        const dy = targetY - node.y;
+        node.vx += dx * 0.08;
+        node.vy += dy * 0.08;
+      });
+    })
     .force('cluster', () => {
-      // Strong force to keep nodes tightly clustered in center
+      // Cluster force for non-default modes
+      if (currentViewMode === 'default') return;
+      
       const w = width();
       const h = height();
       const centerX = w / 2;
@@ -918,16 +1099,18 @@ console.log('Document ready state:', document.readyState);
       const maxDistance = Math.min(w, h) * 0.25;
       
       graphNodes.forEach(node => {
+        if (node.fx !== null) return; // Skip fixed nodes
+        
         const dx = node.x - centerX;
         const dy = node.y - centerY;
         const distance = Math.sqrt(dx * dx + dy * dy);
         
-        // Strong centering force to pull nodes together
+        // Centering force
         const centeringForce = 0.04;
         node.vx -= dx * centeringForce;
         node.vy -= dy * centeringForce;
         
-        // Very strong force if outside bounds
+        // Bound force
         if (distance > maxDistance) {
           const boundForce = (distance - maxDistance) * 0.1;
           node.vx -= (dx / distance) * boundForce;
@@ -970,6 +1153,19 @@ console.log('Document ready state:', document.readyState);
 
   // Track transition state
   let isTransitioning = false;
+  let isLoadingNodes = false; // Disable hover during node loading
+  
+  // Wait for mouse movement before re-enabling hover
+  function waitForMouseMoveToEnableHover() {
+    const handler = () => {
+      isLoadingNodes = false;
+      svg.node().removeEventListener('mousemove', handler);
+      document.removeEventListener('mousemove', handler);
+    };
+    // Listen on both SVG and document to catch any mouse movement
+    svg.node().addEventListener('mousemove', handler, { once: true });
+    document.addEventListener('mousemove', handler, { once: true });
+  }
   
   function setGraphData(newNodes, newLinks, animate = true){
     console.log('setGraphData called with:', {
@@ -1004,6 +1200,10 @@ console.log('Document ready state:', document.readyState);
     // If animating, handle transitions
     if (animate && (enteringNodes.length > 0 || exitingNodes.length > 0)) {
       isTransitioning = true;
+      isLoadingNodes = true; // Disable hover during loading
+      
+      // Disable pointer events on nodes during transition
+      gNodes.style('pointer-events', 'none');
       
       // First, fade out exiting nodes quickly
       const exitSelection = gNodes.selectAll('g.node')
@@ -1032,6 +1232,13 @@ console.log('Document ready state:', document.readyState);
       setTimeout(() => {
         performGraphUpdate(visibleNodes, visibleLinks, centerX, centerY, true);
         isTransitioning = false;
+        
+        // Re-enable hover only after user moves mouse (after a short delay for animations)
+        setTimeout(() => {
+          gNodes.style('pointer-events', 'auto');
+          // Wait for mouse movement to re-enable hover
+          waitForMouseMoveToEnableHover();
+        }, 400); // Wait for entry animations to finish
       }, 160);
     } else {
       performGraphUpdate(visibleNodes, visibleLinks, centerX, centerY, false);
@@ -1044,15 +1251,56 @@ console.log('Document ready state:', document.readyState);
     graphNodes = newVisibleNodes;
     graphLinks = newVisibleLinks;
     
-    // Reset ALL node positions to center for tight grouping
-    graphNodes.forEach((n, i) => {
-      const angle = (i / graphNodes.length) * 2 * Math.PI;
-      const clusterRadius = 20;
-      n.x = centerX + Math.cos(angle) * clusterRadius;
-      n.y = centerY + Math.sin(angle) * clusterRadius;
-      n.vx = 0;
-      n.vy = 0;
+    console.log('performGraphUpdate called:', {
+      nodeCount: graphNodes.length,
+      centerX, centerY,
+      animateEntry,
+      viewMode: currentViewMode
     });
+    
+    // Check if we have LVMH in this set (solar system layout)
+    const lvmhNode = graphNodes.find(n => n.group === 0);
+    const otherNodes = graphNodes.filter(n => n.group !== 0);
+    
+    if (lvmhNode && currentViewMode === 'default') {
+      // Solar system layout: LVMH at center, primary nodes in tight orbit
+      const lvmhRadius = radius(lvmhNode.value, lvmhNode.group);
+      const orbitRadius = lvmhRadius + 30; // Tight orbit around LVMH
+      
+      // Position LVMH at center
+      lvmhNode.x = centerX;
+      lvmhNode.y = centerY;
+      lvmhNode.vx = 0;
+      lvmhNode.vy = 0;
+      lvmhNode.fx = centerX; // Fix position so simulation doesn't move it
+      lvmhNode.fy = centerY;
+      
+      // Position primary nodes in a circle around LVMH
+      otherNodes.forEach((n, i) => {
+        const angle = (i / otherNodes.length) * 2 * Math.PI - Math.PI / 2; // Start from top
+        n.x = centerX + Math.cos(angle) * orbitRadius;
+        n.y = centerY + Math.sin(angle) * orbitRadius;
+        n.vx = 0;
+        n.vy = 0;
+      });
+      
+      console.log('Solar system layout: LVMH at center, ' + otherNodes.length + ' nodes in orbit');
+    } else {
+      // Standard tight cluster layout for other view modes
+      graphNodes.forEach((n, i) => {
+        // Unfix LVMH position if we're not in default mode
+        if (n.group === 0) {
+          n.fx = null;
+          n.fy = null;
+        }
+        const angle = (i / graphNodes.length) * 2 * Math.PI;
+        const clusterRadius = graphNodes.length === 1 ? 0 : 20;
+        n.x = centerX + Math.cos(angle) * clusterRadius;
+        n.y = centerY + Math.sin(angle) * clusterRadius;
+        n.vx = 0;
+        n.vy = 0;
+      });
+    }
 
     // Update links
     link = gLinks.selectAll('line').data(graphLinks, l => {
@@ -1078,7 +1326,7 @@ console.log('Document ready state:', document.readyState);
       enter => {
         const g = enter.append('g')
           .attr('class', 'node')
-          .style('cursor', 'pointer')
+          .style('cursor', d => d.group === 0 ? 'default' : 'pointer') // LVMH not clickable
           .style('opacity', 0)
           .attr('transform', `translate(${centerX},${centerY}) scale(0.5)`);
         
@@ -1089,13 +1337,15 @@ console.log('Document ready state:', document.readyState);
       
       const text = g.append('text')
           .attr('text-anchor', 'middle')
+          .attr('dominant-baseline', 'middle')
           .attr('fill', '#fff')
-          .style('font-weight', '700');
+          .style('font-weight', '600')
+          .style('pointer-events', 'none');
         
         text.each(function(d) {
-        const r = radius(d.value, d.group);
-        d3.select(this).style('font-size', `${computeFontSizeForRadius(r)}px`);
-        wrapText(d3.select(this), d.id, r * 1.6);
+          const r = radius(d.value, d.group);
+          d3.select(this).style('font-size', `${computeFontSizeForRadius(r)}px`);
+          wrapText(d3.select(this), d.id, r);
         });
         
         // Animate entry
@@ -1105,9 +1355,18 @@ console.log('Document ready state:', document.readyState);
             .delay((d, i) => i * 20)
             .ease(d3.easeCubicOut)
             .style('opacity', 1)
-            .attr('transform', d => `translate(${Math.round(d.x)},${Math.round(d.y)}) scale(1)`);
+            .attr('transform', d => `translate(${Math.round(d.x || centerX)},${Math.round(d.y || centerY)}) scale(1)`);
         } else {
+          // Ensure valid positions - fallback to center if NaN
+          g.each(function(d) {
+            if (isNaN(d.x) || isNaN(d.y)) {
+              d.x = centerX;
+              d.y = centerY;
+              console.log('Fixed NaN position for', d.id, 'to', centerX, centerY);
+            }
+          });
           g.style('opacity', 1).attr('transform', d => `translate(${Math.round(d.x)},${Math.round(d.y)})`);
+          console.log('Node positions after entry:', graphNodes.map(n => ({ id: n.id, x: n.x, y: n.y })));
         }
         
         return g;
@@ -1129,19 +1388,19 @@ console.log('Document ready state:', document.readyState);
     
     // Re-attach event handlers
     node.on('mouseenter', (event, d) => {
-      if (isTransitioning) return;
+      if (isTransitioning || isLoadingNodes) return;
       hoveredNode = d;
       highlightConnections(d);
     });
     
     node.on('mouseleave', (event, d) => {
-      if (isTransitioning) return;
+      if (isTransitioning || isLoadingNodes) return;
       hoveredNode = null;
       resetHighlighting();
     });
     
     node.on('click', (event, d) => {
-      if (isTransitioning) return;
+      if (isTransitioning || isLoadingNodes) return;
       event.stopPropagation();
       handleNodeClick(d);
     });
@@ -1193,6 +1452,11 @@ console.log('Document ready state:', document.readyState);
       return;
     }
     
+    // LVMH (group 0) is not clickable - it's always shown with details
+    if (d.group === 0) {
+      return;
+    }
+    
     clickedNode = d;
     hoveredNode = null;
     isHoverClustering = false;
@@ -1211,7 +1475,7 @@ console.log('Document ready state:', document.readyState);
       currentViewMode = 'default';
       clickedNode = null;
       setGraphData(allNodes, allLinks, true);
-      closeDrawer();
+      showLVMHDetails(); // Show LVMH details when going back to default
     } else if (currentViewMode === 'expanded') {
       // Save current state before switching nodes
       pushState();
@@ -1225,6 +1489,134 @@ console.log('Document ready state:', document.readyState);
       highlightConnections(d);
       openDrawer(d);
     }
+  }
+  
+  // Show LVMH details in sidebar (used on page load)
+  function showLVMHDetails() {
+    const lvmhNode = allNodes.find(n => n.group === 0);
+    if (lvmhNode) {
+      const connections = allLinks.filter(l => {
+        const sourceId = typeof l.source === 'object' ? l.source.id : l.source;
+        const targetId = typeof l.target === 'object' ? l.target.id : l.target;
+        return sourceId === 'LVMH' || targetId === 'LVMH';
+      });
+      const relatedKeywords = connections.map(l => {
+        const sourceId = typeof l.source === 'object' ? l.source.id : l.source;
+        const targetId = typeof l.target === 'object' ? l.target.id : l.target;
+        return sourceId === 'LVMH' ? targetId : sourceId;
+      });
+      
+      drawerTitle.textContent = 'LVMH';
+      drawerBody.innerHTML = `
+        <div class="sidebar-content">
+          <div class="sidebar-stats">
+            <div class="sidebar-stat">
+              <span class="sidebar-stat-value">${relatedKeywords.length}</span>
+              <span class="sidebar-stat-label">Primary Keywords</span>
+            </div>
+            <div class="sidebar-stat">
+              <span class="sidebar-stat-value">${allNodes.length}</span>
+              <span class="sidebar-stat-label">Total Keywords</span>
+            </div>
+          </div>
+          <div class="sidebar-section">
+            <div class="sidebar-section-label">Description</div>
+            <p class="sidebar-description">LVMH is the central hub connecting all primary keywords in the knowledge graph. Click on any primary keyword to explore its connections.</p>
+          </div>
+          <div class="sidebar-section">
+            <div class="sidebar-section-header">
+              <div class="sidebar-section-label">Primary Keywords</div>
+              <button class="sidebar-reset-btn" id="resetChipsBtn" title="Reset all"${disabledNodes.size === 0 ? ' disabled' : ''}>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+                  <path d="M3 3v5h5"/>
+                </svg>
+                Reset
+              </button>
+            </div>
+            <p class="sidebar-hint">Click a keyword to toggle visibility</p>
+            <div class="sidebar-chips">
+              ${relatedKeywords.map(kw => `<span class="sidebar-chip sidebar-chip--toggle${disabledNodes.has(kw) ? ' sidebar-chip--disabled' : ''}" data-keyword="${kw}">${kw}</span>`).join('')}
+            </div>
+          </div>
+        </div>
+      `;
+      
+      // Add click handlers to chips
+      attachChipClickHandlers();
+    }
+  }
+  
+  // Attach click handlers to sidebar chips for toggling node visibility
+  function attachChipClickHandlers() {
+    const chips = drawerBody.querySelectorAll('.sidebar-chip--toggle');
+    const resetBtn = drawerBody.querySelector('#resetChipsBtn');
+    
+    // Update reset button state
+    function updateResetBtnState() {
+      if (resetBtn) {
+        resetBtn.disabled = disabledNodes.size === 0;
+      }
+    }
+    
+    chips.forEach(chip => {
+      chip.addEventListener('click', (e) => {
+        const keyword = chip.dataset.keyword;
+        toggleNodeDisabled(keyword);
+        chip.classList.toggle('sidebar-chip--disabled');
+        updateResetBtnState();
+      });
+    });
+    
+    // Reset button handler
+    if (resetBtn) {
+      resetBtn.addEventListener('click', () => {
+        // Clear all disabled nodes
+        disabledNodes.clear();
+        
+        // Update all chips to enabled state
+        chips.forEach(chip => {
+          chip.classList.remove('sidebar-chip--disabled');
+        });
+        
+        // Update node visuals
+        updateNodeDisabledStates();
+        
+        // Disable the reset button
+        resetBtn.disabled = true;
+      });
+    }
+  }
+  
+  // Toggle a node's disabled state
+  function toggleNodeDisabled(nodeId) {
+    if (disabledNodes.has(nodeId)) {
+      disabledNodes.delete(nodeId);
+    } else {
+      disabledNodes.add(nodeId);
+    }
+    
+    // Update node appearance
+    updateNodeDisabledStates();
+  }
+  
+  // Update the visual state of disabled nodes
+  function updateNodeDisabledStates() {
+    node.each(function(d) {
+      const nodeEl = d3.select(this);
+      const isDisabled = disabledNodes.has(d.id);
+      
+      nodeEl.select('circle')
+        .transition()
+        .duration(200)
+        .attr('opacity', isDisabled ? 0.25 : 0.9)
+        .style('filter', isDisabled ? 'grayscale(0.8) brightness(1.3)' : 'none');
+      
+      nodeEl.select('text')
+        .transition()
+        .duration(200)
+        .attr('opacity', isDisabled ? 0.4 : 1);
+    });
   }
 
   function resize(){
@@ -1268,15 +1660,28 @@ console.log('Document ready state:', document.readyState);
         exists: !!canvasEl
       });
       
+      // IMPORTANT: Set SVG dimensions FIRST before creating nodes
+      const w = canvasEl?.clientWidth || 800;
+      const h = Math.max(window.innerHeight * 0.7, 400);
+      svg.attr('viewBox', `0 0 ${w} ${h}`).attr('width', w).attr('height', h);
+      centerForce.x(w/2).y(h/2);
+      
       console.log('About to initialize with data:', {
         allNodes: allNodes.length,
         allLinks: allLinks.length,
-        sampleNodes: allNodes.slice(0, 2)
+        sampleNodes: allNodes.slice(0, 2),
+        canvasWidth: w,
+        canvasHeight: h
       });
       
       // Initialize the graph data properly (no animation on initial load)
       setGraphData(allNodes, allLinks, false);
+      
+      // Call resize to finalize positioning
       resize();
+      
+      // Show LVMH details in sidebar on load
+      setTimeout(showLVMHDetails, 150);
       
       console.log('After initialization:');
       console.log('Graph nodes in simulation:', sim.nodes().length);
@@ -1296,8 +1701,22 @@ console.log('Document ready state:', document.readyState);
 
   function openDrawer(d){
     drawerTitle.textContent = d.id;
-    const connections = graphLinks.filter(l=> (l.source.id?l.source.id:l.source)===d.id || (l.target.id?l.target.id:l.target)===d.id);
-    const relatedKeywords = connections.map(l => (l.source.id?l.source.id:l.source)===d.id ? (l.target.id?l.target.id:l.target) : (l.source.id?l.source.id:l.source));
+    
+    // Use allLinks to get ALL connections, not just visible ones
+    const connections = allLinks.filter(l => {
+      const sourceId = typeof l.source === 'object' ? l.source.id : l.source;
+      const targetId = typeof l.target === 'object' ? l.target.id : l.target;
+      return sourceId === d.id || targetId === d.id;
+    });
+    
+    const relatedKeywords = connections.map(l => {
+      const sourceId = typeof l.source === 'object' ? l.source.id : l.source;
+      const targetId = typeof l.target === 'object' ? l.target.id : l.target;
+      return sourceId === d.id ? targetId : sourceId;
+    });
+    
+    // Remove duplicates and sort
+    const uniqueKeywords = [...new Set(relatedKeywords)].sort();
     
     drawerBody.innerHTML = `
       <div class="sidebar-content">
@@ -1307,7 +1726,7 @@ console.log('Document ready state:', document.readyState);
             <span class="sidebar-stat-label">Volume</span>
           </div>
           <div class="sidebar-stat">
-            <span class="sidebar-stat-value">${connections.length}</span>
+            <span class="sidebar-stat-value">${uniqueKeywords.length}</span>
             <span class="sidebar-stat-label">Connections</span>
           </div>
           </div>
@@ -1316,16 +1735,29 @@ console.log('Document ready state:', document.readyState);
           <p class="sidebar-description">Placeholder description about ${d.id} with sample insights.</p>
         </div>
         <div class="sidebar-section">
-          <div class="sidebar-section-label">Related Keywords</div>
+          <div class="sidebar-section-header">
+            <div class="sidebar-section-label">Related Keywords</div>
+            <button class="sidebar-reset-btn" id="resetChipsBtn" title="Reset all"${disabledNodes.size === 0 ? ' disabled' : ''}>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+                <path d="M3 3v5h5"/>
+              </svg>
+              Reset
+            </button>
+          </div>
+          <p class="sidebar-hint">Click a keyword to toggle visibility</p>
           <div class="sidebar-chips">
-            ${relatedKeywords.length > 0 
-              ? relatedKeywords.map(kw => `<span class="sidebar-chip">${kw}</span>`).join('')
+            ${uniqueKeywords.length > 0 
+              ? uniqueKeywords.map(kw => `<span class="sidebar-chip sidebar-chip--toggle${disabledNodes.has(kw) ? ' sidebar-chip--disabled' : ''}" data-keyword="${kw}">${kw}</span>`).join('')
               : '<span class="sidebar-no-data">No related keywords</span>'
             }
           </div>
         </div>
       </div>
     `;
+    
+    // Add click handlers to chips
+    attachChipClickHandlers();
   }
   
   function closeDrawer(){
@@ -1351,15 +1783,15 @@ console.log('Document ready state:', document.readyState);
   filterInput && filterInput.addEventListener('input', (e)=> applyFilter(e.target.value));
   resetBtn && resetBtn.addEventListener('click', ()=>{ 
     filterInput && (filterInput.value=''); 
-    closeDrawer(); 
     
-    // Reset to default view (primary nodes only)
+    // Reset to default view (LVMH + primary nodes)
     currentViewMode = 'default';
     selectedNode = null;
     clickedNode = null;
     hoveredNode = null;
     isHoverClustering = false;
     originalPositions = {};
+    disabledNodes.clear(); // Clear disabled nodes
     
     // Reset node positions to force re-centering
     allNodes.forEach(node => {
@@ -1370,6 +1802,9 @@ console.log('Document ready state:', document.readyState);
     });
     
     setGraphData(allNodes, allLinks, true);
+    
+    // Show LVMH details in sidebar
+    setTimeout(showLVMHDetails, 200);
     
     // Clear state history on reset
     stateHistory.length = 0;
@@ -1405,7 +1840,7 @@ console.log('Document ready state:', document.readyState);
     // Get current visible nodes based on view mode (before applying hidden filter)
     let availableNodes;
     if (currentViewMode === 'default') {
-      availableNodes = allNodes.filter(n => n.group === 1);
+      availableNodes = allNodes.filter(n => n.group === 0 || n.group === 1); // LVMH + primary on default
     } else if (currentViewMode === 'expanded' && selectedNode) {
       const connectedIds = getConnectedNodeIds(selectedNode);
       availableNodes = allNodes.filter(n => connectedIds.has(n.id));
@@ -1416,7 +1851,7 @@ console.log('Document ready state:', document.readyState);
     // Check which groups exist in available nodes
     const availableGroups = new Set(availableNodes.map(n => n.group));
     
-    // Update each checkbox
+    // Update each checkbox (note: group 0 is LVMH root, not in filter checkboxes)
     const checkboxMap = {
       'filterTopLevel': 1,
       'filterConnected': 2,
@@ -1684,18 +2119,47 @@ console.log('Document ready state:', document.readyState);
   if (window.ShopThatData) {
     // Listen for keyword changes from other pages
     window.ShopThatData.on('keywords', (keywords) => {
-      const newNodes = keywords.map(node => ({
+      let newNodes = keywords.map(node => ({
         id: node.id || node.name,
         group: node.group || 1,
         value: node.value || 50
       }));
-      setGraphData(newNodes, allLinks, false);
+      let newLinks = allLinks.slice();
+      const result = ensureLVMH(newNodes, newLinks);
+      setGraphData(result.nodes, result.links, false);
     });
     
     // Listen for connection changes from other pages
     window.ShopThatData.on('connections', (connections) => {
-      setGraphData(allNodes, connections.slice(), false);
+      let newNodes = allNodes.slice();
+      let newLinks = connections.slice();
+      const result = ensureLVMH(newNodes, newLinks);
+      setGraphData(result.nodes, result.links, false);
     });
+  }
+
+  // Helper function to ensure LVMH is always present
+  function ensureLVMH(nodes, links) {
+    const hasLVMH = nodes.some(n => n.id === 'LVMH');
+    if (!hasLVMH) {
+      // Add LVMH as root node
+      nodes.unshift({ id: 'LVMH', group: 0, value: 100, isRoot: true });
+      
+      // Connect LVMH to all primary (group 1) nodes
+      const primaryNodes = nodes.filter(n => n.group === 1);
+      primaryNodes.forEach(node => {
+        const linkExists = links.some(l => 
+          (l.source === 'LVMH' && l.target === node.id) ||
+          (l.source === node.id && l.target === 'LVMH') ||
+          (l.source?.id === 'LVMH' && l.target?.id === node.id) ||
+          (l.source?.id === node.id && l.target?.id === 'LVMH')
+        );
+        if (!linkExists) {
+          links.push({ source: 'LVMH', target: node.id });
+        }
+      });
+    }
+    return { nodes, links };
   }
 
   // Function to refresh data from shared storage
@@ -1705,13 +2169,18 @@ console.log('Document ready state:', document.readyState);
       const connections = window.ShopThatData.getConnections();
       
       // Convert keywords to D3 format
-      const newNodes = keywords.map(node => ({
+      let newNodes = keywords.map(node => ({
         id: node.id || node.name,
         group: node.group || 1,
         value: node.value || 50
       }));
       
-      setGraphData(newNodes, connections.slice(), false);
+      let newLinks = connections.slice();
+      
+      // Ensure LVMH is always present
+      const result = ensureLVMH(newNodes, newLinks);
+      
+      setGraphData(result.nodes, result.links, false);
     }
   }
 

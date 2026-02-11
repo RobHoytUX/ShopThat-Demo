@@ -8,7 +8,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles/main.css?v=1">
-    <link rel="stylesheet" href="styles/dashboard.css?v=1">
+    <link rel="stylesheet" href="styles/dashboard.css?v=6">
   </head>
   <body class="app app--keywords">
     <aside class="sidebar" aria-label="Primary">
@@ -71,16 +71,6 @@
             <input id="kwFilter" class="input input--compact" type="search" placeholder="Search keywords" />
             <button type="button" id="resetKw" class="btn btn--secondary">Reset</button>
           </div>
-          <div class="control-group">
-            <button type="button" id="showAll" class="btn btn--secondary">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <circle cx="12" cy="12" r="10"></circle>
-                <circle cx="12" cy="12" r="6"></circle>
-                <circle cx="12" cy="12" r="2"></circle>
-              </svg>
-              Show All
-            </button>
-          </div>
         </div>
         <div class="toolbar__right">
           <div class="control-group" role="group" aria-label="Zoom controls">
@@ -138,6 +128,10 @@
             Exit Fullscreen
           </button>
           <div class="graph-legend-filter">
+            <label class="legend-filter-item legend-filter-item--lvmh">
+              <span class="legend-color legend-color--lvmh" style="background: linear-gradient(135deg, #1e3a8a, #1e40af, #312e81);"></span>
+              <span>LVMH (Root)</span>
+            </label>
             <label class="legend-filter-item">
               <input type="checkbox" id="filterTopLevel" checked>
               <span class="legend-color" style="background: linear-gradient(135deg, #06b6d4, #8b5cf6, #6366f1);"></span>
@@ -159,7 +153,7 @@
               <span>Tertiary (Isolated)</span>
             </label>
             <div class="legend-filter-item legend-mode" id="modeIndicator">
-              <span>Mode: Primary Keywords</span>
+              <span>Mode: LVMH + Primary</span>
             </div>
           </div>
           <svg id="bubbleGraph" role="img" aria-label="Keyword knowledge graph"></svg>
@@ -226,7 +220,7 @@
     <script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/neo4j-driver-lite@5.23.0/lib/browser/neo4j-web.min.js"></script>
     <script src="scripts/shared-data.js"></script>
-    <script src="scripts/keywords.js" defer></script>
+    <script src="scripts/keywords.js?v=16" defer></script>
     <script src="scripts/auth.js"></script>
   </body>
 </html>

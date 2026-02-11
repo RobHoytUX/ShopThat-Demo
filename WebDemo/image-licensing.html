@@ -69,10 +69,10 @@
           <div class="toolbar__left">
             <div class="card__tabs">
               <button class="tab-btn active" data-tab="overview">Overview</button>
-              <button class="tab-btn" data-tab="library">Image Library</button>
-              <button class="tab-btn" data-tab="licenses">Licenses</button>
+              <button class="tab-btn" data-tab="instafeed">Instafeed</button>
+              <button class="tab-btn" data-tab="database">Database</button>
+              <button class="tab-btn" data-tab="discovery">Discovery</button>
               <button class="tab-btn" data-tab="analytics">Analytics</button>
-              <button class="tab-btn" data-tab="admin">Admin</button>
             </div>
           </div>
         </section>
@@ -130,128 +130,301 @@
         </section>
       </div>
 
-      <!-- Image Library Tab -->
-      <div class="tab-content" id="library-tab" style="display: none;">
+      <!-- Instafeed Tab -->
+      <div class="tab-content" id="instafeed-tab" style="display: none;">
         <!-- Tab Navigation -->
         <section class="toolbar" aria-label="Navigation Tabs" style="margin-bottom: 1.5rem;">
           <div class="toolbar__left">
             <div class="card__tabs">
               <button class="tab-btn" data-tab="overview">Overview</button>
-              <button class="tab-btn active" data-tab="library">Image Library</button>
-              <button class="tab-btn" data-tab="licenses">Licenses</button>
+              <button class="tab-btn active" data-tab="instafeed">Instafeed</button>
+              <button class="tab-btn" data-tab="database">Database</button>
+              <button class="tab-btn" data-tab="discovery">Discovery</button>
               <button class="tab-btn" data-tab="analytics">Analytics</button>
-              <button class="tab-btn" data-tab="admin">Admin</button>
             </div>
           </div>
         </section>
         
-        <section class="grid" style="grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem;">
-          <article class="card">
-            <img src="https://source.unsplash.com/random/400x300?sig=1" alt="Preview" style="width: 100%; height: 200px; object-fit: cover; border-radius: 8px 8px 0 0;">
-            <div class="card__content" style="padding: 1rem;">
-              <h3 style="font-weight: 600; margin-bottom: 0.5rem;">Nature Photo #1</h3>
-              <p style="font-size: 0.875rem; color: #6b7280; margin-bottom: 1rem;">Royalty-Free | Commercial Use</p>
-              <div style="display: flex; justify-content: space-between; align-items: center;">
-                <span style="font-weight: bold; font-size: 1.125rem;">$25</span>
-                <button class="btn btn--primary btn--sm">License</button>
+        <section class="card" style="margin-bottom: 1.5rem;">
+          <div class="card__header">
+            <h2>Instagram Feed Integration</h2>
+          </div>
+          <div class="card__content" style="padding: 1rem;">
+            <p style="color: #6b7280; margin-bottom: 1.5rem;">Museums, hotels, and partners can enable their Instagram feeds to provide high-quality, curated content for licensing.</p>
+            
+            <div class="keywords-performance-grid">
+              <div class="keyword-performance-item">
+                <div class="keyword-performance-header">
+                  <h3 class="keyword-performance-name">The Carlyle Hotel</h3>
+                  <span class="keyword-performance-rank" style="background: #10B981; color: white;">Connected</span>
+                </div>
+                <div class="keyword-performance-metrics">
+                  <div class="keyword-metric">
+                    <span class="keyword-metric-label">Images Available</span>
+                    <span class="keyword-metric-value usage">342</span>
+                  </div>
+                  <div class="keyword-metric">
+                    <span class="keyword-metric-label">Last Sync</span>
+                    <span class="keyword-metric-value" style="font-size: 14px;">2 hours ago</span>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="keyword-performance-item">
+                <div class="keyword-performance-header">
+                  <h3 class="keyword-performance-name">David Zwirner Gallery</h3>
+                  <span class="keyword-performance-rank" style="background: #10B981; color: white;">Connected</span>
+                </div>
+                <div class="keyword-performance-metrics">
+                  <div class="keyword-metric">
+                    <span class="keyword-metric-label">Images Available</span>
+                    <span class="keyword-metric-value usage">528</span>
+                  </div>
+                  <div class="keyword-metric">
+                    <span class="keyword-metric-label">Last Sync</span>
+                    <span class="keyword-metric-value" style="font-size: 14px;">1 hour ago</span>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="keyword-performance-item">
+                <div class="keyword-performance-header">
+                  <h3 class="keyword-performance-name">MoMA</h3>
+                  <span class="keyword-performance-rank" style="background: #f59e0b; color: white;">Pending</span>
+                </div>
+                <div class="keyword-performance-metrics">
+                  <div class="keyword-metric">
+                    <span class="keyword-metric-label">Images Available</span>
+                    <span class="keyword-metric-value usage">—</span>
+                  </div>
+                  <div class="keyword-metric">
+                    <span class="keyword-metric-label">Status</span>
+                    <span class="keyword-metric-value" style="font-size: 14px;">Awaiting approval</span>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="keyword-performance-item">
+                <div class="keyword-performance-header">
+                  <h3 class="keyword-performance-name">The St. Regis NYC</h3>
+                  <span class="keyword-performance-rank" style="background: #10B981; color: white;">Connected</span>
+                </div>
+                <div class="keyword-performance-metrics">
+                  <div class="keyword-metric">
+                    <span class="keyword-metric-label">Images Available</span>
+                    <span class="keyword-metric-value usage">189</span>
+                  </div>
+                  <div class="keyword-metric">
+                    <span class="keyword-metric-label">Last Sync</span>
+                    <span class="keyword-metric-value" style="font-size: 14px;">4 hours ago</span>
+                  </div>
+                </div>
               </div>
             </div>
-          </article>
-          <article class="card">
-            <img src="https://source.unsplash.com/random/400x300?sig=2" alt="Preview" style="width: 100%; height: 200px; object-fit: cover; border-radius: 8px 8px 0 0;">
-            <div class="card__content" style="padding: 1rem;">
-              <h3 style="font-weight: 600; margin-bottom: 0.5rem;">Nature Photo #2</h3>
-              <p style="font-size: 0.875rem; color: #6b7280; margin-bottom: 1rem;">Royalty-Free | Commercial Use</p>
-              <div style="display: flex; justify-content: space-between; align-items: center;">
-                <span style="font-weight: bold; font-size: 1.125rem;">$25</span>
-                <button class="btn btn--primary btn--sm">License</button>
-              </div>
-            </div>
-          </article>
-          <article class="card">
-            <img src="https://source.unsplash.com/random/400x300?sig=3" alt="Preview" style="width: 100%; height: 200px; object-fit: cover; border-radius: 8px 8px 0 0;">
-            <div class="card__content" style="padding: 1rem;">
-              <h3 style="font-weight: 600; margin-bottom: 0.5rem;">Nature Photo #3</h3>
-              <p style="font-size: 0.875rem; color: #6b7280; margin-bottom: 1rem;">Royalty-Free | Commercial Use</p>
-              <div style="display: flex; justify-content: space-between; align-items: center;">
-                <span style="font-weight: bold; font-size: 1.125rem;">$25</span>
-                <button class="btn btn--primary btn--sm">License</button>
-              </div>
-            </div>
-          </article>
-          <article class="card">
-            <img src="https://source.unsplash.com/random/400x300?sig=4" alt="Preview" style="width: 100%; height: 200px; object-fit: cover; border-radius: 8px 8px 0 0;">
-            <div class="card__content" style="padding: 1rem;">
-              <h3 style="font-weight: 600; margin-bottom: 0.5rem;">Nature Photo #4</h3>
-              <p style="font-size: 0.875rem; color: #6b7280; margin-bottom: 1rem;">Royalty-Free | Commercial Use</p>
-              <div style="display: flex; justify-content: space-between; align-items: center;">
-                <span style="font-weight: bold; font-size: 1.125rem;">$25</span>
-                <button class="btn btn--primary btn--sm">License</button>
-              </div>
-            </div>
-          </article>
-          <article class="card">
-            <img src="https://source.unsplash.com/random/400x300?sig=5" alt="Preview" style="width: 100%; height: 200px; object-fit: cover; border-radius: 8px 8px 0 0;">
-            <div class="card__content" style="padding: 1rem;">
-              <h3 style="font-weight: 600; margin-bottom: 0.5rem;">Nature Photo #5</h3>
-              <p style="font-size: 0.875rem; color: #6b7280; margin-bottom: 1rem;">Royalty-Free | Commercial Use</p>
-              <div style="display: flex; justify-content: space-between; align-items: center;">
-                <span style="font-weight: bold; font-size: 1.125rem;">$25</span>
-                <button class="btn btn--primary btn--sm">License</button>
-              </div>
-            </div>
-          </article>
-          <article class="card">
-            <img src="https://source.unsplash.com/random/400x300?sig=6" alt="Preview" style="width: 100%; height: 200px; object-fit: cover; border-radius: 8px 8px 0 0;">
-            <div class="card__content" style="padding: 1rem;">
-              <h3 style="font-weight: 600; margin-bottom: 0.5rem;">Nature Photo #6</h3>
-              <p style="font-size: 0.875rem; color: #6b7280; margin-bottom: 1rem;">Royalty-Free | Commercial Use</p>
-              <div style="display: flex; justify-content: space-between; align-items: center;">
-                <span style="font-weight: bold; font-size: 1.125rem;">$25</span>
-                <button class="btn btn--primary btn--sm">License</button>
-              </div>
-            </div>
-          </article>
+          </div>
         </section>
       </div>
 
-      <!-- Licenses Tab -->
-      <div class="tab-content" id="licenses-tab" style="display: none;">
+      <!-- Database Tab -->
+      <div class="tab-content" id="database-tab" style="display: none;">
         <!-- Tab Navigation -->
         <section class="toolbar" aria-label="Navigation Tabs" style="margin-bottom: 1.5rem;">
           <div class="toolbar__left">
             <div class="card__tabs">
               <button class="tab-btn" data-tab="overview">Overview</button>
-              <button class="tab-btn" data-tab="library">Image Library</button>
-              <button class="tab-btn active" data-tab="licenses">Licenses</button>
+              <button class="tab-btn" data-tab="instafeed">Instafeed</button>
+              <button class="tab-btn active" data-tab="database">Database</button>
+              <button class="tab-btn" data-tab="discovery">Discovery</button>
               <button class="tab-btn" data-tab="analytics">Analytics</button>
-              <button class="tab-btn" data-tab="admin">Admin</button>
             </div>
           </div>
         </section>
         
-        <section class="grid">
-          <article class="card">
-            <div class="card__content" style="padding: 1.5rem;">
-              <h2 style="font-weight: bold; font-size: 1.125rem; margin-bottom: 0.5rem;">License #10234</h2>
-              <p style="font-size: 0.875rem; color: #6b7280; margin-bottom: 1rem;">Image: Mountain Sunrise | Type: Rights Managed | Expires: 2026-04-12</p>
-              <button class="btn btn--secondary btn--sm">View Details</button>
+        <section class="card">
+          <div class="card__header">
+            <h2>Image Database</h2>
+            <div class="card__actions">
+              <button class="btn btn--primary btn--sm">Upload Images</button>
             </div>
-          </article>
-          <article class="card">
-            <div class="card__content" style="padding: 1.5rem;">
-              <h2 style="font-weight: bold; font-size: 1.125rem; margin-bottom: 0.5rem;">License #10235</h2>
-              <p style="font-size: 0.875rem; color: #6b7280; margin-bottom: 1rem;">Image: Ocean Waves | Type: Royalty-Free | Expires: 2027-01-15</p>
-              <button class="btn btn--secondary btn--sm">View Details</button>
+          </div>
+          <div class="card__content" style="padding: 1.5rem;">
+            <div class="rpv-three-column-layout">
+              <div class="rpv-section-1">
+                <div class="rpv-metrics">
+                  <div class="metric-item">
+                    <span class="metric-label">Total Images</span>
+                    <span class="metric-value rpv-green">3,847</span>
+                    <span class="metric-unit">in database</span>
+                  </div>
+                </div>
+              </div>
+              <div class="rpv-section-2">
+                <div class="benchmark-metrics">
+                  <div class="metric-item">
+                    <span class="metric-label">Licensed</span>
+                    <span class="metric-value traditional-gray">2,156</span>
+                    <span class="metric-unit">active licenses</span>
+                  </div>
+                </div>
+              </div>
+              <div class="rpv-section-1">
+                <div class="rpv-metrics">
+                  <div class="metric-item">
+                    <span class="metric-label">Available</span>
+                    <span class="metric-value rpv-green">1,691</span>
+                    <span class="metric-unit">for licensing</span>
+                  </div>
+                </div>
+              </div>
             </div>
-          </article>
-          <article class="card">
-            <div class="card__content" style="padding: 1.5rem;">
-              <h2 style="font-weight: bold; font-size: 1.125rem; margin-bottom: 0.5rem;">License #10236</h2>
-              <p style="font-size: 0.875rem; color: #6b7280; margin-bottom: 1rem;">Image: Forest Path | Type: Editorial | Expires: 2025-12-31</p>
-              <button class="btn btn--secondary btn--sm">View Details</button>
+            
+            <div style="margin-top: 2rem;">
+              <h3 style="font-size: 1rem; font-weight: 600; margin-bottom: 1rem;">Recent Uploads</h3>
+              <div class="deals-list">
+                <div class="deal-item">
+                  <span class="deal-companies">Kusama Exhibition Photos (24 images)</span>
+                  <span class="deal-amount">Added 2 days ago</span>
+                </div>
+                <div class="deal-item">
+                  <span class="deal-companies">LV Store Interiors (18 images)</span>
+                  <span class="deal-amount">Added 5 days ago</span>
+                </div>
+                <div class="deal-item">
+                  <span class="deal-companies">Product Photography (42 images)</span>
+                  <span class="deal-amount">Added 1 week ago</span>
+                </div>
+              </div>
             </div>
-          </article>
+          </div>
+        </section>
+      </div>
+
+      <!-- Discovery Tab (NEW) -->
+      <div class="tab-content" id="discovery-tab" style="display: none;">
+        <!-- Tab Navigation -->
+        <section class="toolbar" aria-label="Navigation Tabs" style="margin-bottom: 1.5rem;">
+          <div class="toolbar__left">
+            <div class="card__tabs">
+              <button class="tab-btn" data-tab="overview">Overview</button>
+              <button class="tab-btn" data-tab="instafeed">Instafeed</button>
+              <button class="tab-btn" data-tab="database">Database</button>
+              <button class="tab-btn active" data-tab="discovery">Discovery</button>
+              <button class="tab-btn" data-tab="analytics">Analytics</button>
+            </div>
+          </div>
+        </section>
+        
+        <section class="card" style="margin-bottom: 1.5rem;">
+          <div class="card__header">
+            <h2>Image Discovery</h2>
+            <div class="card__actions">
+              <button class="btn btn--secondary btn--sm">Scan New Articles</button>
+            </div>
+          </div>
+          <div class="card__content" style="padding: 1.5rem;">
+            <p style="color: #6b7280; margin-bottom: 1.5rem;">Images automatically extracted from articles and publications for potential licensing opportunities.</p>
+            
+            <div class="rpv-three-column-layout" style="margin-bottom: 2rem;">
+              <div class="rpv-section-1">
+                <div class="rpv-metrics">
+                  <div class="metric-item">
+                    <span class="metric-label">Discovered</span>
+                    <span class="metric-value rpv-green">1,247</span>
+                    <span class="metric-unit">images this month</span>
+                  </div>
+                </div>
+              </div>
+              <div class="rpv-section-2">
+                <div class="benchmark-metrics">
+                  <div class="metric-item">
+                    <span class="metric-label">Pending Review</span>
+                    <span class="metric-value" style="color: #f59e0b;">342</span>
+                    <span class="metric-unit">awaiting approval</span>
+                  </div>
+                </div>
+              </div>
+              <div class="rpv-section-1">
+                <div class="rpv-metrics">
+                  <div class="metric-item">
+                    <span class="metric-label">Approved</span>
+                    <span class="metric-value rpv-green">905</span>
+                    <span class="metric-unit">added to database</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <h3 style="font-size: 1rem; font-weight: 600; margin-bottom: 1rem;">Recent Discoveries</h3>
+            <div class="keywords-performance-grid">
+              <div class="keyword-performance-item">
+                <div class="keyword-performance-header">
+                  <h3 class="keyword-performance-name">Vogue - Kusama Feature</h3>
+                  <span class="keyword-performance-rank">#1</span>
+                </div>
+                <div class="keyword-performance-metrics">
+                  <div class="keyword-metric">
+                    <span class="keyword-metric-label">Images Found</span>
+                    <span class="keyword-metric-value usage">28</span>
+                  </div>
+                  <div class="keyword-metric">
+                    <span class="keyword-metric-label">Quality Score</span>
+                    <span class="keyword-metric-value trend">92%</span>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="keyword-performance-item">
+                <div class="keyword-performance-header">
+                  <h3 class="keyword-performance-name">Financial Times - LV</h3>
+                  <span class="keyword-performance-rank">#2</span>
+                </div>
+                <div class="keyword-performance-metrics">
+                  <div class="keyword-metric">
+                    <span class="keyword-metric-label">Images Found</span>
+                    <span class="keyword-metric-value usage">15</span>
+                  </div>
+                  <div class="keyword-metric">
+                    <span class="keyword-metric-label">Quality Score</span>
+                    <span class="keyword-metric-value trend">88%</span>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="keyword-performance-item">
+                <div class="keyword-performance-header">
+                  <h3 class="keyword-performance-name">Harper's Bazaar</h3>
+                  <span class="keyword-performance-rank">#3</span>
+                </div>
+                <div class="keyword-performance-metrics">
+                  <div class="keyword-metric">
+                    <span class="keyword-metric-label">Images Found</span>
+                    <span class="keyword-metric-value usage">22</span>
+                  </div>
+                  <div class="keyword-metric">
+                    <span class="keyword-metric-label">Quality Score</span>
+                    <span class="keyword-metric-value trend">85%</span>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="keyword-performance-item">
+                <div class="keyword-performance-header">
+                  <h3 class="keyword-performance-name">Artforum</h3>
+                  <span class="keyword-performance-rank">#4</span>
+                </div>
+                <div class="keyword-performance-metrics">
+                  <div class="keyword-metric">
+                    <span class="keyword-metric-label">Images Found</span>
+                    <span class="keyword-metric-value usage">19</span>
+                  </div>
+                  <div class="keyword-metric">
+                    <span class="keyword-metric-label">Quality Score</span>
+                    <span class="keyword-metric-value trend">91%</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </section>
       </div>
 
@@ -262,75 +435,80 @@
           <div class="toolbar__left">
             <div class="card__tabs">
               <button class="tab-btn" data-tab="overview">Overview</button>
-              <button class="tab-btn" data-tab="library">Image Library</button>
-              <button class="tab-btn" data-tab="licenses">Licenses</button>
+              <button class="tab-btn" data-tab="instafeed">Instafeed</button>
+              <button class="tab-btn" data-tab="database">Database</button>
+              <button class="tab-btn" data-tab="discovery">Discovery</button>
               <button class="tab-btn active" data-tab="analytics">Analytics</button>
-              <button class="tab-btn" data-tab="admin">Admin</button>
             </div>
           </div>
         </section>
         
-        <section class="grid" style="grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 1.5rem;">
-          <article class="card">
-            <div class="card__header">
-              <h2>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: inline-block; vertical-align: middle; margin-right: 0.5rem;">
-                  <line x1="18" y1="20" x2="18" y2="10"/>
-                  <line x1="12" y1="20" x2="12" y2="4"/>
-                  <line x1="6" y1="20" x2="6" y2="14"/>
-                </svg>
-                Downloads Trend
-              </h2>
+        <section class="card" style="margin-bottom: 1.5rem;">
+          <div class="card__header">
+            <h2>Image Licensing Analytics</h2>
+          </div>
+          <div class="card__content" style="padding: 1.5rem;">
+            <div class="rpv-three-column-layout" style="margin-bottom: 2rem;">
+              <div class="rpv-section-1">
+                <div class="rpv-metrics">
+                  <div class="metric-item">
+                    <span class="metric-label">Total Revenue</span>
+                    <span class="metric-value rpv-green">$45,230</span>
+                    <span class="metric-unit">this month</span>
+                  </div>
+                </div>
+              </div>
+              <div class="rpv-section-2">
+                <div class="benchmark-metrics">
+                  <div class="metric-item">
+                    <span class="metric-label">Downloads</span>
+                    <span class="metric-value traditional-gray">8,456</span>
+                    <span class="metric-unit">this month</span>
+                  </div>
+                </div>
+              </div>
+              <div class="rpv-section-1">
+                <div class="rpv-metrics">
+                  <div class="metric-item">
+                    <span class="metric-label">Avg. License Value</span>
+                    <span class="metric-value rpv-green">$5.35</span>
+                    <span class="metric-unit">per download</span>
+                  </div>
+                </div>
+              </div>
             </div>
-            <div class="card__content">
-              <p style="color: #6b7280; font-size: 0.875rem;">Top performing images and seasonal trends visualized here.</p>
-            </div>
-          </article>
-          <article class="card">
-            <div class="card__header">
-              <h2>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: inline-block; vertical-align: middle; margin-right: 0.5rem;">
-                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-                </svg>
-                Compliance Summary
-              </h2>
-            </div>
-            <div class="card__content">
-              <p style="color: #6b7280; font-size: 0.875rem;">No disputes detected. All licenses are active and compliant.</p>
-            </div>
-          </article>
-        </section>
-      </div>
-
-      <!-- Admin Tab -->
-      <div class="tab-content" id="admin-tab" style="display: none;">
-        <!-- Tab Navigation -->
-        <section class="toolbar" aria-label="Navigation Tabs" style="margin-bottom: 1.5rem;">
-          <div class="toolbar__left">
-            <div class="card__tabs">
-              <button class="tab-btn" data-tab="overview">Overview</button>
-              <button class="tab-btn" data-tab="library">Image Library</button>
-              <button class="tab-btn" data-tab="licenses">Licenses</button>
-              <button class="tab-btn" data-tab="analytics">Analytics</button>
-              <button class="tab-btn active" data-tab="admin">Admin</button>
+            
+            <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
+              <article class="card">
+                <div class="card__header">
+                  <h2>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: inline-block; vertical-align: middle; margin-right: 0.5rem;">
+                      <line x1="18" y1="20" x2="18" y2="10"/>
+                      <line x1="12" y1="20" x2="12" y2="4"/>
+                      <line x1="6" y1="20" x2="6" y2="14"/>
+                    </svg>
+                    Downloads Trend
+                  </h2>
+                </div>
+                <div class="card__content">
+                  <p style="color: #6b7280; font-size: 0.875rem;">Top performing images and seasonal trends visualized here.</p>
+                </div>
+              </article>
+              <article class="card">
+                <div class="card__header">
+                  <h2>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: inline-block; vertical-align: middle; margin-right: 0.5rem;">
+                      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                    </svg>
+                    Compliance Summary
+                  </h2>
+                </div>
+                <div class="card__content">
+                  <p style="color: #6b7280; font-size: 0.875rem;">No disputes detected. All licenses are active and compliant.</p>
+                </div>
+              </article>
             </div>
           </div>
-        </section>
-        
-        <section class="grid">
-          <article class="card">
-            <div class="card__header">
-              <h2>Admin Tools</h2>
-            </div>
-            <div class="card__content">
-              <ul style="list-style: disc; margin-left: 1.5rem; color: #6b7280;">
-                <li>Manage users and roles</li>
-                <li>Review copyright disputes</li>
-                <li>Audit license history</li>
-                <li>Configure pricing models</li>
-              </ul>
-            </div>
-          </article>
         </section>
       </div>
     </main>

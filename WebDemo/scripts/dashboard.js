@@ -44,42 +44,21 @@
     if (!body) return;
     body.replaceChildren();
     
-    // Restaurant & Hotel keywords data (All NYC venues)
+    // Kusama-focused keywords data with Cost values
     const topKeywordsData = [
-      // The Plaza keywords
-      { name: 'The Plaza', revenue: 35000, engagement: 48 },
-      { name: 'Afternoon Tea', revenue: 18000, engagement: 35 },
-      // The Carlyle keywords
-      { name: 'Cafe Carlyle', revenue: 30000, engagement: 45 },
-      { name: 'The Carlyle', revenue: 28000, engagement: 43 },
-      { name: 'Bemelmans Bar', revenue: 22000, engagement: 38 },
-      { name: 'Classic Cabaret', revenue: 16000, engagement: 35 },
-      // Jean-Georges keywords
-      { name: 'Jean-Georges Vongerichten', revenue: 27000, engagement: 42 },
-      { name: 'Jean-Georges at The Mark', revenue: 24000, engagement: 40 },
-      // The St. Regis keywords
-      { name: 'The St. Regis', revenue: 26000, engagement: 41 },
-      { name: 'King Cole Bar', revenue: 15000, engagement: 32 },
-      // The Baccarat keywords
-      { name: 'The Baccarat', revenue: 25000, engagement: 40 },
-      { name: 'Indoor Pool', revenue: 12000, engagement: 28 },
-      // The Mark Hotel keywords
-      { name: 'The Mark Hotel', revenue: 23000, engagement: 39 },
-      { name: 'Metropolitan Museum of Art', revenue: 18000, engagement: 34 },
-      // Le Bernardin keywords
-      { name: 'Le Bernardin', revenue: 28000, engagement: 42 },
-      { name: 'Three Michelin Stars', revenue: 25000, engagement: 40 },
-      { name: 'Eric Ripert', revenue: 20000, engagement: 36 },
-      // The Modern keywords
-      { name: 'The Modern', revenue: 25000, engagement: 38 },
-      { name: 'Two Michelin Stars', revenue: 20000, engagement: 35 },
-      { name: 'MoMA Museum', revenue: 15000, engagement: 28 }
+      { name: 'Kusama', cost: 12000, engagement: 48 },
+      { name: 'Louis Vuitton', cost: 10000, engagement: 45 },
+      { name: 'David Zwirner', cost: 6000, engagement: 42 },
+      { name: 'Café Carlyle', cost: 3000, engagement: 38 },
+      { name: 'Infinity Dots', cost: 2500, engagement: 35 },
+      { name: 'Capucines', cost: 2000, engagement: 32 },
+      { name: 'Central Park', cost: 500, engagement: 28 }
     ];
     
     // Filter keywords based on search term
     const filteredKeywords = topKeywordsData
       .filter(k => k.name.toLowerCase().includes(filterTerm.toLowerCase()))
-      .sort((a, b) => b.revenue - a.revenue) // Sort by revenue descending
+      .sort((a, b) => b.cost - a.cost) // Sort by cost descending
       .slice(0, 10); // Show top 10
     
     // Populate table with keywords
@@ -87,7 +66,7 @@
       const tr = document.createElement('tr');
       tr.innerHTML = `
         <td>${keyword.name}</td>
-        <td>$${keyword.revenue.toLocaleString()}</td>
+        <td>$${keyword.cost.toLocaleString()}</td>
         <td>${keyword.engagement}%</td>
       `;
       body.appendChild(tr);
@@ -105,26 +84,27 @@
   }
 
   function renderOverview(){
+    // Quick Chatbot Overview with new numbers
     let data = [
-      ['User Interactions','25%'],
-      ['Conversions','2%'],
-      ['Paid Keywords','60%'],
-      ['Average Chatbot Conversion','43 sec']
+      ['Total Chat Sessions', '300,000'],
+      ['Keywords Used', '350,000'],
+      ['Active Sessions', '1,247'],
+      ['Avg Session Time', '2min'],
+      ['Total RPV Cost', '$1,017,600']
     ];
 
-    // Use real analytics data if available
+    // Use real analytics data if available (override defaults)
     if (window.ShopThatData) {
       const analytics = window.ShopThatData.getChatAnalytics();
-      const sessions = window.ShopThatData.getChatSessions();
-      const totalMessages = sessions.reduce((sum, s) => sum + s.messages.length, 0);
-      
-      data = [
-        ['Total Chat Sessions', analytics.totalSessions || 0],
-        ['Keywords Used', analytics.totalUses || 0],
-        ['Active Sessions', analytics.activeSessions || 0],
-        ['Avg Session Time', analytics.avgSessionLength ? `${analytics.avgSessionLength}s` : '0s'],
-        ['Total RPV Cost', analytics.totalCost ? `$${analytics.totalCost.toFixed(2)}` : '$0.00']
-      ];
+      if (analytics.totalSessions > 0) {
+        data = [
+          ['Total Chat Sessions', (analytics.totalSessions || 300000).toLocaleString()],
+          ['Keywords Used', (analytics.totalUses || 350000).toLocaleString()],
+          ['Active Sessions', (analytics.activeSessions || 1247).toLocaleString()],
+          ['Avg Session Time', analytics.avgSessionLength ? `${Math.floor(analytics.avgSessionLength / 60)}min` : '2min'],
+          ['Total RPV Cost', analytics.totalCost ? `$${analytics.totalCost.toLocaleString()}` : '$1,017,600']
+        ];
+      }
     }
 
     const ul = $('#bot-overview');
