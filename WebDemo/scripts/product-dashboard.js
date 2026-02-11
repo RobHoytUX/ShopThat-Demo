@@ -2096,7 +2096,7 @@
         // Product image
         const img = createEl('img', { 
           class: 'dashboard-map-product-image',
-          src: product.image,
+          src: product.image || product.src,
           alt: product.title
         });
         
@@ -2312,14 +2312,16 @@
     // Also show legacy favorites in tab1 (convert to glass card style)
     if (currentFavoritesTab === 'tab1') {
       legacyFavorites.forEach(product => {
-        // Convert legacy product to new format
+        // Convert legacy product to new format (handle both 'image' and 'src' keys)
         const item = {
-          src: product.image,
+          src: product.image || product.src,
           title: product.title,
-          addedAt: new Date().toISOString()
+          id: product.id,
+          addedAt: product.addedAt || new Date().toISOString(),
+          isLegacy: true  // Mark as legacy for deletion handling
         };
         const card = createFavoriteCard(item);
-      grid.appendChild(card);
+        grid.appendChild(card);
       });
     }
   }
@@ -2333,10 +2335,11 @@
     // Inner white card
     const inner = createEl('div', { class: 'favorite-glass-card-inner' });
     
-    // Image
+    // Image (handle both 'image' and 'src' keys)
+    const imageSrc = item.src || item.image;
     const img = createEl('img', {
       class: 'favorite-glass-card-image',
-      src: item.src,
+      src: imageSrc,
       alt: item.title || 'Favorite'
     });
     
@@ -2358,7 +2361,8 @@
     removeBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 18L18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round"/></svg>';
     removeBtn.addEventListener('click', (e) => {
       e.stopPropagation();
-      removeFromFavorites(item.src, currentFavoritesTab);
+      // Remove from all collections
+      removeFromAllCollections(item);
     });
     
     info.appendChild(title);
@@ -2380,6 +2384,56 @@
       renderFavorites();
       updateFavoritesBadge();
     }
+  }
+  
+  // Remove from ALL collections (for complete deletion)
+  function removeFromAllCollections(item) {
+    const itemSrc = item.src || item.image;
+    const itemTitle = item.title;
+    const itemId = item.id;
+    
+    // Remove from categorizedFavorites
+    let categorizedFavorites = JSON.parse(localStorage.getItem('categorizedFavorites') || '{}');
+    Object.keys(categorizedFavorites).forEach(tab => {
+      categorizedFavorites[tab] = categorizedFavorites[tab].filter(
+        i => i.src !== itemSrc && i.title !== itemTitle
+      );
+    });
+    localStorage.setItem('categorizedFavorites', JSON.stringify(categorizedFavorites));
+    
+    // Remove from wishlistProducts (legacy favorites)
+    let wishlistProducts = JSON.parse(localStorage.getItem('wishlistProducts') || '[]');
+    wishlistProducts = wishlistProducts.filter(
+      p => (p.image || p.src) !== itemSrc && p.title !== itemTitle && p.id !== itemId
+    );
+    localStorage.setItem('wishlistProducts', JSON.stringify(wishlistProducts));
+    
+    // Remove from droppedProducts
+    let droppedProducts = JSON.parse(localStorage.getItem('droppedProducts') || '[]');
+    droppedProducts = droppedProducts.filter(
+      p => (p.image || p.src) !== itemSrc && p.title !== itemTitle && p.id !== itemId
+    );
+    localStorage.setItem('droppedProducts', JSON.stringify(droppedProducts));
+    
+    // Remove from galleryImages
+    let galleryImages = JSON.parse(localStorage.getItem('galleryImages') || '[]');
+    galleryImages = galleryImages.filter(
+      g => g.src !== itemSrc && g.title !== itemTitle
+    );
+    localStorage.setItem('galleryImages', JSON.stringify(galleryImages));
+    
+    // Refresh views and badges
+    renderFavorites();
+    updateFavoritesBadge();
+    updateBadge('libraryCount', droppedProducts.length);
+    updateBadge('mediaCount', galleryImages.length);
+    
+    // If on map view, refresh it
+    if (currentView === 'map') {
+      renderMap();
+    }
+    
+    console.log('Removed from all collections:', itemTitle);
   }
   
   // Update favorites badge
@@ -2424,7 +2478,7 @@
     // Image
     const img = createEl('img', {
       class: 'dashboard-product-image',
-      src: product.image,
+      src: product.image || product.src,
       alt: product.title
     });
     
@@ -2624,10 +2678,37 @@
     if (e.key === 'droppedProducts' || e.key === 'galleryImages' || e.key === 'wishlistProducts') {
       // Refresh current view when data changes
       switchView(currentView);
+      updateAllBadges();
     }
   });
+  
+  // Also refresh when window receives focus (user switches back to this tab)
+  let lastMediaCount = JSON.parse(localStorage.getItem('galleryImages') || '[]').length;
+  let lastProductsCount = JSON.parse(localStorage.getItem('droppedProducts') || '[]').length;
+  
+  window.addEventListener('focus', () => {
+    const currentMediaCount = JSON.parse(localStorage.getItem('galleryImages') || '[]').length;
+    const currentProductsCount = JSON.parse(localStorage.getItem('droppedProducts') || '[]').length;
+    
+    if (currentMediaCount !== lastMediaCount || currentProductsCount !== lastProductsCount) {
+      console.log('Data changed, refreshing view...');
+      lastMediaCount = currentMediaCount;
+      lastProductsCount = currentProductsCount;
+      switchView(currentView);
+      updateAllBadges();
+    }
+  });
+  
+  function updateAllBadges() {
+    const products = JSON.parse(localStorage.getItem('droppedProducts') || '[]');
+    const media = JSON.parse(localStorage.getItem('galleryImages') || '[]');
+    const favorites = JSON.parse(localStorage.getItem('wishlistProducts') || '[]');
+    updateBadge('libraryCount', products.length);
+    updateBadge('mediaCount', media.length);
+    updateBadge('favoritesCount', favorites.length);
+  }
 
-  // Initialize demo data - always set to 5 cards (Initial Layout images)
+  // Initialize demo data - only if no existing user data
   // These are the default canvas card images shown on page load
   function initializeDemoData() {
     const demoMedia = [
@@ -2653,12 +2734,33 @@
       }
     ];
     
-    localStorage.setItem('galleryImages', JSON.stringify(demoMedia));
+    // Get existing gallery images
+    const existingMedia = JSON.parse(localStorage.getItem('galleryImages') || '[]');
+    
+    // Only add demo media items that don't already exist
+    const demoSrcs = demoMedia.map(d => d.src);
+    const existingSrcs = existingMedia.map(e => e.src);
+    
+    // Check if we have any user-added content (non-demo items)
+    const hasUserContent = existingMedia.some(item => !demoSrcs.includes(item.src));
+    
+    if (hasUserContent) {
+      // Keep user content, just ensure demo items exist
+      const missingDemo = demoMedia.filter(d => !existingSrcs.includes(d.src));
+      if (missingDemo.length > 0) {
+        const merged = [...existingMedia, ...missingDemo];
+        localStorage.setItem('galleryImages', JSON.stringify(merged));
+      }
+    } else if (existingMedia.length === 0) {
+      // No existing data, initialize with demo
+      localStorage.setItem('galleryImages', JSON.stringify(demoMedia));
+    }
+    // If only demo items exist, don't overwrite
     
     // Reset drawer loaded state so it can be populated on card click
     currentLoadedCardIndex = -1;
     
-    console.log('Demo media data initialized with 5 canvas cards');
+    console.log('Demo media data check complete. Total items:', JSON.parse(localStorage.getItem('galleryImages') || '[]').length);
   }
 
   // Initialize demo data

@@ -220,6 +220,20 @@
   const styles = `
   .chatbot-product-card{background:rgba(255,255,255,0.98);border-radius:16px;padding:16px;margin:8px 0;display:flex;gap:16px;align-items:center;box-shadow:0 2px 12px rgba(0,0,0,0.12);cursor:pointer;transition:all 200ms ease;align-self:flex-start;max-width:90%}
   .chatbot-product-card:hover{transform:translateY(-2px);box-shadow:0 4px 20px rgba(0,0,0,0.18)}
+  .chatbot-drop-zone{position:absolute;inset:0;background:linear-gradient(135deg,rgba(74,144,226,0.15),rgba(74,144,226,0.08));border:2px dashed rgba(74,144,226,0.5);border-radius:12px;display:none;flex-direction:column;align-items:center;justify-content:center;gap:12px;z-index:100;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);transition:all 200ms ease}
+  .chatbot-drop-zone.is-active{display:flex}
+  .chatbot-drop-zone.is-over{background:linear-gradient(135deg,rgba(74,144,226,0.25),rgba(74,144,226,0.15));border-color:rgba(74,144,226,0.8);transform:scale(1.01)}
+  .chatbot-drop-zone__icon{width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,#4A90E2,#357ABD);display:grid;place-items:center;box-shadow:0 4px 16px rgba(74,144,226,0.4);animation:drop-pulse 1.5s ease-in-out infinite}
+  .chatbot-drop-zone__icon svg{width:24px;height:24px;color:#fff}
+  .chatbot-drop-zone__text{font-size:14px;font-weight:600;color:#4A90E2;text-align:center}
+  .chatbot-drop-zone__hint{font-size:12px;color:#666;text-align:center}
+  @keyframes drop-pulse{0%,100%{transform:scale(1);box-shadow:0 4px 16px rgba(74,144,226,0.4)}50%{transform:scale(1.08);box-shadow:0 6px 24px rgba(74,144,226,0.6)}}
+  .product-card.is-dragging{opacity:0.5;transform:scale(0.95)}
+  .product-card__image{cursor:grab}
+  .product-card__image:active{cursor:grabbing}
+  .drop-success-toast{position:fixed;bottom:120px;left:50%;transform:translateX(-50%) translateY(20px);background:linear-gradient(135deg,#10B981,#059669);color:#fff;padding:12px 24px;border-radius:12px;font-size:14px;font-weight:500;box-shadow:0 8px 24px rgba(16,185,129,0.3);opacity:0;pointer-events:none;z-index:10000;transition:all 300ms cubic-bezier(0.34,1.56,0.64,1);display:flex;align-items:center;gap:8px}
+  .drop-success-toast.is-visible{opacity:1;transform:translateX(-50%) translateY(0)}
+  .drop-success-toast svg{width:20px;height:20px}
   .chatbot-product-card-image{width:100px;height:100px;border-radius:12px;object-fit:cover;flex-shrink:0}
   .chatbot-product-card-info{flex:1;min-width:0}
   .chatbot-product-card-title{font-size:15px;font-weight:600;color:#111;margin:0 0 6px;line-height:1.3}
@@ -230,14 +244,16 @@
   .chatbot-product-card-link svg{width:14px;height:14px}
   .chatbot-wrapper{position:fixed;bottom:104px;right:20px;z-index:999;transition:bottom 0.3s ease}
   .chatbot-wrapper.expanded{bottom:104px}
-  .image-gallery-wrapper{position:fixed;top:auto;bottom:-200px;left:20px;z-index:997;width:562.5px;opacity:0;transform:translateY(20px);pointer-events:none;transition:opacity 300ms ease,transform 300ms ease,bottom 0.3s ease}
+  .chatbot-wrapper.gallery-open{bottom:310px}
+  .chatbot-wrapper.gallery-open .chatbot-toggle{bottom:-80px}
+  .image-gallery-wrapper{position:fixed;top:auto;bottom:-200px;right:20px;z-index:997;width:506px;opacity:0;transform:translateY(20px);pointer-events:none;transition:opacity 300ms ease,transform 300ms ease,bottom 0.3s ease}
   .image-gallery-wrapper.is-visible{opacity:1;transform:translateY(0);pointer-events:auto;bottom:20px}
   .image-gallery-wrapper[hidden]{display:none}
   .image-gallery{background:linear-gradient(135deg,rgba(255,255,255,0.4),rgba(255,255,255,0.22));border:1px solid rgba(255,255,255,0.35);border-radius:12px;padding:12px 40px;min-height:144px;box-shadow:0 8px 32px 0 rgba(31,38,135,0.3);backdrop-filter:blur(16px) saturate(180%);-webkit-backdrop-filter:blur(16px) saturate(180%);position:relative;overflow:visible}
   .image-gallery-title{position:absolute;top:12px;left:12px;font-size:16px;font-weight:600;color:#111;pointer-events:none;z-index:1}
   .image-gallery-clear{position:absolute;top:12px;right:12px;padding:6px 12px;border-radius:8px;border:1px solid rgba(0,0,0,0.2);background:rgba(255,255,255,0.95);font-size:12px;font-weight:500;color:#111;cursor:pointer;transition:all 200ms ease;z-index:1}
   .image-gallery-clear:hover{background:rgba(255,255,255,1);transform:scale(1.05)}
-  .product-component{position:fixed;bottom:20px;left:20px;z-index:999;width:562.5px;opacity:0;transform:translateX(20px);pointer-events:none;transition:opacity 300ms ease,transform 300ms ease}
+  .product-component{position:fixed;bottom:20px;left:20px;z-index:999;width:506px;opacity:0;transform:translateX(20px);pointer-events:none;transition:opacity 300ms ease,transform 300ms ease}
   .product-component.is-visible{opacity:1;transform:translateX(0);pointer-events:auto}
   .product-component[hidden]{display:none}
   .product-component-inner{background:linear-gradient(135deg,rgba(255,255,255,0.4),rgba(255,255,255,0.22));border:1px solid rgba(255,255,255,0.35);border-radius:12px;padding:12px;min-height:220px;box-shadow:0 8px 32px 0 rgba(31,38,135,0.3);backdrop-filter:blur(16px) saturate(180%);-webkit-backdrop-filter:blur(16px) saturate(180%);position:relative;overflow:visible}
@@ -314,7 +330,7 @@
   .chatbot-toggle--glass{background: linear-gradient(135deg, rgba(255,255,255,0.9), rgba(255,255,255,0.7)); color:#111; border:1px solid rgba(0,0,0,0.15); box-shadow:0 8px 32px 0 rgba(31,38,135,0.2); backdrop-filter: blur(12px) saturate(160%); -webkit-backdrop-filter: blur(12px) saturate(160%)}
   .chatbot-toggle--glass img{filter:none}
   .chatbot-wrapper.expanded .chatbot-toggle{bottom:-80px}
-  .chatbot-box{height:781.25px;width:562.5px;color:#111;border-radius:12px;padding:28px 12px 20px 12px;display:flex;flex-direction:column;position:relative;box-sizing:border-box;overflow-x:hidden;overflow-y:visible;
+  .chatbot-box{height:781.25px;width:506px;color:#111;border-radius:12px;padding:28px 12px 20px 12px;display:flex;flex-direction:column;position:relative;box-sizing:border-box;overflow-x:hidden;overflow-y:visible;
     background: linear-gradient(135deg, rgba(255,255,255,0.4), rgba(255,255,255,0.22));
     border: 1px solid rgba(255,255,255,0.35);
     box-shadow: 0 8px 32px 0 rgba(31,38,135,0.3);
@@ -323,7 +339,7 @@
     opacity:1; transform: translateY(0);
     transition: opacity 200ms ease, transform 200ms ease, width 200ms ease, height 200ms ease;
   }
-  .chatbot-box.chatbot-box--compact{width:281.25px;height:390.625px}
+  .chatbot-box.chatbot-box--compact{width:253px;height:351px}
   .chatbot-box.is-scroll-hidden{opacity:0; transform: translateY(8px); pointer-events:none}
   .chatbot-box[hidden]{display:none !important}
   .chatbot-refresh{position:absolute;top:20px;right:8px;width:32px;height:32px;border-radius:16px;border:1px solid rgba(0,0,0,0.2);background:rgba(255,255,255,0.95);display:grid;place-items:center;color:#111;cursor:pointer;transition:opacity 200ms ease;z-index:10}
@@ -334,8 +350,9 @@
   .chatbot-sort{position:absolute;top:20px;left:8px;width:32px;height:32px;border-radius:50%;border:1px solid rgba(0,0,0,0.2);background:rgba(255,255,255,0.95);display:grid;place-items:center;color:#111;cursor:pointer;transition:background 200ms ease;z-index:10}
   .chatbot-sort:hover{background:rgba(255,255,255,1)}
   .chatbot-sort[hidden]{display:none}
-  .chatbot-nav{position:fixed;bottom:104px;right:598.5px;width:56px;background:linear-gradient(135deg,rgba(255,255,255,0.95),rgba(255,255,255,0.9));border:1px solid rgba(0,0,0,0.1);border-radius:28px;padding:16px 0;display:flex;flex-direction:column;align-items:center;gap:8px;box-shadow:0 4px 24px rgba(0,0,0,0.12);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);opacity:0;transform:translateX(-8px);pointer-events:none;transition:opacity 200ms ease,transform 200ms ease}
+  .chatbot-nav{position:fixed;bottom:104px;right:542px;width:56px;background:linear-gradient(135deg,rgba(255,255,255,0.95),rgba(255,255,255,0.9));border:1px solid rgba(0,0,0,0.1);border-radius:28px;padding:16px 0;display:flex;flex-direction:column;align-items:center;gap:8px;box-shadow:0 4px 24px rgba(0,0,0,0.12);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);opacity:0;transform:translateX(-8px);pointer-events:none;transition:opacity 200ms ease,transform 200ms ease,bottom 0.3s ease}
   .chatbot-nav.is-visible{opacity:1;transform:translateX(0);pointer-events:auto}
+  .chatbot-wrapper.gallery-open .chatbot-nav{bottom:310px}
   .chatbot-nav.is-disabled{opacity:0.5}
   .chatbot-nav.is-disabled .chatbot-nav-item{pointer-events:none;cursor:not-allowed;opacity:0.6}
   .chatbot-nav[hidden]{display:none}
@@ -452,6 +469,28 @@
     const wrapper = createEl('div', { class: 'chatbot-wrapper', role: 'complementary', 'aria-label': 'Chatbot' });
     const toggle  = createEl('button', { class: 'chatbot-toggle', 'aria-expanded': 'true', 'aria-controls': 'chatbot-box', title: 'Open chat' });
     const box     = createEl('div', { class: 'chatbot-box', id: 'chatbot-box' });
+    
+    // Create drop zone for product drag and drop
+    const dropZone = createEl('div', { class: 'chatbot-drop-zone' });
+    const dropIcon = createEl('div', { class: 'chatbot-drop-zone__icon' });
+    const dropIconSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    dropIconSvg.setAttribute('viewBox', '0 0 24 24');
+    dropIconSvg.setAttribute('fill', 'none');
+    dropIconSvg.setAttribute('stroke', 'currentColor');
+    dropIconSvg.setAttribute('stroke-width', '2');
+    const dropIconPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    dropIconPath.setAttribute('d', 'M12 4v16m8-8H4');
+    dropIconPath.setAttribute('stroke-linecap', 'round');
+    dropIconPath.setAttribute('stroke-linejoin', 'round');
+    dropIconSvg.appendChild(dropIconPath);
+    dropIcon.appendChild(dropIconSvg);
+    const dropText = createEl('div', { class: 'chatbot-drop-zone__text' }, [document.createTextNode('Drop to add product')]);
+    const dropHint = createEl('div', { class: 'chatbot-drop-zone__hint' }, [document.createTextNode('Will be saved to Dashboard, Map & Bookmarks')]);
+    dropZone.appendChild(dropIcon);
+    dropZone.appendChild(dropText);
+    dropZone.appendChild(dropHint);
+    box.appendChild(dropZone);
+    
     const header  = createEl('div', { class: 'chatbot-header' });
     const refreshBtn = createEl('button', { class: 'chatbot-refresh', title: 'Clear chat', hidden: '' });
     const refreshIcon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
@@ -1032,9 +1071,9 @@
     sendBtn.appendChild(icon);
     inputW.appendChild(input); inputW.appendChild(sendBtn);
     header.appendChild(logo); header.appendChild(title); header.appendChild(sub); header.appendChild(presets); header.appendChild(options);
-    // Sizing constants and helpers
-    const FULL_W = 562.5;
-    const COMPACT_W = 281.25;
+    // Sizing constants and helpers (10% less than original 562.5px)
+    const FULL_W = 506;
+    const COMPACT_W = 253;
     const COMPACT_H = 406.625; // maintain proportion with added paddings
     const CHATBOT_BOTTOM = 104; // px from bottom of viewport
     const GALLERY_HEIGHT = 144; // approximate height of gallery
@@ -1060,8 +1099,8 @@
       box.style.height = constrainedHeight + 'px';
       }
     }
-    // Start in full expanded state with increased width
-    const INITIAL_W = 700; // Increased to fit 4 images side by side
+    // Start in full expanded state with reduced width (10% less than original 562.5px)
+    const INITIAL_W = 506;
     setBoxSize(INITIAL_W, 600);
 
     function measureChipRowWidth(container){
@@ -1296,27 +1335,27 @@
       
       // Show initial keyword
       showKeywords([initialKeyword]);
-      
+          
       // Set up scroll listener for product visibility
       setupProductScrollListener(initialKeyword, productKeywords);
-    }
-    
+      }
+      
     // Function to display keywords with animation
     function showKeywords(keywordList) {
-      presets.replaceChildren();
+        presets.replaceChildren();
       
       keywordList.forEach((label, index) => {
-        const b = createEl('button', { type: 'button' }, [document.createTextNode(label)]);
-        b.style.opacity = '0';
-        b.style.transform = 'scale(0.8)';
-        b.style.transition = 'opacity 300ms ease, transform 300ms ease';
+            const b = createEl('button', { type: 'button' }, [document.createTextNode(label)]);
+            b.style.opacity = '0';
+            b.style.transform = 'scale(0.8)';
+            b.style.transition = 'opacity 300ms ease, transform 300ms ease';
         b.addEventListener('click', () => onKeywordSelect(label));
-        presets.appendChild(b);
-        
+            presets.appendChild(b);
+            
         // Stagger animation
         setTimeout(() => {
-          b.style.opacity = '1';
-          b.style.transform = 'scale(1)';
+              b.style.opacity = '1';
+              b.style.transform = 'scale(1)';
         }, index * 150);
       });
       
@@ -1341,7 +1380,7 @@
             productsInView = false;
             console.log('Products out of view - showing only initial keyword');
             showKeywords([initialKeyword]);
-          }
+      }
         });
       }, {
         root: null,
@@ -1446,7 +1485,7 @@
       // Product image
       const img = createEl('img', { 
         class: 'chatbot-product-card-image',
-        src: product.image,
+        src: product.image || product.src,
         alt: product.title
       });
       
@@ -1738,8 +1777,7 @@
       ensureSizeForContent();
       // Perform health check when opening
       performHealthCheck();
-      // Open gallery automatically when chatbot opens
-      toggleGallery(true);
+      // Gallery is closed by default - user opens via hamburger menu
     }
     function closeBox(){
       // End chat session when closing
@@ -2107,7 +2145,7 @@
         });
         
         const img = createEl('img', {
-          src: product.image,
+          src: product.image || product.src,
           alt: product.title
         });
         
@@ -2123,7 +2161,7 @@
           galleryItem.classList.add('is-active');
           
           // Update main product card
-          productImg.src = product.image;
+          productImg.src = product.image || product.src;
           productTitle.textContent = product.title;
           productModel.textContent = `Model: ${product.model}`;
           productPrice.textContent = `Price: ${product.price}`;
@@ -2284,7 +2322,7 @@
         droppedProducts.forEach(product => {
           const card = createEl('div', { class: 'product-list-card' });
 
-          const img = createEl('img', { src: product.image, alt: product.title });
+          const img = createEl('img', { src: product.image || product.src, alt: product.title });
           const info = createEl('div', { class: 'product-list-info' });
           const title = createEl('h3', { class: 'product-list-title', text: product.title });
           const model = createEl('p', { class: 'product-list-model', text: product.model });
@@ -2349,7 +2387,7 @@
         wishlistProducts.forEach(product => {
           const card = createEl('div', { class: 'product-list-card' });
 
-          const img = createEl('img', { src: product.image, alt: product.title });
+          const img = createEl('img', { src: product.image || product.src, alt: product.title });
           const info = createEl('div', { class: 'product-list-info' });
           const title = createEl('h3', { class: 'product-list-title', text: product.title });
           const model = createEl('p', { class: 'product-list-model', text: product.model });
@@ -2441,7 +2479,7 @@
           // Product image
           const img = createEl('img', { 
             class: 'chatbot-map-product-image',
-            src: product.image,
+            src: product.image || product.src,
             alt: product.title
           });
           
@@ -2668,8 +2706,22 @@
       // Show thinking indicator
       showThinking();
       
-      // Try to get AI response, but always use product database for consistent info
-      const productInfo = generateProductInfoFromImage(imageSrc);
+      // Use the global dragged product data if available, otherwise generate from image
+      let productInfo;
+      if (window.currentDraggedProduct && window.currentDraggedProduct.src) {
+        productInfo = {
+          id: Date.now() + Math.random(),
+          image: window.currentDraggedProduct.src,
+          title: window.currentDraggedProduct.title || 'Product',
+          price: window.currentDraggedProduct.price || '',
+          model: window.currentDraggedProduct.model || '',
+          location: { lat: 48.8566 + (Math.random() - 0.5) * 0.02, lng: 2.3522 + (Math.random() - 0.5) * 0.02 }
+        };
+        // Clear the global variable
+        window.currentDraggedProduct = null;
+      } else {
+        productInfo = generateProductInfoFromImage(imageSrc);
+      }
       
       try {
         const res = await fetch(`${API_BASE}/chat`, {
@@ -2698,6 +2750,22 @@
           droppedProducts.push(productInfo);
           saveProducts(); // Save to localStorage
           
+          // Also save to all collections for dashboard
+          if (typeof saveProductToCollections === 'function') {
+            saveProductToCollections({
+              src: productInfo.image,
+              title: productInfo.title,
+              model: productInfo.model,
+              price: productInfo.price
+            });
+          }
+          
+          // Trigger storage event for dashboard
+          window.dispatchEvent(new StorageEvent('storage', {
+            key: 'galleryImages',
+            newValue: localStorage.getItem('galleryImages')
+          }));
+          
           // Track in ShopThatData if available
           if (window.ShopThatData && currentSessionId) {
             window.ShopThatData.addChatMessage(currentSessionId, '📸 Image dropped', 'user', []);
@@ -2720,6 +2788,22 @@
         
         droppedProducts.push(productInfo);
         saveProducts(); // Save to localStorage
+        
+        // Also save to all collections for dashboard
+        if (typeof saveProductToCollections === 'function') {
+          saveProductToCollections({
+            src: productInfo.image,
+            title: productInfo.title,
+            model: productInfo.model,
+            price: productInfo.price
+          });
+        }
+        
+        // Trigger storage event for dashboard
+        window.dispatchEvent(new StorageEvent('storage', {
+          key: 'galleryImages',
+          newValue: localStorage.getItem('galleryImages')
+        }));
       }
       
       refreshBtn.removeAttribute('hidden');
@@ -2769,9 +2853,11 @@
         renderGallery();
         requestAnimationFrame(() => {
           galleryWrapper.classList.add('is-visible');
+          wrapper.classList.add('gallery-open'); // Push chatbot up
         });
       } else {
         galleryWrapper.classList.remove('is-visible');
+        wrapper.classList.remove('gallery-open'); // Reset chatbot position
         setTimeout(() => {
           galleryWrapper.setAttribute('hidden', '');
         }, 300);
@@ -2901,41 +2987,286 @@
     });
   });
   
-  // Enable drag and drop from product cards to gallery
+// Global variable to store dragged product data (more reliable than dataTransfer)
+window.currentDraggedProduct = null;
+
+// Enable drag and drop from product cards to chatbot and gallery
+// Wait for DOM to be fully ready
+setTimeout(() => {
   const productImages = document.querySelectorAll('.product-card__image');
+  console.log('Found product images:', productImages.length);
+
+// Create success toast element
+  const successToast = document.createElement('div');
+  successToast.className = 'drop-success-toast';
+  successToast.innerHTML = `
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M9 12l2 2 4-4" stroke-linecap="round" stroke-linejoin="round"/>
+      <circle cx="12" cy="12" r="10"/>
+    </svg>
+    <span>Product added successfully!</span>
+  `;
+  document.body.appendChild(successToast);
   
-  productImages.forEach(imageContainer => {
-    const img = imageContainer.querySelector('img');
-    if (!img) return;
+  function showSuccessToast(message) {
+    successToast.querySelector('span').textContent = message;
+    successToast.classList.add('is-visible');
+    setTimeout(() => {
+      successToast.classList.remove('is-visible');
+    }, 2500);
+  }
+  
+  // Save product to localStorage for dashboard, map, and bookmarks
+  function saveProductToCollections(productData) {
+    // Generate unique ID for product
+    const productId = 'prod_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
     
-    // Make the image container draggable
-    imageContainer.setAttribute('draggable', 'true');
+    // Normalize the image property (use 'image' key for consistency with rendering)
+    const imageSrc = productData.src || productData.image;
     
-    imageContainer.addEventListener('dragstart', (e) => {
-      const productCard = imageContainer.closest('.product-card');
-      const productTitle = productCard.querySelector('.product-card__title')?.textContent;
-      const productModel = productCard.querySelector('.product-card__model')?.textContent;
-      const productPrice = productCard.querySelector('.product-card__price')?.textContent;
+    // Save to droppedProducts (for product dashboard Gallery and Map)
+    const droppedProducts = JSON.parse(localStorage.getItem('droppedProducts') || '[]');
+    if (!droppedProducts.find(p => p.title === productData.title)) {
+      // Random NYC area coordinates for map
+      const nycLat = 40.7128 + (Math.random() - 0.5) * 0.05;
+      const nycLng = -74.0060 + (Math.random() - 0.5) * 0.05;
+      droppedProducts.push({
+        id: productId,
+        image: imageSrc,  // Use 'image' key for consistency
+        src: imageSrc,    // Keep 'src' for backward compatibility
+        title: productData.title,
+        model: productData.model || '',
+        price: productData.price || '',
+        lat: nycLat,
+        lng: nycLng,
+        addedAt: new Date().toISOString()
+      });
+      localStorage.setItem('droppedProducts', JSON.stringify(droppedProducts));
+    }
+    
+    // Save to galleryImages (for media view)
+    const galleryImages = JSON.parse(localStorage.getItem('galleryImages') || '[]');
+    if (!galleryImages.find(g => g.src === imageSrc)) {
+      galleryImages.push({
+        src: imageSrc,
+        image: imageSrc,  // Also add 'image' key
+        title: productData.title,
+        productData: {
+          title: productData.title,
+          model: productData.model,
+          price: productData.price
+        },
+        addedAt: new Date().toISOString()
+      });
+      localStorage.setItem('galleryImages', JSON.stringify(galleryImages));
+    }
+    
+    // Save to wishlistProducts (for favorites/bookmarks)
+    const wishlistProducts = JSON.parse(localStorage.getItem('wishlistProducts') || '[]');
+    if (!wishlistProducts.find(w => w.id === productId || w.title === productData.title)) {
+      wishlistProducts.push({
+        id: productId,
+        image: imageSrc,  // Use 'image' key for consistency
+        src: imageSrc,    // Keep 'src' for backward compatibility
+        title: productData.title,
+        model: productData.model || '',
+        price: productData.price || '',
+        addedAt: new Date().toISOString()
+      });
+      localStorage.setItem('wishlistProducts', JSON.stringify(wishlistProducts));
+    }
+  }
+  
+  // Make saveProductToCollections globally available
+  window.saveProductToCollections = saveProductToCollections;
+  
+  // Select ARTICLE elements (the whole product card)
+  const productCards = document.querySelectorAll('.product-card');
+  console.log('Found product cards for drag:', productCards.length);
+  
+  productCards.forEach(productCard => {
+    const img = productCard.querySelector('.product-card__image img');
+    if (!img) {
+      console.log('No img found in card');
+      return;
+    }
+    
+    // Disable dragging on the anchor to prevent interference
+    const link = productCard.querySelector('a');
+    if (link) {
+      link.setAttribute('draggable', 'false');
+    }
+    
+    // Make the whole card draggable
+    productCard.setAttribute('draggable', 'true');
+    
+    productCard.addEventListener('dragstart', (e) => {
+      // Get product info from the card
+      const titleEl = productCard.querySelector('.product-card__title');
+      const priceEl = productCard.querySelector('.product-card__price');
+      
+      const productTitle = titleEl?.textContent?.trim() || img.alt || 'Product';
+      const productPrice = priceEl?.textContent?.trim() || '';
       const imageSrc = img.src;
+      
+      console.log('=== DRAG START (from article) ===');
+      console.log('Image src:', imageSrc);
+      console.log('Title:', productTitle);
+      console.log('Price:', productPrice);
+      
+      // Store in global variable
+      window.currentDraggedProduct = {
+        src: imageSrc,
+        title: productTitle,
+        model: '',
+        price: productPrice
+      };
+      
+      console.log('Stored product:', window.currentDraggedProduct);
       
       // Set drag data
       e.dataTransfer.effectAllowed = 'copy';
       e.dataTransfer.setData('text/plain', imageSrc);
-      e.dataTransfer.setData('application/json', JSON.stringify({
-        src: imageSrc,
-        title: productTitle,
-        model: productModel,
-        price: productPrice
-      }));
+      e.dataTransfer.setData('application/json', JSON.stringify(window.currentDraggedProduct));
+      
+      // Set custom drag image
+      e.dataTransfer.setDragImage(img, 50, 50);
       
       // Visual feedback
-      imageContainer.style.opacity = '0.5';
+      productCard.classList.add('is-dragging');
+      
+      // Show drop zone in chatbot
+      const dropZone = document.querySelector('.chatbot-drop-zone');
+      if (dropZone) {
+        dropZone.classList.add('is-active');
+      }
     });
     
-    imageContainer.addEventListener('dragend', (e) => {
-      imageContainer.style.opacity = '1';
+    productCard.addEventListener('dragend', (e) => {
+      productCard.classList.remove('is-dragging');
+      
+      // Clear global variable if drop didn't happen
+      setTimeout(() => {
+        window.currentDraggedProduct = null;
+      }, 100);
+      
+      // Hide drop zone
+      const dropZone = document.querySelector('.chatbot-drop-zone');
+      if (dropZone) {
+        dropZone.classList.remove('is-active', 'is-over');
+      }
     });
   });
+}, 100); // End of product drag setup setTimeout
+  
+  // Set up chatbot drop zone event listeners
+  setTimeout(() => {
+    const dropZone = document.querySelector('.chatbot-drop-zone');
+    const chatbotBox = document.querySelector('.chatbot-box');
+    
+    if (!chatbotBox) return;
+    
+    // Prevent default drag behavior on chatbot
+    chatbotBox.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'copy';
+    });
+    
+    chatbotBox.addEventListener('dragenter', (e) => {
+      e.preventDefault();
+      if (dropZone) {
+        dropZone.classList.add('is-active', 'is-over');
+      }
+    });
+    
+    chatbotBox.addEventListener('dragleave', (e) => {
+      // Only hide if leaving the chatbot entirely
+      if (!chatbotBox.contains(e.relatedTarget)) {
+        if (dropZone) {
+          dropZone.classList.remove('is-over');
+        }
+      }
+    });
+    
+    chatbotBox.addEventListener('drop', (e) => {
+      e.preventDefault();
+      
+      if (dropZone) {
+        dropZone.classList.remove('is-active', 'is-over');
+      }
+      
+      // Get product data - prefer global variable, fallback to dataTransfer
+      let productData = window.currentDraggedProduct;
+      
+      if (!productData || !productData.src) {
+        // Fallback to dataTransfer
+        const productDataStr = e.dataTransfer.getData('application/json');
+        const imageSrc = e.dataTransfer.getData('text/plain');
+        
+        if (productDataStr) {
+          try {
+            productData = JSON.parse(productDataStr);
+          } catch {
+            productData = { src: imageSrc, title: 'Product' };
+          }
+        } else if (imageSrc) {
+          productData = { src: imageSrc, title: 'Product' };
+        }
+      }
+      
+      console.log('Product dropped:', productData);
+      
+      // Clear the global variable
+      window.currentDraggedProduct = null;
+      
+      if (productData && productData.src) {
+        
+        // Save to all collections
+        if (window.saveProductToCollections) {
+          window.saveProductToCollections(productData);
+        }
+        
+        // Add to gallery (My Media)
+        if (typeof window.addProductToGallery === 'function') {
+          window.addProductToGallery(productData.src, productData);
+        }
+        
+        // Display product card in chatbot
+        const productCard = document.createElement('div');
+        productCard.className = 'chatbot-product-card';
+        productCard.innerHTML = `
+          <img class="chatbot-product-card-image" src="${productData.src}" alt="${productData.title || 'Product'}" />
+          <div class="chatbot-product-card-info">
+            <div class="chatbot-product-card-title">${productData.title || 'Product'}</div>
+            ${productData.model ? `<div class="chatbot-product-card-model">${productData.model}</div>` : ''}
+            ${productData.price ? `<div class="chatbot-product-card-price">${productData.price}</div>` : ''}
+            <a class="chatbot-product-card-link" href="https://us.louisvuitton.com/eng-us/search/${encodeURIComponent(productData.title || 'LV')}" target="_blank" rel="noopener noreferrer">
+              View on LV Store
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14 21 3" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </a>
+          </div>
+        `;
+        
+        // Find messages container and add the card
+        const messagesContainer = document.querySelector('.chatbot-messages');
+        if (messagesContainer) {
+          messagesContainer.appendChild(productCard);
+          messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+        
+        // Show success toast
+        showSuccessToast(`${productData.title || 'Product'} added to collections!`);
+        
+        // Trigger storage event for other tabs/windows (product dashboard)
+        window.dispatchEvent(new StorageEvent('storage', {
+          key: 'galleryImages',
+          newValue: localStorage.getItem('galleryImages')
+        }));
+      }
+    });
+  }, 500);
   
   // Add drop zone to gallery wrapper
   setTimeout(() => {
