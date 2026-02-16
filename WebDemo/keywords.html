@@ -8,7 +8,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles/main.css?v=1">
-    <link rel="stylesheet" href="styles/dashboard.css?v=6">
+    <link rel="stylesheet" href="styles/dashboard.css?v=7">
   </head>
   <body class="app app--keywords">
     <aside class="sidebar" aria-label="Primary">
@@ -39,9 +39,7 @@
     <header class="appbar">
       <div class="appbar__inner">
         <h1 class="appbar__title">
-          <span class="appbar__title-row">Keywords
-            <button class="icon-btn icon-btn--sm" id="keywordsBackBtn" aria-label="Back" title="Back">←</button>
-          </span>
+          <span class="appbar__title-row">Keywords</span>
         </h1>
         <div class="appbar__search"><input type="search" placeholder="Search here..." aria-label="Search" /></div>
         <div class="appbar__account">
@@ -73,7 +71,25 @@
           </div>
         </div>
         <div class="toolbar__right">
-          <div class="control-group" role="group" aria-label="Zoom controls">
+          <div class="control-group" role="group" aria-label="View and zoom controls">
+            <button class="btn btn--secondary" id="keywordsBackBtn" aria-label="Back" title="Back">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M19 12H5m0 0l7 7m-7-7l7-7" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+            <button class="btn btn--secondary" id="viewToggle" aria-label="Toggle graph view" title="Show all bubbles">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="view-bubbles-icon">
+                <circle cx="12" cy="12" r="3"/>
+                <circle cx="4" cy="6" r="2"/>
+                <circle cx="20" cy="6" r="2"/>
+                <circle cx="4" cy="18" r="2"/>
+                <circle cx="20" cy="18" r="2"/>
+                <path d="M6.5 7.5L9.5 10.5M14.5 10.5L17.5 7.5M9.5 13.5L6.5 16.5M14.5 13.5L17.5 16.5" stroke-width="1.5"/>
+              </svg>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="view-list-icon" style="display: none;">
+                <path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/>
+              </svg>
+            </button>
             <button class="btn btn--secondary" id="zoomOut" aria-label="Zoom out">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M5 12h14"></path>
@@ -102,19 +118,17 @@
               </svg>
               Neo4j
             </button>
-            <button class="btn btn--ai" id="askAiBtn" aria-label="Ask AI">
+            <button class="btn btn--secondary btn--icon-blue" id="askAiBtn" aria-label="Ask AI" title="Ask AI">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09Z" stroke-linecap="round" stroke-linejoin="round"/>
                 <path d="M18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 0 0-2.456 2.456Z" stroke-linecap="round" stroke-linejoin="round"/>
               </svg>
-              Ask AI
             </button>
-            <a class="btn btn--primary" href="/keywords-manage.html" aria-label="Manage Keywords">
+            <a class="btn btn--secondary" href="/keywords-manage.html" aria-label="Manage Keywords" title="Manage Keywords">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M12 20h9"></path>
-                <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+                <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/>
+                <circle cx="12" cy="12" r="3"/>
               </svg>
-              Manage Keywords
             </a>
           </div>
         </div>
@@ -153,7 +167,7 @@
               <span>Tertiary (Isolated)</span>
             </label>
             <div class="legend-filter-item legend-mode" id="modeIndicator">
-              <span>Mode: LVMH + Primary</span>
+              <span>Mode: LVMH + Areas</span>
             </div>
           </div>
           <svg id="bubbleGraph" role="img" aria-label="Keyword knowledge graph"></svg>
@@ -220,7 +234,7 @@
     <script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/neo4j-driver-lite@5.23.0/lib/browser/neo4j-web.min.js"></script>
     <script src="scripts/shared-data.js"></script>
-    <script src="scripts/keywords.js?v=16" defer></script>
+    <script src="scripts/keywords.js?v=17" defer></script>
     <script src="scripts/auth.js"></script>
   </body>
 </html>

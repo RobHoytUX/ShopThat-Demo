@@ -88,11 +88,18 @@
         bar.className = 'bulk-action-bar';
         bar.innerHTML = `
           <span class="bulk-action-bar__count"><span id="selectedCount">0</span> selected</span>
+          <button class="btn btn--secondary" id="bulkSelectAll">Select All</button>
           <button class="btn btn--secondary" id="bulkDeselectAll">Deselect All</button>
           <button class="btn btn--danger" id="bulkDelete">Delete Selected</button>
         `;
         document.querySelector('.keywords').insertBefore(bar, document.querySelector('.keywords-gallery'));
         
+        document.getElementById('bulkSelectAll').addEventListener('click', () => {
+          const arr = load();
+          arr.forEach(k => selectedKeywords.add(k.name));
+          renderWithSearch(true);
+        });
+
         document.getElementById('bulkDeselectAll').addEventListener('click', () => {
           selectedKeywords.clear();
           renderWithSearch(true);
@@ -456,52 +463,176 @@
     });
   }
 
+  // ============================
+  // Add Keyword Side Panel
+  // ============================
+  let panelSelectedConnections = [];
+
+  function openAddPanel() {
+    const panel = document.getElementById('mkAddPanel');
+    const overlay = document.getElementById('mkPanelOverlay');
+    if (!panel) return;
+
+    // Reset form
+    document.getElementById('mkPanelName').value = '';
+    document.getElementById('mkPanelLevel').value = '1';
+    document.getElementById('mkPanelConnSearch').value = '';
+    panelSelectedConnections = [];
+    renderPanelChips();
+    renderPanelResults('');
+
+    panel.setAttribute('aria-hidden', 'false');
+    overlay.classList.add('active');
+    setTimeout(() => document.getElementById('mkPanelName').focus(), 300);
+  }
+
+  function closeAddPanel() {
+    const panel = document.getElementById('mkAddPanel');
+    const overlay = document.getElementById('mkPanelOverlay');
+    if (panel) panel.setAttribute('aria-hidden', 'true');
+    if (overlay) overlay.classList.remove('active');
+  }
+
+  function renderPanelChips() {
+    const container = document.getElementById('mkPanelSelectedConns');
+    if (!container) return;
+    container.innerHTML = panelSelectedConnections.map(name => 
+      `<span class="mk-conn-chip">${name}<button class="mk-conn-chip__remove" data-name="${name}">&times;</button></span>`
+    ).join('');
+
+    container.querySelectorAll('.mk-conn-chip__remove').forEach(btn => {
+      btn.addEventListener('click', () => {
+        panelSelectedConnections = panelSelectedConnections.filter(n => n !== btn.dataset.name);
+        renderPanelChips();
+        renderPanelResults(document.getElementById('mkPanelConnSearch').value);
+      });
+    });
+  }
+
+  function renderPanelResults(query) {
+    const container = document.getElementById('mkPanelConnResults');
+    if (!container) return;
+    const keywords = load();
+    const q = (query || '').toLowerCase().trim();
+
+    if (!q) {
+      container.classList.remove('has-results');
+      container.innerHTML = '';
+      return;
+    }
+
+    const filtered = keywords
+      .filter(kw => kw.name.toLowerCase().includes(q) && !panelSelectedConnections.includes(kw.name))
+      .slice(0, 15);
+
+    if (filtered.length === 0) {
+      container.classList.remove('has-results');
+      container.innerHTML = '';
+      return;
+    }
+
+    container.classList.add('has-results');
+    container.innerHTML = filtered.map(kw =>
+      `<div class="mk-conn-result" data-name="${kw.name}">${kw.name}</div>`
+    ).join('');
+
+    container.querySelectorAll('.mk-conn-result').forEach(el => {
+      el.addEventListener('click', () => {
+        panelSelectedConnections.push(el.dataset.name);
+        renderPanelChips();
+        renderPanelResults(document.getElementById('mkPanelConnSearch').value);
+      });
+    });
+  }
+
+  function saveFromPanel() {
+    const nameInput = document.getElementById('mkPanelName');
+    const levelSelect = document.getElementById('mkPanelLevel');
+    const name = (nameInput.value || '').trim();
+    if (!name) { nameInput.focus(); return; }
+
+    const arr = load();
+    if (arr.find(x => x.name.toLowerCase() === name.toLowerCase())) {
+      nameInput.style.borderColor = '#ef4444';
+      setTimeout(() => nameInput.style.borderColor = '', 2000);
+      return;
+    }
+
+    const group = parseInt(levelSelect.value) || 1;
+    arr.push({ id: name, name: name, value: 50, group: group });
+    save(arr);
+
+    // Save connections
+    if (panelSelectedConnections.length > 0) {
+      const conns = loadConnections();
+      panelSelectedConnections.forEach(target => {
+        if (!conns.find(c => (c.source === name && c.target === target) || (c.source === target && c.target === name))) {
+          conns.push({ source: name, target: target });
+        }
+      });
+      saveConnections(conns);
+    }
+
+    closeAddPanel();
+    renderWithSearch();
+  }
+
+  function initAddPanel() {
+    document.getElementById('mkPanelClose')?.addEventListener('click', closeAddPanel);
+    document.getElementById('mkPanelCancel')?.addEventListener('click', closeAddPanel);
+    document.getElementById('mkPanelOverlay')?.addEventListener('click', closeAddPanel);
+    document.getElementById('mkPanelSave')?.addEventListener('click', saveFromPanel);
+
+    document.getElementById('mkPanelConnSearch')?.addEventListener('input', (e) => {
+      renderPanelResults(e.target.value);
+    });
+
+    // Close on Escape
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        const panel = document.getElementById('mkAddPanel');
+        if (panel && panel.getAttribute('aria-hidden') === 'false') {
+          closeAddPanel();
+        }
+      }
+    });
+
+    // Save on Enter in name field
+    document.getElementById('mkPanelName')?.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') saveFromPanel();
+    });
+  }
+
+  // ============================
+  // Init
+  // ============================
   function init(){
     const add = document.getElementById('mk-add');
     const clear = document.getElementById('mk-clear');
-    const name = document.getElementById('mk-name');
     const searchInput = document.getElementById('mk-search');
-    const searchClear = document.getElementById('mk-search-clear');
 
     // Search functionality
     searchInput && searchInput.addEventListener('input', (e) => {
       searchTerm = e.target.value;
       renderWithSearch();
     });
+
+    // Add keyword opens side panel
+    add && add.addEventListener('click', openAddPanel);
+
+    // Clear all with warning modal
+    clear && clear.addEventListener('click', () => {
+      const keywords = load();
+      const count = keywords.length;
+      showConfirmModal(
+        'Clear All Keywords',
+        `This will permanently delete all <strong>${count} keywords</strong> and their connections. This action cannot be undone.`,
+        () => { save([]); saveConnections([]); renderWithSearch(); }
+      );
+    });
     
-    searchClear && searchClear.addEventListener('click', () => {
-      searchTerm = '';
-      if (searchInput) searchInput.value = '';
-      renderWithSearch();
-    });
-
-    // Add keyword on button click
-    add && add.addEventListener('click', addKeyword);
-    
-    // Add keyword on Enter key
-    name && name.addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') addKeyword();
-    });
-
-    function addKeyword(){
-      const n = (name.value||'').trim();
-      const level = document.getElementById('mk-level');
-      if (!n) return;
-      const arr = load();
-      if (arr.find(x=>x.name.toLowerCase()===n.toLowerCase())) return;
-      const selectedGroup = level ? parseInt(level.value) : 1;
-      arr.push({ id: n, name: n, value: 50, group: selectedGroup });
-      save(arr); 
-      name.value=''; 
-      if (level) level.value = '1'; // Reset to default
-      renderWithSearch();
-    }
-
-    clear && clear.addEventListener('click', ()=>{ 
-      if (confirm('Are you sure you want to clear all keywords and connections?')) {
-        save([]); saveConnections([]); renderWithSearch(); 
-      }
-    });
+    // Initialize add panel
+    initAddPanel();
     
     renderWithSearch();
   }

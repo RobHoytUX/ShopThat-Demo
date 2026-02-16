@@ -130,6 +130,73 @@ console.log('Document ready state:', document.readyState);
     secondary: true,
     isolated: true
   };
+  
+  // Article data - maps keywords to related articles
+  const keywordArticles = {
+    'LVMH': [
+      { title: 'Luxury Market Analysis 2024', publisher: 'Financial Times', image: 'assets/foundation-lv-png.png', views: '12,340' },
+      { title: 'LVMH Art & Culture Initiatives', publisher: 'Le Monde', image: 'assets/lv-art.avif', views: '8,920' },
+      { title: 'LV New York City Guide', publisher: 'Louis Vuitton', image: 'assets/lv-nyc-guide.png', views: '15,670' }
+    ],
+    'The Modern': [
+      { title: 'MoMA Dining Experience', publisher: 'NY Times', image: 'assets/restaurants/the-modern.jpg', views: '5,230' },
+      { title: 'Modern Art & Fine Dining', publisher: 'Condé Nast', image: 'assets/museums/moma.jpg', views: '3,890' }
+    ],
+    'Le Bernardin': [
+      { title: 'Eric Ripert\'s Seafood Mastery', publisher: 'Eater', image: 'assets/restaurants/le-bernardin.jpg', views: '7,120' },
+      { title: 'Michelin Three Star Excellence', publisher: 'Michelin Guide', image: 'assets/restaurants/le-bernardin.jpg', views: '4,560' }
+    ],
+    'Cafe Carlyle': [
+      { title: 'Iconic NYC Cabaret Scene', publisher: 'Vanity Fair', image: 'assets/restaurants/cafe-carlyle.jpg', views: '6,780' },
+      { title: 'The Carlyle Legacy', publisher: 'Town & Country', image: 'assets/restaurants/carlyle-hotel.jpg', views: '4,230' }
+    ],
+    'MoMA Museum': [
+      { title: 'Modern Art Masterpieces', publisher: 'Art News', image: 'assets/museums/moma.jpg', views: '9,450' },
+      { title: 'Kusama at MoMA', publisher: 'David Zwirner', image: 'assets/kusama-book.png', views: '11,200' }
+    ],
+    'The Carlyle': [
+      { title: 'Manhattan\'s Most Storied Hotel', publisher: 'Architectural Digest', image: 'assets/restaurants/carlyle-hotel.jpg', views: '5,670' }
+    ],
+    'The Plaza': [
+      { title: 'Plaza Hotel Heritage', publisher: 'Condé Nast Traveler', image: 'assets/restaurants/the-plaza.jpg', views: '8,340' }
+    ],
+    'The St. Regis': [
+      { title: 'St. Regis NYC Experience', publisher: 'Forbes Travel', image: 'assets/restaurants/st-regis.jpg', views: '4,890' }
+    ],
+    'The Baccarat': [
+      { title: 'Crystal & Luxury', publisher: 'Robb Report', image: 'assets/restaurants/baccarat.jpg', views: '3,560' }
+    ],
+    'The Mark Hotel': [
+      { title: 'Upper East Side Elegance', publisher: 'Travel + Leisure', image: 'assets/restaurants/mark-hotel.jpg', views: '4,120' }
+    ],
+    'default': [
+      { title: 'Luxury Lifestyle Guide', publisher: 'Financial Times', image: 'assets/foundation-lv-png.png', views: '2,340' }
+    ]
+  };
+  
+  // Get articles for a keyword
+  function getArticlesForKeyword(keyword) {
+    return keywordArticles[keyword] || keywordArticles['default'];
+  }
+  
+  // Generate articles HTML for sidebar
+  function generateArticlesHTML(keyword) {
+    const articles = getArticlesForKeyword(keyword);
+    return articles.map(article => `
+      <div class="sidebar-article">
+        <div class="sidebar-article-image">
+          <img src="${article.image}" alt="${article.title}" onerror="this.style.display='none'">
+        </div>
+        <div class="sidebar-article-info">
+          <div class="sidebar-article-title">${article.title}</div>
+          <div class="sidebar-article-meta">
+            <span class="sidebar-article-publisher">${article.publisher}</span>
+            <span class="sidebar-article-views">${article.views} views</span>
+          </div>
+        </div>
+      </div>
+    `).join('');
+  }
 
   // Restaurant graph data (also used for seeding Neo4j). Will be overridden by localStorage if present.
   const defaultNodes = [
@@ -138,6 +205,12 @@ console.log('Document ready state:', document.readyState);
     // ============================================
     // Group 0 - Root Node (LVMH) - Dark gradient blue, 4x larger
     { id: 'LVMH', group: 0, value: 100, isRoot: true },
+    
+    // ============================================
+    // AREA GROUPING NODES - Nested under LVMH
+    // ============================================
+    { id: '57th St.', group: 1, value: 90, isArea: true },
+    { id: 'Soho', group: 1, value: 90, isArea: true },
     
     // ============================================
     // THE MODERN RESTAURANT
@@ -343,26 +416,36 @@ console.log('Document ready state:', document.readyState);
   ];
   const defaultLinks = [
     // ============================================
-    // LVMH ROOT CONNECTIONS - Connects to all primary nodes
+    // LVMH ROOT CONNECTIONS - Connects to area nodes
     // ============================================
-    { source: 'LVMH', target: 'The Modern' },
-    { source: 'LVMH', target: 'Two Michelin Stars' },
-    { source: 'LVMH', target: 'MoMA Museum' },
-    { source: 'LVMH', target: 'Le Bernardin' },
-    { source: 'LVMH', target: 'Three Michelin Stars' },
-    { source: 'LVMH', target: 'Eric Ripert' },
-    { source: 'LVMH', target: 'Seafood' },
-    { source: 'LVMH', target: 'Cafe Carlyle' },
-    { source: 'LVMH', target: 'The Carlyle' },
-    { source: 'LVMH', target: 'Bemelmans Bar' },
-    { source: 'LVMH', target: 'Art Deco' },
-    { source: 'LVMH', target: 'Luxury Hotel' },
-    { source: 'LVMH', target: 'Jean-Georges Vongerichten' },
-    { source: 'LVMH', target: 'Jean-Georges at The Mark' },
-    { source: 'LVMH', target: 'The Mark Hotel' },
-    { source: 'LVMH', target: 'The Plaza' },
-    { source: 'LVMH', target: 'The St. Regis' },
-    { source: 'LVMH', target: 'The Baccarat' },
+    { source: 'LVMH', target: '57th St.' },
+    { source: 'LVMH', target: 'Soho' },
+    
+    // ============================================
+    // 57TH ST. AREA CONNECTIONS
+    // ============================================
+    { source: '57th St.', target: 'The Modern' },
+    { source: '57th St.', target: 'Two Michelin Stars' },
+    { source: '57th St.', target: 'MoMA Museum' },
+    { source: '57th St.', target: 'Le Bernardin' },
+    { source: '57th St.', target: 'Three Michelin Stars' },
+    { source: '57th St.', target: 'Eric Ripert' },
+    { source: '57th St.', target: 'Seafood' },
+    { source: '57th St.', target: 'The Plaza' },
+    { source: '57th St.', target: 'The St. Regis' },
+    { source: '57th St.', target: 'The Baccarat' },
+    { source: '57th St.', target: 'Luxury Hotel' },
+    
+    // ============================================
+    // SOHO AREA CONNECTIONS
+    // ============================================
+    { source: 'Soho', target: 'Cafe Carlyle' },
+    { source: 'Soho', target: 'The Carlyle' },
+    { source: 'Soho', target: 'Bemelmans Bar' },
+    { source: 'Soho', target: 'Art Deco' },
+    { source: 'Soho', target: 'Jean-Georges Vongerichten' },
+    { source: 'Soho', target: 'Jean-Georges at The Mark' },
+    { source: 'Soho', target: 'The Mark Hotel' },
     
     // ============================================
     // THE MODERN CONNECTIONS
@@ -612,7 +695,9 @@ console.log('Document ready state:', document.readyState);
     initialNodes = storedNodes.map(node => ({
       id: node.id || node.name,
       group: node.group || 1,
-      value: node.value || 50
+      value: node.value || 50,
+      isArea: node.isArea || false,
+      isRoot: node.isRoot || false
     }));
     console.log('Loaded stored nodes:', initialNodes.map(n => ({ id: n.id, group: n.group })));
   }
@@ -649,27 +734,24 @@ console.log('Document ready state:', document.readyState);
     }
   }
   
-  // ALWAYS ensure LVMH root node exists and is connected to all primary (group 1) nodes
-  const hasLVMH = initialNodes.some(n => n.id === 'LVMH');
-  if (!hasLVMH) {
-    console.log('Adding LVMH root node');
-    // Add LVMH as root node
+  // Ensure LVMH + area nodes always exist in initial data
+  if (!initialNodes.some(n => n.id === 'LVMH')) {
     initialNodes.unshift({ id: 'LVMH', group: 0, value: 100, isRoot: true });
-    
-    // Connect LVMH to all primary (group 1) nodes
-    const primaryNodes = initialNodes.filter(n => n.group === 1);
-    primaryNodes.forEach(node => {
-      // Check if link already exists
-      const linkExists = initialLinks.some(l => 
-        (l.source === 'LVMH' && l.target === node.id) ||
-        (l.source === node.id && l.target === 'LVMH')
-      );
-      if (!linkExists) {
-        initialLinks.push({ source: 'LVMH', target: node.id });
-      }
-    });
-    console.log('Added LVMH with', primaryNodes.length, 'connections');
   }
+  // Ensure area nodes exist
+  [{ id: '57th St.', group: 1, value: 90, isArea: true }, { id: 'Soho', group: 1, value: 90, isArea: true }].forEach(area => {
+    let existing = initialNodes.find(n => n.id === area.id);
+    if (!existing) {
+      initialNodes.push({ ...area });
+    } else {
+      existing.isArea = true;
+    }
+    // Ensure LVMH → area link
+    if (!initialLinks.some(l => (l.source === 'LVMH' && l.target === area.id) || (l.source === area.id && l.target === 'LVMH'))) {
+      initialLinks.push({ source: 'LVMH', target: area.id });
+    }
+  });
+  console.log('LVMH + area nodes ensured');
   
   // Set up initial graph data using the new system
   allNodes = initialNodes;
@@ -746,9 +828,10 @@ console.log('Document ready state:', document.readyState);
   const baseRadius = d3.scaleSqrt().domain([10, 100]).range([30, 70]);
   
   // LVMH root node (group 0) is 3x larger, primary nodes slightly larger than others
-  function radius(value, group) {
+  function radius(value, group, isArea) {
+    if (group === 0) return 140; // LVMH is fixed at 140px radius
+    if (isArea) return 70; // Area nodes are half of LVMH
     const base = baseRadius(value);
-    if (group === 0) return 140; // LVMH is fixed at 140px radius (about 3x primary size)
     return group === 1 ? base * 1.1 : base;
   }
 
@@ -853,8 +936,15 @@ console.log('Document ready state:', document.readyState);
   // Function to determine which nodes to show based on current mode
   function getVisibleNodes() {
     if (currentViewMode === 'default') {
-      // Show LVMH root node (Group 0) and all primary nodes (Group 1) on page load
-      return allNodes.filter(node => node.group === 0 || node.group === 1);
+      // Show LVMH and its direct connections (area nodes) on page load
+      const lvmhConnectedIds = new Set(['LVMH']);
+      allLinks.forEach(link => {
+        const sourceId = typeof link.source === 'object' ? link.source.id : link.source;
+        const targetId = typeof link.target === 'object' ? link.target.id : link.target;
+        if (sourceId === 'LVMH') lvmhConnectedIds.add(targetId);
+        if (targetId === 'LVMH') lvmhConnectedIds.add(sourceId);
+      });
+      return allNodes.filter(node => lvmhConnectedIds.has(node.id));
     } else if (currentViewMode === 'expanded' && selectedNode) {
       // Show selected node and all connected nodes
       const connectedNodeIds = new Set();
@@ -1031,8 +1121,10 @@ console.log('Document ready state:', document.readyState);
   function updateModeIndicator() {
     const modeIndicator = document.getElementById('modeIndicator');
     if (modeIndicator) {
-      let modeText = 'Mode: LVMH + Primary';
-      if (currentViewMode === 'expanded' && selectedNode) {
+      let modeText = 'Mode: LVMH + Areas';
+      if (currentViewMode === 'linear' && selectedNode) {
+        modeText = `Mode: "${selectedNode.id}" + Connected`;
+      } else if (currentViewMode === 'expanded' && selectedNode) {
         modeText = `Mode: "${selectedNode.id}" + Connected`;
       } else if (currentViewMode === 'filtered') {
         modeText = 'Mode: Filtered View';
@@ -1041,6 +1133,288 @@ console.log('Document ready state:', document.readyState);
       }
       modeIndicator.querySelector('span').textContent = modeText;
     }
+  }
+
+  // Group colors for linear view
+  const groupColors = {
+    0: { gradient: 'linear-gradient(135deg, #1e3a8a, #1e40af, #312e81)', label: 'Root' },
+    1: { gradient: 'linear-gradient(135deg, #06b6d4, #8b5cf6, #6366f1)', label: 'Primary' },
+    2: { gradient: 'linear-gradient(135deg, #10b981, #34d399, #06b6d4)', label: 'Connected' },
+    3: { gradient: 'linear-gradient(135deg, #f97316, #ec4899, #f472b6)', label: 'Secondary' },
+    4: { gradient: 'linear-gradient(135deg, #10b981, #06b6d4, #8b5cf6)', label: 'Tertiary' }
+  };
+
+  // Category mapping for organizing connected keywords
+  const keywordCategories = {
+    // Restaurants & Dining Venues
+    'The Modern': 'Restaurants',
+    'The Modern (Dining Room)': 'Restaurants',
+    'The Bar Room': 'Restaurants',
+    'The Kitchen Table': 'Restaurants',
+    'Le Bernardin': 'Restaurants',
+    'Cafe Carlyle': 'Restaurants',
+    'Jean-Georges at The Mark': 'Restaurants',
+    "Dowling's at The Carlyle": 'Restaurants',
+    'Restaurant': 'Restaurants',
+    'Supper Club': 'Restaurants',
+    'Comfortable Dining Room': 'Restaurants',
+
+    // Hotels
+    'The Carlyle': 'Hotels',
+    'The Mark Hotel': 'Hotels',
+    'The Plaza': 'Hotels',
+    'The St. Regis': 'Hotels',
+    'The Baccarat': 'Hotels',
+    'Rosewood Hotel': 'Hotels',
+    'Luxury Hotel': 'Hotels',
+    'Hotel': 'Hotels',
+    'Five-Star': 'Hotels',
+
+    // Galleries & Museums
+    'MoMA Museum': 'Galleries',
+    'MoMA Sculpture Garden': 'Galleries',
+    'Sculpture Garden': 'Galleries',
+    'Metropolitan Museum of Art': 'Galleries',
+    'Madeline Murals': 'Galleries',
+
+    // Bars & Lounges
+    'Bemelmans Bar': 'Bars & Lounges',
+    'King Cole Bar': 'Bars & Lounges',
+    'Elegant Bar': 'Bars & Lounges',
+    'Swanky Bar': 'Bars & Lounges',
+    'Hand Crafted Bar': 'Bars & Lounges',
+    'Cocktails': 'Bars & Lounges',
+
+    // Cuisine & Dishes
+    'Seafood': 'Cuisine & Dishes',
+    'Fine Dining': 'Cuisine & Dishes',
+    'French Cuisine': 'Cuisine & Dishes',
+    'Tasting Menu': 'Cuisine & Dishes',
+    'Prix Fixe': 'Cuisine & Dishes',
+    'Almost Raw': 'Cuisine & Dishes',
+    'Barely Touched': 'Cuisine & Dishes',
+    'Lightly Cooked': 'Cuisine & Dishes',
+    'Eggs on Eggs on Eggs': 'Cuisine & Dishes',
+    'Caviar Hot Dogs': 'Cuisine & Dishes',
+    'Tuna with Foie Gras': 'Cuisine & Dishes',
+    'Slowly Baked Salmon with Caviar': 'Cuisine & Dishes',
+    'Poached Lobster': 'Cuisine & Dishes',
+    'Dover Sole': 'Cuisine & Dishes',
+    'Scallop with Caviar': 'Cuisine & Dishes',
+    'Halibut': 'Cuisine & Dishes',
+    'Pistachio Dessert': 'Cuisine & Dishes',
+    'Peruvian Dark Chocolate Tart': 'Cuisine & Dishes',
+    'Lobster': 'Cuisine & Dishes',
+    'Truffles': 'Cuisine & Dishes',
+    'Lunch': 'Cuisine & Dishes',
+    'Dinner': 'Cuisine & Dishes',
+    'Brunch': 'Cuisine & Dishes',
+    'Afternoon Tea': 'Cuisine & Dishes',
+    'Seasonal & Local': 'Cuisine & Dishes',
+    'Fresh from the Market': 'Cuisine & Dishes',
+    'Innovative Seasonings': 'Cuisine & Dishes',
+    'French-Inspired': 'Cuisine & Dishes',
+    'Global Bistro': 'Cuisine & Dishes',
+    'The Fish is the Star': 'Cuisine & Dishes',
+    'Wine': 'Cuisine & Dishes',
+    'Sommelier': 'Cuisine & Dishes',
+    'Grand Award Wine List': 'Cuisine & Dishes',
+
+    // Awards & Recognition
+    'Two Michelin Stars': 'Awards',
+    'Three Michelin Stars': 'Awards',
+    'Four-Star NY Times': 'Awards',
+    'La Liste Top Restaurants': 'Awards',
+    'World Class': 'Awards',
+
+    // People
+    'Eric Ripert': 'People',
+    'Jean-Georges Vongerichten': 'People',
+    'Ludwig Bemelmans': 'People',
+    'Celebrities': 'People',
+
+    // Locations
+    'New York': 'Locations',
+    'Upper East Side': 'Locations',
+    'Midtown Manhattan': 'Locations',
+    'Central Park': 'Locations',
+    '57th St.': 'Areas',
+    'Soho': 'Areas',
+    'Central Park Views': 'Locations',
+    'Madison Avenue': 'Locations',
+    '76th Street': 'Locations',
+    '57th Street': 'Locations',
+    '51st Street': 'Locations',
+    'Empire State Building': 'Locations',
+
+    // Entertainment
+    'Classic Cabaret': 'Entertainment',
+    'Live Entertainment': 'Entertainment',
+    'Concerts': 'Entertainment',
+    'Evenings': 'Entertainment',
+    'People Watching': 'Entertainment',
+
+    // Amenities & Services
+    'Spa': 'Amenities',
+    'Valmont Spa': 'Amenities',
+    'Yves Durif Salon': 'Amenities',
+    'Fitness Center': 'Amenities',
+    'Gym': 'Amenities',
+    'Indoor Pool': 'Amenities',
+    'Steam Room': 'Amenities',
+    'Concierge': 'Amenities',
+    '24-Hour Service': 'Amenities',
+    'Valet Parking': 'Amenities',
+    'Pet-Friendly': 'Amenities',
+    'Salon': 'Amenities',
+    'Hospitality Included': 'Amenities',
+    '28-Day Reservations': 'Amenities',
+    'Reservations Required': 'Amenities',
+    'Professional Service': 'Amenities',
+    'Expert Service': 'Amenities',
+    'Union Square Hospitality Group (USHG)': 'Amenities',
+
+    // Style & Atmosphere
+    'Art Deco': 'Style & Atmosphere',
+    'Art Deco-Inspired': 'Style & Atmosphere',
+    'Elegant': 'Style & Atmosphere',
+    'Contemporary': 'Style & Atmosphere',
+    'Upscale': 'Style & Atmosphere',
+    'Upscale & Sophisticated': 'Style & Atmosphere',
+    'Luxurious Decor': 'Style & Atmosphere',
+    'Polished': 'Style & Atmosphere',
+    'Iconic': 'Style & Atmosphere',
+    'Luxury': 'Style & Atmosphere',
+    'Landmark Building': 'Style & Atmosphere',
+    '19th-Century Architecture': 'Style & Atmosphere',
+    'Artful & Refined': 'Style & Atmosphere',
+    'Dress Code': 'Style & Atmosphere',
+    'Business Casual': 'Style & Atmosphere',
+    'Special Occasions': 'Style & Atmosphere'
+  };
+
+  // Preferred category display order
+  const categoryOrder = [
+    'Areas', 'Restaurants', 'Hotels', 'Galleries', 'Bars & Lounges',
+    'Cuisine & Dishes', 'Awards', 'People', 'Locations',
+    'Entertainment', 'Amenities', 'Style & Atmosphere', 'Other'
+  ];
+
+  // Show linear view when a keyword bubble is clicked
+  function showLinearView(nodeData) {
+    selectedNode = nodeData;
+    currentViewMode = 'linear';
+
+    // Hide SVG and legend filter
+    svg.node().style.display = 'none';
+    const legend = document.querySelector('.graph-legend-filter');
+    if (legend) legend.style.display = 'none';
+
+    // Get connected nodes (exclude root LVMH node)
+    const connectedIds = getConnectedNodeIds(nodeData);
+    const connectedNodes = allNodes.filter(n => connectedIds.has(n.id) && n.id !== nodeData.id && n.group !== 0);
+
+    // Group connected nodes by category
+    const grouped = {};
+    connectedNodes.forEach(n => {
+      const cat = keywordCategories[n.id] || 'Other';
+      if (!grouped[cat]) grouped[cat] = [];
+      grouped[cat].push(n);
+    });
+
+    // Sort within each category by value descending
+    Object.values(grouped).forEach(items => {
+      items.sort((a, b) => b.value - a.value);
+    });
+
+    // Sort categories by preferred order
+    const sortedCategories = Object.keys(grouped).sort((a, b) => {
+      const ai = categoryOrder.indexOf(a);
+      const bi = categoryOrder.indexOf(b);
+      return (ai === -1 ? 999 : ai) - (bi === -1 ? 999 : bi);
+    });
+
+    const mainColor = groupColors[nodeData.group] || groupColors[1];
+
+    // Build category-grouped list HTML
+    let itemIndex = 0;
+    const listHTML = sortedCategories.map(cat => {
+      const items = grouped[cat];
+      const headerHTML = `<div class="linear-view__category"><span class="linear-view__category-label">${cat}</span><span class="linear-view__category-count">${items.length}</span><div class="linear-view__category-line"></div></div>`;
+      const itemsHTML = items.map(n => {
+        const nColor = groupColors[n.group] || groupColors[1];
+        const count = getConnectedNodeIds(n).size - 1;
+        const delay = itemIndex * 0.04;
+        itemIndex++;
+        return `
+          <div class="linear-view__item" data-id="${n.id}" style="animation-delay: ${delay}s">
+            <div class="linear-view__item-indicator" style="background: ${nColor.gradient}"></div>
+            <div class="linear-view__item-info">
+              <span class="linear-view__item-name">${n.id}</span>
+              <span class="linear-view__item-meta">${count} connections</span>
+            </div>
+            <svg class="linear-view__item-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M9 18l6-6-6-6" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+        `;
+      }).join('');
+      return headerHTML + itemsHTML;
+    }).join('');
+
+    // Create or reuse container
+    let linearView = document.getElementById('linearView');
+    if (!linearView) {
+      linearView = document.createElement('div');
+      linearView.id = 'linearView';
+      linearView.className = 'keywords__linear-view';
+      document.querySelector('.keywords__canvas').appendChild(linearView);
+    }
+
+    linearView.innerHTML = `
+      <div class="linear-view__main">
+        <div class="linear-view__main-bubble" style="background: ${mainColor.gradient}">
+          <span class="linear-view__main-name">${nodeData.id}</span>
+        </div>
+        <div class="linear-view__main-meta">
+          <span class="linear-view__main-group">${mainColor.label}</span>
+          <span class="linear-view__main-connections">${connectedNodes.length} connections</span>
+        </div>
+      </div>
+      <div class="linear-view__divider">
+        <span>Connected Keywords</span>
+      </div>
+      <div class="linear-view__list">
+        ${listHTML}
+      </div>
+    `;
+
+    linearView.style.display = 'flex';
+    linearView.scrollTop = 0;
+
+    // Click handlers for connected items
+    linearView.querySelectorAll('.linear-view__item').forEach(item => {
+      item.addEventListener('click', () => {
+        const target = allNodes.find(n => n.id === item.dataset.id);
+        if (target) {
+          pushState();
+          showLinearView(target);
+          openDrawer(target);
+        }
+      });
+    });
+
+    openDrawer(nodeData);
+    updateModeIndicator();
+  }
+
+  // Hide linear view and restore bubble graph
+  function hideLinearView() {
+    const linearView = document.getElementById('linearView');
+    if (linearView) linearView.style.display = 'none';
+    svg.node().style.display = '';
+    const legend = document.querySelector('.graph-legend-filter');
+    if (legend) legend.style.display = '';
   }
 
   const gLinks = svg.append('g').attr('stroke', '#d9d9ef').attr('stroke-width', 2.5);
@@ -1056,7 +1430,7 @@ console.log('Document ready state:', document.readyState);
     .force('link', d3.forceLink(graphLinks).id(d => d.id).distance(20).strength(0.2))
     .force('charge', d3.forceManyBody().strength(-10).distanceMax(100))
     .force('center', centerForce)
-    .force('collision', d3.forceCollide().radius(d => radius(d.value, d.group) + 2).strength(0.8).iterations(2))
+    .force('collision', d3.forceCollide().radius(d => radius(d.value, d.group, d.isArea) + 2).strength(0.8).iterations(2))
     .alphaDecay(0.05)
     .velocityDecay(0.85)
     .alphaMin(0.005)
@@ -1071,15 +1445,18 @@ console.log('Document ready state:', document.readyState);
       const h = height();
       const centerX = w / 2;
       const centerY = h / 2;
-      const lvmhRadius = radius(lvmhNode.value, lvmhNode.group);
-      const orbitRadius = lvmhRadius + 30; // Tight orbit
+      const lvmhRadius = radius(lvmhNode.value, lvmhNode.group, lvmhNode.isArea);
+      const areaRadius = 70; // Area node radius
+      const belowOffset = lvmhRadius + areaRadius + 20; // Gap between LVMH and area nodes
+      const sideSpacing = areaRadius + 30; // Horizontal spacing between area nodes
       
       const otherNodes = graphNodes.filter(n => n.group !== 0);
       
       otherNodes.forEach((node, i) => {
-        const targetAngle = (i / otherNodes.length) * 2 * Math.PI - Math.PI / 2;
-        const targetX = centerX + Math.cos(targetAngle) * orbitRadius;
-        const targetY = centerY + Math.sin(targetAngle) * orbitRadius;
+        // Position area nodes below LVMH, side by side
+        const xOffset = otherNodes.length === 1 ? 0 : (i === 0 ? -sideSpacing : sideSpacing);
+        const targetX = centerX + xOffset;
+        const targetY = centerY + belowOffset;
         
         // Stronger force toward target position for tighter grouping
         const dx = targetX - node.x;
@@ -1264,27 +1641,30 @@ console.log('Document ready state:', document.readyState);
     
     if (lvmhNode && currentViewMode === 'default') {
       // Solar system layout: LVMH at center, primary nodes in tight orbit
-      const lvmhRadius = radius(lvmhNode.value, lvmhNode.group);
-      const orbitRadius = lvmhRadius + 30; // Tight orbit around LVMH
+      const lvmhRadius = radius(lvmhNode.value, lvmhNode.group, lvmhNode.isArea);
+      const areaRadius = 70;
+      const belowOffset = lvmhRadius + areaRadius + 20;
+      const sideSpacing = areaRadius + 30;
       
-      // Position LVMH at center
+      // Position LVMH above center to make room for area nodes below
+      const lvmhY = centerY - belowOffset / 2;
       lvmhNode.x = centerX;
-      lvmhNode.y = centerY;
+      lvmhNode.y = lvmhY;
       lvmhNode.vx = 0;
       lvmhNode.vy = 0;
-      lvmhNode.fx = centerX; // Fix position so simulation doesn't move it
-      lvmhNode.fy = centerY;
+      lvmhNode.fx = centerX;
+      lvmhNode.fy = lvmhY;
       
-      // Position primary nodes in a circle around LVMH
+      // Position area nodes below LVMH, side by side
       otherNodes.forEach((n, i) => {
-        const angle = (i / otherNodes.length) * 2 * Math.PI - Math.PI / 2; // Start from top
-        n.x = centerX + Math.cos(angle) * orbitRadius;
-        n.y = centerY + Math.sin(angle) * orbitRadius;
+        const xOffset = otherNodes.length === 1 ? 0 : (i === 0 ? -sideSpacing : sideSpacing);
+        n.x = centerX + xOffset;
+        n.y = lvmhY + belowOffset;
         n.vx = 0;
         n.vy = 0;
       });
       
-      console.log('Solar system layout: LVMH at center, ' + otherNodes.length + ' nodes in orbit');
+      console.log('Layout: LVMH + ' + otherNodes.length + ' area nodes below');
     } else {
       // Standard tight cluster layout for other view modes
       graphNodes.forEach((n, i) => {
@@ -1331,7 +1711,7 @@ console.log('Document ready state:', document.readyState);
           .attr('transform', `translate(${centerX},${centerY}) scale(0.5)`);
         
         g.append('circle')
-        .attr('r', d => radius(d.value, d.group))
+        .attr('r', d => radius(d.value, d.group, d.isArea))
           .attr('fill', d => color(d.group))
           .attr('opacity', 0.9);
       
@@ -1343,7 +1723,7 @@ console.log('Document ready state:', document.readyState);
           .style('pointer-events', 'none');
         
         text.each(function(d) {
-          const r = radius(d.value, d.group);
+          const r = radius(d.value, d.group, d.isArea);
           d3.select(this).style('font-size', `${computeFontSizeForRadius(r)}px`);
           wrapText(d3.select(this), d.id, r);
         });
@@ -1405,12 +1785,16 @@ console.log('Document ready state:', document.readyState);
       handleNodeClick(d);
     });
     
-    // Click on background to go back to default view
+    // Click on background to go back
     svg.on('click', (event) => {
       if (isTransitioning) return;
       if (event.target === svg.node()) {
+        if (isBubbleView) {
+          // In bubble view, background click goes back one level
+          bubbleBack();
+          return;
+        }
         if (currentViewMode === 'expanded') {
-          // Go back to showing only primary nodes
           selectedNode = null;
           currentViewMode = 'default';
           clickedNode = null;
@@ -1418,7 +1802,6 @@ console.log('Document ready state:', document.readyState);
           setGraphData(allNodes, allLinks, true);
           closeDrawer();
         } else {
-          // Just reset highlighting
           selectedNode = null;
         clickedNode = null;
         hoveredNode = null;
@@ -1452,7 +1835,19 @@ console.log('Document ready state:', document.readyState);
       return;
     }
     
-    // LVMH (group 0) is not clickable - it's always shown with details
+    // In bubble view mode, handle clicks differently
+    if (isBubbleView) {
+      // LVMH click in bubble view - expand to show area nodes
+      if (d.group === 0) {
+        expandBubbleNode(d);
+        return;
+      }
+      // Any other node - expand to show its connections
+      expandBubbleNode(d);
+      return;
+    }
+
+    // LVMH (group 0) is not clickable in linear mode
     if (d.group === 0) {
       return;
     }
@@ -1461,30 +1856,22 @@ console.log('Document ready state:', document.readyState);
     hoveredNode = null;
     isHoverClustering = false;
     
-    if (currentViewMode === 'default') {
-      // Save current state before expanding
+    if (currentViewMode === 'default' || currentViewMode === 'linear') {
+      // Save current state before showing linear view
       pushState();
-      // Clicking a primary node - expand to show connected nodes
-      selectedNode = d;
-      currentViewMode = 'expanded';
-      setGraphData(allNodes, allLinks, true);
-      openDrawer(d);
+      showLinearView(d);
     } else if (currentViewMode === 'expanded' && selectedNode && selectedNode.id === d.id) {
-      // Clicking the same node again - collapse back to default (don't push state, this is like going back)
       selectedNode = null;
       currentViewMode = 'default';
       clickedNode = null;
       setGraphData(allNodes, allLinks, true);
-      showLVMHDetails(); // Show LVMH details when going back to default
+      showLVMHDetails();
     } else if (currentViewMode === 'expanded') {
-      // Save current state before switching nodes
       pushState();
-      // Clicking a different node while expanded - switch to that node's connections
       selectedNode = d;
       setGraphData(allNodes, allLinks, true);
       openDrawer(d);
     } else {
-      // In 'all' or 'filtered' mode - just highlight and show drawer
       selectedNode = d;
       highlightConnections(d);
       openDrawer(d);
@@ -1512,7 +1899,7 @@ console.log('Document ready state:', document.readyState);
           <div class="sidebar-stats">
             <div class="sidebar-stat">
               <span class="sidebar-stat-value">${relatedKeywords.length}</span>
-              <span class="sidebar-stat-label">Primary Keywords</span>
+              <span class="sidebar-stat-label">Areas</span>
             </div>
             <div class="sidebar-stat">
               <span class="sidebar-stat-value">${allNodes.length}</span>
@@ -1521,11 +1908,11 @@ console.log('Document ready state:', document.readyState);
           </div>
           <div class="sidebar-section">
             <div class="sidebar-section-label">Description</div>
-            <p class="sidebar-description">LVMH is the central hub connecting all primary keywords in the knowledge graph. Click on any primary keyword to explore its connections.</p>
+            <p class="sidebar-description">LVMH is the central hub of the knowledge graph. Click on an area to explore the restaurants, hotels, galleries, and more within it.</p>
           </div>
           <div class="sidebar-section">
             <div class="sidebar-section-header">
-              <div class="sidebar-section-label">Primary Keywords</div>
+              <div class="sidebar-section-label">Areas</div>
               <button class="sidebar-reset-btn" id="resetChipsBtn" title="Reset all"${disabledNodes.size === 0 ? ' disabled' : ''}>
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
@@ -1537,6 +1924,12 @@ console.log('Document ready state:', document.readyState);
             <p class="sidebar-hint">Click a keyword to toggle visibility</p>
             <div class="sidebar-chips">
               ${relatedKeywords.map(kw => `<span class="sidebar-chip sidebar-chip--toggle${disabledNodes.has(kw) ? ' sidebar-chip--disabled' : ''}" data-keyword="${kw}">${kw}</span>`).join('')}
+            </div>
+          </div>
+          <div class="sidebar-section">
+            <div class="sidebar-section-label">Related Articles</div>
+            <div class="sidebar-articles">
+              ${generateArticlesHTML('LVMH')}
             </div>
           </div>
         </div>
@@ -1680,8 +2073,10 @@ console.log('Document ready state:', document.readyState);
       // Call resize to finalize positioning
       resize();
       
-      // Show LVMH details in sidebar on load
-      setTimeout(showLVMHDetails, 150);
+      // Show bubble view on page load (LVMH centered)
+      setTimeout(() => {
+        showBubbleView();
+      }, 150);
       
       console.log('After initialization:');
       console.log('Graph nodes in simulation:', sim.nodes().length);
@@ -1700,6 +2095,11 @@ console.log('Document ready state:', document.readyState);
   }
 
   function openDrawer(d){
+    // Always use the LVMH-specific details for the root node
+    if (d.id === 'LVMH' || d.group === 0) {
+      showLVMHDetails();
+      return;
+    }
     drawerTitle.textContent = d.id;
     
     // Use allLinks to get ALL connections, not just visible ones
@@ -1753,6 +2153,12 @@ console.log('Document ready state:', document.readyState);
             }
           </div>
         </div>
+        <div class="sidebar-section">
+          <div class="sidebar-section-label">Related Articles</div>
+          <div class="sidebar-articles">
+            ${generateArticlesHTML(d.id)}
+          </div>
+        </div>
       </div>
     `;
     
@@ -1784,6 +2190,9 @@ console.log('Document ready state:', document.readyState);
   resetBtn && resetBtn.addEventListener('click', ()=>{ 
     filterInput && (filterInput.value=''); 
     
+    // Hide linear view if active
+    hideLinearView();
+    
     // Reset to default view (LVMH + primary nodes)
     currentViewMode = 'default';
     selectedNode = null;
@@ -1803,24 +2212,53 @@ console.log('Document ready state:', document.readyState);
     
     setGraphData(allNodes, allLinks, true);
     
-    // Show LVMH details in sidebar
-    setTimeout(showLVMHDetails, 200);
-    
     // Clear state history on reset
     stateHistory.length = 0;
     
-    svg.transition().duration(250).call(zoom.transform, d3.zoomIdentity); 
+    // Return to bubble view (LVMH centered)
+    setTimeout(() => {
+      showBubbleView();
+    }, 200);
   });
   
   // Back button - navigate through state history
   const backBtn = document.getElementById('keywordsBackBtn');
   backBtn && backBtn.addEventListener('click', () => {
+    // Bubble view back navigation
+    if (isBubbleView) {
+      if (!bubbleBack()) {
+        // No more bubble history - switch back to list view
+        showListView();
+      }
+      return;
+    }
+
+    // Linear view back navigation
+    if (currentViewMode === 'linear') {
+      const previousState = popState();
+      if (previousState) {
+        if (previousState.viewMode === 'linear') {
+          const prevNode = allNodes.find(n => n.id === previousState.selectedNodeId);
+          if (prevNode) {
+            showLinearView(prevNode);
+            return;
+          }
+        }
+        hideLinearView();
+        restoreState(previousState);
+      } else {
+        // No history - go back to LVMH linear view (home)
+        const lvmhNode = allNodes.find(n => n.id === 'LVMH');
+        if (lvmhNode) {
+          showLinearView(lvmhNode);
+        }
+      }
+      return;
+    }
     const previousState = popState();
     if (previousState) {
-      // Restore the previous state
       restoreState(previousState);
     } else {
-      // No more state history, go back to previous page
       history.back();
     }
   });
@@ -2017,6 +2455,155 @@ console.log('Document ready state:', document.readyState);
   zoomOut && zoomOut.addEventListener('click', ()=> svg.transition().duration(200).call(zoom.scaleBy, 0.8));
   fitBtn && fitBtn.addEventListener('click', ()=> svg.transition().duration(250).call(zoom.transform, d3.zoomIdentity));
 
+  // View toggle: linear list vs. all-bubbles graph
+  const viewToggleBtn = document.getElementById('viewToggle');
+  const viewBubblesIcon = viewToggleBtn?.querySelector('.view-bubbles-icon');
+  const viewListIcon = viewToggleBtn?.querySelector('.view-list-icon');
+  let isBubbleView = false;
+
+  // Track bubble view navigation history
+  const bubbleHistory = [];
+
+  function showBubbleView(startNode) {
+    isBubbleView = true;
+    if (viewBubblesIcon) viewBubblesIcon.style.display = 'none';
+    if (viewListIcon) viewListIcon.style.display = '';
+    viewToggleBtn.title = 'Show list view';
+
+    // Remember current node for sidebar continuity
+    const currentNode = startNode || selectedNode;
+
+    // Hide linear view, show SVG
+    hideLinearView();
+
+    // Build bubble history from linear state history so back works
+    if (!startNode && stateHistory.length > 0) {
+      bubbleHistory.length = 0;
+      stateHistory.forEach(entry => {
+        bubbleHistory.push({
+          selectedNodeId: entry.selectedNodeId === 'LVMH' ? null : entry.selectedNodeId,
+          viewMode: entry.selectedNodeId === 'LVMH' ? 'default' : 'expanded'
+        });
+      });
+    } else if (!startNode && !currentNode) {
+      bubbleHistory.length = 0;
+    }
+
+    const lvmhNode = allNodes.find(n => n.id === 'LVMH');
+    const nodeToShow = currentNode || lvmhNode;
+
+    clickedNode = null;
+    hoveredNode = null;
+
+    if (nodeToShow && nodeToShow.id === 'LVMH') {
+      selectedNode = null;
+      currentViewMode = 'default';
+    } else if (nodeToShow) {
+      selectedNode = nodeToShow;
+      currentViewMode = 'expanded';
+    }
+
+    allNodes.forEach(n => { delete n.x; delete n.y; delete n.vx; delete n.vy; delete n.fx; delete n.fy; });
+    setGraphData(allNodes, allLinks, true);
+    setTimeout(() => svg.transition().duration(250).call(zoom.transform, d3.zoomIdentity), 300);
+
+    // Keep sidebar showing the current node's info
+    if (nodeToShow && nodeToShow.id !== 'LVMH') {
+      openDrawer(nodeToShow);
+    } else {
+      showLVMHDetails();
+    }
+  }
+
+  // Expand into a node in bubble view (show its connections as bubbles)
+  function expandBubbleNode(nodeData) {
+    // Push current state to bubble history
+    bubbleHistory.push({
+      selectedNodeId: selectedNode ? selectedNode.id : null,
+      viewMode: currentViewMode
+    });
+
+    selectedNode = nodeData;
+    currentViewMode = 'expanded';
+    clickedNode = null;
+    hoveredNode = null;
+    isHoverClustering = false;
+
+    allNodes.forEach(n => { delete n.x; delete n.y; delete n.vx; delete n.vy; delete n.fx; delete n.fy; });
+    setGraphData(allNodes, allLinks, true);
+    setTimeout(() => svg.transition().duration(250).call(zoom.transform, d3.zoomIdentity), 300);
+
+    openDrawer(nodeData);
+  }
+
+  // Go back one level in bubble view
+  function bubbleBack() {
+    if (bubbleHistory.length === 0) return false;
+    const prev = bubbleHistory.pop();
+    clickedNode = null;
+    hoveredNode = null;
+    isHoverClustering = false;
+
+    if (prev.selectedNodeId) {
+      selectedNode = allNodes.find(n => n.id === prev.selectedNodeId);
+      currentViewMode = prev.viewMode;
+    } else {
+      selectedNode = null;
+      currentViewMode = 'default';
+    }
+
+    allNodes.forEach(n => { delete n.x; delete n.y; delete n.vx; delete n.vy; delete n.fx; delete n.fy; });
+    setGraphData(allNodes, allLinks, true);
+    setTimeout(() => svg.transition().duration(250).call(zoom.transform, d3.zoomIdentity), 300);
+
+    if (selectedNode) {
+      openDrawer(selectedNode);
+    } else {
+      showLVMHDetails();
+    }
+    return true;
+  }
+
+  function showListView() {
+    isBubbleView = false;
+    if (viewBubblesIcon) viewBubblesIcon.style.display = '';
+    if (viewListIcon) viewListIcon.style.display = 'none';
+    viewToggleBtn.title = 'Show all bubbles';
+
+    // Remember current node for sidebar continuity
+    const currentNode = selectedNode;
+
+    clickedNode = null;
+    hoveredNode = null;
+    stateHistory.length = 0;
+
+    // Build the linear view history from the bubble history so back works
+    // Each level in bubble history becomes a linear state entry
+    const lvmhNode = allNodes.find(n => n.id === 'LVMH');
+    bubbleHistory.forEach(entry => {
+      stateHistory.push({
+        viewMode: 'linear',
+        selectedNodeId: entry.selectedNodeId || 'LVMH',
+        hiddenGroups: new Set(),
+        timestamp: Date.now()
+      });
+    });
+
+    // Show linear view for the current node, or LVMH if none
+    const nodeToShow = currentNode || lvmhNode;
+    if (nodeToShow) {
+      showLinearView(nodeToShow);
+    }
+  }
+
+  viewToggleBtn && viewToggleBtn.addEventListener('click', () => {
+    if (isBubbleView) {
+      showListView();
+    } else {
+      showBubbleView();
+    }
+  });
+
   // Fullscreen toggle
   const fullscreenToggle = document.getElementById('fullscreenToggle');
   const fullscreenExit = document.getElementById('fullscreenExit');
@@ -2122,7 +2709,9 @@ console.log('Document ready state:', document.readyState);
       let newNodes = keywords.map(node => ({
         id: node.id || node.name,
         group: node.group || 1,
-        value: node.value || 50
+        value: node.value || 50,
+        isArea: node.isArea || false,
+        isRoot: node.isRoot || false
       }));
       let newLinks = allLinks.slice();
       const result = ensureLVMH(newNodes, newLinks);
@@ -2138,27 +2727,49 @@ console.log('Document ready state:', document.readyState);
     });
   }
 
-  // Helper function to ensure LVMH is always present
+  // Area structure definition
+  const AREA_DEFS = [
+    { node: { id: '57th St.', group: 1, value: 90, isArea: true },
+      keywords: ['The Modern','Two Michelin Stars','MoMA Museum','Le Bernardin','Three Michelin Stars','Eric Ripert','Seafood','The Plaza','The St. Regis','The Baccarat','Luxury Hotel'] },
+    { node: { id: 'Soho', group: 1, value: 90, isArea: true },
+      keywords: ['Cafe Carlyle','The Carlyle','Bemelmans Bar','Art Deco','Jean-Georges Vongerichten','Jean-Georges at The Mark','The Mark Hotel'] }
+  ];
+
+  function linkExists(links, src, tgt) {
+    return links.some(l =>
+      (l.source === src && l.target === tgt) || (l.source === tgt && l.target === src) ||
+      (l.source?.id === src && l.target?.id === tgt) || (l.source?.id === tgt && l.target?.id === src)
+    );
+  }
+
+  // Ensure LVMH + area nodes + area connections always exist
   function ensureLVMH(nodes, links) {
-    const hasLVMH = nodes.some(n => n.id === 'LVMH');
-    if (!hasLVMH) {
-      // Add LVMH as root node
+    if (!nodes.some(n => n.id === 'LVMH')) {
       nodes.unshift({ id: 'LVMH', group: 0, value: 100, isRoot: true });
-      
-      // Connect LVMH to all primary (group 1) nodes
-      const primaryNodes = nodes.filter(n => n.group === 1);
-      primaryNodes.forEach(node => {
-        const linkExists = links.some(l => 
-          (l.source === 'LVMH' && l.target === node.id) ||
-          (l.source === node.id && l.target === 'LVMH') ||
-          (l.source?.id === 'LVMH' && l.target?.id === node.id) ||
-          (l.source?.id === node.id && l.target?.id === 'LVMH')
-        );
-        if (!linkExists) {
-          links.push({ source: 'LVMH', target: node.id });
+    }
+
+    AREA_DEFS.forEach(area => {
+      // Ensure area node
+      let existing = nodes.find(n => n.id === area.node.id);
+      if (!existing) {
+        nodes.push({ ...area.node });
+      } else {
+        existing.isArea = true;
+      }
+
+      // Ensure LVMH → area link
+      if (!linkExists(links, 'LVMH', area.node.id)) {
+        links.push({ source: 'LVMH', target: area.node.id });
+      }
+
+      // Ensure area → keyword links
+      area.keywords.forEach(kw => {
+        if (nodes.some(n => n.id === kw) && !linkExists(links, area.node.id, kw)) {
+          links.push({ source: area.node.id, target: kw });
         }
       });
-    }
+    });
+
     return { nodes, links };
   }
 
@@ -2172,7 +2783,9 @@ console.log('Document ready state:', document.readyState);
       let newNodes = keywords.map(node => ({
         id: node.id || node.name,
         group: node.group || 1,
-        value: node.value || 50
+        value: node.value || 50,
+        isArea: node.isArea || false,
+        isRoot: node.isRoot || false
       }));
       
       let newLinks = connections.slice();

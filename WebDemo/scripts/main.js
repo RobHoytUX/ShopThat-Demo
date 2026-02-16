@@ -245,9 +245,15 @@
   .chatbot-wrapper{position:fixed;bottom:104px;right:20px;z-index:999;transition:bottom 0.3s ease}
   .chatbot-wrapper.expanded{bottom:104px}
   .chatbot-wrapper.gallery-open{bottom:310px}
+  .chatbot-wrapper.gallery-open.map-view-active{bottom:200px}
   .chatbot-wrapper.gallery-open .chatbot-toggle{bottom:-80px}
-  .image-gallery-wrapper{position:fixed;top:auto;bottom:-200px;right:20px;z-index:997;width:506px;opacity:0;transform:translateY(20px);pointer-events:none;transition:opacity 300ms ease,transform 300ms ease,bottom 0.3s ease}
+  .image-gallery-wrapper{position:fixed;top:auto;bottom:-200px;right:20px;z-index:997;width:506px;opacity:0;transform:translateY(20px);pointer-events:none;transition:opacity 300ms ease,transform 300ms ease,bottom 0.3s ease,max-height 0.3s ease}
   .image-gallery-wrapper.is-visible{opacity:1;transform:translateY(0);pointer-events:auto;bottom:20px}
+  .image-gallery-wrapper.compact-mode{max-height:90px}
+  .image-gallery-wrapper.compact-mode .image-gallery{min-height:70px;padding:8px 40px}
+  .image-gallery-wrapper.compact-mode .image-gallery-item{width:56px;height:56px}
+  .image-gallery-wrapper.compact-mode .image-gallery-title{font-size:13px;top:8px;left:8px}
+  .image-gallery-wrapper.compact-mode .image-gallery-clear{top:8px;right:8px;padding:4px 8px;font-size:10px}
   .image-gallery-wrapper[hidden]{display:none}
   .image-gallery{background:linear-gradient(135deg,rgba(255,255,255,0.4),rgba(255,255,255,0.22));border:1px solid rgba(255,255,255,0.35);border-radius:12px;padding:12px 40px;min-height:144px;box-shadow:0 8px 32px 0 rgba(31,38,135,0.3);backdrop-filter:blur(16px) saturate(180%);-webkit-backdrop-filter:blur(16px) saturate(180%);position:relative;overflow:visible}
   .image-gallery-title{position:absolute;top:12px;left:12px;font-size:16px;font-weight:600;color:#111;pointer-events:none;z-index:1}
@@ -353,6 +359,7 @@
   .chatbot-nav{position:fixed;bottom:104px;right:542px;width:56px;background:linear-gradient(135deg,rgba(255,255,255,0.95),rgba(255,255,255,0.9));border:1px solid rgba(0,0,0,0.1);border-radius:28px;padding:16px 0;display:flex;flex-direction:column;align-items:center;gap:8px;box-shadow:0 4px 24px rgba(0,0,0,0.12);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);opacity:0;transform:translateX(-8px);pointer-events:none;transition:opacity 200ms ease,transform 200ms ease,bottom 0.3s ease}
   .chatbot-nav.is-visible{opacity:1;transform:translateX(0);pointer-events:auto}
   .chatbot-wrapper.gallery-open .chatbot-nav{bottom:310px}
+  .chatbot-wrapper.gallery-open.map-view-active .chatbot-nav{bottom:200px}
   .chatbot-nav.is-disabled{opacity:0.5}
   .chatbot-nav.is-disabled .chatbot-nav-item{pointer-events:none;cursor:not-allowed;opacity:0.6}
   .chatbot-nav[hidden]{display:none}
@@ -631,7 +638,6 @@
     const navItems = [
       { icon: 'user', id: 'nav-user', title: 'Chat', view: 'chat', active: true, closeNav: true },
       { icon: 'book', id: 'nav-library', title: 'Library', view: 'library', closeNav: false },
-      { icon: 'globe', id: 'nav-search', title: 'Search', view: 'search', closeNav: false },
       { icon: 'map', id: 'nav-map', title: 'Map', view: 'map', closeNav: false },
       { icon: 'bookmark', id: 'nav-favorites', title: 'Favorites', view: 'favorites', closeNav: false },
       { icon: 'grid', id: 'nav-grid', title: 'Grid View', view: 'grid', closeNav: true }
@@ -919,8 +925,21 @@
       }, 100);
     }
     
+    // Helper to clear map view specific classes
+    function clearMapViewClasses() {
+      wrapper.classList.remove('map-view-active');
+      if (galleryWrapper) {
+        galleryWrapper.classList.remove('compact-mode');
+      }
+    }
+    
     // Function to switch chatbot views
     function switchChatbotView(view) {
+      // Clear map view classes for non-map views
+      if (view !== 'map') {
+        clearMapViewClasses();
+      }
+      
       // Hide/show different sections based on view
       if (view === 'chat') {
         // Show chatbot interface ONLY - chat view is the only one with input
@@ -972,10 +991,16 @@
         productGallery.classList.add('is-visible');
         // Don't add is-visible to explorer yet - it opens when clicking a product card
 
+        // Add map-view-active class to wrapper for compact gallery positioning
+        wrapper.classList.add('map-view-active');
+        // Scale down gallery when map view is open
+        if (galleryWrapper) {
+          galleryWrapper.classList.add('compact-mode');
+        }
+
         // Set appropriate height for map view with product cards (no explorer)
-        // Map (350px) + Product Gallery (~170px) + padding (~80px) = ~600px
-        // Use larger height to prepare for explorer opening
-        const mapViewHeight = Math.min(700, getMaxChatbotHeight());
+        // Use a height that works with the compact gallery
+        const mapViewHeight = Math.min(600, getMaxChatbotHeight());
         setBoxSize(FULL_W, mapViewHeight);
 
         // Initialize map and render products
@@ -2310,7 +2335,10 @@
     function renderProductListView() {
       messages.replaceChildren();
 
-      if (droppedProducts.length === 0) {
+      // Always reload from localStorage to get latest products
+      const savedProducts = JSON.parse(localStorage.getItem('droppedProducts') || '[]');
+
+      if (savedProducts.length === 0) {
         const emptyMsg = createEl('div', {
           class: 'no-products-message',
           text: 'No products yet. Drop images from the gallery to add products.'
@@ -2319,7 +2347,7 @@
       } else {
         const grid = createEl('div', { class: 'product-list-grid' });
 
-        droppedProducts.forEach(product => {
+        savedProducts.forEach(product => {
           const card = createEl('div', { class: 'product-list-card' });
 
           const img = createEl('img', { src: product.image || product.src, alt: product.title });
@@ -2375,7 +2403,10 @@
     function renderWishlistView() {
       messages.replaceChildren();
 
-      if (wishlistProducts.length === 0) {
+      // Always reload from localStorage to get latest favorites
+      const savedWishlist = JSON.parse(localStorage.getItem('wishlistProducts') || '[]');
+
+      if (savedWishlist.length === 0) {
         const emptyMsg = createEl('div', {
           class: 'no-products-message',
           text: 'No bookmarks yet. Add products to your bookmarks from the product list.'
@@ -2384,7 +2415,7 @@
       } else {
         const grid = createEl('div', { class: 'product-list-grid' });
 
-        wishlistProducts.forEach(product => {
+        savedWishlist.forEach(product => {
           const card = createEl('div', { class: 'product-list-card' });
 
           const img = createEl('img', { src: product.image || product.src, alt: product.title });
@@ -2451,13 +2482,16 @@
     function renderMapView() {
       productGallery.replaceChildren();
       
+      // Always reload from localStorage to get latest products
+      const savedProducts = JSON.parse(localStorage.getItem('droppedProducts') || '[]');
+      
       // NYC LV store locations for product assignment
       const storeLocations = [
         { lat: 40.7632, lng: -73.9732, name: 'Louis Vuitton 57th Street', address: '6 E 57th St, New York, NY 10022' },
         { lat: 40.7245, lng: -73.9975, name: 'Louis Vuitton SoHo', address: '116 Greene St, New York, NY 10012' }
       ];
       
-      if (droppedProducts.length === 0) {
+      if (savedProducts.length === 0) {
         // Show empty message
         const emptyMsg = createEl('div', { 
           class: 'chatbot-map-empty',
@@ -2466,7 +2500,7 @@
         productGallery.appendChild(emptyMsg);
       } else {
         // Show actual product cards
-        droppedProducts.forEach((product, index) => {
+        savedProducts.forEach((product, index) => {
           // Assign location alternately between the two stores
           const storeIndex = index % 2;
           product.location = {
