@@ -146,6 +146,7 @@
 .btn--primary:hover { background: #5856eb; }
 .btn--secondary { background: #fff; color: #374151; border-color: #d1d5db; }
 .btn--secondary:hover { background: #f9fafb; }
+.btn--sm { font-size: 13px; padding: 7px 14px; white-space: nowrap; }
 
 /* Specific styling for Filter by Level button */
 #filterByLevel { font-size: 14px; }
