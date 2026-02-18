@@ -118,7 +118,7 @@
               <div class="rpv-metrics">
                 <div class="metric-item">
                   <span class="metric-label">Images Uploaded</span>
-                  <span class="metric-value rpv-green">1,058</span>
+                  <span class="metric-value rpv-green" id="overviewImagesUploaded">1,058</span>
                   <span class="metric-unit">total images</span>
                 </div>
               </div>
@@ -244,7 +244,10 @@
           <div class="card__header">
             <h2>Image Database</h2>
             <div class="card__actions">
-              <button class="btn btn--primary btn--sm">Upload Images</button>
+              <button class="btn btn--primary btn--sm" id="uploadImagesBtn">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                Upload Images
+              </button>
             </div>
           </div>
           <div class="card__content" style="padding: 1.5rem;">
@@ -253,7 +256,7 @@
                 <div class="rpv-metrics">
                   <div class="metric-item">
                     <span class="metric-label">Total Images</span>
-                    <span class="metric-value rpv-green">3,847</span>
+                    <span class="metric-value rpv-green" id="dbTotalImages">0</span>
                     <span class="metric-unit">in database</span>
                   </div>
                 </div>
@@ -277,7 +280,43 @@
                 </div>
               </div>
             </div>
-            
+
+            <!-- Uploaded images gallery -->
+            <div id="uploadedGallery" class="upload-gallery" style="display:none; margin-top: 2rem;">
+              <!-- Breadcrumb navigation -->
+              <nav id="galleryBreadcrumb" class="gallery-breadcrumb" aria-label="Folder navigation">
+                <button class="gallery-breadcrumb__item is-active" id="breadcrumbRoot">All Images</button>
+              </nav>
+
+              <!-- Toolbar: select-all, count, actions -->
+              <div class="gallery-toolbar">
+                <div class="gallery-toolbar__left">
+                  <label class="gallery-checkbox-label">
+                    <input type="checkbox" id="selectAllCheckbox">
+                    <span>Select All</span>
+                  </label>
+                  <span id="uploadedCount" style="color:#6b7280; font-size:13px;"></span>
+                </div>
+                <div class="gallery-toolbar__right">
+                  <button class="btn btn--secondary btn--sm" id="clearGalleryBtn" style="font-size:12px; padding:6px 12px;">Clear All</button>
+                </div>
+              </div>
+
+              <!-- Bulk action bar (hidden until selection) -->
+              <div id="bulkActionBar" class="gallery-bulk-bar" style="display:none;">
+                <span id="bulkSelectionCount"></span>
+                <div class="gallery-bulk-bar__actions">
+                  <button class="btn btn--primary btn--sm" id="moveToFolderBtn">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg>
+                    Move to Folder
+                  </button>
+                  <button class="btn btn--secondary btn--sm" id="deselectAllBtn">Deselect</button>
+                </div>
+              </div>
+
+              <div id="galleryGrid" class="upload-gallery__grid"></div>
+            </div>
+
             <div style="margin-top: 2rem;">
               <h3 style="font-size: 1rem; font-weight: 600; margin-bottom: 1rem;">Recent Uploads</h3>
               <div class="deals-list">
@@ -297,6 +336,51 @@
             </div>
           </div>
         </section>
+      </div>
+
+      <!-- Upload Modal -->
+      <div class="modal-overlay" id="uploadModal" style="display:none;">
+        <div class="modal-content upload-modal">
+          <div class="modal-header">
+            <h3>Upload Images</h3>
+            <button class="modal-close" id="uploadModalClose">&times;</button>
+          </div>
+          <div class="modal-body upload-modal__body">
+            <div class="upload-dropzone" id="uploadDropzone">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+                <polyline points="17 8 12 3 7 8"/>
+                <line x1="12" y1="3" x2="12" y2="15"/>
+              </svg>
+              <p class="upload-dropzone__title">Drag & drop images or a zip file here</p>
+              <p class="upload-dropzone__subtitle">or click to browse files</p>
+              <p class="upload-dropzone__formats">Supports JPG, PNG, GIF, WebP, SVG, and ZIP archives</p>
+              <input type="file" id="uploadFileInput" multiple accept="image/*,.zip,application/zip,application/x-zip-compressed" style="display:none;">
+            </div>
+
+            <div id="uploadPreview" class="upload-preview" style="display:none;">
+              <div class="upload-preview__header">
+                <span id="previewCount"></span>
+                <button class="btn btn--secondary" id="previewClearBtn" style="font-size:12px; padding:4px 10px;">Clear</button>
+              </div>
+              <div id="previewGrid" class="upload-preview__grid"></div>
+            </div>
+
+            <div id="uploadProgress" class="upload-progress" style="display:none;">
+              <div class="upload-progress__bar">
+                <div class="upload-progress__fill" id="uploadProgressFill"></div>
+              </div>
+              <span class="upload-progress__text" id="uploadProgressText">Processing...</span>
+            </div>
+          </div>
+          <div class="upload-modal__footer">
+            <button class="btn btn--secondary" id="uploadCancelBtn">Cancel</button>
+            <button class="btn btn--primary" id="uploadConfirmBtn" disabled>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              Upload to Database
+            </button>
+          </div>
+        </div>
       </div>
 
       <!-- Discovery Tab (NEW) -->
@@ -513,6 +597,35 @@
       </div>
     </main>
 
+    <!-- Folder creation dialog -->
+    <div class="modal-overlay" id="folderModal" style="display:none;">
+      <div class="modal-content" style="max-width:400px; width:90%;">
+        <div class="modal-header">
+          <h3>Move to Folder</h3>
+          <button class="modal-close" id="folderModalClose">&times;</button>
+        </div>
+        <div class="modal-body">
+          <p style="font-size:13px; color:#6b7280; margin:0 0 12px;">Choose an existing folder or create a new one.</p>
+          <div id="existingFoldersList" class="folder-list"></div>
+          <div class="folder-create-row">
+            <input type="text" id="newFolderInput" class="input" placeholder="New folder name..." style="flex:1;">
+            <button class="btn btn--primary btn--sm" id="createFolderBtn">Create & Move</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Image lightbox -->
+    <div class="lightbox-overlay" id="imageLightbox" style="display:none;">
+      <button class="lightbox-close" id="lightboxClose">&times;</button>
+      <button class="lightbox-nav lightbox-nav--prev" id="lightboxPrev">&#8249;</button>
+      <button class="lightbox-nav lightbox-nav--next" id="lightboxNext">&#8250;</button>
+      <div class="lightbox-content">
+        <img id="lightboxImg" src="" alt="">
+        <div class="lightbox-caption" id="lightboxCaption"></div>
+      </div>
+    </div>
+
     <script src="scripts/shared-data.js"></script>
     <script>
       // Tab switching functionality
@@ -546,6 +659,8 @@
         });
       });
     </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="scripts/image-upload.js"></script>
     <script src="scripts/auth.js"></script>
   </body>
 </html>
