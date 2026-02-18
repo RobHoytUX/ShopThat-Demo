@@ -1,7 +1,9 @@
 (function () {
   'use strict';
 
-  var STORAGE_KEY = 'shopThat_imageDB';
+  var DB_NAME = 'shopThat_imageDB';
+  var DB_VERSION = 1;
+  var STORE_NAME = 'state';
   var IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml'];
   var IMAGE_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg'];
   var ZIP_TYPES = ['application/zip', 'application/x-zip-compressed', 'application/x-zip'];
@@ -63,38 +65,60 @@
   var lightboxIndex = 0;
   var nextId = 1;
 
-  // ─── Persistence ───
+  // ─── Persistence (IndexedDB) ───
+
+  function openDB() {
+    return new Promise(function (resolve, reject) {
+      var req = indexedDB.open(DB_NAME, DB_VERSION);
+      req.onupgradeneeded = function () {
+        var db = req.result;
+        if (!db.objectStoreNames.contains(STORE_NAME)) {
+          db.createObjectStore(STORE_NAME);
+        }
+      };
+      req.onsuccess = function () { resolve(req.result); };
+      req.onerror = function () { reject(req.error); };
+    });
+  }
 
   function saveState() {
-    try {
-      var payload = {
-        galleryImages: galleryImages,
-        folders: folders,
-        nextId: nextId
-      };
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
-    } catch (e) {
-      console.warn('Could not save to localStorage:', e);
-    }
+    openDB().then(function (db) {
+      var tx = db.transaction(STORE_NAME, 'readwrite');
+      var store = tx.objectStore(STORE_NAME);
+      store.put(galleryImages, 'galleryImages');
+      store.put(folders, 'folders');
+      store.put(nextId, 'nextId');
+    }).catch(function (e) {
+      console.warn('Could not save to IndexedDB:', e);
+    });
   }
 
   function loadState() {
-    try {
-      var raw = localStorage.getItem(STORAGE_KEY);
-      if (!raw) return;
-      var payload = JSON.parse(raw);
-      if (payload.galleryImages && Array.isArray(payload.galleryImages)) {
-        galleryImages = payload.galleryImages;
-      }
-      if (payload.folders && Array.isArray(payload.folders)) {
-        folders = payload.folders;
-      }
-      if (payload.nextId) {
-        nextId = payload.nextId;
-      }
-    } catch (e) {
-      console.warn('Could not load from localStorage:', e);
-    }
+    return openDB().then(function (db) {
+      return new Promise(function (resolve) {
+        var tx = db.transaction(STORE_NAME, 'readonly');
+        var store = tx.objectStore(STORE_NAME);
+        var imgReq = store.get('galleryImages');
+        var fldReq = store.get('folders');
+        var idReq = store.get('nextId');
+
+        tx.oncomplete = function () {
+          if (imgReq.result && Array.isArray(imgReq.result)) {
+            galleryImages = imgReq.result;
+          }
+          if (fldReq.result && Array.isArray(fldReq.result)) {
+            folders = fldReq.result;
+          }
+          if (idReq.result) {
+            nextId = idReq.result;
+          }
+          resolve();
+        };
+        tx.onerror = function () { resolve(); };
+      });
+    }).catch(function (e) {
+      console.warn('Could not load from IndexedDB:', e);
+    });
   }
 
   function genId() { return nextId++; }
@@ -713,7 +737,8 @@
   });
 
   // ─── Init: load persisted state and render ───
-  loadState();
-  renderGallery();
+  loadState().then(function () {
+    renderGallery();
+  });
 
 })();
