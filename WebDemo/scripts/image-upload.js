@@ -30,6 +30,8 @@
   var uploadedCountEl = document.getElementById('uploadedCount');
   var clearGalleryBtn = document.getElementById('clearGalleryBtn');
   var totalImagesEl = document.getElementById('dbTotalImages');
+  var licensedImagesEl = document.getElementById('dbLicensedImages');
+  var availableImagesEl = document.getElementById('dbAvailableImages');
   var overviewImagesEl = document.getElementById('overviewImagesUploaded');
   var selectAllCheckbox = document.getElementById('selectAllCheckbox');
   var bulkActionBar = document.getElementById('bulkActionBar');
@@ -126,9 +128,13 @@
   // ─── Metrics ───
 
   function updateMetrics() {
-    var count = galleryImages.length;
-    if (totalImagesEl) totalImagesEl.textContent = count.toLocaleString();
-    if (overviewImagesEl) overviewImagesEl.textContent = count.toLocaleString();
+    var total = galleryImages.length;
+    var licensed = galleryImages.filter(function (img) { return img.licensed; }).length;
+    var available = total - licensed;
+    if (totalImagesEl) totalImagesEl.textContent = total.toLocaleString();
+    if (licensedImagesEl) licensedImagesEl.textContent = licensed.toLocaleString();
+    if (availableImagesEl) availableImagesEl.textContent = available.toLocaleString();
+    if (overviewImagesEl) overviewImagesEl.textContent = total.toLocaleString();
   }
 
   // ─── File helpers ───
