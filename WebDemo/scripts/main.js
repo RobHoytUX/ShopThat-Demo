@@ -356,6 +356,10 @@
   .chatbot-sort{position:absolute;top:20px;left:8px;width:32px;height:32px;border-radius:50%;border:1px solid rgba(0,0,0,0.2);background:rgba(255,255,255,0.95);display:grid;place-items:center;color:#111;cursor:pointer;transition:background 200ms ease;z-index:10}
   .chatbot-sort:hover{background:rgba(255,255,255,1)}
   .chatbot-sort[hidden]{display:none}
+  .chatbot-media-btn{position:absolute;top:20px;left:46px;width:32px;height:32px;border-radius:50%;border:1px solid rgba(0,0,0,0.2);background:rgba(255,255,255,0.95);display:grid;place-items:center;color:#111;cursor:pointer;transition:background 200ms ease,box-shadow 200ms ease;z-index:10}
+  .chatbot-media-btn:hover{background:rgba(255,255,255,1)}
+  .chatbot-media-btn.is-active{background:#6366f1;color:#fff;border-color:#6366f1}
+  .chatbot-media-btn[hidden]{display:none}
   .chatbot-nav{position:fixed;bottom:104px;right:542px;width:56px;background:linear-gradient(135deg,rgba(255,255,255,0.95),rgba(255,255,255,0.9));border:1px solid rgba(0,0,0,0.1);border-radius:28px;padding:16px 0;display:flex;flex-direction:column;align-items:center;gap:8px;box-shadow:0 4px 24px rgba(0,0,0,0.12);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);opacity:0;transform:translateX(-8px);pointer-events:none;transition:opacity 200ms ease,transform 200ms ease,bottom 0.3s ease}
   .chatbot-nav.is-visible{opacity:1;transform:translateX(0);pointer-events:auto}
   .chatbot-wrapper.gallery-open .chatbot-nav{bottom:310px}
@@ -533,7 +537,7 @@
     backPath.setAttribute('stroke-width','1.5');
     backIcon.appendChild(backPath);
     backBtn.appendChild(backIcon);
-    const sortBtn = createEl('button', { class: 'chatbot-sort', title: 'Sort options', type: 'button' });
+    const sortBtn = createEl('button', { class: 'chatbot-sort', title: 'Menu', type: 'button' });
     const sortIcon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     sortIcon.setAttribute('xmlns','http://www.w3.org/2000/svg');
     sortIcon.setAttribute('viewBox','0 0 24 24');
@@ -548,6 +552,33 @@
     sortPath.setAttribute('stroke-linejoin','round');
     sortIcon.appendChild(sortPath);
     sortBtn.appendChild(sortIcon);
+
+    const mediaBtn = createEl('button', { class: 'chatbot-media-btn', title: 'My Media', type: 'button' });
+    const mediaIcon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    mediaIcon.setAttribute('xmlns','http://www.w3.org/2000/svg');
+    mediaIcon.setAttribute('viewBox','0 0 24 24');
+    mediaIcon.setAttribute('fill','none');
+    mediaIcon.setAttribute('stroke','currentColor');
+    mediaIcon.setAttribute('width','16');
+    mediaIcon.setAttribute('height','16');
+    mediaIcon.setAttribute('stroke-width','1.5');
+    const mediaPath1 = document.createElementNS('http://www.w3.org/2000/svg','rect');
+    mediaPath1.setAttribute('x','3');
+    mediaPath1.setAttribute('y','3');
+    mediaPath1.setAttribute('width','18');
+    mediaPath1.setAttribute('height','18');
+    mediaPath1.setAttribute('rx','2');
+    mediaPath1.setAttribute('ry','2');
+    const mediaPath2 = document.createElementNS('http://www.w3.org/2000/svg','circle');
+    mediaPath2.setAttribute('cx','8.5');
+    mediaPath2.setAttribute('cy','8.5');
+    mediaPath2.setAttribute('r','1.5');
+    const mediaPath3 = document.createElementNS('http://www.w3.org/2000/svg','polyline');
+    mediaPath3.setAttribute('points','21 15 16 10 5 21');
+    mediaIcon.appendChild(mediaPath1);
+    mediaIcon.appendChild(mediaPath2);
+    mediaIcon.appendChild(mediaPath3);
+    mediaBtn.appendChild(mediaIcon);
     
     // Create navigation menu
     const chatbotNav = createEl('div', { class: 'chatbot-nav' });
@@ -1230,19 +1261,23 @@
     // The back button is no longer needed since there are no detail views
     backBtn.setAttribute('hidden','');
 
-    box.appendChild(refreshBtn); box.appendChild(backBtn); box.appendChild(sortBtn); box.appendChild(header); box.appendChild(mapContainer); box.appendChild(productGallery); box.appendChild(chatbotLocationExplorer); box.appendChild(messages); box.appendChild(inputW);
+    box.appendChild(refreshBtn); box.appendChild(backBtn); box.appendChild(sortBtn); box.appendChild(mediaBtn); box.appendChild(header); box.appendChild(mapContainer); box.appendChild(productGallery); box.appendChild(chatbotLocationExplorer); box.appendChild(messages); box.appendChild(inputW);
     
-    // Navigation toggle functionality
+    // Navigation toggle functionality (menu only)
     sortBtn.addEventListener('click', (e) => {
       e.preventDefault();
       e.stopPropagation();
-      console.log('Sort button clicked! Current navVisible:', navVisible);
       navVisible = !navVisible;
-      galleryVisible = !galleryVisible; // Toggle gallery along with nav
-      console.log('New navVisible:', navVisible, 'galleryVisible:', galleryVisible);
       chatbotNav.classList.toggle('is-visible', navVisible);
-      toggleGallery(galleryVisible); // Toggle gallery visibility
-      console.log('Nav classList:', chatbotNav.classList.toString());
+    });
+
+    // My Media toggle functionality
+    mediaBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      galleryVisible = !galleryVisible;
+      mediaBtn.classList.toggle('is-active', galleryVisible);
+      toggleGallery(galleryVisible);
     });
     wrapper.appendChild(toggle); wrapper.appendChild(box); wrapper.appendChild(chatbotNav);
     document.body.appendChild(wrapper);
@@ -1812,8 +1847,9 @@
       
       // Close nav if it's open
       navVisible = false;
-      galleryVisible = false; // Reset gallery state
+      galleryVisible = false;
       chatbotNav.classList.remove('is-visible');
+      mediaBtn.classList.remove('is-active');
       
       // Hide gallery when chatbot closes
       toggleGallery(false);
