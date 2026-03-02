@@ -2711,56 +2711,20 @@
   // Initialize demo data - only if no existing user data
   // These are the default canvas card images shown on page load
   function initializeDemoData() {
-    const demoMedia = [
-      {
-        src: 'assets/canvas-1.jpg',  // Kusama sitting with polka dot fabric (B&W)
-        productData: { title: 'Kusama Portrait - Polka Dot Room' }
-      },
-      {
-        src: 'assets/canvas-2.jpg',  // Woman with blue circles on face
-        productData: { title: 'Blue Face Paint Editorial' }
-      },
-      {
-        src: 'assets/canvas-3.jpg',  // Kusama in polka dot outfit and hat (B&W)
-        productData: { title: 'Kusama Polka Dot Outfit' }
-      },
-      {
-        src: 'assets/canvas-4.jpg',  // Arm with blue dots holding blue LV bag
-        productData: { title: 'LV x Kusama Blue Bag' }
-      },
-      {
-        src: 'assets/canvas-5.jpg',  // Blue paint swatch
-        productData: { title: 'Blue Paint Swatch' }
-      }
-    ];
-    
-    // Get existing gallery images
+    // Remove legacy demo/default images that were pre-seeded
     const existingMedia = JSON.parse(localStorage.getItem('galleryImages') || '[]');
-    
-    // Only add demo media items that don't already exist
-    const demoSrcs = demoMedia.map(d => d.src);
-    const existingSrcs = existingMedia.map(e => e.src);
-    
-    // Check if we have any user-added content (non-demo items)
-    const hasUserContent = existingMedia.some(item => !demoSrcs.includes(item.src));
-    
-    if (hasUserContent) {
-      // Keep user content, just ensure demo items exist
-      const missingDemo = demoMedia.filter(d => !existingSrcs.includes(d.src));
-      if (missingDemo.length > 0) {
-        const merged = [...existingMedia, ...missingDemo];
-        localStorage.setItem('galleryImages', JSON.stringify(merged));
-      }
-    } else if (existingMedia.length === 0) {
-      // No existing data, initialize with demo
-      localStorage.setItem('galleryImages', JSON.stringify(demoMedia));
+    const legacySrcs = [
+      'assets/canvas-1.jpg', 'assets/canvas-2.jpg', 'assets/canvas-3.jpg',
+      'assets/canvas-4.jpg', 'assets/canvas-5.jpg',
+      'assets/image1.png', 'assets/image2.png', 'assets/image3.png',
+      'assets/image4.png', 'assets/image5.png', 'assets/image6.png', 'assets/image7.png'
+    ];
+    const cleaned = existingMedia.filter(item => !legacySrcs.includes(item.src));
+    if (cleaned.length !== existingMedia.length) {
+      localStorage.setItem('galleryImages', JSON.stringify(cleaned));
     }
-    // If only demo items exist, don't overwrite
-    
-    // Reset drawer loaded state so it can be populated on card click
+
     currentLoadedCardIndex = -1;
-    
-    console.log('Demo media data check complete. Total items:', JSON.parse(localStorage.getItem('galleryImages') || '[]').length);
   }
 
   // Initialize demo data

@@ -1768,10 +1768,7 @@
     galleryClearBtn.textContent = 'Clear';
     
     galleryClearBtn.addEventListener('click', () => {
-      // Only remove non-default images (keep image1-7.png)
-      const defaultImages = galleryImages.filter(img => img.src.includes('image') && /image[1-7]\.png/.test(img.src));
       galleryImages.length = 0;
-      galleryImages.push(...defaultImages);
       saveGalleryImages();
       renderGallery();
     });
@@ -1869,33 +1866,7 @@
     updateToggle();
     toggle.addEventListener('click', toggleBox);
     
-    // Initialize default media gallery images - always ensure they exist
     function initializeDefaultMedia() {
-      const defaultMediaImages = [
-        { src: 'assets/image1.png', productData: { title: 'Kusama Collection 1' } },
-        { src: 'assets/image2.png', productData: { title: 'Kusama Collection 2' } },
-        { src: 'assets/image3.png', productData: { title: 'Kusama Collection 3' } },
-        { src: 'assets/image4.png', productData: { title: 'Kusama Collection 4' } },
-        { src: 'assets/image5.png', productData: { title: 'Kusama Collection 5' } },
-        { src: 'assets/image6.png', productData: { title: 'Kusama Collection 6' } },
-        { src: 'assets/image7.png', productData: { title: 'Kusama Collection 7' } }
-      ];
-      
-      // Check if default images already exist, if not add them
-      defaultMediaImages.forEach(defaultImg => {
-        const exists = galleryImages.some(img => img.src === defaultImg.src);
-        if (!exists) {
-          galleryImages.unshift(defaultImg); // Add to beginning
-        }
-      });
-      
-      // Reverse to maintain correct order (image1 first)
-      const tempDefaults = galleryImages.filter(img => img.src.includes('image'));
-      const tempOthers = galleryImages.filter(img => !img.src.includes('image'));
-      galleryImages.length = 0;
-      galleryImages.push(...tempDefaults.reverse(), ...tempOthers);
-      
-      saveGalleryImages();
       renderGallery();
     }
     
