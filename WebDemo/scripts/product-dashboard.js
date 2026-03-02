@@ -2711,17 +2711,29 @@
   // Initialize demo data - only if no existing user data
   // These are the default canvas card images shown on page load
   function initializeDemoData() {
-    // Remove legacy demo/default images that were pre-seeded
+    const demoMedia = [
+      { src: 'assets/canvas-1.jpg', productData: { title: 'Kusama Portrait - Polka Dot Room' } },
+      { src: 'assets/canvas-2.jpg', productData: { title: 'Blue Face Paint Editorial' } },
+      { src: 'assets/canvas-3.jpg', productData: { title: 'Kusama Polka Dot Outfit' } },
+      { src: 'assets/canvas-4.jpg', productData: { title: 'LV x Kusama Blue Bag' } },
+      { src: 'assets/canvas-5.jpg', productData: { title: 'Blue Paint Swatch' } }
+    ];
+
     const existingMedia = JSON.parse(localStorage.getItem('galleryImages') || '[]');
+
+    // Remove old image1-7.png defaults
     const legacySrcs = [
-      'assets/canvas-1.jpg', 'assets/canvas-2.jpg', 'assets/canvas-3.jpg',
-      'assets/canvas-4.jpg', 'assets/canvas-5.jpg',
       'assets/image1.png', 'assets/image2.png', 'assets/image3.png',
       'assets/image4.png', 'assets/image5.png', 'assets/image6.png', 'assets/image7.png'
     ];
     const cleaned = existingMedia.filter(item => !legacySrcs.includes(item.src));
-    if (cleaned.length !== existingMedia.length) {
-      localStorage.setItem('galleryImages', JSON.stringify(cleaned));
+
+    const demoSrcs = demoMedia.map(d => d.src);
+    const existingSrcs = cleaned.map(e => e.src);
+    const missingDemo = demoMedia.filter(d => !existingSrcs.includes(d.src));
+
+    if (missingDemo.length > 0 || cleaned.length !== existingMedia.length) {
+      localStorage.setItem('galleryImages', JSON.stringify([...cleaned, ...missingDemo]));
     }
 
     currentLoadedCardIndex = -1;

@@ -1768,7 +1768,10 @@
     galleryClearBtn.textContent = 'Clear';
     
     galleryClearBtn.addEventListener('click', () => {
+      const keepSrcs = ['assets/canvas-1.jpg','assets/canvas-2.jpg','assets/canvas-3.jpg','assets/canvas-4.jpg','assets/canvas-5.jpg'];
+      const kept = galleryImages.filter(img => keepSrcs.includes(img.src));
       galleryImages.length = 0;
+      galleryImages.push(...kept);
       saveGalleryImages();
       renderGallery();
     });
@@ -1867,6 +1870,21 @@
     toggle.addEventListener('click', toggleBox);
     
     function initializeDefaultMedia() {
+      const defaultMediaImages = [
+        { src: 'assets/canvas-1.jpg', productData: { title: 'Kusama Portrait - Polka Dot Room' } },
+        { src: 'assets/canvas-2.jpg', productData: { title: 'Blue Face Paint Editorial' } },
+        { src: 'assets/canvas-3.jpg', productData: { title: 'Kusama Polka Dot Outfit' } },
+        { src: 'assets/canvas-4.jpg', productData: { title: 'LV x Kusama Blue Bag' } },
+        { src: 'assets/canvas-5.jpg', productData: { title: 'Blue Paint Swatch' } }
+      ];
+
+      defaultMediaImages.forEach(defaultImg => {
+        if (!galleryImages.some(img => img.src === defaultImg.src)) {
+          galleryImages.push(defaultImg);
+        }
+      });
+
+      saveGalleryImages();
       renderGallery();
     }
     
