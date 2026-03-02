@@ -43,7 +43,7 @@
     favorites: document.getElementById('favoritesView')
   };
 
-  let currentView = 'chat';
+  let currentView = 'media';
   let leafletMap = null;
   let locationMarkers = []; // Store location markers for cleanup
   
@@ -2784,4 +2784,7 @@
   updateBadge('libraryCount', products.length);
   updateBadge('mediaCount', media.length);
   updateBadge('favoritesCount', favorites.length);
+
+  // Initialize the default view
+  switchView(currentView);
 })();
