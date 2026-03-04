@@ -4295,6 +4295,9 @@ svg#bubbleGraph { width: 100%; flex: 1; display: block; padding-top: 60px; min-h
 
 /* ─── Keyword view tabs ─── */
 .keywords .kw-tabs-toolbar { margin: 0 0 8px 0 !important; }
+.keywords .kw-tabs-toolbar .toolbar__right { margin-right: 336px; }
+.kw-tab-controls { display: inline-flex; align-items: center; }
+.kw-tab-controls .control-group { display: inline-flex; align-items: center; gap: 4px; }
 .kw-tab-content { display: flex; flex-direction: column; flex: 1; min-height: 0; }
 .kw-tab-content[style*="display: none"], .kw-tab-content[style*="display:none"] { display: none !important; }
 .keywords__list-view-tab {

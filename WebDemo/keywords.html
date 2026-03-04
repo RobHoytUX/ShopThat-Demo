@@ -73,71 +73,75 @@
             <button class="tab-btn" data-kw-tab="sankey">Sankey</button>
           </div>
         </div>
-        <div class="toolbar__right">
+        <div class="toolbar__right" style="display:flex; align-items:center; gap:8px;">
+          <!-- Bubbles controls (shown when bubbles tab active) -->
+          <div class="kw-tab-controls" data-for-tab="bubbles">
+            <div class="control-group" role="group" aria-label="View and zoom controls">
+              <input id="kwFilter" type="hidden" />
+              <button type="button" id="resetKw" class="btn btn--secondary btn--sm">Reset</button>
+              <button class="btn btn--secondary btn--sm" id="keywordsBackBtn" aria-label="Back" title="Back">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M19 12H5m0 0l7 7m-7-7l7-7" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </button>
+              <button class="btn btn--secondary btn--sm" id="zoomOut" aria-label="Zoom out">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M5 12h14"></path>
+                </svg>
+              </button>
+              <button class="btn btn--secondary btn--sm" id="zoomIn" aria-label="Zoom in">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M12 5v14m-7-7h14"></path>
+                </svg>
+              </button>
+              <button class="btn btn--secondary btn--sm" id="fullscreenToggle" aria-label="Toggle fullscreen">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="fullscreen-expand-icon">
+                  <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
+                </svg>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="fullscreen-collapse-icon" style="display: none;">
+                  <path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"></path>
+                </svg>
+              </button>
+              <button class="btn btn--secondary btn--sm" id="openNeo4j" aria-label="Open Neo4j panel">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                  <polyline points="3.27,6.96 12,12.01 20.73,6.96"></polyline>
+                  <line x1="12" y1="22.08" x2="12" y2="12"></line>
+                </svg>
+              </button>
+              <button class="btn btn--secondary btn--sm btn--icon-blue" id="askAiBtn" aria-label="Ask AI" title="Ask AI">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09Z" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 0 0-2.456 2.456Z" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </button>
+              <a class="btn btn--secondary btn--sm" href="/keywords-manage.html" aria-label="Manage Keywords" title="Manage Keywords">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/>
+                  <circle cx="12" cy="12" r="3"/>
+                </svg>
+              </a>
+            </div>
+          </div>
+          <!-- Tree controls (shown when tree tab active) -->
+          <div class="kw-tab-controls" data-for-tab="tree" style="display:none;">
+            <div class="control-group">
+              <input id="treeSearch" type="hidden" />
+              <button class="btn btn--secondary btn--sm" id="treeExpandAll">Expand All</button>
+              <button class="btn btn--secondary btn--sm" id="treeCollapseAll">Collapse All</button>
+              <button class="btn btn--secondary btn--sm" id="treeClearSelection">Clear Selection</button>
+              <span class="kw-tree-stats">
+                <span>Visible <strong id="treeVisibleCount">0</strong></span>
+                <span>Selected <strong id="treeSelectedCount">0</strong></span>
+              </span>
+            </div>
+          </div>
           <input id="kwGlobalSearch" class="input input--compact" type="search" placeholder="Search bubbles..." aria-label="Search keywords" style="min-width:200px;" />
         </div>
       </section>
 
       <!-- Bubbles tab content -->
       <div class="kw-tab-content active" id="kw-bubbles-tab">
-      <section class="toolbar" aria-label="Graph controls">
-        <div class="toolbar__left">
-          <div class="control-group">
-            <label class="sr-only" for="kwFilter">Filter keywords</label>
-            <input id="kwFilter" class="input input--compact" type="search" placeholder="Search keywords" style="display:none;" />
-            <button type="button" id="resetKw" class="btn btn--secondary">Reset</button>
-          </div>
-        </div>
-        <div class="toolbar__right">
-          <div class="control-group" role="group" aria-label="View and zoom controls">
-            <button class="btn btn--secondary" id="keywordsBackBtn" aria-label="Back" title="Back">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M19 12H5m0 0l7 7m-7-7l7-7" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-            </button>
-            <button class="btn btn--secondary" id="zoomOut" aria-label="Zoom out">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M5 12h14"></path>
-              </svg>
-            </button>
-            <button class="btn btn--secondary" id="zoomIn" aria-label="Zoom in">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M12 5v14m-7-7h14"></path>
-              </svg>
-            </button>
-            <button class="btn btn--secondary" id="fullscreenToggle" aria-label="Toggle fullscreen">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="fullscreen-expand-icon">
-                <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
-              </svg>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="fullscreen-collapse-icon" style="display: none;">
-                <path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"></path>
-              </svg>
-            </button>
-          </div>
-          <div class="control-group">
-            <button class="btn btn--secondary" id="openNeo4j" aria-label="Open Neo4j panel">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
-                <polyline points="3.27,6.96 12,12.01 20.73,6.96"></polyline>
-                <line x1="12" y1="22.08" x2="12" y2="12"></line>
-              </svg>
-              Neo4j
-            </button>
-            <button class="btn btn--secondary btn--icon-blue" id="askAiBtn" aria-label="Ask AI" title="Ask AI">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09Z" stroke-linecap="round" stroke-linejoin="round"/>
-                <path d="M18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 0 0-2.456 2.456Z" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-            </button>
-            <a class="btn btn--secondary" href="/keywords-manage.html" aria-label="Manage Keywords" title="Manage Keywords">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/>
-                <circle cx="12" cy="12" r="3"/>
-              </svg>
-            </a>
-          </div>
-        </div>
-      </section>
       <div class="keywords__main">
         <div class="keywords__canvas">
           <button class="fullscreen-exit-btn" id="fullscreenExit">
@@ -207,18 +211,6 @@
 
       <!-- Tree tab content -->
       <div class="kw-tab-content" id="kw-tree-tab" style="display:none;">
-        <div class="kw-tree-toolbar">
-          <div class="control-group">
-            <input id="treeSearch" class="input input--compact" type="search" placeholder="Search tree..." style="display:none;" />
-            <button class="btn btn--secondary btn--sm" id="treeExpandAll">Expand All</button>
-            <button class="btn btn--secondary btn--sm" id="treeCollapseAll">Collapse All</button>
-            <button class="btn btn--secondary btn--sm" id="treeClearSelection">Clear Selection</button>
-          </div>
-          <div class="kw-tree-stats">
-            <span>Visible <strong id="treeVisibleCount">0</strong></span>
-            <span>Selected <strong id="treeSelectedCount">0</strong></span>
-          </div>
-        </div>
         <div class="keywords__main">
           <div class="keywords__canvas" id="treeViewCanvas">
             <div id="treeContainer" class="kw-tree-container"></div>
@@ -352,6 +344,10 @@
 
             globalSearch.value = '';
             globalSearch.placeholder = placeholders[target] || 'Search keywords...';
+
+            document.querySelectorAll('.kw-tab-controls').forEach(function(c) {
+              c.style.display = c.dataset.forTab === target ? '' : 'none';
+            });
 
             if (target === 'list' && window.kwShowListTab) window.kwShowListTab();
             if (target === 'tree' && window.kwShowTreeTab) window.kwShowTreeTab();
