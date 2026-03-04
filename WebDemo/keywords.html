@@ -8,7 +8,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles/main.css?v=1">
-    <link rel="stylesheet" href="styles/dashboard.css?v=9">
+    <link rel="stylesheet" href="styles/dashboard.css?v=10">
   </head>
   <body class="app app--keywords">
     <aside class="sidebar" aria-label="Primary">
@@ -69,6 +69,7 @@
             <button class="tab-btn active" data-kw-tab="bubbles">Bubbles</button>
             <button class="tab-btn" data-kw-tab="list">List</button>
             <button class="tab-btn" data-kw-tab="tree">Tree</button>
+            <button class="tab-btn" data-kw-tab="scatter">Scatter</button>
           </div>
         </div>
       </section>
@@ -229,6 +230,23 @@
         </div>
       </div>
 
+      <!-- Scatter tab content -->
+      <div class="kw-tab-content" id="kw-scatter-tab" style="display:none;">
+        <div class="keywords__main">
+          <div class="keywords__canvas" id="scatterViewCanvas">
+            <div id="scatterContainer" class="kw-scatter-container"></div>
+          </div>
+          <aside class="keywords__sidebar" id="scatterDetailsDrawer" aria-label="Keyword details">
+            <div class="sidebar__header">
+              <h2 id="scatterDrawerTitle">Select a Keyword</h2>
+            </div>
+            <div class="sidebar__body" id="scatterDrawerBody">
+              <p class="sidebar__placeholder">Click on a point in the scatter plot to see its details.</p>
+            </div>
+          </aside>
+        </div>
+      </div>
+
       <aside class="drawer" id="neo4jDrawer" aria-label="Neo4j connection" aria-hidden="true">
         <div class="drawer__header">
           <h2>Neo4j</h2>
@@ -284,6 +302,7 @@
     <script src="scripts/shared-data.js"></script>
     <script src="scripts/keywords.js?v=18" defer></script>
     <script src="scripts/keywords-tree.js?v=2" defer></script>
+    <script src="scripts/keywords-scatter.js?v=1" defer></script>
     <script>
       document.addEventListener('DOMContentLoaded', function() {
         var tabBtns = document.querySelectorAll('[data-kw-tab]');
@@ -298,6 +317,7 @@
 
             if (target === 'list' && window.kwShowListTab) window.kwShowListTab();
             if (target === 'tree' && window.kwShowTreeTab) window.kwShowTreeTab();
+            if (target === 'scatter' && window.kwShowScatterTab) window.kwShowScatterTab();
             if (target === 'bubbles' && window.kwShowBubblesTab) window.kwShowBubblesTab();
           });
         });
