@@ -128,7 +128,7 @@
     }
 
     // Links
-    g.append('g')
+    var allLinks = g.append('g')
       .selectAll('path')
       .data(graph.links)
       .enter().append('path')
@@ -136,42 +136,85 @@
       .attr('d', d3.sankeyLinkHorizontal())
       .attr('stroke-width', function (d) { return Math.max(1, d.width); })
       .attr('stroke', function (d) {
-        var c = groupColorMap[d.source.group] || '#6366f1';
-        return c;
+        return groupColorMap[d.source.group] || '#6366f1';
       })
       .attr('stroke-opacity', 0.25)
       .attr('fill', 'none')
       .on('mouseover', function (event, d) {
-        d3.select(this).attr('stroke-opacity', 0.55);
+        allLinks.attr('stroke-opacity', 0.06);
+        d3.select(this).attr('stroke-opacity', 0.8);
+        allNodeGroups.select('rect').attr('opacity', 0.15);
+        allNodeGroups.select('text').attr('opacity', 0.2);
+        allNodeGroups.filter(function (n) { return n.index === d.source.index || n.index === d.target.index; })
+          .select('rect').attr('opacity', 1);
+        allNodeGroups.filter(function (n) { return n.index === d.source.index || n.index === d.target.index; })
+          .select('text').attr('opacity', 1);
       })
       .on('mouseout', function () {
-        d3.select(this).attr('stroke-opacity', 0.25);
+        allLinks.attr('stroke-opacity', 0.25);
+        allNodeGroups.select('rect').attr('opacity', 0.85);
+        allNodeGroups.select('text').attr('opacity', 1);
       })
       .on('click', function (event, d) {
         showFlowDetails(d);
       });
 
+    function getConnectedLinkIndices(nodeIndex) {
+      var set = new Set();
+      graph.links.forEach(function (l, i) {
+        if (l.source.index === nodeIndex || l.target.index === nodeIndex) set.add(i);
+      });
+      return set;
+    }
+
+    function getConnectedNodeIndices(nodeIndex) {
+      var set = new Set();
+      set.add(nodeIndex);
+      graph.links.forEach(function (l) {
+        if (l.source.index === nodeIndex) set.add(l.target.index);
+        if (l.target.index === nodeIndex) set.add(l.source.index);
+      });
+      return set;
+    }
+
     // Nodes
-    var nodeG = g.append('g')
+    var allNodeGroups = g.append('g')
       .selectAll('g')
       .data(graph.nodes)
       .enter().append('g')
       .attr('class', 'sankey-node')
       .style('cursor', 'pointer')
+      .on('mouseover', function (event, d) {
+        var connLinks = getConnectedLinkIndices(d.index);
+        var connNodes = getConnectedNodeIndices(d.index);
+
+        allLinks.attr('stroke-opacity', function (l, i) {
+          return connLinks.has(i) ? 0.7 : 0.04;
+        });
+        allNodeGroups.select('rect').attr('opacity', function (n) {
+          return connNodes.has(n.index) ? 1 : 0.15;
+        });
+        allNodeGroups.select('text').attr('opacity', function (n) {
+          return connNodes.has(n.index) ? 1 : 0.2;
+        });
+      })
+      .on('mouseout', function () {
+        allLinks.attr('stroke-opacity', 0.25);
+        allNodeGroups.select('rect').attr('opacity', 0.85);
+        allNodeGroups.select('text').attr('opacity', 1);
+      })
       .on('click', function (event, d) {
         showNodeDetails(d, data.nodes);
       });
 
-    nodeG.append('rect')
+    allNodeGroups.append('rect')
       .attr('x', function (d) { return d.x0; })
       .attr('y', function (d) { return d.y0; })
       .attr('height', function (d) { return Math.max(d.y1 - d.y0, 2); })
       .attr('width', sankey.nodeWidth())
       .attr('fill', function (d) { return groupColorMap[d.group] || '#6366f1'; })
       .attr('rx', 3)
-      .attr('opacity', 0.85)
-      .on('mouseover', function () { d3.select(this).attr('opacity', 1); })
-      .on('mouseout', function () { d3.select(this).attr('opacity', 0.85); });
+      .attr('opacity', 0.85);
 
     nodeG.append('text')
       .attr('x', function (d) { return d.x1 + 6; })
