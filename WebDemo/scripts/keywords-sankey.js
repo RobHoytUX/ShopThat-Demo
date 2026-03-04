@@ -216,7 +216,7 @@
       .attr('rx', 3)
       .attr('opacity', 0.85);
 
-    nodeG.append('text')
+    allNodeGroups.append('text')
       .attr('x', function (d) { return d.x1 + 6; })
       .attr('y', function (d) { return (d.y0 + d.y1) / 2; })
       .attr('dy', '0.35em')
