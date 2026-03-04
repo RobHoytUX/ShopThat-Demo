@@ -8,7 +8,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles/main.css?v=1">
-    <link rel="stylesheet" href="styles/dashboard.css?v=10">
+    <link rel="stylesheet" href="styles/dashboard.css?v=11">
   </head>
   <body class="app app--keywords">
     <aside class="sidebar" aria-label="Primary">
@@ -70,6 +70,7 @@
             <button class="tab-btn" data-kw-tab="list">List</button>
             <button class="tab-btn" data-kw-tab="tree">Tree</button>
             <button class="tab-btn" data-kw-tab="scatter">Scatter</button>
+            <button class="tab-btn" data-kw-tab="sankey">Sankey</button>
           </div>
         </div>
       </section>
@@ -247,6 +248,23 @@
         </div>
       </div>
 
+      <!-- Sankey tab content -->
+      <div class="kw-tab-content" id="kw-sankey-tab" style="display:none;">
+        <div class="keywords__main">
+          <div class="keywords__canvas" id="sankeyViewCanvas">
+            <div id="sankeyContainer" class="kw-sankey-container"></div>
+          </div>
+          <aside class="keywords__sidebar" id="sankeyDetailsDrawer" aria-label="Keyword details">
+            <div class="sidebar__header">
+              <h2 id="sankeyDrawerTitle">Select a Flow</h2>
+            </div>
+            <div class="sidebar__body" id="sankeyDrawerBody">
+              <p class="sidebar__placeholder">Click on a node or flow to see its details.</p>
+            </div>
+          </aside>
+        </div>
+      </div>
+
       <aside class="drawer" id="neo4jDrawer" aria-label="Neo4j connection" aria-hidden="true">
         <div class="drawer__header">
           <h2>Neo4j</h2>
@@ -303,6 +321,8 @@
     <script src="scripts/keywords.js?v=18" defer></script>
     <script src="scripts/keywords-tree.js?v=2" defer></script>
     <script src="scripts/keywords-scatter.js?v=1" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/d3-sankey@0.12.3/dist/d3-sankey.min.js"></script>
+    <script src="scripts/keywords-sankey.js?v=1" defer></script>
     <script>
       document.addEventListener('DOMContentLoaded', function() {
         var tabBtns = document.querySelectorAll('[data-kw-tab]');
@@ -318,6 +338,7 @@
             if (target === 'list' && window.kwShowListTab) window.kwShowListTab();
             if (target === 'tree' && window.kwShowTreeTab) window.kwShowTreeTab();
             if (target === 'scatter' && window.kwShowScatterTab) window.kwShowScatterTab();
+            if (target === 'sankey' && window.kwShowSankeyTab) window.kwShowSankeyTab();
             if (target === 'bubbles' && window.kwShowBubblesTab) window.kwShowBubblesTab();
           });
         });

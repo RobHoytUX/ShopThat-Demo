@@ -4403,6 +4403,14 @@ svg#bubbleGraph { width: 100%; flex: 1; display: block; padding-top: 60px; min-h
 .dark-mode .scatter-grid line { stroke: #1f2937; }
 .dark-mode .scatter-legend-text { fill: #d1d5db; }
 
+/* ─── Sankey ─── */
+.kw-sankey-container { width: 100%; height: 100%; overflow: auto; position: relative; }
+.kw-sankey-container svg { display: block; }
+.sankey-label { fill: #374151; font-size: 13px; font-family: 'Poppins', sans-serif; font-weight: 500; }
+.sankey-link { transition: stroke-opacity 0.15s; }
+.dark-mode .sankey-label { fill: #e2e8f0; }
+.dark-mode .sankey-link { stroke-opacity: 0.3; }
+
 /* ─── Image Upload Modal & Gallery ─── */
 .upload-modal {
   max-width: 640px;
