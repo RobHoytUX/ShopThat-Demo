@@ -8,7 +8,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles/main.css?v=1">
-    <link rel="stylesheet" href="styles/dashboard.css?v=8">
+    <link rel="stylesheet" href="styles/dashboard.css?v=9">
   </head>
   <body class="app app--keywords">
     <aside class="sidebar" aria-label="Primary">
@@ -63,7 +63,7 @@
 
     <main id="main" class="keywords" role="main">
       <!-- Keyword view tabs -->
-      <section class="toolbar" aria-label="View tabs" style="margin-bottom: 0;">
+      <section class="toolbar kw-tabs-toolbar" aria-label="View tabs">
         <div class="toolbar__left">
           <div class="card__tabs">
             <button class="tab-btn active" data-kw-tab="bubbles">Bubbles</button>
@@ -283,7 +283,7 @@
     <script src="https://cdn.jsdelivr.net/npm/neo4j-driver-lite@5.23.0/lib/browser/neo4j-web.min.js"></script>
     <script src="scripts/shared-data.js"></script>
     <script src="scripts/keywords.js?v=18" defer></script>
-    <script src="scripts/keywords-tree.js?v=1" defer></script>
+    <script src="scripts/keywords-tree.js?v=2" defer></script>
     <script>
       document.addEventListener('DOMContentLoaded', function() {
         var tabBtns = document.querySelectorAll('[data-kw-tab]');

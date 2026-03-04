@@ -4294,19 +4294,20 @@ svg#bubbleGraph { width: 100%; flex: 1; display: block; padding-top: 60px; min-h
 }
 
 /* ─── Keyword view tabs ─── */
-.kw-tab-content { display: block; }
+.keywords .kw-tabs-toolbar { margin: 0 0 4px 0 !important; }
+.kw-tab-content { display: flex; flex-direction: column; flex: 1; min-height: 0; }
 .kw-tab-content[style*="display: none"], .kw-tab-content[style*="display:none"] { display: none !important; }
 .keywords__list-view-tab {
   padding: 16px;
   overflow-y: auto;
-  max-height: calc(100vh - 180px);
 }
 .kw-tree-toolbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding: 8px 16px;
+  padding: 4px 0;
+  flex-shrink: 0;
 }
 .kw-tree-stats {
   display: flex;
@@ -4319,61 +4320,35 @@ svg#bubbleGraph { width: 100%; flex: 1; display: block; padding-top: 60px; min-h
   font-weight: 600;
   margin-left: 4px;
 }
-.kw-tree-container {
-  padding: 12px 8px;
-  overflow-y: auto;
-  max-height: calc(100vh - 200px);
-  font-size: 13px;
+
+/* D3 tree SVG */
+.kw-tree-container { width: 100%; height: 100%; overflow: hidden; }
+.kw-tree-container svg { width: 100%; height: 100%; }
+.kw-tree-container .link { fill: none; stroke: #cbd5e1; stroke-width: 1.5px; }
+.kw-tree-container .node { cursor: pointer; }
+.kw-tree-container .node circle {
+  stroke-width: 2px;
+  transition: r 0.15s;
 }
-.kw-tree-node { }
-.kw-tree-row {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 5px 8px;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: background 0.12s;
-  user-select: none;
+.kw-tree-container .node:hover circle { r: 8; }
+.kw-tree-container .node text {
+  font-size: 12px;
+  font-family: 'Poppins', sans-serif;
+  fill: #374151;
 }
-.kw-tree-row:hover { background: #f3f4f6; }
-.kw-tree-row.is-selected { background: #eef2ff; outline: 1px solid #c7d2fe; }
-.kw-tree-toggle {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 18px;
-  height: 18px;
-  flex-shrink: 0;
-  color: #9ca3af;
+.kw-tree-container .node.is-selected circle {
+  stroke: #6366f1 !important;
+  stroke-width: 3px;
 }
-.kw-tree-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  flex-shrink: 0;
+.kw-tree-container .node .toggle-icon {
+  font-size: 14px;
+  font-weight: 700;
+  fill: #fff;
+  text-anchor: middle;
+  dominant-baseline: central;
+  pointer-events: none;
 }
-.kw-tree-label {
-  flex: 1;
-  color: #374151;
-  font-weight: 500;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.kw-tree-label.is-match {
-  background: #fef3c7;
-  border-radius: 3px;
-  padding: 0 3px;
-}
-.kw-tree-count {
-  font-size: 11px;
-  color: #9ca3af;
-  background: #f3f4f6;
-  border-radius: 99px;
-  padding: 1px 7px;
-  flex-shrink: 0;
-}
+
 .kw-tree-selected-item {
   display: flex;
   align-items: center;
@@ -4396,11 +4371,8 @@ svg#bubbleGraph { width: 100%; flex: 1; display: block; padding-top: 60px; min-h
 .kw-tree-selected-remove:hover { color: #ef4444; }
 
 /* Dark mode for tree */
-.dark-mode .kw-tree-row:hover { background: #374151; }
-.dark-mode .kw-tree-row.is-selected { background: rgba(99,102,241,0.15); outline-color: rgba(99,102,241,0.3); }
-.dark-mode .kw-tree-label { color: #e5e7eb; }
-.dark-mode .kw-tree-label.is-match { background: rgba(245,158,11,0.2); }
-.dark-mode .kw-tree-count { background: #374151; color: #9ca3af; }
+.dark-mode .kw-tree-container .link { stroke: #475569; }
+.dark-mode .kw-tree-container .node text { fill: #e2e8f0; }
 .dark-mode .kw-tree-stats strong { color: #e5e7eb; }
 .dark-mode .kw-tree-selected-item { border-color: #374151; color: #e5e7eb; }
 
