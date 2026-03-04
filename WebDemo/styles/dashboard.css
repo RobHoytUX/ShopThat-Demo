@@ -4332,7 +4332,7 @@ svg#bubbleGraph { width: 100%; flex: 1; display: block; padding-top: 60px; min-h
 }
 .kw-tree-container .node:hover circle { r: 8; }
 .kw-tree-container .node text {
-  font-size: 15px;
+  font-size: 17px;
   font-family: 'Poppins', sans-serif;
   fill: #374151;
 }
