@@ -2455,10 +2455,7 @@ console.log('Document ready state:', document.readyState);
   zoomOut && zoomOut.addEventListener('click', ()=> svg.transition().duration(200).call(zoom.scaleBy, 0.8));
   fitBtn && fitBtn.addEventListener('click', ()=> svg.transition().duration(250).call(zoom.transform, d3.zoomIdentity));
 
-  // View toggle: linear list vs. all-bubbles graph
-  const viewToggleBtn = document.getElementById('viewToggle');
-  const viewBubblesIcon = viewToggleBtn?.querySelector('.view-bubbles-icon');
-  const viewListIcon = viewToggleBtn?.querySelector('.view-list-icon');
+  // View state (tabs now handle switching, but keep state for internal logic)
   let isBubbleView = false;
 
   // Track bubble view navigation history
@@ -2466,9 +2463,6 @@ console.log('Document ready state:', document.readyState);
 
   function showBubbleView(startNode) {
     isBubbleView = true;
-    if (viewBubblesIcon) viewBubblesIcon.style.display = 'none';
-    if (viewListIcon) viewListIcon.style.display = '';
-    viewToggleBtn.title = 'Show list view';
 
     // Remember current node for sidebar continuity
     const currentNode = startNode || selectedNode;
@@ -2566,9 +2560,6 @@ console.log('Document ready state:', document.readyState);
 
   function showListView() {
     isBubbleView = false;
-    if (viewBubblesIcon) viewBubblesIcon.style.display = '';
-    if (viewListIcon) viewListIcon.style.display = 'none';
-    viewToggleBtn.title = 'Show all bubbles';
 
     // Remember current node for sidebar continuity
     const currentNode = selectedNode;
@@ -2596,13 +2587,69 @@ console.log('Document ready state:', document.readyState);
     }
   }
 
-  viewToggleBtn && viewToggleBtn.addEventListener('click', () => {
-    if (isBubbleView) {
-      showListView();
-    } else {
-      showBubbleView();
-    }
-  });
+  // Expose tab switching for external tab navigation
+  window.kwShowBubblesTab = function() {
+    hideLinearView();
+    showBubbleView();
+  };
+  window.kwShowListTab = function() {
+    const lvmhNode = allNodes.find(n => n.id === 'LVMH');
+    if (lvmhNode) showListView();
+
+    // Build list in the dedicated list tab
+    const container = document.getElementById('listViewContainer');
+    if (!container) return;
+    container.innerHTML = '';
+
+    const grouped = {};
+    allNodes.forEach(n => {
+      if (n.group === 0) return;
+      const cat = keywordCategories[n.id] || 'Other';
+      if (!grouped[cat]) grouped[cat] = [];
+      grouped[cat].push(n);
+    });
+    Object.values(grouped).forEach(items => items.sort((a, b) => b.value - a.value));
+
+    const sortedCats = Object.keys(grouped).sort((a, b) => {
+      const ai = categoryOrder.indexOf(a);
+      const bi = categoryOrder.indexOf(b);
+      return (ai === -1 ? 999 : ai) - (bi === -1 ? 999 : bi);
+    });
+
+    sortedCats.forEach(cat => {
+      const items = grouped[cat];
+      const section = document.createElement('div');
+      section.innerHTML = '<div class="linear-view__category"><span class="linear-view__category-label">' + cat + '</span><span class="linear-view__category-count">' + items.length + '</span><div class="linear-view__category-line"></div></div>';
+      items.forEach(n => {
+        const color = groupColors[n.group] || groupColors[1];
+        const count = getConnectedNodeIds(n).size - 1;
+        const el = document.createElement('div');
+        el.className = 'linear-view__item';
+        el.dataset.id = n.id;
+        el.innerHTML = '<div class="linear-view__item-indicator" style="background:' + color.gradient + '"></div><div class="linear-view__item-info"><span class="linear-view__item-name">' + n.id + '</span><span class="linear-view__item-meta">' + count + ' connections</span></div><svg class="linear-view__item-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+        el.addEventListener('click', function() {
+          var target = allNodes.find(function(nd) { return nd.id === n.id; });
+          if (target) {
+            var title = document.getElementById('listDrawerTitle');
+            var body = document.getElementById('listDrawerBody');
+            if (title) title.textContent = target.id;
+            if (body) {
+              var conns = getConnectedNodeIds(target);
+              var connNodes = allNodes.filter(function(nd) { return conns.has(nd.id) && nd.id !== target.id; });
+              body.innerHTML = '<div class="sidebar-stat"><span class="sidebar-stat-value">' + connNodes.length + '</span><span class="sidebar-stat-label">connections</span></div><div class="sidebar-connections"><h3>Connected Keywords</h3>' + connNodes.map(function(c) { return '<span class="sidebar-connection-tag">' + c.id + '</span>'; }).join('') + '</div><div class="sidebar-articles"><h3>Related Articles</h3>' + generateArticlesHTML(target.id) + '</div>';
+            }
+          }
+        });
+        section.appendChild(el);
+      });
+      container.appendChild(section);
+    });
+  };
+
+  window.kwGetNodes = function() { return allNodes; };
+  window.kwGetLinks = function() { return allLinks; };
+  window.kwGetConnected = getConnectedNodeIds;
+  window.kwGetArticlesHTML = generateArticlesHTML;
 
   // Fullscreen toggle
   const fullscreenToggle = document.getElementById('fullscreenToggle');
