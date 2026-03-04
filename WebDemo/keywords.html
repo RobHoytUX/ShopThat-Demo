@@ -41,7 +41,7 @@
         <h1 class="appbar__title">
           <span class="appbar__title-row">Keywords</span>
         </h1>
-        <div class="appbar__search"><input type="search" placeholder="Search here..." aria-label="Search" /></div>
+        <div class="appbar__search" style="display:none;"></div>
         <div class="appbar__account">
           <span class="locale">Eng (US)</span>
           <button class="icon-btn" aria-label="Notifications" title="Notifications">
@@ -73,6 +73,9 @@
             <button class="tab-btn" data-kw-tab="sankey">Sankey</button>
           </div>
         </div>
+        <div class="toolbar__right">
+          <input id="kwGlobalSearch" class="input input--compact" type="search" placeholder="Search bubbles..." aria-label="Search keywords" style="min-width:200px;" />
+        </div>
       </section>
 
       <!-- Bubbles tab content -->
@@ -81,7 +84,7 @@
         <div class="toolbar__left">
           <div class="control-group">
             <label class="sr-only" for="kwFilter">Filter keywords</label>
-            <input id="kwFilter" class="input input--compact" type="search" placeholder="Search keywords" />
+            <input id="kwFilter" class="input input--compact" type="search" placeholder="Search keywords" style="display:none;" />
             <button type="button" id="resetKw" class="btn btn--secondary">Reset</button>
           </div>
         </div>
@@ -206,7 +209,7 @@
       <div class="kw-tab-content" id="kw-tree-tab" style="display:none;">
         <div class="kw-tree-toolbar">
           <div class="control-group">
-            <input id="treeSearch" class="input input--compact" type="search" placeholder="Search tree..." />
+            <input id="treeSearch" class="input input--compact" type="search" placeholder="Search tree..." style="display:none;" />
             <button class="btn btn--secondary btn--sm" id="treeExpandAll">Expand All</button>
             <button class="btn btn--secondary btn--sm" id="treeCollapseAll">Collapse All</button>
             <button class="btn btn--secondary btn--sm" id="treeClearSelection">Clear Selection</button>
@@ -326,14 +329,29 @@
     <script>
       document.addEventListener('DOMContentLoaded', function() {
         var tabBtns = document.querySelectorAll('[data-kw-tab]');
+        var globalSearch = document.getElementById('kwGlobalSearch');
+        var currentTab = 'bubbles';
+
+        var placeholders = {
+          bubbles: 'Search bubbles...',
+          list: 'Search list...',
+          tree: 'Search tree...',
+          scatter: 'Search scatter...',
+          sankey: 'Search sankey...'
+        };
+
         tabBtns.forEach(function(btn) {
           btn.addEventListener('click', function() {
             var target = btn.dataset.kwTab;
+            currentTab = target;
             tabBtns.forEach(function(b) { b.classList.remove('active'); });
             btn.classList.add('active');
             document.querySelectorAll('.kw-tab-content').forEach(function(c) { c.style.display = 'none'; });
             var el = document.getElementById('kw-' + target + '-tab');
             if (el) el.style.display = '';
+
+            globalSearch.value = '';
+            globalSearch.placeholder = placeholders[target] || 'Search keywords...';
 
             if (target === 'list' && window.kwShowListTab) window.kwShowListTab();
             if (target === 'tree' && window.kwShowTreeTab) window.kwShowTreeTab();
@@ -341,6 +359,29 @@
             if (target === 'sankey' && window.kwShowSankeyTab) window.kwShowSankeyTab();
             if (target === 'bubbles' && window.kwShowBubblesTab) window.kwShowBubblesTab();
           });
+        });
+
+        globalSearch.addEventListener('input', function() {
+          var q = globalSearch.value;
+          if (currentTab === 'bubbles') {
+            var kwFilter = document.getElementById('kwFilter');
+            if (kwFilter) { kwFilter.value = q; kwFilter.dispatchEvent(new Event('input')); }
+          } else if (currentTab === 'tree') {
+            var treeSearch = document.getElementById('treeSearch');
+            if (treeSearch) { treeSearch.value = q; treeSearch.dispatchEvent(new Event('input')); }
+          } else if (currentTab === 'list') {
+            var items = document.querySelectorAll('#listViewContainer .linear-view__item');
+            var cats = document.querySelectorAll('#listViewContainer .linear-view__category');
+            var lower = q.toLowerCase();
+            items.forEach(function(item) {
+              var name = item.querySelector('.linear-view__item-name');
+              item.style.display = (!q || (name && name.textContent.toLowerCase().includes(lower))) ? '' : 'none';
+            });
+          } else if (currentTab === 'scatter' && window.kwScatterSearch) {
+            window.kwScatterSearch(q);
+          } else if (currentTab === 'sankey' && window.kwSankeySearch) {
+            window.kwSankeySearch(q);
+          }
         });
       });
     </script>
