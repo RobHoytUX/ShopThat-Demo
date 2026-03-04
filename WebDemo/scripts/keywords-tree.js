@@ -110,7 +110,7 @@
     treeSvg.call(zoomBehavior);
     treeSvg.call(zoomBehavior.transform, d3.zoomIdentity.translate(80, h / 2).scale(0.85));
 
-    treeLayout = d3.tree().nodeSize([28, 220]);
+    treeLayout = d3.tree().nodeSize([42, 220]);
 
     root = d3.hierarchy(data);
     root.x0 = 0;
