@@ -4294,7 +4294,7 @@ svg#bubbleGraph { width: 100%; flex: 1; display: block; padding-top: 60px; min-h
 }
 
 /* ─── Keyword view tabs ─── */
-.keywords .kw-tabs-toolbar { margin: 0 0 4px 0 !important; }
+.keywords .kw-tabs-toolbar { margin: 0 0 8px 0 !important; }
 .kw-tab-content { display: flex; flex-direction: column; flex: 1; min-height: 0; }
 .kw-tab-content[style*="display: none"], .kw-tab-content[style*="display:none"] { display: none !important; }
 .keywords__list-view-tab {
