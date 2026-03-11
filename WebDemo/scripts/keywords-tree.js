@@ -299,6 +299,42 @@
     });
 
     updateCounts();
+
+    // Auto-fit zoom after transition
+    setTimeout(function () { fitToView(treeNodes); }, duration + 50);
+  }
+
+  function fitToView(nodes) {
+    if (!treeSvg || !zoomBehavior || !nodes || nodes.length === 0) return;
+
+    var rect = containerEl.getBoundingClientRect();
+    var svgW = rect.width || 800;
+    var svgH = rect.height || 600;
+
+    var minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+    nodes.forEach(function (d) {
+      if (d.x < minX) minX = d.x;
+      if (d.x > maxX) maxX = d.x;
+      if (d.y < minY) minY = d.y;
+      if (d.y > maxY) maxY = d.y;
+    });
+
+    var treeW = (maxY - minY) + 250;
+    var treeH = (maxX - minX) + 80;
+
+    if (treeW <= 0 || treeH <= 0) return;
+
+    var scale = Math.min(svgW / treeW, svgH / treeH, 1.2);
+    scale = Math.max(scale, 0.25);
+
+    var centerX = (minX + maxX) / 2;
+    var centerY = (minY + maxY) / 2;
+
+    var tx = svgW / 2 - centerY * scale;
+    var ty = svgH / 2 - centerX * scale;
+
+    treeSvg.transition().duration(500)
+      .call(zoomBehavior.transform, d3.zoomIdentity.translate(tx, ty).scale(scale));
   }
 
   function updateCounts() {
