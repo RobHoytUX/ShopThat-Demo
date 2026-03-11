@@ -76,7 +76,7 @@
             sankeyLinks.push({
               source: node.id,
               target: child.id,
-              value: Math.max(child.value / 10, 3)
+              value: 1
             });
           }
           collect(child);
