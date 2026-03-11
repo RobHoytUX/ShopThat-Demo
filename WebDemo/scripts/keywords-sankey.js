@@ -55,16 +55,6 @@
 
     var tree = walk('LVMH', 0);
 
-    var unclaimed = nodes.filter(function (n) { return !claimed.has(n.id); });
-    if (unclaimed.length > 0 && tree) {
-      tree.children.push({
-        id: 'Other',
-        group: 4,
-        value: 40,
-        children: unclaimed.map(function (n) { return { id: n.id, group: n.group, value: n.value, children: [] }; })
-      });
-    }
-
     return tree;
   }
 
@@ -207,10 +197,8 @@
       .attr('text-anchor', 'start')
       .attr('class', 'sankey-label')
       .text(function (d) {
-        var expanded = expandedIds.has(d.name);
-        var canExpand = hasChildren(d.name);
-        var indicator = canExpand ? (expanded ? ' ▾' : ' ▸') : '';
-        return d.name + indicator;
+        var canExpand = hasChildren(d.name) && !expandedIds.has(d.name);
+        return d.name + (canExpand ? ' ▸' : '');
       })
       .attr('opacity', 0)
       .transition().duration(400)
@@ -249,12 +237,8 @@
         allNodeGroups.select('text').attr('opacity', 1);
       })
       .on('click', function (event, d) {
-        if (hasChildren(d.name)) {
-          if (expandedIds.has(d.name)) {
-            collapseNode(d.name);
-          } else {
-            expandedIds.add(d.name);
-          }
+        if (hasChildren(d.name) && !expandedIds.has(d.name)) {
+          expandedIds.add(d.name);
           renderSankey();
         }
         showNodeDetails(d);
@@ -337,8 +321,8 @@
     var html = '<div class="sidebar-stat"><span class="sidebar-stat-value">' + (groupLabels[d.group] || 'Other') + '</span><span class="sidebar-stat-label">group</span></div>';
     html += '<div class="sidebar-stat"><span class="sidebar-stat-value">' + (outgoing.length + incoming.length) + '</span><span class="sidebar-stat-label">visible connections</span></div>';
 
-    if (canExpand) {
-      html += '<p style="font-size:12px;color:#6b7280;margin:8px 0;">' + (isExpanded ? 'Click node to collapse' : 'Click node to reveal connections') + '</p>';
+    if (canExpand && !isExpanded) {
+      html += '<p style="font-size:12px;color:#6b7280;margin:8px 0;">Click node to reveal connections</p>';
     }
 
     if (outgoing.length > 0) {
