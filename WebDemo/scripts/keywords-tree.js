@@ -66,6 +66,7 @@
     }
 
     var hierarchy = build('LVMH', 0);
+    if (hierarchy) hierarchy.name = 'Louis Vuitton';
 
     var unclaimed = nodes.filter(function (n) { return !claimed.has(n.id); });
     if (unclaimed.length > 0 && hierarchy) {
@@ -241,7 +242,7 @@
       });
 
     nodeUpdate.select('circle')
-      .attr('r', function (d) { return d.depth === 0 ? 8 : 6; })
+      .attr('r', function (d) { return d.depth === 0 ? 10 : 6; })
       .style('fill', function (d) {
         return d._children ? (groupColorMap[d.data.group] || '#6366f1') : '#fff';
       })
