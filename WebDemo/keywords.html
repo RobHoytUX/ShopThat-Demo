@@ -38,7 +38,9 @@
         <h1 class="appbar__title">
           <span class="appbar__title-row">Keywords</span>
         </h1>
-        <div class="appbar__search" style="display:none;"></div>
+        <div class="appbar__search">
+          <input type="search" placeholder="Search here..." aria-label="Search" />
+        </div>
         <div class="appbar__account">
           <span class="locale">Eng (US)</span>
           <button class="icon-btn" aria-label="Notifications" title="Notifications">
@@ -63,17 +65,16 @@
       <section class="toolbar kw-tabs-toolbar" aria-label="View tabs">
         <div class="toolbar__left">
           <div class="card__tabs">
-            <button class="tab-btn active" data-kw-tab="bubbles">Bubbles</button>
+            <button class="tab-btn active" data-kw-tab="tree">Tree</button>
+            <button class="tab-btn" data-kw-tab="bubbles">Bubbles</button>
             <button class="tab-btn" data-kw-tab="list">List</button>
-            <button class="tab-btn" data-kw-tab="tree">Tree</button>
             <button class="tab-btn" data-kw-tab="scatter">Scatter</button>
-            <button class="tab-btn" data-kw-tab="sankey">Sankey</button>
             <button class="tab-btn" data-kw-tab="beeswarm">Beeswarm</button>
           </div>
         </div>
         <div class="toolbar__right" style="display:flex; align-items:center; gap:8px;">
-          <!-- Bubbles controls (shown when bubbles tab active) -->
-          <div class="kw-tab-controls" data-for-tab="bubbles">
+          <!-- Bubbles controls (hidden until bubbles tab active) -->
+          <div class="kw-tab-controls" data-for-tab="bubbles" style="display:none;">
             <div class="control-group" role="group" aria-label="View and zoom controls">
               <input id="kwFilter" type="hidden" />
               <button type="button" id="resetKw" class="btn btn--secondary btn--sm">Reset</button>
@@ -107,22 +108,10 @@
                   <line x1="12" y1="22.08" x2="12" y2="12"></line>
                 </svg>
               </button>
-              <button class="btn btn--secondary btn--sm btn--icon-blue" id="askAiBtn" aria-label="Ask AI" title="Ask AI">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09Z" stroke-linecap="round" stroke-linejoin="round"/>
-                  <path d="M18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 0 0-2.456 2.456Z" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-              </button>
-              <a class="btn btn--secondary btn--sm" href="keywords-manage.html" aria-label="Manage Keywords" title="Manage Keywords">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/>
-                  <circle cx="12" cy="12" r="3"/>
-                </svg>
-              </a>
             </div>
           </div>
-          <!-- Tree controls (shown when tree tab active) -->
-          <div class="kw-tab-controls" data-for-tab="tree" style="display:none;">
+          <!-- Tree controls (shown by default) -->
+          <div class="kw-tab-controls" data-for-tab="tree">
             <div class="control-group">
               <input id="treeSearch" type="hidden" />
               <button class="btn btn--secondary btn--sm" id="treeExpandAll">Expand All</button>
@@ -134,12 +123,12 @@
               </span>
             </div>
           </div>
-          <input id="kwGlobalSearch" class="input input--compact" type="search" placeholder="Search bubbles..." aria-label="Search keywords" style="min-width:200px;" />
+          <input id="kwGlobalSearch" class="input input--compact" type="search" placeholder="Search tree..." aria-label="Search keywords" style="min-width:200px;" />
         </div>
       </section>
 
       <!-- Bubbles tab content -->
-      <div class="kw-tab-content active" id="kw-bubbles-tab">
+      <div class="kw-tab-content" id="kw-bubbles-tab" style="display:none;">
       <div class="keywords__main">
         <div class="keywords__canvas">
           <button class="fullscreen-exit-btn" id="fullscreenExit">
@@ -173,9 +162,6 @@
               <span class="legend-color" style="background: linear-gradient(135deg, #10b981, #06b6d4, #8b5cf6);"></span>
               <span>Tertiary (Isolated)</span>
             </label>
-            <div class="legend-filter-item legend-mode" id="modeIndicator">
-              <span>Mode: LVMH + Areas</span>
-            </div>
           </div>
           <svg id="bubbleGraph" role="img" aria-label="Keyword knowledge graph"></svg>
         </div>
@@ -208,17 +194,17 @@
       </div>
 
       <!-- Tree tab content -->
-      <div class="kw-tab-content" id="kw-tree-tab" style="display:none;">
+      <div class="kw-tab-content active" id="kw-tree-tab">
         <div class="keywords__main">
           <div class="keywords__canvas" id="treeViewCanvas">
             <div id="treeContainer" class="kw-tree-container"></div>
           </div>
-          <aside class="keywords__sidebar" id="treeDetailsDrawer" aria-label="Selected keywords">
+          <aside class="keywords__sidebar" id="treeDetailsDrawer" aria-label="Keyword details">
             <div class="sidebar__header">
-              <h2>Selected Keywords</h2>
+              <h2 id="treeDrawerTitle">Select a Keyword</h2>
             </div>
-            <div class="sidebar__body" id="treeSelectedList">
-              <p class="sidebar__placeholder">Shift+Click nodes to select keywords.</p>
+            <div class="sidebar__body" id="treeDrawerBody">
+              <p class="sidebar__placeholder">Click on a node in the tree to see its details.</p>
             </div>
           </aside>
         </div>
@@ -326,9 +312,11 @@
     </main>
 
     <script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/neo4j-driver-lite@5.23.0/lib/browser/neo4j-web.min.js"></script>
     <script src="scripts/shared-data.js"></script>
-    <script src="scripts/keywords.js?v=18" defer></script>
+    <script src="scripts/luxury-intelligence.js"></script>
+    <script src="scripts/keywords.js?v=19" defer></script>
     <script src="scripts/keywords-tree.js?v=2" defer></script>
     <script src="scripts/keywords-scatter.js?v=1" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/d3-sankey@0.12.3/dist/d3-sankey.min.js"></script>
@@ -338,16 +326,19 @@
       document.addEventListener('DOMContentLoaded', function() {
         var tabBtns = document.querySelectorAll('[data-kw-tab]');
         var globalSearch = document.getElementById('kwGlobalSearch');
-        var currentTab = 'bubbles';
+        var currentTab = 'tree';
 
         var placeholders = {
+          tree: 'Search tree...',
           bubbles: 'Search bubbles...',
           list: 'Search list...',
-          tree: 'Search tree...',
           scatter: 'Search scatter...',
           sankey: 'Search sankey...',
           beeswarm: 'Search beeswarm...'
         };
+
+        globalSearch.placeholder = placeholders[currentTab];
+        if (window.kwShowTreeTab) window.kwShowTreeTab();
 
         tabBtns.forEach(function(btn) {
           btn.addEventListener('click', function() {

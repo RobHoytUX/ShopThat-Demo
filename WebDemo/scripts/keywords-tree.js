@@ -8,7 +8,8 @@
   var clearSelectionBtn = document.getElementById('treeClearSelection');
   var visibleCountEl = document.getElementById('treeVisibleCount');
   var selectedCountEl = document.getElementById('treeSelectedCount');
-  var selectedListEl = document.getElementById('treeSelectedList');
+  var drawerTitleEl = document.getElementById('treeDrawerTitle');
+  var drawerBodyEl = document.getElementById('treeDrawerBody');
 
   var selectedKeywords = new Set();
   var root = null;
@@ -33,51 +34,79 @@
     var links = window.kwGetLinks ? window.kwGetLinks() : [];
     if (nodes.length === 0) return null;
 
-    var childMap = {};
+    var adjacency = {};
     links.forEach(function (link) {
       var src = typeof link.source === 'object' ? link.source.id : link.source;
       var tgt = typeof link.target === 'object' ? link.target.id : link.target;
-      if (!childMap[src]) childMap[src] = [];
-      childMap[src].push(tgt);
+      if (!adjacency[src]) adjacency[src] = [];
+      if (!adjacency[tgt]) adjacency[tgt] = [];
+      adjacency[src].push(tgt);
+      adjacency[tgt].push(src);
     });
 
-    var claimed = new Set();
+    function neighborsOf(id) {
+      var seen = {};
+      var out = [];
+      (adjacency[id] || []).forEach(function (nid) {
+        if (!seen[nid]) { seen[nid] = true; out.push(nid); }
+      });
+      return out;
+    }
 
-    function build(id, depth) {
-      if (claimed.has(id) || depth > 5) return null;
-      claimed.add(id);
-      var node = nodes.find(function (n) { return n.id === id; });
-      var kids = (childMap[id] || []).sort(function (a, b) {
+    function sortByValue(ids) {
+      return ids.slice().sort(function (a, b) {
         var na = nodes.find(function (n) { return n.id === a; });
         var nb = nodes.find(function (n) { return n.id === b; });
         return ((nb ? nb.value : 0) - (na ? na.value : 0));
       });
-      var children = [];
-      kids.forEach(function (cid) {
-        var child = build(cid, depth + 1);
-        if (child) children.push(child);
-      });
-      return {
-        name: id,
-        group: node ? node.group : 4,
-        value: node ? node.value : 50,
-        children: children.length > 0 ? children : undefined
-      };
     }
 
-    var hierarchy = build('LVMH', 0);
-    if (hierarchy) hierarchy.name = 'Louis Vuitton';
-
-    var unclaimed = nodes.filter(function (n) { return !claimed.has(n.id); });
-    if (unclaimed.length > 0 && hierarchy) {
-      var otherKids = unclaimed.map(function (n) {
-        return { name: n.id, group: n.group, value: n.value };
-      });
-      if (!hierarchy.children) hierarchy.children = [];
-      hierarchy.children.push({ name: 'Other', group: 4, value: 40, children: otherKids });
+    function nodeData(id) {
+      var n = nodes.find(function (nd) { return nd.id === id; });
+      return { group: n ? n.group : 4, value: n ? n.value : 50 };
     }
 
-    return hierarchy;
+    var areaIds = nodes.filter(function (n) { return n.isArea; }).map(function (n) { return n.id; });
+    var rootNeighbors = neighborsOf('LVMH');
+    if (areaIds.length === 0) {
+      areaIds = rootNeighbors.slice();
+    }
+    var areaSet = {};
+    areaIds.forEach(function (id) { areaSet[id] = true; });
+
+    var areaChildren = [];
+    var globalClaimed = { 'LVMH': true };
+    areaIds.forEach(function (id) { globalClaimed[id] = true; });
+
+    areaIds.forEach(function (areaId) {
+      var kwIds = sortByValue(
+        neighborsOf(areaId).filter(function (nid) { return nid !== 'LVMH' && !areaSet[nid]; })
+      );
+
+      var kids = [];
+      kwIds.forEach(function (kwId) {
+        if (globalClaimed[kwId]) return;
+        globalClaimed[kwId] = true;
+        var d = nodeData(kwId);
+        kids.push({ name: kwId, group: d.group, value: d.value });
+      });
+
+      var ad = nodeData(areaId);
+      areaChildren.push({
+        name: areaId,
+        group: ad.group,
+        value: ad.value,
+        children: kids.length > 0 ? kids : undefined
+      });
+    });
+
+    var rd = nodeData('LVMH');
+    return {
+      name: 'Louis Vuitton',
+      group: rd.group,
+      value: rd.value,
+      children: areaChildren.length > 0 ? areaChildren : undefined
+    };
   }
 
   function initTree() {
@@ -111,7 +140,7 @@
     treeSvg.call(zoomBehavior);
     treeSvg.call(zoomBehavior.transform, d3.zoomIdentity.translate(80, h / 2).scale(0.85));
 
-    treeLayout = d3.tree().nodeSize([34, 220]).separation(function (a, b) { return a.parent === b.parent ? 1 : 2; });
+    treeLayout = d3.tree().nodeSize([38, 240]).separation(function (a, b) { return a.parent === b.parent ? 1 : 1.6; });
 
     root = d3.hierarchy(data);
     root.x0 = 0;
@@ -188,16 +217,6 @@
         return 'translate(' + source.y0 + ',' + source.x0 + ')';
       })
       .on('click', function (event, d) {
-        if (event.shiftKey) {
-          if (selectedKeywords.has(d.data.name)) {
-            selectedKeywords.delete(d.data.name);
-          } else {
-            selectedKeywords.add(d.data.name);
-          }
-          updateSelectedUI();
-          d3.select(this).classed('is-selected', selectedKeywords.has(d.data.name));
-          return;
-        }
         if (d.children) {
           d._children = d.children;
           d.children = null;
@@ -206,6 +225,7 @@
           d._children = null;
         }
         update(d);
+        showNodeDetails(d);
       });
 
     nodeEnter.append('circle')
@@ -347,27 +367,80 @@
     }
   }
 
-  function updateSelectedUI() {
-    updateCounts();
-    if (!selectedListEl) return;
-    if (selectedKeywords.size === 0) {
-      selectedListEl.innerHTML = '<p class="sidebar__placeholder">Shift+Click nodes to select keywords.</p>';
-      return;
+  var groupLabels = {
+    0: 'Root',
+    1: 'Primary',
+    2: 'Connected',
+    3: 'Secondary',
+    4: 'Tertiary'
+  };
+
+  function showNodeDetails(d) {
+    if (!drawerTitleEl || !drawerBodyEl) return;
+
+    var name = d.data.name;
+    var realId = (name === 'Louis Vuitton') ? 'LVMH' : name;
+    drawerTitleEl.textContent = name;
+
+    var allChildren = d.children || d._children || [];
+    var childNames = allChildren.map(function (c) { return c.data.name; });
+
+    var nodes = window.kwGetNodes ? window.kwGetNodes() : [];
+    var getConnected = window.kwGetConnected;
+    var articlesHTML = window.kwGetArticlesHTML ? window.kwGetArticlesHTML(realId) : '';
+
+    var nodeObj = nodes.find(function (n) { return n.id === realId; });
+    var value = nodeObj ? nodeObj.value : (d.data.value || 0);
+    var group = nodeObj ? nodeObj.group : (d.data.group || 0);
+
+    var connCount = 0;
+    var connNames = [];
+    if (getConnected && nodeObj) {
+      var connIds = getConnected(nodeObj);
+      connNames = nodes.filter(function (n) { return connIds.has(n.id) && n.id !== realId; }).map(function (n) { return n.id; });
+      connCount = connNames.length;
     }
+
     var html = '';
-    selectedKeywords.forEach(function (kw) {
-      html += '<div class="kw-tree-selected-item"><span>' + kw + '</span><button class="kw-tree-selected-remove" data-id="' + kw + '">&times;</button></div>';
-    });
-    selectedListEl.innerHTML = html;
-    selectedListEl.querySelectorAll('.kw-tree-selected-remove').forEach(function (btn) {
-      btn.addEventListener('click', function () {
-        selectedKeywords.delete(btn.dataset.id);
-        updateSelectedUI();
-        treeG.selectAll('g.node').classed('is-selected', function (d) {
-          return selectedKeywords.has(d.data.name);
-        });
+
+    html += '<div class="sidebar-content">';
+    html += '<div class="sidebar-stats">';
+    html += '<div class="sidebar-stat"><span class="sidebar-stat-value">' + value + '</span><span class="sidebar-stat-label">Volume</span></div>';
+    html += '<div class="sidebar-stat"><span class="sidebar-stat-value">' + connCount + '</span><span class="sidebar-stat-label">Connections</span></div>';
+    html += '<div class="sidebar-stat"><span class="sidebar-stat-value">' + (groupLabels[group] || 'Other') + '</span><span class="sidebar-stat-label">Group</span></div>';
+    html += '</div>';
+
+    if (childNames.length > 0) {
+      html += '<div class="sidebar-section">';
+      html += '<div class="sidebar-section-label">Nested Keywords (' + childNames.length + ')</div>';
+      html += '<div class="sidebar-chips">';
+      childNames.forEach(function (cn) {
+        html += '<span class="sidebar-chip">' + cn + '</span>';
       });
-    });
+      html += '</div>';
+      html += '</div>';
+    }
+
+    if (connNames.length > 0) {
+      html += '<div class="sidebar-section">';
+      html += '<div class="sidebar-section-label">All Connections</div>';
+      html += '<div class="sidebar-chips">';
+      connNames.forEach(function (cn) {
+        html += '<span class="sidebar-chip">' + cn + '</span>';
+      });
+      html += '</div>';
+      html += '</div>';
+    }
+
+    if (articlesHTML) {
+      html += '<div class="sidebar-section">';
+      html += '<div class="sidebar-section-label">Related Articles</div>';
+      html += '<div class="sidebar-articles">' + articlesHTML + '</div>';
+      html += '</div>';
+    }
+
+    html += '</div>';
+    drawerBodyEl.innerHTML = html;
   }
 
   // Search: expand to matches
@@ -426,8 +499,9 @@
   });
   if (clearSelectionBtn) clearSelectionBtn.addEventListener('click', function () {
     selectedKeywords.clear();
-    updateSelectedUI();
     if (treeG) treeG.selectAll('g.node').classed('is-selected', false);
+    if (drawerTitleEl) drawerTitleEl.textContent = 'Select a Keyword';
+    if (drawerBodyEl) drawerBodyEl.innerHTML = '<p class="sidebar__placeholder">Click on a node in the tree to see its details.</p>';
   });
   if (searchInput) searchInput.addEventListener('input', function () {
     searchTree(searchInput.value.trim());
@@ -444,4 +518,12 @@
       }
     }
   };
+
+  window.addEventListener('kw-data-updated', function () {
+    initialized = false;
+    var tab = document.getElementById('kw-tree-tab');
+    if (tab && tab.style.display !== 'none') {
+      setTimeout(initTree, 50);
+    }
+  });
 })();

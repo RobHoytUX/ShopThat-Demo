@@ -356,6 +356,19 @@
   color: #fff;
 }
 
+.tab-btn:disabled {
+  background: #f3f4f6;
+  border-color: #e5e7eb;
+  color: #9ca3af;
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
+.tab-btn:disabled:hover {
+  background: #f3f4f6;
+  border-color: #e5e7eb;
+}
+
 .card__content {
   flex: 1;
   min-height: 0;
@@ -2425,6 +2438,18 @@ svg#bubbleGraph { width: 100%; flex: 1; display: block; padding-top: 60px; min-h
   background: #605efb;
   border-color: #605efb;
   color: #fff;
+}
+
+.dark-mode .tab-btn:disabled {
+  background: #1f2937;
+  border-color: #374151;
+  color: #6b7280;
+  opacity: 0.6;
+}
+
+.dark-mode .tab-btn:disabled:hover {
+  background: #1f2937;
+  border-color: #374151;
 }
 
 .dark-mode .articles-list {

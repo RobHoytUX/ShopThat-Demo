@@ -681,6 +681,223 @@ console.log('Document ready state:', document.readyState);
     if (window.ShopThatData) return window.ShopThatData.getConnections();
     try { return JSON.parse(localStorage.getItem('st_connections_v1')||'[]'); } catch { return []; }
   }
+
+  const AI_GRAPH_CACHE_KEY = 'st_ai_keywords_graph_v2';
+  const AI_GRAPH_CACHE_MAX_AGE_MS = 1000 * 60 * 60 * 6;
+  const AI_GRAPH_QUERY =
+    'You are a luxury intelligence analyst. Using available backend article context and ecommerce product catalogs, generate keywords for a knowledge graph. Respond ONLY in markdown with these exact headings: "### LVMH", "### Soho", "### 57th St." Under each heading provide exactly 8 short keyword phrases (2-5 words), one per bullet, with no explanations.';
+
+  function normalizeKeywordLabel(label) {
+    return String(label || '')
+      .replace(/\*\*/g, '')
+      .replace(/`/g, '')
+      .replace(/\[(.*?)\]\((.*?)\)/g, '$1')
+      .replace(/^["'`]+|["'`]+$/g, '')
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+
+  function parseAiKeywordSections(answer) {
+    const sections = { LVMH: [], Soho: [], '57th St.': [] };
+    const seen = { LVMH: new Set(), Soho: new Set(), '57th St.': new Set() };
+    let current = 'LVMH';
+    const lines = String(answer || '').split(/\r?\n/);
+
+    lines.forEach((line) => {
+      const raw = line.trim();
+      if (!raw) return;
+
+      if (/^#{1,6}\s*lvmh\b/i.test(raw) || /^lvmh\b[:\-]/i.test(raw)) {
+        current = 'LVMH';
+        return;
+      }
+      if (/^#{1,6}\s*soho\b/i.test(raw) || /^soho\b[:\-]/i.test(raw)) {
+        current = 'Soho';
+        return;
+      }
+      if (/^#{1,6}\s*57(th)?\s*(st|street)\b/i.test(raw) || /^57(th)?\s*(st|street)\b[:\-]/i.test(raw)) {
+        current = '57th St.';
+        return;
+      }
+
+      const bullet = normalizeKeywordLabel(raw.replace(/^[-*•]\s*/, '').replace(/^\d+[.)]\s*/, ''));
+      if (!bullet || /^#{1,6}\s/.test(bullet)) return;
+
+      const key = bullet.toLowerCase();
+      if (!seen[current].has(key)) {
+        seen[current].add(key);
+        sections[current].push(bullet);
+      }
+    });
+
+    if (sections.LVMH.length === 0 && window.LuxuryIntelligence && window.LuxuryIntelligence.extractKeywordPhrases) {
+      const fallback = window.LuxuryIntelligence.extractKeywordPhrases(answer, 12);
+      fallback.forEach((k, idx) => {
+        if (idx < 4) sections.LVMH.push(k);
+        else if (idx < 8) sections.Soho.push(k);
+        else sections['57th St.'].push(k);
+      });
+    }
+
+    sections.LVMH = sections.LVMH.slice(0, 8);
+    sections.Soho = sections.Soho.slice(0, 8);
+    sections['57th St.'] = sections['57th St.'].slice(0, 8);
+    return sections;
+  }
+
+  function groupForIndex(idx) {
+    if (idx < 3) return 1;
+    if (idx < 5) return 2;
+    if (idx < 7) return 3;
+    return 4;
+  }
+
+  function valueForIndex(idx) {
+    return Math.max(42, 88 - (idx * 6));
+  }
+
+  function buildAiGraphFromSections(sections) {
+    const nodeMap = new Map();
+    const linkMap = new Set();
+
+    function addNode(node) {
+      if (!node || !node.id) return;
+      const existing = nodeMap.get(node.id);
+      if (!existing) {
+        nodeMap.set(node.id, { ...node });
+        return;
+      }
+      existing.value = Math.max(existing.value || 0, node.value || 0);
+      existing.group = Math.min(existing.group || 4, node.group || 4);
+      existing.isArea = existing.isArea || !!node.isArea;
+      existing.isRoot = existing.isRoot || !!node.isRoot;
+    }
+
+    function addLink(source, target) {
+      if (!source || !target || source === target) return;
+      const a = String(source);
+      const b = String(target);
+      const key = a < b ? a + '|' + b : b + '|' + a;
+      if (linkMap.has(key)) return;
+      linkMap.add(key);
+    }
+
+    addNode({ id: 'LVMH', group: 0, value: 100, isRoot: true });
+    addNode({ id: 'Soho', group: 1, value: 90, isArea: true });
+    addNode({ id: '57th St.', group: 1, value: 90, isArea: true });
+    addLink('LVMH', 'Soho');
+    addLink('LVMH', '57th St.');
+
+    const lvmhKeywords = sections.LVMH || [];
+    const lvmhSoho = [];
+    const lvmh57 = [];
+    lvmhKeywords.forEach((label, idx) => {
+      if (idx % 2 === 0) lvmhSoho.push(label);
+      else lvmh57.push(label);
+    });
+
+    const areaDefs = [
+      { area: 'Soho', keywords: lvmhSoho.concat(sections.Soho || []) },
+      { area: '57th St.', keywords: lvmh57.concat(sections['57th St.'] || []) }
+    ];
+
+    areaDefs.forEach((entry) => {
+      entry.keywords.forEach((label, idx) => {
+        addNode({ id: label, group: groupForIndex(idx), value: valueForIndex(idx) });
+        addLink(entry.area, label);
+        if (idx > 0) addLink(entry.keywords[idx - 1], label);
+      });
+    });
+
+    const nodes = Array.from(nodeMap.values());
+    const links = Array.from(linkMap).map((key) => {
+      const parts = key.split('|');
+      return { source: parts[0], target: parts[1] };
+    });
+    return { nodes, links };
+  }
+
+  function cacheAiGraph(graph) {
+    try {
+      localStorage.setItem(AI_GRAPH_CACHE_KEY, JSON.stringify({
+        at: Date.now(),
+        nodes: graph.nodes,
+        links: graph.links
+      }));
+    } catch (e) {
+      console.warn('Failed to cache AI keyword graph', e);
+    }
+  }
+
+  function loadCachedAiGraph() {
+    try {
+      const raw = localStorage.getItem(AI_GRAPH_CACHE_KEY);
+      if (!raw) return null;
+      const parsed = JSON.parse(raw);
+      if (!parsed || !parsed.at || !Array.isArray(parsed.nodes) || !Array.isArray(parsed.links)) return null;
+      if ((Date.now() - parsed.at) > AI_GRAPH_CACHE_MAX_AGE_MS) return null;
+      return { nodes: parsed.nodes, links: parsed.links };
+    } catch {
+      return null;
+    }
+  }
+
+  function applyAiGraphToSharedData(graph) {
+    if (!graph || !Array.isArray(graph.nodes) || !Array.isArray(graph.links) || graph.nodes.length === 0) return false;
+    if (!window.ShopThatData) return false;
+
+    const now = new Date().toISOString();
+    const keywords = graph.nodes.map((node) => ({
+      id: node.id,
+      name: node.id,
+      value: node.value || 50,
+      group: node.group || 1,
+      isArea: !!node.isArea,
+      isRoot: !!node.isRoot,
+      uses: 0,
+      cost: 0,
+      totalCost: 0,
+      lastUsed: null,
+      created: now
+    }));
+
+    window.ShopThatData.saveKeywords(keywords);
+    window.ShopThatData.saveConnections(graph.links.slice());
+    return true;
+  }
+
+  async function bootstrapAiKeywordGraph() {
+    if (!window.ShopThatData || !window.LuxuryIntelligence || typeof window.LuxuryIntelligence.ask !== 'function') return;
+    if (window.__kwAiGraphLoading) return;
+    window.__kwAiGraphLoading = true;
+
+    try {
+      const cachedGraph = loadCachedAiGraph();
+      if (cachedGraph) {
+        applyAiGraphToSharedData(cachedGraph);
+        window.dispatchEvent(new CustomEvent('kw-data-updated'));
+        return;
+      }
+
+      const intel = await window.LuxuryIntelligence.ask(AI_GRAPH_QUERY);
+      const sections = parseAiKeywordSections(intel && intel.answer);
+      const totalKeywords = sections.LVMH.length + sections.Soho.length + sections['57th St.'].length;
+      if (totalKeywords < 9) {
+        console.warn('AI keyword response too small; using existing keyword graph');
+        return;
+      }
+
+      const graph = buildAiGraphFromSections(sections);
+      if (applyAiGraphToSharedData(graph)) {
+        cacheAiGraph(graph);
+        window.dispatchEvent(new CustomEvent('kw-data-updated'));
+      }
+    } catch (e) {
+      console.warn('AI keyword graph bootstrap failed', e);
+    } finally {
+      window.__kwAiGraphLoading = false;
+    }
+  }
   
   // Initialize with default data first, then try to load from storage
   let initialNodes = defaultNodes.slice();
@@ -2915,8 +3132,56 @@ console.log('Document ready state:', document.readyState);
       }
     });
 
+    function escapeHtml(s) {
+      return String(s)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    function renderAiAnswer(container, payload) {
+      const answer = payload && payload.answer ? payload.answer : 'No response available.';
+      if (window.LuxuryIntelligence && window.LuxuryIntelligence.markdownToHtml) {
+        container.innerHTML = window.LuxuryIntelligence.markdownToHtml(answer);
+      } else {
+        container.innerHTML = '<p>' + escapeHtml(answer) + '</p>';
+      }
+
+      if (payload && payload.domain) {
+        const domainEl = document.createElement('div');
+        domainEl.className = 'ai-message-domain';
+        domainEl.style.marginTop = '8px';
+        domainEl.style.opacity = '0.75';
+        domainEl.style.fontSize = '12px';
+        domainEl.textContent = 'Domain: ' + payload.domain;
+        container.appendChild(domainEl);
+      }
+
+      if (payload && Array.isArray(payload.images) && payload.images.length) {
+        const imageWrap = document.createElement('div');
+        imageWrap.className = 'ai-message-images';
+        imageWrap.style.display = 'grid';
+        imageWrap.style.gridTemplateColumns = 'repeat(3, minmax(0, 1fr))';
+        imageWrap.style.gap = '8px';
+        imageWrap.style.marginTop = '10px';
+        payload.images.slice(0, 3).forEach((url) => {
+          const img = document.createElement('img');
+          img.src = url;
+          img.alt = 'Luxury intelligence result';
+          img.loading = 'lazy';
+          img.style.width = '100%';
+          img.style.height = '84px';
+          img.style.objectFit = 'cover';
+          img.style.borderRadius = '8px';
+          imageWrap.appendChild(img);
+        });
+        container.appendChild(imageWrap);
+      }
+    }
+
     // Send message functionality
-    function sendMessage() {
+    async function sendMessage() {
       const message = aiInput.value.trim();
       if (!message) return;
 
@@ -2933,61 +3198,39 @@ console.log('Document ready state:', document.readyState);
       // Clear input
       aiInput.value = '';
 
-      // Scroll to bottom
+      const thinkingMsg = document.createElement('div');
+      thinkingMsg.className = 'ai-message ai';
+      thinkingMsg.textContent = 'Thinking...';
+      aiMessages.appendChild(thinkingMsg);
       aiMessages.scrollTop = aiMessages.scrollHeight;
 
-      // Simulate AI response
-      setTimeout(() => {
+      aiSendBtn.disabled = true;
+
+      try {
+        let payload = null;
+        if (window.LuxuryIntelligence && typeof window.LuxuryIntelligence.ask === 'function') {
+          payload = await window.LuxuryIntelligence.ask(message);
+        } else {
+          payload = { answer: 'Luxury Intelligence client is not available on this page yet.', images: [] };
+        }
+
+        thinkingMsg.remove();
+
         const aiResponse = document.createElement('div');
         aiResponse.className = 'ai-message ai';
-        aiResponse.textContent = generateAIResponse(message);
+        renderAiAnswer(aiResponse, payload);
         aiMessages.appendChild(aiResponse);
+      } catch (error) {
+        thinkingMsg.remove();
+        const failMsg = document.createElement('div');
+        failMsg.className = 'ai-message ai';
+        failMsg.textContent = 'Sorry, the AI request failed. Please try again.';
+        aiMessages.appendChild(failMsg);
+        console.error('Keywords AI panel error:', error);
+      } finally {
+        aiSendBtn.disabled = false;
         aiMessages.scrollTop = aiMessages.scrollHeight;
-      }, 800);
-    }
-
-    // Generate AI response based on query
-    function generateAIResponse(query) {
-      const lowerQuery = query.toLowerCase();
-      
-      // Get current keyword data
-      const keywords = window.ShopThatData ? window.ShopThatData.getKeywords() : [];
-      const connections = window.ShopThatData ? window.ShopThatData.getConnections() : [];
-
-      if (lowerQuery.includes('how many') && lowerQuery.includes('keyword')) {
-        return `There are currently ${keywords.length} keywords in the knowledge graph. The graph also has ${connections.length} connections between them.`;
       }
-      
-      if (lowerQuery.includes('most connected') || lowerQuery.includes('top keyword')) {
-        // Count connections per keyword
-        const connectionCounts = {};
-        connections.forEach(conn => {
-          connectionCounts[conn.source] = (connectionCounts[conn.source] || 0) + 1;
-          connectionCounts[conn.target] = (connectionCounts[conn.target] || 0) + 1;
-        });
-        
-        const sorted = Object.entries(connectionCounts).sort((a, b) => b[1] - a[1]);
-        if (sorted.length > 0) {
-          const top3 = sorted.slice(0, 3).map(([name, count]) => `${name} (${count} connections)`).join(', ');
-          return `The most connected keywords are: ${top3}. These keywords serve as hubs in your knowledge graph.`;
-        }
-        return 'No connection data available yet. Try adding some keyword connections.';
-      }
-
-      if (lowerQuery.includes('kusama') || lowerQuery.includes('yayoi')) {
-        return 'Yayoi Kusama is a central keyword in the knowledge graph, connecting to many product and artistic concepts. Her collaboration with Louis Vuitton is a key topic, featuring polka dots, monogram patterns, and various product lines.';
-      }
-
-      if (lowerQuery.includes('connection') || lowerQuery.includes('link')) {
-        return `The knowledge graph currently has ${connections.length} connections. Connections represent relationships between keywords - for example, "Yayoi Kusama" might be connected to "Polka Dots" and "Monogram" patterns.`;
-      }
-
-      if (lowerQuery.includes('help') || lowerQuery.includes('what can')) {
-        return 'I can help you understand the keyword knowledge graph! Ask me about:\n• How many keywords exist\n• The most connected keywords\n• Connections between concepts\n• Specific keywords like "Kusama" or "Murakami"';
-      }
-
-      // Default response
-      return `I understand you're asking about "${query}". The knowledge graph contains ${keywords.length} keywords organized into a hierarchical structure. You can click on any keyword node to see its details and connections.`;
     }
 
     aiSendBtn.addEventListener('click', sendMessage);
@@ -2998,7 +3241,10 @@ console.log('Document ready state:', document.readyState);
 
   // Initialize dark mode
   initDarkMode();
-  
+
+  // Bootstrap graph keywords from Luxury Intelligence API
+  setTimeout(bootstrapAiKeywordGraph, 180);
+
   // Initialize AI Side Panel
   initAISidePanel();
 })();

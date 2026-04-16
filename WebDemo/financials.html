@@ -381,7 +381,14 @@
 
             <!-- Advanced Settings -->
             <div class="calc-section">
-              <h3 class="advanced-toggle" id="advancedToggle">Advanced Settings <span class="toggle-arrow">▸</span></h3>
+              <h3 class="advanced-toggle" id="advancedToggle">
+                <span class="advanced-toggle__title">Advanced Settings</span>
+                <span class="toggle-arrow" aria-hidden="true">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="9 18 15 12 9 6"></polyline>
+                  </svg>
+                </span>
+              </h3>
               <div id="advancedBody" style="display:none;">
                 <div class="param-group">
                   <label>Cashback Tier Override <span class="tooltip" title="Auto-selects based on avg. transaction size. Override here to model a specific tier.">?</span></label>
@@ -976,9 +983,32 @@
       .dark-mode .param-hint { color: #6a6a8a; }
 
       /* Advanced toggle */
-      .advanced-toggle { cursor: pointer; user-select: none; }
+      .advanced-toggle {
+        cursor: pointer;
+        user-select: none;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        width: 100%;
+      }
       .advanced-toggle:hover { color: #6366f1; }
-      .toggle-arrow { font-size: 12px; transition: transform 0.2s; display: inline-block; }
+      .advanced-toggle:hover .toggle-arrow { color: #6366f1; }
+      .advanced-toggle__title { flex: 1; min-width: 0; }
+      .toggle-arrow {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        color: #6b7280;
+        transition: transform 0.2s ease;
+      }
+      .dark-mode .toggle-arrow { color: #9ca3af; }
+      .toggle-arrow svg {
+        display: block;
+        width: 28px;
+        height: 28px;
+      }
       .toggle-arrow.open { transform: rotate(90deg); }
 
       /* Benchmark checkboxes */

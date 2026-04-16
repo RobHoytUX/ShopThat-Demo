@@ -251,4 +251,12 @@
       }
     }
   };
+
+  window.addEventListener('kw-data-updated', function () {
+    initialized = false;
+    var tab = document.getElementById('kw-scatter-tab');
+    if (tab && tab.style.display !== 'none') {
+      setTimeout(initScatter, 50);
+    }
+  });
 })();

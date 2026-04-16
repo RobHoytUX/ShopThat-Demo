@@ -284,4 +284,12 @@
       }
     }
   };
+
+  window.addEventListener('kw-data-updated', function () {
+    initialized = false;
+    var tab = document.getElementById('kw-sankey-tab');
+    if (tab && tab.style.display !== 'none') {
+      setTimeout(initSankey, 50);
+    }
+  });
 })();
