@@ -217,14 +217,11 @@
         return 'translate(' + source.y0 + ',' + source.x0 + ')';
       })
       .on('click', function (event, d) {
-        if (d.children) {
-          d._children = d.children;
-          d.children = null;
-        } else if (d._children) {
+        if (d._children) {
           d.children = d._children;
           d._children = null;
+          update(d);
         }
-        update(d);
         showNodeDetails(d);
       });
 
