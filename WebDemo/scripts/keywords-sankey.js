@@ -7,21 +7,27 @@
   var initialized = false;
 
   var groupColorMap = {
-    0: '#1e3a8a', 1: '#6366f1', 2: '#8b5cf6', 3: '#f59e0b', 4: '#10b981'
+    0: '#1e3a8a',
+    1: '#6366f1',
+    2: '#8b5cf6',
+    3: '#f59e0b',
+    4: '#10b981'
   };
+
   var groupLabels = {
-    0: 'Root', 1: 'Primary', 2: 'Connected', 3: 'Secondary', 4: 'Tertiary'
+    0: 'Root',
+    1: 'Primary',
+    2: 'Connected',
+    3: 'Secondary',
+    4: 'Tertiary'
   };
 
-  var fullTree = null;
-  var expandedIds = new Set();
-  var svg, gContainer, zoomBehavior;
-
-  function buildTree() {
+  function buildSankeyData() {
     var nodes = window.kwGetNodes ? window.kwGetNodes() : [];
     var links = window.kwGetLinks ? window.kwGetLinks() : [];
     if (nodes.length === 0) return null;
 
+    // Build adjacency from links
     var childMap = {};
     links.forEach(function (link) {
       var src = typeof link.source === 'object' ? link.source.id : link.source;
@@ -30,80 +36,75 @@
       childMap[src].push(tgt);
     });
 
+    // Build tree to get parent-child relationships (no cycles)
     var claimed = new Set();
+    var sankeyLinks = [];
+
     function walk(id, depth) {
-      if (claimed.has(id) || depth > 5) return null;
+      if (claimed.has(id) || depth > 4) return;
       claimed.add(id);
-      var node = nodes.find(function (n) { return n.id === id; });
-      var kids = (childMap[id] || []).map(function (cid) { return walk(cid, depth + 1); }).filter(Boolean);
-      return { id: id, group: node ? node.group : 4, value: node ? node.value : 50, children: kids };
+      var kids = childMap[id] || [];
+      kids.forEach(function (cid) {
+        if (!claimed.has(cid)) {
+          var childNode = nodes.find(function (n) { return n.id === cid; });
+          sankeyLinks.push({
+            source: id,
+            target: cid,
+            value: childNode ? Math.max(childNode.value / 10, 3) : 5
+          });
+          walk(cid, depth + 1);
+        }
+      });
     }
 
-    return walk('LVMH', 0);
+    walk('LVMH', 0);
+
+    // Collect used node ids
+    var usedIds = new Set();
+    sankeyLinks.forEach(function (l) {
+      usedIds.add(l.source);
+      usedIds.add(l.target);
+    });
+
+    var sankeyNodes = [];
+    usedIds.forEach(function (id) {
+      var n = nodes.find(function (nd) { return nd.id === id; });
+      sankeyNodes.push({ id: id, group: n ? n.group : 4 });
+    });
+
+    return { nodes: sankeyNodes, links: sankeyLinks };
   }
 
-  function findNode(node, id) {
-    if (!node) return null;
-    if (node.id === id) return node;
-    for (var i = 0; node.children && i < node.children.length; i++) {
-      var f = findNode(node.children[i], id);
-      if (f) return f;
-    }
-    return null;
-  }
+  function initSankey() {
+    if (!containerEl) return;
+    containerEl.innerHTML = '';
 
-  function hasChildren(id) {
-    var n = findNode(fullTree, id);
-    return n && n.children && n.children.length > 0;
-  }
-
-  function getVisibleData() {
-    if (!fullTree) return { nodes: [], links: [] };
-    var sNodes = [];
-    var sLinks = [];
-    var seen = new Set();
-
-    function collect(node) {
-      if (!node || seen.has(node.id)) return;
-      seen.add(node.id);
-      sNodes.push({ id: node.id, group: node.group });
-
-      if (expandedIds.has(node.id) && node.children) {
-        node.children.forEach(function (child) {
-          if (!seen.has(child.id)) {
-            sLinks.push({ source: node.id, target: child.id, value: 1 });
-          }
-          collect(child);
-        });
-      }
+    var data = buildSankeyData();
+    if (!data || data.nodes.length === 0) {
+      containerEl.innerHTML = '<p style="color:#6b7280;padding:2rem;">No keyword data available.</p>';
+      return;
     }
 
-    collect(fullTree);
-    return { nodes: sNodes, links: sLinks };
-  }
-
-  function render() {
-    if (!containerEl || !fullTree) return;
-    if (gContainer) gContainer.remove();
-
-    var data = getVisibleData();
     var rect = containerEl.getBoundingClientRect();
     var width = rect.width || 900;
-    var height = Math.max(rect.height || 500, data.nodes.length * 28, 300);
-    var margin = { top: 16, right: 180, bottom: 16, left: 16 };
+    var height = Math.max(rect.height || 700, data.nodes.length * 6);
+    var margin = { top: 16, right: 160, bottom: 16, left: 16 };
+
+    var svg = d3.select(containerEl).append('svg')
+      .attr('width', width)
+      .attr('height', height);
+
+    var g = svg.append('g')
+      .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
+
     var innerW = width - margin.left - margin.right;
     var innerH = height - margin.top - margin.bottom;
 
-    svg.attr('width', width).attr('height', height);
-    gContainer = svg.append('g');
-    var g = gContainer.append('g').attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
-
-    if (data.nodes.length === 0) return;
-
+    // Node index map
     var nodeIndex = {};
     data.nodes.forEach(function (n, i) { nodeIndex[n.id] = i; });
 
-    var input = {
+    var sankeyData = {
       nodes: data.nodes.map(function (n) { return { name: n.id, group: n.group }; }),
       links: data.links.map(function (l) {
         return { source: nodeIndex[l.source], target: nodeIndex[l.target], value: l.value };
@@ -118,137 +119,169 @@
       .extent([[0, 0], [innerW, innerH]]);
 
     var graph;
-    try { graph = sankey(input); } catch (e) { console.error('Sankey error:', e); return; }
+    try {
+      graph = sankey(sankeyData);
+    } catch (e) {
+      containerEl.innerHTML = '<p style="color:#6b7280;padding:2rem;">Could not generate Sankey layout.</p>';
+      console.error('Sankey error:', e);
+      return;
+    }
 
     // Links
-    var allLinks = g.append('g').selectAll('path')
-      .data(graph.links).enter().append('path')
+    var allLinks = g.append('g')
+      .selectAll('path')
+      .data(graph.links)
+      .enter().append('path')
       .attr('class', 'sankey-link')
       .attr('d', d3.sankeyLinkHorizontal())
       .attr('stroke-width', function (d) { return Math.max(1, d.width); })
-      .attr('stroke', function (d) { return groupColorMap[d.source.group] || '#6366f1'; })
-      .attr('stroke-opacity', 0).attr('fill', 'none');
+      .attr('stroke', function (d) {
+        return groupColorMap[d.source.group] || '#6366f1';
+      })
+      .attr('stroke-opacity', 0.25)
+      .attr('fill', 'none')
+      .on('mouseover', function (event, d) {
+        allLinks.attr('stroke-opacity', 0.06);
+        d3.select(this).attr('stroke-opacity', 0.8);
+        allNodeGroups.select('rect').attr('opacity', 0.15);
+        allNodeGroups.select('text').attr('opacity', 0.2);
+        allNodeGroups.filter(function (n) { return n.index === d.source.index || n.index === d.target.index; })
+          .select('rect').attr('opacity', 1);
+        allNodeGroups.filter(function (n) { return n.index === d.source.index || n.index === d.target.index; })
+          .select('text').attr('opacity', 1);
+      })
+      .on('mouseout', function () {
+        allLinks.attr('stroke-opacity', 0.25);
+        allNodeGroups.select('rect').attr('opacity', 0.85);
+        allNodeGroups.select('text').attr('opacity', 1);
+      })
+      .on('click', function (event, d) {
+        showFlowDetails(d);
+      });
 
-    allLinks.transition().duration(400).attr('stroke-opacity', 0.25);
+    function getConnectedLinkIndices(nodeIndex) {
+      var set = new Set();
+      graph.links.forEach(function (l, i) {
+        if (l.source.index === nodeIndex || l.target.index === nodeIndex) set.add(i);
+      });
+      return set;
+    }
+
+    function getConnectedNodeIndices(nodeIndex) {
+      var set = new Set();
+      set.add(nodeIndex);
+      graph.links.forEach(function (l) {
+        if (l.source.index === nodeIndex) set.add(l.target.index);
+        if (l.target.index === nodeIndex) set.add(l.source.index);
+      });
+      return set;
+    }
 
     // Nodes
-    var allNodeGs = g.append('g').selectAll('g')
-      .data(graph.nodes).enter().append('g')
+    var allNodeGroups = g.append('g')
+      .selectAll('g')
+      .data(graph.nodes)
+      .enter().append('g')
       .attr('class', 'sankey-node')
-      .style('cursor', function (d) { return hasChildren(d.name) && !expandedIds.has(d.name) ? 'pointer' : 'default'; });
+      .style('cursor', 'pointer')
+      .on('mouseover', function (event, d) {
+        var connLinks = getConnectedLinkIndices(d.index);
+        var connNodes = getConnectedNodeIndices(d.index);
 
-    allNodeGs.append('rect')
+        allLinks.attr('stroke-opacity', function (l, i) {
+          return connLinks.has(i) ? 0.7 : 0.04;
+        });
+        allNodeGroups.select('rect').attr('opacity', function (n) {
+          return connNodes.has(n.index) ? 1 : 0.15;
+        });
+        allNodeGroups.select('text').attr('opacity', function (n) {
+          return connNodes.has(n.index) ? 1 : 0.2;
+        });
+      })
+      .on('mouseout', function () {
+        allLinks.attr('stroke-opacity', 0.25);
+        allNodeGroups.select('rect').attr('opacity', 0.85);
+        allNodeGroups.select('text').attr('opacity', 1);
+      })
+      .on('click', function (event, d) {
+        showNodeDetails(d, data.nodes);
+      });
+
+    allNodeGroups.append('rect')
       .attr('x', function (d) { return d.x0; })
       .attr('y', function (d) { return d.y0; })
       .attr('height', function (d) { return Math.max(d.y1 - d.y0, 2); })
       .attr('width', sankey.nodeWidth())
       .attr('fill', function (d) { return groupColorMap[d.group] || '#6366f1'; })
-      .attr('rx', 3).attr('opacity', 0)
-      .transition().duration(400).attr('opacity', 0.85);
+      .attr('rx', 3)
+      .attr('opacity', 0.85);
 
-    allNodeGs.append('text')
+    allNodeGroups.append('text')
       .attr('x', function (d) { return d.x1 + 6; })
       .attr('y', function (d) { return (d.y0 + d.y1) / 2; })
-      .attr('dy', '0.35em').attr('text-anchor', 'start')
+      .attr('dy', '0.35em')
+      .attr('text-anchor', 'start')
       .attr('class', 'sankey-label')
-      .text(function (d) {
-        var expandable = hasChildren(d.name) && !expandedIds.has(d.name);
-        return d.name + (expandable ? ' ▸' : '');
-      })
-      .attr('opacity', 0).transition().duration(400).attr('opacity', 1);
+      .text(function (d) { return d.name; });
 
-    // Hover
-    function connLinkIdx(idx) {
-      var s = new Set();
-      graph.links.forEach(function (l, i) { if (l.source.index === idx || l.target.index === idx) s.add(i); });
-      return s;
-    }
-    function connNodeIdx(idx) {
-      var s = new Set(); s.add(idx);
-      graph.links.forEach(function (l) {
-        if (l.source.index === idx) s.add(l.target.index);
-        if (l.target.index === idx) s.add(l.source.index);
+    // Zoom/pan
+    var zoom = d3.zoom()
+      .scaleExtent([0.3, 4])
+      .on('zoom', function (event) {
+        g.attr('transform', event.transform);
       });
-      return s;
-    }
 
-    allNodeGs.on('mouseover', function (ev, d) {
-      var cl = connLinkIdx(d.index), cn = connNodeIdx(d.index);
-      allLinks.attr('stroke-opacity', function (l, i) { return cl.has(i) ? 0.7 : 0.04; });
-      allNodeGs.select('rect').attr('opacity', function (n) { return cn.has(n.index) ? 1 : 0.15; });
-      allNodeGs.select('text').attr('opacity', function (n) { return cn.has(n.index) ? 1 : 0.2; });
-    }).on('mouseout', function () {
-      allLinks.attr('stroke-opacity', 0.25);
-      allNodeGs.select('rect').attr('opacity', 0.85);
-      allNodeGs.select('text').attr('opacity', 1);
-    }).on('click', function (ev, d) {
-      if (hasChildren(d.name) && !expandedIds.has(d.name)) {
-        expandedIds.add(d.name);
-        render();
-      }
-      showNodeDetails(d);
-    });
+    svg.call(zoom);
 
-    allLinks.on('mouseover', function (ev, d) {
-      allLinks.attr('stroke-opacity', 0.06);
-      d3.select(this).attr('stroke-opacity', 0.8);
-      allNodeGs.select('rect').attr('opacity', 0.15);
-      allNodeGs.select('text').attr('opacity', 0.2);
-      [d.source.index, d.target.index].forEach(function (idx) {
-        allNodeGs.filter(function (n) { return n.index === idx; }).select('rect').attr('opacity', 1);
-        allNodeGs.filter(function (n) { return n.index === idx; }).select('text').attr('opacity', 1);
-      });
-    }).on('mouseout', function () {
-      allLinks.attr('stroke-opacity', 0.25);
-      allNodeGs.select('rect').attr('opacity', 0.85);
-      allNodeGs.select('text').attr('opacity', 1);
-    }).on('click', function (ev, d) { showFlowDetails(d); });
-
-    if (zoomBehavior) svg.call(zoomBehavior);
+    initialized = true;
   }
 
-  function showNodeDetails(d) {
+  function showNodeDetails(d, allDataNodes) {
     if (drawerTitle) drawerTitle.textContent = d.name;
     if (!drawerBody) return;
-    var out = (d.sourceLinks || []).map(function (l) { return l.target.name; });
-    var inc = (d.targetLinks || []).map(function (l) { return l.source.name; });
-    var articles = window.kwGetArticlesHTML ? window.kwGetArticlesHTML(d.name) : '';
-    var expandable = hasChildren(d.name) && !expandedIds.has(d.name);
+
+    var sourceLinks = d.sourceLinks || [];
+    var targetLinks = d.targetLinks || [];
+    var outgoing = sourceLinks.map(function (l) { return l.target.name; });
+    var incoming = targetLinks.map(function (l) { return l.source.name; });
+
+    var articlesHTML = window.kwGetArticlesHTML ? window.kwGetArticlesHTML(d.name) : '';
+
     var html = '<div class="sidebar-stat"><span class="sidebar-stat-value">' + (groupLabels[d.group] || 'Other') + '</span><span class="sidebar-stat-label">group</span></div>';
-    html += '<div class="sidebar-stat"><span class="sidebar-stat-value">' + (out.length + inc.length) + '</span><span class="sidebar-stat-label">visible connections</span></div>';
-    if (expandable) html += '<p style="font-size:12px;color:#6b7280;margin:8px 0;">Click node to reveal connections</p>';
-    if (out.length) html += '<div class="sidebar-connections"><h3>Flows To</h3>' + out.map(function (n) { return '<span class="sidebar-connection-tag">' + n + '</span>'; }).join('') + '</div>';
-    if (inc.length) html += '<div class="sidebar-connections"><h3>Flows From</h3>' + inc.map(function (n) { return '<span class="sidebar-connection-tag">' + n + '</span>'; }).join('') + '</div>';
-    html += '<div class="sidebar-articles"><h3>Related Articles</h3>' + articles + '</div>';
+    html += '<div class="sidebar-stat"><span class="sidebar-stat-value">' + (outgoing.length + incoming.length) + '</span><span class="sidebar-stat-label">connections</span></div>';
+
+    if (outgoing.length > 0) {
+      html += '<div class="sidebar-connections"><h3>Flows To</h3>' + outgoing.map(function (n) { return '<span class="sidebar-connection-tag">' + n + '</span>'; }).join('') + '</div>';
+    }
+    if (incoming.length > 0) {
+      html += '<div class="sidebar-connections"><h3>Flows From</h3>' + incoming.map(function (n) { return '<span class="sidebar-connection-tag">' + n + '</span>'; }).join('') + '</div>';
+    }
+
+    html += '<div class="sidebar-articles"><h3>Related Articles</h3>' + articlesHTML + '</div>';
     drawerBody.innerHTML = html;
   }
 
   function showFlowDetails(d) {
     if (drawerTitle) drawerTitle.textContent = d.source.name + ' → ' + d.target.name;
     if (!drawerBody) return;
+
     drawerBody.innerHTML =
       '<div class="sidebar-stat"><span class="sidebar-stat-value">' + d.source.name + '</span><span class="sidebar-stat-label">source</span></div>' +
-      '<div class="sidebar-stat"><span class="sidebar-stat-value">' + d.target.name + '</span><span class="sidebar-stat-label">target</span></div>';
+      '<div class="sidebar-stat"><span class="sidebar-stat-value">' + d.target.name + '</span><span class="sidebar-stat-label">target</span></div>' +
+      '<div class="sidebar-stat"><span class="sidebar-stat-value">' + Math.round(d.value) + '</span><span class="sidebar-stat-label">flow weight</span></div>';
   }
 
   window.kwShowSankeyTab = function () {
     if (!initialized) {
-      setTimeout(function () {
-        fullTree = buildTree();
-        if (!fullTree) { containerEl.innerHTML = '<p style="color:#6b7280;padding:2rem;">No data.</p>'; return; }
-        expandedIds.clear();
-        expandedIds.add('LVMH');
-        containerEl.innerHTML = '';
-        var rect = containerEl.getBoundingClientRect();
-        svg = d3.select(containerEl).append('svg').attr('width', rect.width || 900).attr('height', rect.height || 500);
-        zoomBehavior = d3.zoom().scaleExtent([0.3, 4]).on('zoom', function (ev) { if (gContainer) gContainer.attr('transform', ev.transform); });
-        svg.call(zoomBehavior);
-        render();
-        initialized = true;
-      }, 50);
+      setTimeout(initSankey, 50);
     } else {
       var rect = containerEl.getBoundingClientRect();
-      if (rect.width > 0 && svg) svg.attr('width', rect.width);
+      if (rect.width > 0) {
+        var svg = containerEl.querySelector('svg');
+        if (svg) {
+          svg.setAttribute('width', rect.width);
+        }
+      }
     }
   };
 })();

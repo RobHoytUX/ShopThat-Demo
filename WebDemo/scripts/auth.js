@@ -3,7 +3,7 @@
 // Check if user is authenticated
 function checkAuth() {
   if (localStorage.getItem('shopThatLoggedIn') !== 'true') {
-    window.location.href = '/login.html';
+    window.location.href = 'login.html';
     return false;
   }
   return true;
@@ -13,7 +13,7 @@ function checkAuth() {
 function signOut() {
   localStorage.removeItem('shopThatLoggedIn');
   localStorage.removeItem('shopThatUser');
-  window.location.href = '/login.html';
+  window.location.href = 'login.html';
 }
 
 // Get current user

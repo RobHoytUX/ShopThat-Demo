@@ -510,6 +510,7 @@ html, body {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 24px;
+  margin-top: -40px;
 }
 
 .dashboard-product-card {
@@ -1069,6 +1070,62 @@ html, body {
   background: rgba(255, 255, 255, 0.7);
   color: #111;
   border-radius: 16px 16px 16px 4px;
+}
+
+.ai-chat-markdown {
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.ai-chat-markdown p {
+  margin: 0 0 8px;
+}
+
+.ai-chat-markdown p:last-child {
+  margin-bottom: 0;
+}
+
+.ai-chat-markdown ul,
+.ai-chat-markdown ol {
+  margin: 8px 0;
+  padding-left: 1.2em;
+}
+
+.ai-chat-markdown img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+}
+
+.ai-chat-markdown a {
+  color: #1a1a1a;
+  text-decoration: underline;
+}
+
+.ai-chat-domain {
+  font-size: 11px;
+  color: #666;
+  margin-top: 8px;
+  font-weight: 500;
+}
+
+.ai-chat-images {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+  flex-wrap: wrap;
+}
+
+.ai-chat-images img {
+  width: 72px;
+  height: 72px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.ai-chat-typing {
+  font-style: italic;
+  opacity: 0.85;
 }
 
 @keyframes messageSlide {

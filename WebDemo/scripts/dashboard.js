@@ -16,6 +16,47 @@
   const catSpend = [5,18,27,52];
 
   const STORAGE_KEY = 'st_keywords_v1';
+
+  /** Populated from Luxury Intelligence API (see loadDashboardKeywords) */
+  let dashboardIntelKeywordsRows = null;
+  let dashboardKeywordsLoadPromise = null;
+
+  const FALLBACK_INTEL_KEYWORDS = [
+    { name: 'Kusama', cost: 12000, engagement: 48 },
+    { name: 'Louis Vuitton', cost: 10000, engagement: 45 },
+    { name: 'David Zwirner', cost: 6000, engagement: 42 },
+    { name: 'Café Carlyle', cost: 3000, engagement: 38 },
+    { name: 'Infinity Dots', cost: 2500, engagement: 35 },
+    { name: 'Capucines', cost: 2000, engagement: 32 },
+    { name: 'Central Park', cost: 500, engagement: 28 }
+  ];
+
+  function loadDashboardKeywords(){
+    if (dashboardKeywordsLoadPromise) return dashboardKeywordsLoadPromise;
+    dashboardKeywordsLoadPromise = (async function(){
+      try {
+        if (window.LuxuryIntelligence) {
+          const data = await window.LuxuryIntelligence.ask(window.LuxuryIntelligence.DASHBOARD_KEYWORDS_QUERY);
+          const phrases = window.LuxuryIntelligence.extractKeywordPhrases(data.answer, 10);
+          if (phrases.length) {
+            dashboardIntelKeywordsRows = phrases.map(function(name, i){
+              return {
+                name: name,
+                cost: 12000 - i * 800,
+                engagement: Math.max(40, 48 - i * 2)
+              };
+            });
+            return;
+          }
+        }
+      } catch (e) {
+        console.warn('Dashboard keyword intelligence:', e);
+      }
+      dashboardIntelKeywordsRows = FALLBACK_INTEL_KEYWORDS.slice();
+    })();
+    return dashboardKeywordsLoadPromise;
+  }
+
   function loadStored(){
     // Use shared data system if available
     if (window.ShopThatData) {
@@ -39,29 +80,25 @@
     ['Three Michelin Stars', 1000, '$250.00']
   ];
 
-  function populateTopKeywords(filterTerm=''){
+  async function populateTopKeywords(filterTerm=''){
     const body = $('#top-keywords-body');
     if (!body) return;
     body.replaceChildren();
-    
-    // Kusama-focused keywords data with Cost values
-    const topKeywordsData = [
-      { name: 'Kusama', cost: 12000, engagement: 48 },
-      { name: 'Louis Vuitton', cost: 10000, engagement: 45 },
-      { name: 'David Zwirner', cost: 6000, engagement: 42 },
-      { name: 'Café Carlyle', cost: 3000, engagement: 38 },
-      { name: 'Infinity Dots', cost: 2500, engagement: 35 },
-      { name: 'Capucines', cost: 2000, engagement: 32 },
-      { name: 'Central Park', cost: 500, engagement: 28 }
-    ];
-    
-    // Filter keywords based on search term
-    const filteredKeywords = topKeywordsData
-      .filter(k => k.name.toLowerCase().includes(filterTerm.toLowerCase()))
-      .sort((a, b) => b.cost - a.cost) // Sort by cost descending
-      .slice(0, 10); // Show top 10
-    
-    // Populate table with keywords
+    const loadingTr = document.createElement('tr');
+    loadingTr.innerHTML = '<td colspan="3" style="text-align:center;color:#6b7280;">Loading keyword intelligence…</td>';
+    body.appendChild(loadingTr);
+    await loadDashboardKeywords();
+    loadingTr.remove();
+
+    const source = dashboardIntelKeywordsRows && dashboardIntelKeywordsRows.length
+      ? dashboardIntelKeywordsRows
+      : FALLBACK_INTEL_KEYWORDS;
+
+    const filteredKeywords = source
+      .filter(k => k.name.toLowerCase().includes((filterTerm || '').toLowerCase()))
+      .sort((a, b) => b.cost - a.cost)
+      .slice(0, 10);
+
     filteredKeywords.forEach(keyword => {
       const tr = document.createElement('tr');
       tr.innerHTML = `
@@ -71,14 +108,13 @@
       `;
       body.appendChild(tr);
     });
-    
-    // If no keywords found, show placeholder
+
     if (filteredKeywords.length === 0) {
       const tr = document.createElement('tr');
       tr.innerHTML = '<td colspan="3" style="text-align: center; color: #9ca3af;">No keywords found</td>';
       body.appendChild(tr);
     }
-    
+
     const link = $('#view-keywords');
     if (link){ link.addEventListener('click', ()=>{}); }
   }
@@ -152,88 +188,104 @@
   function populateArticles() {
     const trendingArticles = [
       {
-        title: "The Polka Dot Fantasy World of Yayoi Kusama",
-        url: "https://asianews.network/the-polka-dot-fantasy-world-of-yayoi-kusama/"
+        title: 'Luxury Market Analysis 2024',
+        source: 'Financial Times',
+        views: '12,340 views',
+        image: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=120&h=120&fit=crop',
+        url: 'https://www.ft.com/content/198207f2-5f5e-441c-b033-7deee8a28feb'
       },
       {
-        title: "Creating Infinity: The Worlds of Louis Vuitton and Yayoi Kusama",
-        url: "https://www.davidzwirner.com/news/2023/creating-infinity-the-worlds-of-louis-vuitton-and-yayoi-kusama"
+        title: 'LVMH Art & Culture Initiatives',
+        source: 'Le Monde',
+        views: '8,920 views',
+        image: 'https://images.unsplash.com/photo-1499781350541-7783f6c6a0c8?w=120&h=120&fit=crop',
+        url: 'https://www.lemonde.fr/'
       },
       {
-        title: "Yayoi Kusama - Artist Profile",
-        url: "https://www.davidzwirner.com/artists/yayoi-kusama"
+        title: 'LV New York City Guide',
+        source: 'Louis Vuitton',
+        views: '15,670 views',
+        image: 'assets/kusama1.png',
+        url: 'https://us.louisvuitton.com/'
       },
       {
-        title: "Louis Vuitton's Collaboration Strategy",
-        url: "https://www.ft.com/content/198207f2-5f5e-441c-b033-7deee8a28feb"
+        title: 'Creating Infinity: Kusama x LV',
+        source: 'David Zwirner',
+        views: '9,450 views',
+        image: 'assets/kusama-gal2.png',
+        url: 'https://www.davidzwirner.com/news/2023/creating-infinity-the-worlds-of-louis-vuitton-and-yayoi-kusama'
       },
       {
-        title: "See the New Louis Vuitton x Yayoi Kusama Collaboration Here",
-        url: "https://www.lofficielph.com/fashion/see-the-new-louis-vuitton-x-yayoi-kusama-collaboration-here"
-      },
-      {
-        title: "Louis Vuitton Second Yayoi Kusama Collection",
-        url: "https://www.harpersbazaar.com/fashion/trends/a42411209/louis-vuitton-second-yayoi-kusama-collection/"
+        title: 'Polka Dot Fantasy World',
+        source: 'Asian News Network',
+        views: '6,210 views',
+        image: 'assets/kusama-gal1.png',
+        url: 'https://asianews.network/the-polka-dot-fantasy-world-of-yayoi-kusama/'
       }
     ];
 
     const newContentArticles = [
       {
-        title: "Café Louis Vuitton Opens in Seoul Blending Korean Flavors with French Savoir-Faire",
-        url: "https://www.lvmh.com/en/news-lvmh/cafe-louis-vuitton-opens-in-seoul-blending-korean-flavors-with-french-savoir-faire"
+        title: 'Cafe Louis Vuitton Opens in Seoul',
+        source: 'LVMH',
+        views: '4,820 views',
+        image: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=120&h=120&fit=crop',
+        url: 'https://www.lvmh.com/en/news-lvmh/cafe-louis-vuitton-opens-in-seoul-blending-korean-flavors-with-french-savoir-faire'
       },
       {
-        title: "Louis Vuitton Dévoile Tous Ses Trésors Art Déco Lors d'une Expo Gratuite",
-        url: "https://www.timeout.fr/paris/actualites/louis-vuitton-devoile-tous-ses-tresors-art-deco-lors-dune-expo-gratuite-091525"
+        title: 'Selena Gomez in Louis Vuitton',
+        source: 'Page Six',
+        views: '11,300 views',
+        image: 'https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=120&h=120&fit=crop',
+        url: 'https://pagesix.com/2025/09/14/style/selena-gomez-wears-louis-vuitton-on-emmys-2025-red-carpet/'
       },
       {
-        title: "Selena Gomez Wears Louis Vuitton on Emmys 2025 Red Carpet",
-        url: "https://pagesix.com/2025/09/14/style/selena-gomez-wears-louis-vuitton-on-emmys-2025-red-carpet/"
+        title: 'LV Pop-up Immersif a Soho',
+        source: 'Meet & Match',
+        views: '3,950 views',
+        image: 'assets/kusama3.png',
+        url: 'https://www.meetandmatch.fr/louis-vuitton-accelere-dans-la-beaute-avec-un-pop-up-immersif-a-soho/'
       },
       {
-        title: "Louis Vuitton Présente les Tenues Officielles de l'Équipe Féminine du Real Madrid",
-        url: "https://fr.fashionnetwork.com/news/Louis-vuitton-presente-les-tenues-officielles-de-l-equipe-feminine-du-real-madrid,1763336.html"
-      },
-      {
-        title: "Louis Vuitton Accélère dans la Beauté avec un Pop-up Immersif à Soho",
-        url: "https://www.meetandmatch.fr/louis-vuitton-accelere-dans-la-beaute-avec-un-pop-up-immersif-a-soho/"
+        title: 'LV x Real Madrid Collection',
+        source: 'Fashion Network',
+        views: '7,120 views',
+        image: 'https://images.unsplash.com/photo-1556906781-9a412961c28c?w=120&h=120&fit=crop',
+        url: 'https://fr.fashionnetwork.com/news/Louis-vuitton-presente-les-tenues-officielles-de-l-equipe-feminine-du-real-madrid,1763336.html'
       }
     ];
 
-    // Populate trending articles
-    const trendingContainer = $('#trending-articles .articles-list');
-    if (trendingContainer) {
-      trendingContainer.replaceChildren();
-      trendingArticles.forEach(article => {
-        const articleEl = document.createElement('a');
-        articleEl.className = 'article-item';
-        articleEl.href = article.url;
-        articleEl.target = '_blank';
-        articleEl.rel = 'noopener noreferrer';
-        articleEl.innerHTML = `
-          <div class="article-title">${article.title}</div>
-          <div class="article-url">${article.url}</div>
-        `;
-        trendingContainer.appendChild(articleEl);
-      });
+    function renderArticleCard(article) {
+      var a = document.createElement('a');
+      a.className = 'article-card';
+      a.href = article.url;
+      a.target = '_blank';
+      a.rel = 'noopener noreferrer';
+      a.innerHTML =
+        '<div class="article-card__thumb">' +
+          '<img src="' + article.image + '" alt="" loading="lazy">' +
+        '</div>' +
+        '<div class="article-card__body">' +
+          '<div class="article-card__title">' + article.title + '</div>' +
+          '<div class="article-card__meta">' +
+            '<span class="article-card__source">' + article.source + '</span>' +
+            '<span class="article-card__dot">&middot;</span>' +
+            '<span class="article-card__views">' + article.views + '</span>' +
+          '</div>' +
+        '</div>';
+      return a;
     }
 
-    // Populate new content articles
-    const newContentContainer = $('#new-content-articles .articles-list');
+    var trendingContainer = $('#trending-articles .articles-list');
+    if (trendingContainer) {
+      trendingContainer.replaceChildren();
+      trendingArticles.forEach(function (a) { trendingContainer.appendChild(renderArticleCard(a)); });
+    }
+
+    var newContentContainer = $('#new-content-articles .articles-list');
     if (newContentContainer) {
       newContentContainer.replaceChildren();
-      newContentArticles.forEach(article => {
-        const articleEl = document.createElement('a');
-        articleEl.className = 'article-item';
-        articleEl.href = article.url;
-        articleEl.target = '_blank';
-        articleEl.rel = 'noopener noreferrer';
-        articleEl.innerHTML = `
-          <div class="article-title">${article.title}</div>
-          <div class="article-url">${article.url}</div>
-        `;
-        newContentContainer.appendChild(articleEl);
-      });
+      newContentArticles.forEach(function (a) { newContentContainer.appendChild(renderArticleCard(a)); });
     }
   }
 

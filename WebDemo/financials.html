@@ -12,11 +12,9 @@
   </head>
   <body class="app app--financials">
     <aside class="sidebar" aria-label="Primary">
-      <div class="sidebar__brand">
-        <span>shopThat</span>
-      </div>
+      <div class="sidebar__brand"></div>
       <div class="sidebar__campaign-btn">
-        <a href="/campaigns.html" class="btn btn--primary btn--campaign">
+        <a href="campaigns.html" class="btn btn--primary btn--campaign">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="12" cy="12" r="10"/>
             <path d="M12 8v8M8 12h8"/>
@@ -25,13 +23,13 @@
         </a>
       </div>
       <nav class="sidebar__nav">
-        <a href="/dashboard.html">Dashboard</a>
-        <a href="/keywords.html">Keywords</a>
-        <a href="/internals.html">Internals</a>
-        <a href="/publishers.html">Publishers</a>
-        <a href="/products.html">Products</a>
-        <a href="/image-licensing.html">Image Licensing</a>
-        <a class="is-active" href="/financials.html">Financials</a>
+        <a href="dashboard.html">Dashboard</a>
+        <a href="keywords.html">Keywords</a>
+        <a href="internals.html">Internals</a>
+        <a href="publishers.html">Publishers</a>
+        <a href="products.html">Products</a>
+        <a href="image-licensing.html">Image Licensing</a>
+        <a class="is-active" href="financials.html">Financials</a>
         <a href="#" id="signOutLink">Sign Out</a>
       </nav>
     </aside>
@@ -60,7 +58,7 @@
               <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
             </svg>
           </button>
-          <a href="/product-dashboard.html" class="avatar" role="img" aria-label="Person, Admin" title="Open Dashboard"></a>
+          <a href="product-dashboard.html" class="avatar" role="img" aria-label="Person, Admin" title="Open Dashboard"></a>
         </div>
       </div>
     </header>
@@ -304,241 +302,255 @@
     <!-- Rewards Calculator View (Hidden by default) -->
     <div id="calculatorView" class="calculator-view">
       <div class="calculator-content">
-        <!-- Live Price Reference -->
-        <div class="calc-section live-reference">
-          <div class="live-reference-row">
-            <h2 class="live-reference-title">📊 Real-Time Tokenomics Analyzer</h2>
-            <div class="live-stats">
-              <div class="live-stat token-selector">
-                <span class="stat-label">Token</span>
-                <select id="volatilityRef" class="token-dropdown">
-                  <option value="BTC">BTC</option>
-                  <option value="ETH">ETH</option>
-                  <option value="SOL">SOL</option>
-                  <option value="DOGE">DOGE</option>
-                  <option value="SHIB">SHIB</option>
-                </select>
-              </div>
-              <div class="live-stat">
-                <span class="stat-label">Live Price</span>
-                <span class="stat-value" id="livePrice">$0.00</span>
-              </div>
-              <div class="live-stat">
-                <span class="stat-label">24h Change</span>
-                <span class="stat-value" id="liveChange">0.00%</span>
-              </div>
-              <div class="live-stat live-indicator">
-                <span class="stat-label">Live Updates</span>
-                <span class="pulse-dot"></span>
-              </div>
-            </div>
+        <!-- Quick Scenario Bar -->
+        <div class="calc-scenario-bar">
+          <div class="pill-group" id="scenarioPresets">
+            <button type="button" class="pill-btn" data-preset="conservative">Conservative</button>
+            <button type="button" class="pill-btn active" data-preset="expected">Expected</button>
+            <button type="button" class="pill-btn" data-preset="optimistic">Optimistic</button>
           </div>
+          <button class="btn btn--primary" id="exportData" style="margin-left:auto; padding:8px 12px; font-size:13px; flex:none;">Export Data (CSV)</button>
         </div>
 
         <div class="calc-grid">
           <!-- Left Column: Parameters -->
           <div class="calc-params">
+            <!-- Retailer Profile -->
             <div class="calc-section">
-              <h3>⚙️ Token Parameters</h3>
-              
-              <h4>Token Supply</h4>
+              <h3>Retailer Profile <span class="tooltip" title="Configure your retailer's monthly volume and growth assumptions.">?</span></h3>
               <div class="param-group">
-                <label>Total Supply (tokens)
-                  <span class="tooltip" title="The total number of tokens that will ever exist.">?</span>
-                </label>
-                <input type="number" id="totalSupply" value="1000000000" step="1000000">
+                <label>Monthly GMV <span class="range-val" id="gmvVal">$20,000,000</span></label>
+                <input type="range" id="monthlyGMV" min="5" max="8" step="0.01" value="7.301">
+                <div class="range-ticks"><span>$100K</span><span>$1M</span><span>$10M</span><span>$100M</span></div>
+                <label class="precise-toggle"><input type="checkbox" id="gmvPrecise"> <span>Precise entry ($)</span></label>
+                <input type="number" id="gmvPreciseInput" class="precise-input" style="display:none;" value="20000000" min="100000" step="100000">
               </div>
               <div class="param-group">
-                <label>Initial Token Price ($)
-                  <span class="tooltip" title="The starting price of your token at launch.">?</span>
-                </label>
-                <input type="number" id="initialPrice" value="0.10" step="0.01">
+                <label>Annual GMV Growth Rate <span class="range-val" id="growthVal">25%</span></label>
+                <input type="range" id="annualGrowth" min="0" max="100" step="1" value="25">
+                <div class="range-ticks"><span>0%</span><span>25%</span><span>50%</span><span>75%</span><span>100%</span></div>
               </div>
               <div class="param-group">
-                <label>End Token Price ($)
-                  <span class="tooltip" title="Target token price at the end of the projection period.">?</span>
-                </label>
-                <input type="number" id="endPrice" value="0.50" step="0.01">
-              </div>
-              <div class="param-group">
-                <label>Projection Period (months)
-                  <span class="tooltip" title="How many months into the future to simulate.">?</span>
-                </label>
-                <input type="number" id="projectionMonths" value="24" min="1" max="60">
-              </div>
-
-              <h4>Business Metrics</h4>
-              <div class="param-group">
-                <label>Monthly Transaction Volume
-                  <span class="tooltip" title="The number of transactions processed each month.">?</span>
-                </label>
-                <input type="number" id="monthlyVolume" value="100000" step="10000">
-              </div>
-              <div class="param-group">
-                <label>Average Order Value ($)
-                  <span class="tooltip" title="The average dollar amount per transaction.">?</span>
-                </label>
-                <input type="number" id="avgOrderValue" value="50" step="5">
-              </div>
-              <div class="param-group">
-                <label>Cashback Rate (%)
-                  <span class="tooltip" title="The percentage of GMV returned as rewards.">?</span>
-                </label>
-                <input type="number" id="cashbackRate" value="1" step="0.1" min="0" max="10">
-              </div>
-              <div class="param-group">
-                <label>Monthly Growth Rate (%)
-                  <span class="tooltip" title="Average growth rate for transaction volume.">?</span>
-                </label>
-                <input type="number" id="growthRate" value="5" step="1" min="-10" max="50">
-              </div>
-              <div class="param-group">
-                <label>Growth Variability (%)
-                  <span class="tooltip" title="How much growth fluctuates month-to-month.">?</span>
-                </label>
-                <input type="number" id="growthVariability" value="3" step="1" min="0" max="20">
-              </div>
-              <div class="param-group">
-                <label>Growth Pattern
-                  <span class="tooltip" title="Choose how growth behaves over time.">?</span>
-                </label>
-                <select id="growthPattern">
-                  <option value="steady">Steady Growth</option>
-                  <option value="seasonal">Seasonal Fluctuations</option>
-                  <option value="volatile">Volatile (Random)</option>
-                </select>
-              </div>
-
-              <h4>Treasury & Economics</h4>
-              <div class="param-group">
-                <label>Treasury Take Rate (%)
-                  <span class="tooltip" title="The portion of total cashback that goes to your treasury.">?</span>
-                </label>
-                <input type="number" id="treasuryRate" value="20" step="1" min="0" max="50">
-              </div>
-              <div class="param-group">
-                <label>Treasury Investment Return (%/year)
-                  <span class="tooltip" title="Annual yield on treasury funds through investments.">?</span>
-                </label>
-                <input type="number" id="investmentReturn" value="5" step="0.5" min="0" max="30">
-              </div>
-              <div class="param-group">
-                <label>Burn Rate (%)
-                  <span class="tooltip" title="Percentage of reward tokens permanently removed from circulation.">?</span>
-                </label>
-                <input type="number" id="burnRate" value="0.1" step="0.05" min="0" max="5">
-              </div>
-
-              <h4>Volatility Model</h4>
-              <div class="param-group">
-                <label>Apply Real Crypto Volatility
-                  <span class="tooltip" title="Simulates price fluctuations based on real crypto market data.">?</span>
-                </label>
-                <select id="volatilityLevel">
-                  <option value="0">No Volatility (Fixed Price)</option>
-                  <option value="50">50% of Reference Crypto</option>
-                  <option value="100" selected>100% of Reference Crypto</option>
-                  <option value="200">200% of Reference Crypto</option>
-                </select>
-              </div>
-              <div class="volatility-impact">
-                <h5>Estimated Volatility Impact</h5>
-                <p id="volatilityImpactText">Moderate volatility applied</p>
+                <label>Projection Horizon</label>
+                <div class="pill-group" data-bind="horizon">
+                  <button type="button" class="pill-btn" data-value="1">1 Year</button>
+                  <button type="button" class="pill-btn active" data-value="3">3 Years</button>
+                  <button type="button" class="pill-btn" data-value="5">5 Years</button>
+                </div>
               </div>
             </div>
 
-            <div class="calc-controls">
-              <button class="btn btn--primary calc-btn" id="runSimulation">Run Full Simulation</button>
-              <button class="btn btn--secondary calc-btn" id="exportData">📥 Export Data (CSV)</button>
+            <!-- Token Price -->
+            <div class="calc-section">
+              <h3>Token Price <span class="tooltip" title="Set the current token price and expected price trajectory.">?</span></h3>
+              <div class="param-group">
+                <label>Current TQT Price (USD) <span class="range-val" id="tqtPriceVal">$0.25</span></label>
+                <input type="range" id="tqtPrice" min="-2" max="1" step="0.01" value="-0.602">
+                <div class="range-ticks"><span>$0.01</span><span>$0.25</span><span>$1.00</span><span>$5.00</span><span>$10</span></div>
+              </div>
+              <div class="param-group">
+                <label>Price Scenario</label>
+                <div class="pill-group" data-bind="priceScenario">
+                  <button type="button" class="pill-btn" data-value="-0.40">Bearish −40%/yr</button>
+                  <button type="button" class="pill-btn active" data-value="0">Neutral 0%</button>
+                  <button type="button" class="pill-btn" data-value="0.20">Bullish +20%/yr</button>
+                </div>
+              </div>
             </div>
+
+            <!-- Staking -->
+            <div class="calc-section">
+              <h3>Staking <span class="tooltip" title="Configure how many earned tokens are staked and for how long.">?</span></h3>
+              <div class="param-group">
+                <label>% of Earned Tokens to Stake <span class="range-val" id="stakeVal">50%</span></label>
+                <input type="range" id="stakePct" min="0" max="100" step="1" value="50">
+                <div class="range-ticks"><span>0%</span><span>25%</span><span>50%</span><span>75%</span><span>100%</span></div>
+              </div>
+              <div class="param-group">
+                <label>Lock Period</label>
+                <div class="pill-group" data-bind="lockPeriod">
+                  <button type="button" class="pill-btn" data-value="3">3 mo</button>
+                  <button type="button" class="pill-btn active" data-value="6">6 mo</button>
+                  <button type="button" class="pill-btn" data-value="12">12 mo</button>
+                </div>
+              </div>
+              <div class="param-group">
+                <label class="precise-toggle"><input type="checkbox" id="compoundToggle" checked> <span>Compound staking rewards monthly</span></label>
+              </div>
+            </div>
+
+            <!-- Advanced Settings -->
+            <div class="calc-section">
+              <h3 class="advanced-toggle" id="advancedToggle">Advanced Settings <span class="toggle-arrow">▸</span></h3>
+              <div id="advancedBody" style="display:none;">
+                <div class="param-group">
+                  <label>Cashback Tier Override <span class="tooltip" title="Auto-selects based on avg. transaction size. Override here to model a specific tier.">?</span></label>
+                  <div class="pill-group" data-bind="cashbackTier">
+                    <button type="button" class="pill-btn" data-value="0.0075">Tier 1 — 0.75%</button>
+                    <button type="button" class="pill-btn active" data-value="0.0125">Tier 2 — 1.25%</button>
+                    <button type="button" class="pill-btn" data-value="0.015">Tier 3 — 1.50%</button>
+                  </div>
+                  <span class="param-hint">Auto-selects based on avg. transaction size. Override here to model a specific tier.</span>
+                </div>
+                <div class="param-group">
+                  <label>Staking APY <span class="range-val" id="apyVal">12%</span></label>
+                  <input type="range" id="stakingAPY" min="0" max="50" step="0.5" value="12">
+                  <div class="range-ticks"><span>0%</span><span>12.5%</span><span>25%</span><span>37.5%</span><span>50%</span></div>
+                </div>
+                <div class="param-group">
+                  <label>BTC Annual Return (benchmarks) <span class="range-val" id="btcReturnVal">30%</span></label>
+                  <input type="range" id="btcReturn" min="-50" max="200" step="1" value="30">
+                  <div class="range-ticks"><span>−50%</span><span>0%</span><span>75%</span><span>150%</span><span>200%</span></div>
+                </div>
+                <div class="param-group">
+                  <label class="precise-toggle"><input type="checkbox" id="independentBTC"> <span>Independent BTC Return per Card</span></label>
+                </div>
+                <div id="independentBTCGroup" style="display:none;">
+                  <div class="param-group">
+                    <label>Gemini BTC Return <span class="range-val" id="geminiBtcVal">30%</span></label>
+                    <input type="range" id="geminiBtcReturn" min="-50" max="200" step="1" value="30">
+                  </div>
+                  <div class="param-group">
+                    <label>Coinbase BTC Return <span class="range-val" id="coinbaseBtcVal">30%</span></label>
+                    <input type="range" id="coinbaseBtcReturn" min="-50" max="200" step="1" value="30">
+                  </div>
+                </div>
+                <div class="param-group">
+                  <label>Avg Transaction Size ($) <span class="range-val" id="avgTxVal">$650</span></label>
+                  <input type="range" id="avgTxSize" min="100" max="10000" step="50" value="650">
+                  <div class="range-ticks"><span>$100</span><span>$2.5K</span><span>$5K</span><span>$7.5K</span><span>$10K</span></div>
+                </div>
+                <div class="param-group">
+                  <label>Credit Card Benchmarks to Display</label>
+                  <div class="benchmark-checks" id="benchmarkChecks">
+                    <label><input type="checkbox" data-cc="chase_preferred" checked> Chase Sapphire Preferred (~1%)</label>
+                    <label><input type="checkbox" data-cc="chase_reserve" checked> Chase Sapphire Reserve (~1%)</label>
+                    <label><input type="checkbox" data-cc="amex_gold" checked> Amex Gold Card (~1%)</label>
+                    <label><input type="checkbox" data-cc="amex_plat" checked> Amex Platinum Card (~1%)</label>
+                    <label><input type="checkbox" data-cc="citi_double" checked> Citi Double Cash (2%)</label>
+                    <label><input type="checkbox" data-cc="venture_x" checked> Capital One Venture X (2%)</label>
+                    <label><input type="checkbox" data-cc="gemini" checked> Gemini Credit Card (1% BTC)</label>
+                    <label><input type="checkbox" data-cc="coinbase_base" checked> Coinbase One Card — Base 2% BTC</label>
+                    <label><input type="checkbox" data-cc="coinbase_top" checked> Coinbase One Card — Top 4% BTC</label>
+                  </div>
+                </div>
+                <div class="param-group">
+                  <label class="precise-toggle"><input type="checkbox" id="customRateToggle"> <span>Enable custom card rate</span></label>
+                </div>
+                <div id="customRateGroup" style="display:none;">
+                  <div class="param-group">
+                    <label>Custom Rate (%) <span class="range-val" id="customRateVal">1.50%</span></label>
+                    <input type="range" id="customRate" min="0" max="10" step="0.1" value="1.5">
+                  </div>
+                </div>
+                <div class="param-group">
+                  <label class="precise-toggle"><input type="checkbox" id="customPricePathToggle"> <span>Override with manual year-by-year prices</span></label>
+                  <span class="param-hint">Enter the TQT price (USD) at the start of each year. Overrides the scenario price path.</span>
+                </div>
+                <div id="customPricePathGroup" style="display:none;"></div>
+              </div>
+            </div>
+
           </div>
 
           <!-- Right Column: Results -->
           <div class="calc-results">
-            <div class="results-grid">
-              <div class="result-card">
-                <span class="result-label">Token Price (Current)</span>
-                <span class="result-value" id="resultPrice">$0.10</span>
-                <span class="result-sub" id="resultVolatility">Volatility: 0%</span>
-              </div>
-              <div class="result-card">
-                <span class="result-label">Ecosystem Reserve</span>
-                <span class="result-value" id="resultReserve">350M</span>
-                <span class="result-sub">Available for rewards</span>
-              </div>
-              <div class="result-card">
-                <span class="result-label">Treasury Value</span>
-                <span class="result-value" id="resultTreasury">$0</span>
-                <span class="result-sub" id="resultROI">ROI: 0%</span>
-              </div>
-              <div class="result-card">
-                <span class="result-label">Total Buyback Cost</span>
-                <span class="result-value" id="resultBuyback">$0</span>
-                <span class="result-sub" id="resultTokens">0 tokens purchased</span>
-              </div>
+            <div class="results-grid results-grid--hero">
               <div class="result-card highlight">
-                <span class="result-label">Net Profit</span>
-                <span class="result-value" id="resultProfit">$0</span>
-                <span class="result-sub">Treasury - Buyback Costs</span>
+                <span class="result-label">Total Annual Benefit</span>
+                <span class="result-value" id="resBenefitUSD">$0</span>
+                <span class="result-sub" id="resBenefitSub">—</span>
               </div>
               <div class="result-card">
-                <span class="result-label">Months Until Depletion</span>
-                <span class="result-value" id="resultDepletion">36+</span>
-                <span class="result-sub">At current burn rate</span>
+                <span class="result-label">Annual Cashback</span>
+                <span class="result-value" id="resCashbackUSD">$0</span>
+                <span class="result-sub" id="resCashbackTQT">— TQT</span>
+              </div>
+              <div class="result-card">
+                <span class="result-label">Annual Staking Yield</span>
+                <span class="result-value" id="resStakingUSD">$0</span>
+                <span class="result-sub" id="resStakingTQT">— TQT</span>
+              </div>
+              <div class="result-card">
+                <span class="result-label">Year-End Portfolio Value</span>
+                <span class="result-value" id="resPortfolioUSD">$0</span>
+                <span class="result-sub" id="resPortfolioTQT">— TQT accumulated</span>
               </div>
             </div>
 
-            <div class="alert-box" id="supplyAlert" style="display: none;">
-              <h4>⚠️ Critical Supply Alert</h4>
-              <p id="alertMessage"></p>
+            <!-- Results tabs -->
+            <div class="calc-results-tabs">
+              <button type="button" class="pill-btn active" data-restab="breakdown">Breakdown</button>
+              <button type="button" class="pill-btn" data-restab="benchmark">Benchmark</button>
+              <button type="button" class="pill-btn" data-restab="charts">Charts</button>
+              <button type="button" class="pill-btn" data-restab="matrix">Scenario Matrix</button>
             </div>
 
-            <div class="chart-section">
-              <h4>Token Price Projection (with Real Volatility)</h4>
-              <canvas id="priceChart"></canvas>
+            <!-- Breakdown tab -->
+            <div class="calc-restab-pane" id="pane-breakdown">
+              <div class="breakdown-section">
+                <div class="table-container">
+                  <table class="breakdown-table" id="breakdownTable">
+                    <tbody id="breakdownBody"></tbody>
+                  </table>
+                </div>
+              </div>
             </div>
 
-            <div class="chart-section">
-              <h4>Monthly GMV & Growth Rate</h4>
-              <canvas id="gmvChart"></canvas>
-            </div>
-
-            <div class="chart-section">
-              <h4>Token Buyback Cost by Month</h4>
-              <canvas id="buybackChart"></canvas>
-            </div>
-
-            <div class="chart-section">
-              <h4>Treasury Value vs Net Profit</h4>
-              <canvas id="treasuryChart"></canvas>
-            </div>
-
-            <div class="chart-section">
-              <h4>Ecosystem Reserve vs. Demand</h4>
-              <canvas id="reserveChart"></canvas>
-            </div>
-
-            <div class="breakdown-section">
-              <div class="breakdown-header">
-                <h4>📊 Monthly Breakdown</h4>
-                <button class="btn btn--secondary" id="exportCSV">📥 Export CSV</button>
+            <!-- Benchmark tab -->
+            <div class="calc-restab-pane" id="pane-benchmark" style="display:none;">
+              <div class="results-grid" style="margin-bottom:20px;">
+                <div class="result-card">
+                  <span class="result-label">Breakeven vs 2% Flat-Rate Card</span>
+                  <span class="result-value" id="breakeven2pct">$—</span>
+                  <span class="result-sub">TQT price needed for Tier 1 to match Citi Double Cash / Venture X</span>
+                </div>
+                <div class="result-card">
+                  <span class="result-label">Breakeven vs 1% BTC Card</span>
+                  <span class="result-value" id="breakeven1btc">$—</span>
+                  <span class="result-sub">TQT price needed for Tier 1 to match Gemini Card (1% BTC)</span>
+                </div>
+              </div>
+              <div class="param-group" style="margin-bottom:16px;">
+                <label>TQT Price Sensitivity <span class="range-val" id="sensitivityPriceVal">$0.25</span></label>
+                <input type="range" id="sensitivityPrice" min="-2" max="1" step="0.01" value="-0.602">
               </div>
               <div class="table-container">
-                <table class="breakdown-table" id="breakdownTable">
-                  <thead>
-                    <tr>
-                      <th>Month</th>
-                      <th>Token Price</th>
-                      <th>Reserve Pool</th>
-                      <th>Tokens Needed</th>
-                      <th>To Purchase</th>
-                      <th>Cost</th>
-                      <th>Treasury</th>
-                    </tr>
-                  </thead>
-                  <tbody id="breakdownBody">
-                  </tbody>
+                <table class="breakdown-table" id="benchmarkTable">
+                  <thead><tr><th>Program</th><th>Rate</th><th>Annual USD Value</th><th>vs Annual GMV</th></tr></thead>
+                  <tbody id="benchmarkBody"></tbody>
                 </table>
+              </div>
+              <p class="param-hint" style="margin-top:12px;font-size:11px;">† Chase Sapphire & Amex cards earn 5x/4x/3x only on travel & dining. Luxury retail earns ~1pt/$ ≈ 1¢ cash-equivalent.<br>‡ Gemini Credit Card: 1% on all other purchases incl. luxury retail.<br>§ Coinbase One Card: flat BTC reward on all purchases (2% base tier; 4% at $200K+ assets on Coinbase).</p>
+            </div>
+
+            <!-- Charts tab -->
+            <div class="calc-restab-pane" id="pane-charts" style="display:none;">
+              <div class="chart-section">
+                <h4>Multi-Year Benefit Projection — Cashback · Staking · Price Appreciation</h4>
+                <canvas id="benefitChart"></canvas>
+              </div>
+              <div class="chart-section">
+                <h4>Effective Reward Rate Comparison (%)</h4>
+                <canvas id="rateCompChart"></canvas>
+              </div>
+              <div class="chart-section">
+                <h4>Token Accumulation Curve</h4>
+                <canvas id="accumChart"></canvas>
+              </div>
+            </div>
+
+            <!-- Scenario Matrix tab -->
+            <div class="calc-restab-pane" id="pane-matrix" style="display:none;">
+              <div class="breakdown-section">
+                <h4>3-Year Total Benefit — GMV Scenario × Token Price Scenario</h4>
+                <p class="param-hint">Each cell shows total 3-year benefit (cashback + staking + price appreciation). The currently selected combination is highlighted. Colour scale: red = lowest, green = highest benefit.</p>
+                <div class="table-container">
+                  <table class="breakdown-table scenario-matrix" id="scenarioMatrix">
+                    <thead><tr><th></th><th>Bearish −40%/yr</th><th>Neutral 0%</th><th>Bullish +20%/yr</th></tr></thead>
+                    <tbody id="matrixBody"></tbody>
+                  </table>
+                </div>
               </div>
             </div>
           </div>
@@ -659,7 +671,8 @@
       .calc-grid {
         display: grid;
         grid-template-columns: 340px 1fr;
-        gap: 16px;
+        gap: 24px;
+        margin-top: 16px;
       }
       @media (max-width: 1100px) {
         .calc-grid { grid-template-columns: 1fr; }
@@ -669,6 +682,7 @@
         border-radius: 12px;
         padding: 20px;
         border: 1px solid #e8e8ef;
+        margin-bottom: 12px;
       }
       .dark-mode .calc-section {
         background: #16213e;
@@ -918,6 +932,72 @@
       .dark-mode .breakdown-table td {
         color: #d0d0e0;
       }
+
+      /* Pill button groups (radio-style + scenario bar) */
+      .pill-group { display: flex; gap: 6px; flex-wrap: wrap; }
+      .pill-btn {
+        padding: 8px 16px; border-radius: 20px; border: 1px solid #e8e8ef;
+        background: #fff; font-size: 13px; font-weight: 500; cursor: pointer;
+        color: #4a4a6a; transition: all 0.15s ease; white-space: nowrap;
+      }
+      .pill-btn:hover { border-color: #6366f1; color: #6366f1; }
+      .pill-btn.active { background: #6366f1; color: #fff; border-color: #6366f1; }
+      .dark-mode .pill-btn { background: #1a1a2e; border-color: #3a3a5a; color: #a0a0c0; }
+      .dark-mode .pill-btn:hover { border-color: #818cf8; color: #818cf8; }
+      .dark-mode .pill-btn.active { background: #6366f1; color: #fff; border-color: #6366f1; }
+
+      .calc-scenario-bar { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+      .scenario-label { font-size: 14px; font-weight: 600; color: #4a4a6a; white-space: nowrap; }
+      .dark-mode .scenario-label { color: #a0a0c0; }
+
+      /* Range slider styling */
+      .calc-params input[type="range"] {
+        -webkit-appearance: none; appearance: none; width: 100%; height: 6px;
+        border-radius: 3px; background: #e8e8ef; outline: none; margin: 8px 0 4px;
+      }
+      .calc-params input[type="range"]::-webkit-slider-thumb {
+        -webkit-appearance: none; width: 20px; height: 20px; border-radius: 50%;
+        background: #6366f1; cursor: pointer; border: 2px solid #fff;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+      }
+      .calc-params input[type="range"]::-moz-range-thumb {
+        width: 20px; height: 20px; border-radius: 50%; background: #6366f1;
+        cursor: pointer; border: 2px solid #fff; box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+      }
+      .dark-mode .calc-params input[type="range"] { background: #3a3a5a; }
+      .range-val { font-weight: 700; color: #6366f1; margin-left: 6px; }
+      .dark-mode .range-val { color: #818cf8; }
+      .range-ticks { display: flex; justify-content: space-between; font-size: 10px; color: #9ca3af; margin-top: 2px; }
+
+      .precise-toggle { display: flex; align-items: center; gap: 6px; font-size: 12px; cursor: pointer; margin-top: 4px; }
+      .precise-toggle input[type="checkbox"] { accent-color: #6366f1; }
+      .precise-input { margin-top: 6px; }
+      .param-hint { font-size: 11px; color: #9ca3af; margin-top: 4px; }
+      .dark-mode .param-hint { color: #6a6a8a; }
+
+      /* Advanced toggle */
+      .advanced-toggle { cursor: pointer; user-select: none; }
+      .advanced-toggle:hover { color: #6366f1; }
+      .toggle-arrow { font-size: 12px; transition: transform 0.2s; display: inline-block; }
+      .toggle-arrow.open { transform: rotate(90deg); }
+
+      /* Benchmark checkboxes */
+      .benchmark-checks { display: grid; gap: 6px; margin-top: 6px; }
+      .benchmark-checks label { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #4a4a6a; cursor: pointer; }
+      .dark-mode .benchmark-checks label { color: #a0a0c0; }
+      .benchmark-checks input[type="checkbox"] { accent-color: #6366f1; }
+
+      /* Results hero grid */
+      .results-grid--hero { grid-template-columns: repeat(4, 1fr); margin-bottom: 20px; }
+      @media (max-width: 1100px) { .results-grid--hero { grid-template-columns: repeat(2, 1fr); } }
+
+      /* Results tab nav */
+      .calc-results-tabs { display: flex; gap: 6px; margin-bottom: 16px; flex-wrap: wrap; }
+
+      /* Scenario matrix heatmap */
+      .scenario-matrix td { text-align: center; font-weight: 600; font-size: 13px; min-width: 120px; }
+      .scenario-matrix td.cell-current { outline: 2px solid #6366f1; outline-offset: -2px; }
+      .scenario-matrix th:first-child { min-width: 100px; }
     </style>
     
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -1246,616 +1326,526 @@
       }
       
       // =====================================================
-      // REWARDS CALCULATOR FUNCTIONALITY
+      // RETAILER BENEFITS CALCULATOR (TectoniQ-style)
       // =====================================================
-      
-      let simulationData = [];
-      let priceChartInstance = null;
-      let gmvChartInstance = null;
-      let buybackChartInstance = null;
-      let treasuryChartInstance = null;
-      let reserveChartInstance = null;
-      
-      // Live crypto prices from CoinGecko API
-      let cryptoPrices = {
-        BTC: { price: 0, change: 0 },
-        ETH: { price: 0, change: 0 },
-        SOL: { price: 0, change: 0 },
-        DOGE: { price: 0, change: 0 },
-        SHIB: { price: 0, change: 0 }
-      };
-      
-      // CoinGecko ID mapping
-      const coinGeckoIds = {
-        BTC: 'bitcoin',
-        ETH: 'ethereum',
-        SOL: 'solana',
-        DOGE: 'dogecoin',
-        SHIB: 'shiba-inu'
-      };
-      
-      // Fetch live prices from CoinGecko
-      async function fetchLivePrices() {
-        try {
-          const ids = Object.values(coinGeckoIds).join(',');
-          const response = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd&include_24hr_change=true`);
-          const data = await response.json();
-          
-          // Map response to our format
-          Object.keys(coinGeckoIds).forEach(symbol => {
-            const id = coinGeckoIds[symbol];
-            if (data[id]) {
-              cryptoPrices[symbol] = {
-                price: data[id].usd,
-                change: data[id].usd_24h_change || 0
-              };
-            }
-          });
-          
-          // Update the display
-          updateLivePrice();
-          
-          // Update live indicator - pulse the dot
-          const pulseDot = document.querySelector('.pulse-dot');
-          if (pulseDot) {
-            pulseDot.style.background = '#10b981';
-          }
-          
-          console.log('Live prices updated:', cryptoPrices);
-        } catch (error) {
-          console.error('Error fetching crypto prices:', error);
-          // Keep existing prices on error
-        }
-      }
-      
-      // Volatility patterns based on real crypto data
-      const volatilityPatterns = {
-        BTC: 0.45,   // Bitcoin volatility factor
-        ETH: 0.55,   // Ethereum volatility factor
-        SOL: 0.75,   // Solana volatility factor
-        DOGE: 0.90,  // Dogecoin volatility factor
-        SHIB: 1.20   // Shiba Inu volatility factor
+
+      var benefitChartInst = null, rateCompChartInst = null, accumChartInst = null;
+
+      var CC_BENCHMARKS = [
+        { key:'chase_preferred', name:'Chase Sapphire Preferred', rate:0.01, type:'cash' },
+        { key:'chase_reserve',   name:'Chase Sapphire Reserve',   rate:0.01, type:'cash' },
+        { key:'amex_gold',       name:'Amex Gold Card',           rate:0.01, type:'cash' },
+        { key:'amex_plat',       name:'Amex Platinum Card',       rate:0.01, type:'cash' },
+        { key:'citi_double',     name:'Citi Double Cash',          rate:0.02, type:'cash' },
+        { key:'venture_x',      name:'Capital One Venture X',     rate:0.02, type:'cash' },
+        { key:'gemini',          name:'Gemini Credit Card',        rate:0.01, type:'btc' },
+        { key:'coinbase_base',   name:'Coinbase One Card — Base',  rate:0.02, type:'btc' },
+        { key:'coinbase_top',    name:'Coinbase One Card — Top',   rate:0.04, type:'btc' }
+      ];
+
+      var PRESETS = {
+        conservative: { gmv:6.699, growth:10, horizon:1, price:-1, scenario:'-0.40', stake:25, lock:3, apy:8 },
+        expected:     { gmv:7.301, growth:25, horizon:3, price:-0.602, scenario:'0', stake:50, lock:6, apy:12 },
+        optimistic:   { gmv:7.699, growth:50, horizon:5, price:0, scenario:'0.20', stake:75, lock:12, apy:20 }
       };
 
+      function pillVal(bind) {
+        var el = document.querySelector('[data-bind="'+bind+'"] .pill-btn.active');
+        return el ? el.getAttribute('data-value') : null;
+      }
+
+      function readState() {
+        var gmvLog = parseFloat(document.getElementById('monthlyGMV').value);
+        var preciseOn = document.getElementById('gmvPrecise').checked;
+        var monthlyGMV = preciseOn ? parseFloat(document.getElementById('gmvPreciseInput').value) || 20000000 : Math.pow(10, gmvLog);
+        var annualGrowth = parseFloat(document.getElementById('annualGrowth').value) / 100;
+        var horizon = parseInt(pillVal('horizon')) || 3;
+        var tqtPrice = Math.pow(10, parseFloat(document.getElementById('tqtPrice').value));
+        var priceScenario = parseFloat(pillVal('priceScenario')) || 0;
+        var stakePct = parseFloat(document.getElementById('stakePct').value) / 100;
+        var lockMonths = parseInt(pillVal('lockPeriod')) || 6;
+        var compound = document.getElementById('compoundToggle').checked;
+        var cashbackTier = parseFloat(pillVal('cashbackTier')) || 0.0125;
+        var stakingAPY = parseFloat(document.getElementById('stakingAPY').value) / 100;
+        var btcReturn = parseFloat(document.getElementById('btcReturn').value) / 100;
+        var indepBTC = document.getElementById('independentBTC').checked;
+        var geminiBTC = indepBTC ? parseFloat(document.getElementById('geminiBtcReturn').value)/100 : btcReturn;
+        var coinbaseBTC = indepBTC ? parseFloat(document.getElementById('coinbaseBtcReturn').value)/100 : btcReturn;
+        var avgTx = parseFloat(document.getElementById('avgTxSize').value) || 650;
+        var customRateOn = document.getElementById('customRateToggle').checked;
+        var customRate = customRateOn ? parseFloat(document.getElementById('customRate').value)/100 : 0;
+        var customPricePath = null;
+        if (document.getElementById('customPricePathToggle').checked) {
+          customPricePath = [];
+          for (var y = 0; y < horizon; y++) {
+            var inp = document.getElementById('customPriceY'+y);
+            customPricePath.push(inp ? parseFloat(inp.value) || tqtPrice : tqtPrice);
+          }
+        }
+        return { monthlyGMV:monthlyGMV, annualGrowth:annualGrowth, horizon:horizon, tqtPrice:tqtPrice,
+          priceScenario:priceScenario, stakePct:stakePct, lockMonths:lockMonths, compound:compound,
+          cashbackTier:cashbackTier, stakingAPY:stakingAPY, btcReturn:btcReturn,
+          geminiBTC:geminiBTC, coinbaseBTC:coinbaseBTC, avgTx:avgTx,
+          customRate:customRate, customRateOn:customRateOn, customPricePath:customPricePath };
+      }
+
+      function autoSelectTier(avgTx) {
+        if (avgTx >= 2000) return 0.015;
+        if (avgTx >= 500)  return 0.0125;
+        return 0.0075;
+      }
+
+      function tierLabel(rate) {
+        if (rate === 0.015)  return 'Tier 3';
+        if (rate === 0.0125) return 'Tier 2';
+        return 'Tier 1';
+      }
+
+      function priceAtYear(s, yr) {
+        if (s.customPricePath && s.customPricePath[yr] !== undefined) return s.customPricePath[yr];
+        return s.tqtPrice * Math.pow(1 + s.priceScenario, yr);
+      }
+
+      function computeBenefit(s) {
+        var years = s.horizon;
+        var yearData = [];
+        var accumTokens = 0;
+        for (var y = 0; y < years; y++) {
+          var annualGMV = s.monthlyGMV * 12 * Math.pow(1 + s.annualGrowth, y);
+          var cashbackUSD = annualGMV * s.cashbackTier;
+          var priceBOY = priceAtYear(s, y);
+          var priceEOY = priceAtYear(s, y + 1);
+          var convPrice = Math.max(priceBOY, priceBOY); // TWAP ≈ current for demo
+          var cashbackTokens = cashbackUSD / convPrice;
+          var stakedTokens = cashbackTokens * s.stakePct;
+          var periods = 12 / s.lockMonths;
+          var stakingTokens = 0;
+          if (s.compound) {
+            var bal = stakedTokens;
+            for (var p = 0; p < periods; p++) {
+              var yld = bal * (s.stakingAPY * s.lockMonths / 12);
+              stakingTokens += yld;
+              bal += yld;
+            }
+          } else {
+            stakingTokens = stakedTokens * s.stakingAPY;
+          }
+          var stakingUSD = stakingTokens * priceEOY;
+          accumTokens += cashbackTokens + stakingTokens;
+          var appreciation = accumTokens * (priceEOY - priceBOY);
+          yearData.push({
+            year: y + 1, annualGMV: annualGMV, cashbackUSD: cashbackUSD,
+            cashbackTokens: cashbackTokens, stakedTokens: stakedTokens,
+            stakingTokens: stakingTokens, stakingUSD: stakingUSD,
+            appreciation: appreciation, priceBOY: priceBOY, priceEOY: priceEOY,
+            accumTokens: accumTokens,
+            totalBenefit: cashbackUSD + stakingUSD + Math.max(0, appreciation)
+          });
+        }
+        var lastY = yearData[yearData.length - 1];
+        var firstY = yearData[0];
+        var effectiveRate = firstY.annualGMV > 0 ? firstY.totalBenefit / firstY.annualGMV : 0;
+        var breakeven2 = s.cashbackTier > 0 ? (0.02 / s.cashbackTier) * s.tqtPrice : 0;
+        var breakeven1btc = s.cashbackTier > 0 ? (0.01 / s.cashbackTier) * s.tqtPrice : 0;
+        return { yearData:yearData, firstYear:firstY, effectiveRate:effectiveRate,
+          breakeven2:breakeven2, breakeven1btc:breakeven1btc, accumTokens:accumTokens };
+      }
+
+      function enabledBenchmarks() {
+        var out = [];
+        document.querySelectorAll('#benchmarkChecks input[type="checkbox"]').forEach(function(cb) {
+          if (cb.checked) {
+            var key = cb.getAttribute('data-cc');
+            var bm = CC_BENCHMARKS.find(function(b){ return b.key === key; });
+            if (bm) out.push(bm);
+          }
+        });
+        return out;
+      }
+
+      function fmtCur(v) {
+        if (Math.abs(v) >= 1e9) return '$' + (v/1e9).toFixed(2) + 'B';
+        if (Math.abs(v) >= 1e6) return '$' + (v/1e6).toFixed(2) + 'M';
+        if (Math.abs(v) >= 1e3) return '$' + (v/1e3).toFixed(1) + 'K';
+        if (Math.abs(v) < 0.01 && v !== 0) return '$' + v.toFixed(4);
+        return '$' + v.toFixed(2);
+      }
+      function fmtNum(v) {
+        if (Math.abs(v) >= 1e9) return (v/1e9).toFixed(1) + 'B';
+        if (Math.abs(v) >= 1e6) return (v/1e6).toFixed(1) + 'M';
+        if (Math.abs(v) >= 1e3) return (v/1e3).toFixed(1) + 'K';
+        return v.toFixed(0);
+      }
+      function fmtPct(v) { return (v*100).toFixed(2) + '%'; }
+
+      function updateDisplay(r, s) {
+        var f = r.firstYear;
+        document.getElementById('resBenefitUSD').textContent = fmtCur(f.totalBenefit);
+        document.getElementById('resBenefitSub').textContent = fmtPct(r.effectiveRate) + ' effective rate';
+        document.getElementById('resCashbackUSD').textContent = fmtCur(f.cashbackUSD);
+        document.getElementById('resCashbackTQT').textContent = fmtNum(f.cashbackTokens) + ' TQT';
+        document.getElementById('resStakingUSD').textContent = fmtCur(f.stakingUSD);
+        document.getElementById('resStakingTQT').textContent = fmtNum(f.stakingTokens) + ' TQT';
+        var lastY = r.yearData[r.yearData.length - 1];
+        document.getElementById('resPortfolioUSD').textContent = fmtCur(r.accumTokens * lastY.priceEOY);
+        document.getElementById('resPortfolioTQT').textContent = fmtNum(r.accumTokens) + ' TQT accumulated';
+
+        // Breakdown table
+        var tb = document.getElementById('breakdownBody');
+        if (tb) {
+          var rows = [
+            ['Annual GMV at selected horizon start', fmtCur(f.annualGMV)],
+            ['Cashback Rate (' + tierLabel(s.cashbackTier) + ') TWAP-protected conversion', fmtPct(s.cashbackTier)],
+            ['Cashback Earned (USD)', fmtCur(f.cashbackUSD)],
+            ['Cashback Tokens &divide; max(P_current, P_TWAP)', fmtNum(f.cashbackTokens)],
+            ['Tokens Staked (' + (s.stakePct*100).toFixed(0) + '%) at ' + (s.stakingAPY*100).toFixed(0) + '% APY', fmtNum(f.stakedTokens)],
+            ['Staking Yield (Tokens) ' + (s.compound ? 'compound' : 'simple'), fmtNum(f.stakingTokens)],
+            ['Staking Yield (USD) at projected price', fmtCur(f.stakingUSD)],
+            ['Price Appreciation on Accumulated Tokens', fmtCur(Math.max(0, f.appreciation))],
+            ['Total Annual Benefit', fmtCur(f.totalBenefit)],
+            ['Effective Reward Rate', fmtPct(r.effectiveRate)],
+            ['Breakeven TQT Price (vs 2% CC)', fmtCur(r.breakeven2)]
+          ];
+          tb.innerHTML = rows.map(function(r){ return '<tr><td>'+r[0]+'</td><td style="text-align:right;font-weight:600">'+r[1]+'</td></tr>'; }).join('');
+        }
+
+        // Breakeven cards
+        document.getElementById('breakeven2pct').textContent = fmtCur(r.breakeven2);
+        document.getElementById('breakeven1btc').textContent = fmtCur(r.breakeven1btc);
+
+        // Benchmark table
+        updateBenchmarkTable(s, r);
+        updateCalcCharts(r, s);
+        updateScenarioMatrix(s);
+      }
+
+      function updateBenchmarkTable(s, r) {
+        var body = document.getElementById('benchmarkBody');
+        if (!body) return;
+        var annualGMV = s.monthlyGMV * 12;
+        var sensLog = parseFloat(document.getElementById('sensitivityPrice').value);
+        var sensPrice = Math.pow(10, sensLog);
+        document.getElementById('sensitivityPriceVal').textContent = fmtCur(sensPrice);
+        var benchmarks = enabledBenchmarks();
+        var tqtRow = { name:'TQT Cashback (' + tierLabel(s.cashbackTier) + ')', rate:s.cashbackTier, val:annualGMV * s.cashbackTier, type:'tqt' };
+        var rows = [tqtRow];
+        benchmarks.forEach(function(bm) {
+          var val = annualGMV * bm.rate;
+          if (bm.type === 'btc') {
+            var btcRet = bm.key === 'gemini' ? s.geminiBTC : s.coinbaseBTC;
+            val = val * (1 + btcRet);
+          }
+          rows.push({ name:bm.name, rate:bm.rate, val:val, type:bm.type });
+        });
+        if (s.customRateOn) {
+          rows.push({ name:'Custom Benchmark', rate:s.customRate, val:annualGMV * s.customRate, type:'cash' });
+        }
+        body.innerHTML = rows.map(function(r) {
+          var suffix = r.type === 'btc' ? ' (incl. BTC return)' : '';
+          return '<tr><td>' + r.name + suffix + '</td><td>' + fmtPct(r.rate) + '</td><td>' + fmtCur(r.val) + '</td><td>' + fmtPct(r.val / annualGMV) + '</td></tr>';
+        }).join('');
+      }
+
+      function updateCalcCharts(r, s) {
+        var isDark = document.body.classList.contains('dark-mode');
+        var gc = isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)';
+        var tc = isDark ? '#a0a0c0' : '#6a6a8a';
+        [benefitChartInst, rateCompChartInst, accumChartInst].forEach(function(c){ if(c) c.destroy(); });
+
+        var labels = r.yearData.map(function(d){ return 'Year ' + d.year; });
+        var bCtx = document.getElementById('benefitChart');
+        if (bCtx) {
+          benefitChartInst = new Chart(bCtx, {
+            type:'bar', data:{
+              labels:labels,
+              datasets:[
+                { label:'Cashback', data:r.yearData.map(function(d){return d.cashbackUSD;}), backgroundColor:'rgba(99,102,241,0.8)' },
+                { label:'Staking Yield', data:r.yearData.map(function(d){return d.stakingUSD;}), backgroundColor:'rgba(16,185,129,0.8)' },
+                { label:'Price Appreciation', data:r.yearData.map(function(d){return Math.max(0,d.appreciation);}), backgroundColor:'rgba(245,158,11,0.8)' }
+              ]
+            }, options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{labels:{color:tc}}},
+              scales:{ x:{stacked:true,grid:{color:gc},ticks:{color:tc}}, y:{stacked:true,beginAtZero:true,grid:{color:gc},ticks:{color:tc}} } }
+          });
+        }
+
+        var benchmarks = enabledBenchmarks();
+        var annualGMV = s.monthlyGMV * 12;
+        var rateLabels = ['TQT (' + tierLabel(s.cashbackTier) + ')'];
+        var rateData = [r.effectiveRate * 100];
+        var rateColors = ['rgba(99,102,241,0.8)'];
+        benchmarks.forEach(function(bm) {
+          rateLabels.push(bm.name);
+          var effRate = bm.rate;
+          if (bm.type === 'btc') effRate = bm.rate * (1 + s.btcReturn);
+          rateData.push(effRate * 100);
+          rateColors.push(bm.type === 'btc' ? 'rgba(245,158,11,0.7)' : 'rgba(156,163,175,0.7)');
+        });
+        var rcCtx = document.getElementById('rateCompChart');
+        if (rcCtx) {
+          rateCompChartInst = new Chart(rcCtx, {
+            type:'bar', data:{
+              labels:rateLabels, datasets:[{ label:'Effective Rate %', data:rateData, backgroundColor:rateColors }]
+            }, options:{ indexAxis:'y', responsive:true, maintainAspectRatio:false,
+              plugins:{legend:{display:false}}, scales:{ x:{beginAtZero:true,grid:{color:gc},ticks:{color:tc}}, y:{grid:{color:gc},ticks:{color:tc}} } }
+          });
+        }
+
+        var aCtx = document.getElementById('accumChart');
+        if (aCtx) {
+          var running = 0;
+          var accumData = r.yearData.map(function(d){ running = d.accumTokens; return running; });
+          accumChartInst = new Chart(aCtx, {
+            type:'line', data:{
+              labels:labels, datasets:[{ label:'Accumulated TQT', data:accumData, borderColor:'#6366f1', backgroundColor:'rgba(99,102,241,0.1)', fill:true, tension:0.35 }]
+            }, options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}},
+              scales:{ x:{grid:{color:gc},ticks:{color:tc}}, y:{beginAtZero:true,grid:{color:gc},ticks:{color:tc}} } }
+          });
+        }
+      }
+
+      function updateScenarioMatrix(s) {
+        var body = document.getElementById('matrixBody');
+        if (!body) return;
+        var gmvScenarios = [
+          { label:'Conservative', growth:0.10 },
+          { label:'Expected', growth:0.25 },
+          { label:'Optimistic', growth:0.50 }
+        ];
+        var priceScenarios = [-0.40, 0, 0.20];
+        var values = [];
+        var min = Infinity, max = -Infinity;
+        gmvScenarios.forEach(function(gs) {
+          var row = [];
+          priceScenarios.forEach(function(ps) {
+            var ss = Object.assign({}, s, { annualGrowth:gs.growth, priceScenario:ps, horizon:3 });
+            var res = computeBenefit(ss);
+            var total = 0;
+            res.yearData.forEach(function(d){ total += d.totalBenefit; });
+            row.push(total);
+            if (total < min) min = total;
+            if (total > max) max = total;
+          });
+          values.push({ label:gs.label, cells:row });
+        });
+        var currentGrowth = s.annualGrowth;
+        var currentPS = s.priceScenario;
+        var html = '';
+        values.forEach(function(r) {
+          html += '<tr><td style="font-weight:600">' + r.label + '</td>';
+          r.cells.forEach(function(v, ci) {
+            var pct = max > min ? (v - min) / (max - min) : 0.5;
+            var rr = Math.round(220 - pct * 180);
+            var gg = Math.round(80 + pct * 140);
+            var bb = Math.round(80);
+            var isCurrent = false;
+            var gIdx = values.indexOf(r);
+            if (gIdx === 0 && currentGrowth <= 0.15 || gIdx === 1 && currentGrowth > 0.15 && currentGrowth <= 0.35 || gIdx === 2 && currentGrowth > 0.35) {
+              if (ci === 0 && currentPS <= -0.2 || ci === 1 && currentPS > -0.2 && currentPS < 0.1 || ci === 2 && currentPS >= 0.1) {
+                isCurrent = true;
+              }
+            }
+            html += '<td style="background:rgba('+rr+','+gg+','+bb+',0.25);color:#1a1a2e" class="' + (isCurrent ? 'cell-current' : '') + '">' + fmtCur(v) + '</td>';
+          });
+          html += '</tr>';
+        });
+        body.innerHTML = html;
+      }
+
+      function applyPreset(name) {
+        var p = PRESETS[name];
+        if (!p) return;
+        document.getElementById('monthlyGMV').value = p.gmv;
+        document.getElementById('annualGrowth').value = p.growth;
+        document.getElementById('tqtPrice').value = p.price;
+        document.getElementById('stakePct').value = p.stake;
+        document.getElementById('stakingAPY').value = p.apy;
+        setPill('horizon', String(p.horizon));
+        setPill('priceScenario', p.scenario);
+        setPill('lockPeriod', String(p.lock));
+        document.querySelectorAll('#scenarioPresets .pill-btn').forEach(function(b) {
+          b.classList.toggle('active', b.getAttribute('data-preset') === name);
+        });
+        syncSliderDisplays();
+        recalc();
+      }
+
+      function setPill(bind, val) {
+        document.querySelectorAll('[data-bind="'+bind+'"] .pill-btn').forEach(function(b) {
+          b.classList.toggle('active', b.getAttribute('data-value') === val);
+        });
+      }
+
+      function syncSliderDisplays() {
+        var gmvLog = parseFloat(document.getElementById('monthlyGMV').value);
+        document.getElementById('gmvVal').textContent = fmtCur(Math.pow(10, gmvLog));
+        document.getElementById('growthVal').textContent = document.getElementById('annualGrowth').value + '%';
+        var tqtLog = parseFloat(document.getElementById('tqtPrice').value);
+        document.getElementById('tqtPriceVal').textContent = fmtCur(Math.pow(10, tqtLog));
+        document.getElementById('stakeVal').textContent = document.getElementById('stakePct').value + '%';
+        document.getElementById('apyVal').textContent = document.getElementById('stakingAPY').value + '%';
+        document.getElementById('btcReturnVal').textContent = document.getElementById('btcReturn').value + '%';
+        document.getElementById('avgTxVal').textContent = '$' + parseInt(document.getElementById('avgTxSize').value).toLocaleString();
+        if (document.getElementById('independentBTC').checked) {
+          document.getElementById('geminiBtcVal').textContent = document.getElementById('geminiBtcReturn').value + '%';
+          document.getElementById('coinbaseBtcVal').textContent = document.getElementById('coinbaseBtcReturn').value + '%';
+        }
+        if (document.getElementById('customRateToggle').checked) {
+          document.getElementById('customRateVal').textContent = parseFloat(document.getElementById('customRate').value).toFixed(2) + '%';
+        }
+        var sensLog = parseFloat(document.getElementById('sensitivityPrice').value);
+        document.getElementById('sensitivityPriceVal').textContent = fmtCur(Math.pow(10, sensLog));
+      }
+
+      function recalc() {
+        syncSliderDisplays();
+        var s = readState();
+        var r = computeBenefit(s);
+        updateDisplay(r, s);
+      }
+
+      function exportToCSV() {
+        var s = readState();
+        var r = computeBenefit(s);
+        var headers = ['Year','Annual GMV','Cashback USD','Cashback TQT','Staked TQT','Staking Yield TQT','Staking Yield USD','Appreciation USD','Total Benefit','Accum TQT','Price BOY','Price EOY'];
+        var rows = r.yearData.map(function(d) {
+          return [d.year, d.annualGMV.toFixed(2), d.cashbackUSD.toFixed(2), d.cashbackTokens.toFixed(0),
+            d.stakedTokens.toFixed(0), d.stakingTokens.toFixed(0), d.stakingUSD.toFixed(2),
+            d.appreciation.toFixed(2), d.totalBenefit.toFixed(2), d.accumTokens.toFixed(0),
+            d.priceBOY.toFixed(4), d.priceEOY.toFixed(4)];
+        });
+        var csv = [headers.join(',')].concat(rows.map(function(r){return r.join(',');})).join('\n');
+        var blob = new Blob([csv], {type:'text/csv'});
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        a.href = url; a.download = 'retailer_benefits.csv'; a.click();
+        URL.revokeObjectURL(url);
+      }
+
+      function buildCustomPricePath(horizon) {
+        var grp = document.getElementById('customPricePathGroup');
+        if (!grp) return;
+        grp.innerHTML = '';
+        for (var y = 0; y < horizon; y++) {
+          var div = document.createElement('div');
+          div.className = 'param-group';
+          div.innerHTML = '<label>Year ' + (y+1) + ' TQT Price ($)</label><input type="number" id="customPriceY' + y + '" value="0.25" step="0.01" min="0.001">';
+          grp.appendChild(div);
+          div.querySelector('input').addEventListener('input', recalc);
+        }
+      }
+
       function initRewardsCalculator() {
-        const calcBtn = document.getElementById('rewardsCalcBtn');
-        const backBtn = document.getElementById('calculatorBackBtn');
-        const calcView = document.getElementById('calculatorView');
-        const mainView = document.getElementById('main');
-        const pageTitle = document.getElementById('pageTitle');
-        const runSimBtn = document.getElementById('runSimulation');
-        const exportBtn = document.getElementById('exportData');
-        const exportCSVBtn = document.getElementById('exportCSV');
-        const volatilityRef = document.getElementById('volatilityRef');
-        
-        // Switch to calculator view
-        let priceRefreshInterval = null;
-        
+        var calcBtn = document.getElementById('rewardsCalcBtn');
+        var backBtn = document.getElementById('calculatorBackBtn');
+        var calcView = document.getElementById('calculatorView');
+        var mainView = document.getElementById('main');
+        var exportBtn = document.getElementById('exportData');
+
         if (calcBtn) {
-          calcBtn.addEventListener('click', async () => {
+          calcBtn.addEventListener('click', function() {
             mainView.style.display = 'none';
             calcView.classList.add('active');
             backBtn.style.display = 'inline-grid';
-            
-            // Fetch live prices immediately
-            await fetchLivePrices();
-            runSimulation();
-            
-            // Refresh prices every 30 seconds
-            priceRefreshInterval = setInterval(fetchLivePrices, 30000);
+            recalc();
           });
         }
-        
-        // Switch back to financials view
         if (backBtn) {
-          backBtn.addEventListener('click', () => {
+          backBtn.addEventListener('click', function() {
             calcView.classList.remove('active');
             mainView.style.display = 'block';
             backBtn.style.display = 'none';
-            
-            // Stop price refresh when leaving calculator
-            if (priceRefreshInterval) {
-              clearInterval(priceRefreshInterval);
-              priceRefreshInterval = null;
-            }
           });
         }
-        
-        // Update live price when reference changes
-        if (volatilityRef) {
-          volatilityRef.addEventListener('change', updateLivePrice);
-        }
-        
-        // Run simulation
-        if (runSimBtn) {
-          runSimBtn.addEventListener('click', runSimulation);
-        }
-        
-        // Export buttons
-        if (exportBtn) {
-          exportBtn.addEventListener('click', exportToCSV);
-        }
-        if (exportCSVBtn) {
-          exportCSVBtn.addEventListener('click', exportToCSV);
-        }
-        
-        // Auto-run simulation when parameters change
-        document.querySelectorAll('.calc-params input, .calc-params select').forEach(input => {
-          input.addEventListener('change', runSimulation);
+        if (exportBtn) exportBtn.addEventListener('click', exportToCSV);
+
+        // Preset buttons
+        document.querySelectorAll('#scenarioPresets .pill-btn').forEach(function(btn) {
+          btn.addEventListener('click', function() { applyPreset(btn.getAttribute('data-preset')); });
         });
-      }
-      
-      function updateLivePrice() {
-        const ref = document.getElementById('volatilityRef');
-        if (!ref) return;
-        
-        const refValue = ref.value;
-        const priceEl = document.getElementById('livePrice');
-        const changeEl = document.getElementById('liveChange');
-        
-        if (cryptoPrices[refValue] && priceEl && changeEl) {
-          const data = cryptoPrices[refValue];
-          
-          if (data.price === 0) {
-            priceEl.textContent = 'Loading...';
-            changeEl.textContent = '--';
-            changeEl.style.color = '#888';
-          } else {
-            priceEl.textContent = formatCurrency(data.price);
-            changeEl.textContent = (data.change >= 0 ? '+' : '') + data.change.toFixed(2) + '%';
-            changeEl.style.color = data.change >= 0 ? '#10b981' : '#ef4444';
-          }
-        }
-        
-        // Update volatility impact text
-        const level = parseInt(document.getElementById('volatilityLevel').value);
-        const impactText = document.getElementById('volatilityImpactText');
-        if (level === 0) {
-          impactText.textContent = 'No volatility - fixed price growth';
-        } else if (level <= 50) {
-          impactText.textContent = 'Low volatility applied - mild price fluctuations';
-        } else if (level <= 100) {
-          impactText.textContent = 'Moderate volatility applied';
-        } else {
-          impactText.textContent = 'High volatility applied - significant price swings';
-        }
-      }
-      
-      function runSimulation() {
-        // Get all input values
-        const totalSupply = parseFloat(document.getElementById('totalSupply').value) || 1000000000;
-        const initialPrice = parseFloat(document.getElementById('initialPrice').value) || 0.10;
-        const endPrice = parseFloat(document.getElementById('endPrice').value) || 0.50;
-        const months = parseInt(document.getElementById('projectionMonths').value) || 24;
-        const monthlyVolume = parseFloat(document.getElementById('monthlyVolume').value) || 100000;
-        const avgOrderValue = parseFloat(document.getElementById('avgOrderValue').value) || 50;
-        const cashbackRate = parseFloat(document.getElementById('cashbackRate').value) / 100 || 0.01;
-        const growthRate = parseFloat(document.getElementById('growthRate').value) / 100 || 0.05;
-        const growthVariability = parseFloat(document.getElementById('growthVariability').value) / 100 || 0.03;
-        const growthPattern = document.getElementById('growthPattern').value;
-        const treasuryRate = parseFloat(document.getElementById('treasuryRate').value) / 100 || 0.20;
-        const investmentReturn = parseFloat(document.getElementById('investmentReturn').value) / 100 / 12 || 0.00417;
-        const burnRate = parseFloat(document.getElementById('burnRate').value) / 100 || 0.001;
-        const volatilityLevel = parseInt(document.getElementById('volatilityLevel').value) / 100 || 1;
-        const volatilityRef = document.getElementById('volatilityRef').value;
-        
-        // Calculate ecosystem reserve (35% of total supply)
-        let ecosystemReserve = totalSupply * 0.35;
-        
-        // Initialize simulation data
-        simulationData = [];
-        let treasury = 0;
-        let totalBuybackCost = 0;
-        let totalTokensPurchased = 0;
-        let currentVolume = monthlyVolume;
-        
-        // Generate monthly data
-        for (let month = 1; month <= months; month++) {
-          // Calculate price for this month with volatility
-          const priceProgress = month / months;
-          let basePrice = initialPrice + (endPrice - initialPrice) * priceProgress;
-          
-          // Apply volatility
-          let volatilityFactor = 0;
-          if (volatilityLevel > 0) {
-            const refVolatility = volatilityPatterns[volatilityRef] || 0.5;
-            volatilityFactor = (Math.random() - 0.5) * 2 * refVolatility * volatilityLevel;
-          }
-          const tokenPrice = basePrice * (1 + volatilityFactor);
-          
-          // Calculate growth for this month
-          let monthGrowth = growthRate;
-          if (growthPattern === 'seasonal') {
-            // Seasonal pattern: higher in winter (months 11,12,1,2), lower in summer
-            const monthOfYear = ((month - 1) % 12) + 1;
-            const seasonalFactor = Math.cos((monthOfYear - 1) * Math.PI / 6) * 0.5;
-            monthGrowth += seasonalFactor * growthRate;
-          } else if (growthPattern === 'volatile') {
-            // Random volatility including potential negative months
-            monthGrowth += (Math.random() - 0.4) * growthVariability * 3;
-          }
-          monthGrowth += (Math.random() - 0.5) * growthVariability;
-          
-          // Update volume
-          currentVolume = currentVolume * (1 + monthGrowth);
-          
-          // Calculate GMV and rewards
-          const gmv = currentVolume * avgOrderValue;
-          const totalCashback = gmv * cashbackRate;
-          const userCashback = totalCashback * (1 - treasuryRate);
-          const treasuryIncome = totalCashback * treasuryRate;
-          
-          // Calculate tokens needed for rewards
-          const tokensNeeded = userCashback / tokenPrice;
-          
-          // Determine if we need to buy from market
-          let tokensToPurchase = 0;
-          let purchaseCost = 0;
-          
-          if (tokensNeeded > ecosystemReserve) {
-            tokensToPurchase = tokensNeeded - ecosystemReserve;
-            purchaseCost = tokensToPurchase * tokenPrice;
-            ecosystemReserve = 0;
-          } else {
-            ecosystemReserve -= tokensNeeded;
-          }
-          
-          // Apply burn
-          const tokensBurned = tokensNeeded * burnRate;
-          
-          // Update treasury with investment returns
-          treasury = treasury * (1 + investmentReturn) + treasuryIncome;
-          totalBuybackCost += purchaseCost;
-          totalTokensPurchased += tokensToPurchase;
-          
-          simulationData.push({
-            month,
-            tokenPrice,
-            ecosystemReserve,
-            gmv,
-            growthRate: monthGrowth,
-            tokensNeeded,
-            tokensToPurchase,
-            purchaseCost,
-            treasury,
-            totalBuybackCost,
-            netProfit: treasury - totalBuybackCost
+
+        // Pill groups (radio-style)
+        document.querySelectorAll('.calc-params [data-bind]').forEach(function(grp) {
+          grp.querySelectorAll('.pill-btn').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+              grp.querySelectorAll('.pill-btn').forEach(function(b){ b.classList.remove('active'); });
+              btn.classList.add('active');
+              if (grp.getAttribute('data-bind') === 'horizon' && document.getElementById('customPricePathToggle').checked) {
+                buildCustomPricePath(parseInt(btn.getAttribute('data-value')));
+              }
+              recalc();
+            });
           });
-        }
-        
-        // Update results display
-        updateResultsDisplay();
-        updateCharts();
-        updateBreakdownTable();
-      }
-      
-      function updateResultsDisplay() {
-        const lastMonth = simulationData[simulationData.length - 1];
-        const firstMonth = simulationData[0];
-        
-        document.getElementById('resultPrice').textContent = formatCurrency(lastMonth.tokenPrice);
-        document.getElementById('resultVolatility').textContent = 'Volatility: ' + document.getElementById('volatilityLevel').value + '%';
-        document.getElementById('resultReserve').textContent = formatNumber(lastMonth.ecosystemReserve);
-        document.getElementById('resultTreasury').textContent = formatCurrency(lastMonth.treasury);
-        
-        const roi = firstMonth.treasury > 0 
-          ? ((lastMonth.treasury - firstMonth.treasury) / firstMonth.treasury * 100).toFixed(1)
-          : (lastMonth.treasury > 0 ? '∞' : '0');
-        document.getElementById('resultROI').textContent = 'ROI: ' + roi + '%';
-        
-        document.getElementById('resultBuyback').textContent = formatCurrency(lastMonth.totalBuybackCost);
-        document.getElementById('resultTokens').textContent = formatNumber(simulationData.reduce((sum, m) => sum + m.tokensToPurchase, 0)) + ' tokens purchased';
-        document.getElementById('resultProfit').textContent = formatCurrency(lastMonth.netProfit);
-        
-        // Calculate months until depletion
-        const avgMonthlyTokens = simulationData.reduce((sum, m) => sum + m.tokensNeeded, 0) / simulationData.length;
-        const monthsUntilDepletion = avgMonthlyTokens > 0 
-          ? Math.floor(lastMonth.ecosystemReserve / avgMonthlyTokens)
-          : 999;
-        document.getElementById('resultDepletion').textContent = monthsUntilDepletion > 36 ? '36+' : monthsUntilDepletion;
-        
-        // Show alert if reserve is critically low
-        const alertBox = document.getElementById('supplyAlert');
-        const alertMsg = document.getElementById('alertMessage');
-        if (lastMonth.ecosystemReserve < 10000000) {
-          alertBox.style.display = 'block';
-          alertMsg.textContent = 'Ecosystem reserve is critically low at ' + formatNumber(lastMonth.ecosystemReserve) + ' tokens. Consider reducing cashback rate or increasing burn rate.';
-        } else if (monthsUntilDepletion < 12) {
-          alertBox.style.display = 'block';
-          alertMsg.textContent = 'At current rates, ecosystem reserve will be depleted in approximately ' + monthsUntilDepletion + ' months.';
-        } else {
-          alertBox.style.display = 'none';
-        }
-      }
-      
-      function updateCharts() {
-        const labels = simulationData.map(d => 'M' + d.month);
-        const isDarkMode = document.body.classList.contains('dark-mode');
-        const gridColor = isDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)';
-        const textColor = isDarkMode ? '#a0a0c0' : '#6a6a8a';
-        
-        // Destroy existing charts
-        [priceChartInstance, gmvChartInstance, buybackChartInstance, treasuryChartInstance, reserveChartInstance].forEach(chart => {
-          if (chart) chart.destroy();
         });
-        
-        // Price Chart
-        const priceCtx = document.getElementById('priceChart');
-        if (priceCtx) {
-          priceChartInstance = new Chart(priceCtx, {
-            type: 'line',
-            data: {
-              labels,
-              datasets: [{
-                label: 'Token Price',
-                data: simulationData.map(d => d.tokenPrice),
-                borderColor: '#6366f1',
-                backgroundColor: 'rgba(99, 102, 241, 0.1)',
-                fill: true,
-                tension: 0.4
-              }]
-            },
-            options: {
-              responsive: true,
-              maintainAspectRatio: false,
-              plugins: { legend: { display: false } },
-              scales: {
-                y: { 
-                  beginAtZero: false,
-                  grid: { color: gridColor },
-                  ticks: { color: textColor }
-                },
-                x: { 
-                  grid: { color: gridColor },
-                  ticks: { color: textColor }
-                }
-              }
+
+        // Results tab switching
+        document.querySelectorAll('.calc-results-tabs .pill-btn').forEach(function(btn) {
+          btn.addEventListener('click', function() {
+            document.querySelectorAll('.calc-results-tabs .pill-btn').forEach(function(b){ b.classList.remove('active'); });
+            btn.classList.add('active');
+            document.querySelectorAll('.calc-restab-pane').forEach(function(p){ p.style.display = 'none'; });
+            var pane = document.getElementById('pane-' + btn.getAttribute('data-restab'));
+            if (pane) pane.style.display = 'block';
+            if (btn.getAttribute('data-restab') === 'charts') recalc();
+          });
+        });
+
+        // Range sliders + number inputs -> recalc on input
+        document.querySelectorAll('.calc-params input[type="range"], .calc-params input[type="number"]').forEach(function(inp) {
+          inp.addEventListener('input', recalc);
+        });
+
+        // Checkboxes -> recalc
+        document.querySelectorAll('.calc-params input[type="checkbox"]').forEach(function(cb) {
+          cb.addEventListener('change', function() {
+            // Toggle visibility for dependent groups
+            if (cb.id === 'gmvPrecise') {
+              document.getElementById('gmvPreciseInput').style.display = cb.checked ? 'block' : 'none';
             }
+            if (cb.id === 'independentBTC') {
+              document.getElementById('independentBTCGroup').style.display = cb.checked ? 'block' : 'none';
+            }
+            if (cb.id === 'customRateToggle') {
+              document.getElementById('customRateGroup').style.display = cb.checked ? 'block' : 'none';
+            }
+            if (cb.id === 'customPricePathToggle') {
+              var grp = document.getElementById('customPricePathGroup');
+              grp.style.display = cb.checked ? 'block' : 'none';
+              if (cb.checked) buildCustomPricePath(parseInt(pillVal('horizon')) || 3);
+            }
+            recalc();
+          });
+        });
+
+        // Sensitivity price slider
+        var sensSlider = document.getElementById('sensitivityPrice');
+        if (sensSlider) sensSlider.addEventListener('input', function() { recalc(); });
+
+        // Advanced toggle
+        var advToggle = document.getElementById('advancedToggle');
+        var advBody = document.getElementById('advancedBody');
+        var arrow = advToggle ? advToggle.querySelector('.toggle-arrow') : null;
+        if (advToggle) {
+          advToggle.addEventListener('click', function() {
+            var open = advBody.style.display !== 'none';
+            advBody.style.display = open ? 'none' : 'block';
+            if (arrow) arrow.classList.toggle('open', !open);
           });
         }
-        
-        // GMV Chart
-        const gmvCtx = document.getElementById('gmvChart');
-        if (gmvCtx) {
-          gmvChartInstance = new Chart(gmvCtx, {
-            type: 'bar',
-            data: {
-              labels,
-              datasets: [
-                {
-                  label: 'GMV',
-                  data: simulationData.map(d => d.gmv),
-                  backgroundColor: 'rgba(16, 185, 129, 0.8)',
-                  yAxisID: 'y'
-                },
-                {
-                  label: 'Growth Rate',
-                  data: simulationData.map(d => d.growthRate * 100),
-                  type: 'line',
-                  borderColor: '#f59e0b',
-                  backgroundColor: 'transparent',
-                  tension: 0.4,
-                  yAxisID: 'y1'
-                }
-              ]
-            },
-            options: {
-              responsive: true,
-              maintainAspectRatio: false,
-              plugins: { legend: { labels: { color: textColor } } },
-              scales: {
-                y: { 
-                  position: 'left',
-                  grid: { color: gridColor },
-                  ticks: { color: textColor }
-                },
-                y1: {
-                  position: 'right',
-                  grid: { display: false },
-                  ticks: { color: textColor }
-                },
-                x: { 
-                  grid: { color: gridColor },
-                  ticks: { color: textColor }
-                }
-              }
-            }
-          });
-        }
-        
-        // Buyback Chart
-        const buybackCtx = document.getElementById('buybackChart');
-        if (buybackCtx) {
-          buybackChartInstance = new Chart(buybackCtx, {
-            type: 'bar',
-            data: {
-              labels,
-              datasets: [{
-                label: 'Buyback Cost',
-                data: simulationData.map(d => d.purchaseCost),
-                backgroundColor: 'rgba(239, 68, 68, 0.8)'
-              }]
-            },
-            options: {
-              responsive: true,
-              maintainAspectRatio: false,
-              plugins: { legend: { display: false } },
-              scales: {
-                y: { 
-                  beginAtZero: true,
-                  grid: { color: gridColor },
-                  ticks: { color: textColor }
-                },
-                x: { 
-                  grid: { color: gridColor },
-                  ticks: { color: textColor }
-                }
-              }
-            }
-          });
-        }
-        
-        // Treasury Chart
-        const treasuryCtx = document.getElementById('treasuryChart');
-        if (treasuryCtx) {
-          treasuryChartInstance = new Chart(treasuryCtx, {
-            type: 'line',
-            data: {
-              labels,
-              datasets: [
-                {
-                  label: 'Treasury Value',
-                  data: simulationData.map(d => d.treasury),
-                  borderColor: '#8b5cf6',
-                  backgroundColor: 'rgba(139, 92, 246, 0.1)',
-                  fill: true,
-                  tension: 0.4
-                },
-                {
-                  label: 'Net Profit',
-                  data: simulationData.map(d => d.netProfit),
-                  borderColor: '#10b981',
-                  backgroundColor: 'rgba(16, 185, 129, 0.1)',
-                  fill: true,
-                  tension: 0.4
-                }
-              ]
-            },
-            options: {
-              responsive: true,
-              maintainAspectRatio: false,
-              plugins: { legend: { labels: { color: textColor } } },
-              scales: {
-                y: { 
-                  beginAtZero: true,
-                  grid: { color: gridColor },
-                  ticks: { color: textColor }
-                },
-                x: { 
-                  grid: { color: gridColor },
-                  ticks: { color: textColor }
-                }
-              }
-            }
-          });
-        }
-        
-        // Reserve Chart
-        const reserveCtx = document.getElementById('reserveChart');
-        if (reserveCtx) {
-          reserveChartInstance = new Chart(reserveCtx, {
-            type: 'line',
-            data: {
-              labels,
-              datasets: [
-                {
-                  label: 'Ecosystem Reserve',
-                  data: simulationData.map(d => d.ecosystemReserve),
-                  borderColor: '#06b6d4',
-                  backgroundColor: 'rgba(6, 182, 212, 0.1)',
-                  fill: true,
-                  tension: 0.4
-                },
-                {
-                  label: 'Tokens Needed',
-                  data: simulationData.map(d => d.tokensNeeded),
-                  borderColor: '#f59e0b',
-                  backgroundColor: 'transparent',
-                  tension: 0.4
-                }
-              ]
-            },
-            options: {
-              responsive: true,
-              maintainAspectRatio: false,
-              plugins: { legend: { labels: { color: textColor } } },
-              scales: {
-                y: { 
-                  beginAtZero: true,
-                  grid: { color: gridColor },
-                  ticks: { color: textColor }
-                },
-                x: { 
-                  grid: { color: gridColor },
-                  ticks: { color: textColor }
-                }
-              }
-            }
-          });
-        }
+
+        // Auto-select tier when avg tx changes
+        document.getElementById('avgTxSize').addEventListener('input', function() {
+          var autoTier = autoSelectTier(parseFloat(this.value));
+          setPill('cashbackTier', String(autoTier));
+          recalc();
+        });
+
+        // Initial run
+        syncSliderDisplays();
+        recalc();
       }
-      
-      function updateBreakdownTable() {
-        const tbody = document.getElementById('breakdownBody');
-        if (!tbody) return;
-        
-        tbody.innerHTML = simulationData.map(d => `
-          <tr>
-            <td>Month ${d.month}</td>
-            <td>${formatCurrency(d.tokenPrice)}</td>
-            <td>${formatNumber(d.ecosystemReserve)}</td>
-            <td>${formatNumber(d.tokensNeeded)}</td>
-            <td>${formatNumber(d.tokensToPurchase)}</td>
-            <td>${formatCurrency(d.purchaseCost)}</td>
-            <td>${formatCurrency(d.treasury)}</td>
-          </tr>
-        `).join('');
-      }
-      
-      function exportToCSV() {
-        if (simulationData.length === 0) {
-          alert('Please run a simulation first');
-          return;
-        }
-        
-        const headers = ['Month', 'Token Price', 'Reserve Pool', 'GMV', 'Growth Rate', 'Tokens Needed', 'Tokens To Purchase', 'Purchase Cost', 'Treasury', 'Total Buyback Cost', 'Net Profit'];
-        const rows = simulationData.map(d => [
-          d.month,
-          d.tokenPrice.toFixed(4),
-          d.ecosystemReserve.toFixed(0),
-          d.gmv.toFixed(2),
-          (d.growthRate * 100).toFixed(2) + '%',
-          d.tokensNeeded.toFixed(0),
-          d.tokensToPurchase.toFixed(0),
-          d.purchaseCost.toFixed(2),
-          d.treasury.toFixed(2),
-          d.totalBuybackCost.toFixed(2),
-          d.netProfit.toFixed(2)
-        ]);
-        
-        const csv = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
-        const blob = new Blob([csv], { type: 'text/csv' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'tokenomics_simulation.csv';
-        a.click();
-        URL.revokeObjectURL(url);
-      }
-      
-      function formatCurrency(value) {
-        if (value >= 1000000) {
-          return '$' + (value / 1000000).toFixed(2) + 'M';
-        } else if (value >= 1000) {
-          return '$' + (value / 1000).toFixed(2) + 'K';
-        } else if (value < 0.01) {
-          return '$' + value.toFixed(6);
-        } else {
-          return '$' + value.toFixed(2);
-        }
-      }
-      
-      function formatNumber(value) {
-        if (value >= 1000000000) {
-          return (value / 1000000000).toFixed(1) + 'B';
-        } else if (value >= 1000000) {
-          return (value / 1000000).toFixed(1) + 'M';
-        } else if (value >= 1000) {
-          return (value / 1000).toFixed(1) + 'K';
-        } else {
-          return value.toFixed(0);
-        }
-      }
+
+      function formatCurrency(value) { return fmtCur(value); }
+      function formatNumber(value) { return fmtNum(value); }
 
       // Initialize when DOM is ready
       if (document.readyState === 'loading') {

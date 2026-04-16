@@ -390,6 +390,14 @@
   .chatbot-messages::-webkit-scrollbar-track{background:rgba(0,0,0,0.06);border-radius:8px}
   .chatbot-messages::-webkit-scrollbar-thumb{background:rgba(0,0,0,0.25);border-radius:8px}
   .chatbot-msg{max-width:80%;padding:10px 12px;border-radius:16px;line-height:1.35;font-size:14px;word-wrap:break-word;white-space:pre-wrap;position:relative;transition:opacity 200ms ease}
+  .chatbot-msg.chatbot-msg-markdown{white-space:normal}
+  .chatbot-msg-markdown p{margin:0 0 8px}
+  .chatbot-msg-markdown p:last-child{margin-bottom:0}
+  .chatbot-msg-markdown ul,.chatbot-msg-markdown ol{margin:8px 0;padding-left:1.2em}
+  .chatbot-msg-markdown li{margin:4px 0}
+  .chatbot-msg-markdown img{max-width:100%;height:auto;border-radius:8px}
+  .chatbot-msg-markdown a{color:#1a1a1a;text-decoration:underline}
+  .chatbot-msg-domain{font-size:11px;color:#666;margin-top:6px;font-weight:500}
   .chatbot-msg-user{align-self:flex-end;background:rgba(0,0,0,0.78);color:#fff;border-radius:30px 30px 6px 30px;margin-right:8px}
   .chatbot-msg-bot{align-self:flex-start;background:#f2f2f2;color:#111;border-radius:30px 30px 30px 6px}
   .chatbot-images{background:transparent;padding:8px;border-radius:12px;display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-start}
@@ -1221,38 +1229,61 @@
         input.setAttribute('placeholder','Select a keyword to begin');
       }
     }
+
+    function keywordToLuxuryQuery(label) {
+      const q = String(label || '').toLowerCase();
+      if (q === 'kusama' || q === 'kusama x lv campaign') {
+        return 'Tell me about the Louis Vuitton and Yayoi Kusama collaboration: campaigns, iconic products, and visual themes.';
+      }
+      if (q.includes('capucines')) {
+        return 'Tell me about the Louis Vuitton Capucines bag, including Kusama editions and pricing context.';
+      }
+      return 'Tell me about "' + label + '" in the context of Louis Vuitton luxury fashion, campaigns, and retail.';
+    }
+
+    async function runLuxuryQueryForKeyword(label) {
+      if (!window.LuxuryIntelligence) return;
+      showThinking();
+      try {
+        const data = await window.LuxuryIntelligence.ask(keywordToLuxuryQuery(label));
+        hideThinking();
+        addMessage('bot', String(data.answer || ''), {
+          renderMarkdown: true,
+          domain: data.domain
+        });
+        if (data.images && Array.isArray(data.images) && data.images.length > 0) {
+          displayImages(data.images);
+        } else {
+          finalizeAssistantTurnScroll();
+        }
+        if (window.ShopThatData && currentSessionId) {
+          const botKeywords = window.ShopThatData.extractKeywordsFromText(String(data.answer || ''));
+          window.ShopThatData.addChatMessage(currentSessionId, String(data.answer || ''), 'bot', botKeywords);
+        }
+      } catch (e) {
+        hideThinking();
+        console.error('LuxuryIntelligence keyword query failed', e);
+        addMessage('bot', 'Luxury Intelligence is temporarily unavailable. Please try again in a moment.');
+        finalizeAssistantTurnScroll();
+      }
+    }
+
     function onKeywordSelect(label){
       hasSelectedKeyword = true;
       setInputsEnabled(true);
       input.value = label;
       input.focus();
-      
-      // Special handling for "Kusama x LV Campaign" keyword
-      if (label.toLowerCase() === 'kusama x lv campaign') {
-        // Add informational blurb about Kusama FIRST (above images)
-        addMessage('bot', 'Yayoi Kusama is a renowned Japanese contemporary artist known for her immersive installations and signature polka dot patterns. Her work explores themes of infinity, self-obliteration, and the cosmos. The Louis Vuitton x Yayoi Kusama collaboration celebrates her iconic artistic vision.');
-        
-        // Display Kusama images in the chatbot (below blurb)
-        const kusamaImageUrls = [
-          'assets/kusama-gal1.png',
-          'assets/kusama-gal2.png',
-          'assets/kusama-gal3.png',
-          'assets/kusama-gal4.png'
-        ];
-        
-        // Display images in chatbot messages (these will be draggable to gallery)
-        displayImages(kusamaImageUrls);
-      }
-      
-      // Track keyword usage in ShopThatData system
+
+      addMessage('user', label);
+
       if (window.ShopThatData) {
         window.ShopThatData.trackKeywordUsage(label, 'chatbot-selection');
-        
-        // Add message to current chat session
         if (currentSessionId) {
           window.ShopThatData.addChatMessage(currentSessionId, label, 'user', [label]);
         }
       }
+
+      void runLuxuryQueryForKeyword(label);
     }
 
     // Remove hardcoded mock keywords - now using ShopThatData system above
@@ -1388,16 +1419,15 @@
     
     // Helper function to show keywords based on scroll position
     function showKeywordsAnimated(allKeywords) {
-      // Initial keyword - only show Capucines Bag when at top
-      const initialKeyword = 'Capucines Bag';
+      // First two chips when at top of page
+      const initialKeywords = ['Capucines Bag', 'Kusama'];
       // Additional keywords to show when products are in view
       const productKeywords = ['Capucines BB', 'Capucines White', 'Twist MM'];
       
-      // Show initial keyword
-      showKeywords([initialKeyword]);
+      showKeywords(initialKeywords);
           
       // Set up scroll listener for product visibility
-      setupProductScrollListener(initialKeyword, productKeywords);
+      setupProductScrollListener(initialKeywords, productKeywords);
       }
       
     // Function to display keywords with animation
@@ -1423,7 +1453,7 @@
     }
     
     // Set up scroll listener to detect when products section is visible
-    function setupProductScrollListener(initialKeyword, productKeywords) {
+    function setupProductScrollListener(initialKeywords, productKeywords) {
       const productGrid = document.querySelector('.product-grid');
       if (!productGrid) return;
       
@@ -1434,12 +1464,12 @@
             // Products are now visible - show additional keywords
             productsInView = true;
             console.log('Products in view - showing additional keywords');
-            showKeywords([initialKeyword, ...productKeywords]);
+            showKeywords([...initialKeywords, ...productKeywords]);
           } else if (!entry.isIntersecting && productsInView) {
-            // Products no longer visible - show only initial keyword
+            // Products no longer visible - show only initial keywords
             productsInView = false;
-            console.log('Products out of view - showing only initial keyword');
-            showKeywords([initialKeyword]);
+            console.log('Products out of view - showing only initial keywords');
+            showKeywords(initialKeywords);
       }
         });
       }, {
@@ -1467,23 +1497,35 @@
       updateBoxSizeForState();
     }
 
-    function addMessage(sender, text){
+    /** After assistant text + optional images, align scroll so the latest user prompt is at the top of the messages viewport (AI reply starts in view, not scrolled to the bottom). */
+    function finalizeAssistantTurnScroll(){
+      requestAnimationFrame(() => {
+        const users = messages.querySelectorAll('.chatbot-msg-user');
+        const lastUser = users[users.length - 1];
+        if (lastUser) {
+          lastUser.scrollIntoView({ block: 'start', behavior: 'instant' });
+        }
+      });
+    }
+
+    function addMessage(sender, text, opts){
       const klass = sender === 'user' ? 'chatbot-msg chatbot-msg-user' : 'chatbot-msg chatbot-msg-bot';
       const div = createEl('div', { class: klass });
-      div.textContent = sender === 'user' ? text : markdownToText(text);
+      if (sender === 'user') {
+        div.textContent = text;
+      } else if (opts && opts.renderMarkdown && window.LuxuryIntelligence) {
+        div.classList.add('chatbot-msg-markdown');
+        div.innerHTML = window.LuxuryIntelligence.markdownToHtml(text);
+        if (opts.domain) {
+          const dom = createEl('div', { class: 'chatbot-msg-domain', text: String(opts.domain) });
+          div.appendChild(dom);
+        }
+      } else {
+        div.textContent = markdownToText(text);
+      }
       messages.appendChild(div);
       if (sender === 'user') {
-        // keep UX: after sending, keep at bottom to see pending reply
         messages.scrollTop = messages.scrollHeight;
-      } else {
-        // after bot response, anchor just above the preceding user bubble
-        // so both the query and the start of the response are visible
-        const botH = div.offsetHeight || 0;
-        const prev = div.previousElementSibling;
-        const prevH = prev && prev instanceof HTMLElement ? (prev.offsetHeight || 0) : 0;
-        const gutter = 16; // small padding so both bubbles breathe
-        const target = Math.max(0, messages.scrollHeight - (botH + prevH + gutter));
-        messages.scrollTop = target;
       }
       // Show refresh after the first bot response exists
       if (sender !== 'user') refreshBtn.removeAttribute('hidden');
@@ -1534,7 +1576,7 @@
       });
       
       messages.appendChild(imageContainer);
-      messages.scrollTop = messages.scrollHeight;
+      finalizeAssistantTurnScroll();
       ensureSizeForContent();
     }
 
@@ -1598,7 +1640,7 @@
       
       // Add card to messages
       messages.appendChild(card);
-      messages.scrollTop = messages.scrollHeight;
+      finalizeAssistantTurnScroll();
       ensureSizeForContent();
     }
 
@@ -1620,7 +1662,13 @@
       thinkingIndicator.appendChild(thinkingText);
       thinkingIndicator.appendChild(dots);
       messages.appendChild(thinkingIndicator);
-      messages.scrollTop = messages.scrollHeight;
+      const userNodes = messages.querySelectorAll('.chatbot-msg-user');
+      const lastUser = userNodes[userNodes.length - 1];
+      if (lastUser) {
+        lastUser.scrollIntoView({ block: 'start', behavior: 'instant' });
+      } else {
+        messages.scrollTop = messages.scrollHeight;
+      }
       ensureSizeForContent();
     }
 
@@ -1637,15 +1685,12 @@
       const txt = (input.value||'').trim();
       if (!txt) return;
       
-      // Track keyword usage from user message
-      if (window.ShopThatData) {
-        const keywordsFound = window.ShopThatData.extractKeywordsFromText(txt);
-        if (currentSessionId && keywordsFound.length > 0) {
-          window.ShopThatData.addChatMessage(currentSessionId, txt, 'user', keywordsFound);
-        }
-      }
-      
       addMessage('user', txt);
+
+      if (window.ShopThatData && currentSessionId) {
+        const keywordsFound = window.ShopThatData.extractKeywordsFromText(txt);
+        window.ShopThatData.addChatMessage(currentSessionId, txt, 'user', keywordsFound);
+      }
       input.value = '';
       // After first send, keep inputs enabled for continued conversation
       if (!hasSelectedKeyword) setInputsEnabled(true);
@@ -1654,60 +1699,35 @@
       showThinking();
       
       try {
-        const res = await fetch(`${API_BASE}/chat`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ message: txt })
-        });
-        if (!res.ok) throw new Error('HTTP '+res.status);
-        const d = await res.json();
-        
-        // Hide thinking indicator before showing response
+        if (!window.LuxuryIntelligence) throw new Error('LuxuryIntelligence not loaded');
+        const d = await window.LuxuryIntelligence.ask(txt);
         hideThinking();
-        
-        const botResponse = String(d?.answer||'No response');
-        addMessage('bot', botResponse);
-        
-        // Handle image URLs if provided
-        if (d?.image_urls && Array.isArray(d.image_urls) && d.image_urls.length > 0) {
-          displayImages(d.image_urls);
+
+        const botResponse = String(d.answer || 'No response');
+        addMessage('bot', botResponse, { renderMarkdown: true, domain: d.domain });
+
+        if (d.images && Array.isArray(d.images) && d.images.length > 0) {
+          displayImages(d.images);
+        } else {
+          finalizeAssistantTurnScroll();
         }
-        
-        // Track keywords from bot response
-        if (window.ShopThatData) {
+
+        if (window.ShopThatData && currentSessionId) {
           const botKeywords = window.ShopThatData.extractKeywordsFromText(botResponse);
-          if (currentSessionId && botKeywords.length > 0) {
-            window.ShopThatData.addChatMessage(currentSessionId, botResponse, 'bot', botKeywords);
-          }
+          window.ShopThatData.addChatMessage(currentSessionId, botResponse, 'bot', botKeywords);
         }
-        
-        // ensure refresh visible after bot message
+
         refreshBtn.removeAttribute('hidden');
       } catch (e) {
-        // Hide thinking indicator on error too
         hideThinking();
-        addMessage('bot', '❗ Failed to fetch response');
+        console.error('LuxuryIntelligence send failed', e);
+        addMessage('bot', '❗ Luxury Intelligence could not answer right now. Please try again.');
+        finalizeAssistantTurnScroll();
       }
     }
 
     sendBtn.addEventListener('click', send);
     input.addEventListener('keydown', (e)=>{ if (e.key === 'Enter'){ e.preventDefault(); send(); }});
-
-    // Health check functionality
-    async function checkHealth() {
-      try {
-        const res = await fetch(`${API_BASE}/health`);
-        if (res.ok) {
-          const data = await res.json();
-          console.log('Health check successful:', data);
-          return true;
-        }
-        throw new Error('Health check failed');
-      } catch (e) {
-        console.error('Health check error:', e);
-        return false;
-      }
-    }
 
     // Search functionality
     async function searchQuery(query) {
@@ -1721,15 +1741,6 @@
         console.error('Search error:', e);
         return null;
       }
-    }
-
-    // Perform initial health check when chatbot opens
-    function performHealthCheck() {
-      checkHealth().then(isHealthy => {
-        if (!isHealthy) {
-          addMessage('bot', '⚠️ Backend service is currently unavailable. Some features may not work properly.');
-        }
-      });
     }
 
     // =====================
@@ -1835,8 +1846,6 @@
       // scheduleAnalysis(); // Disabled
       // On open, determine size based on current content
       ensureSizeForContent();
-      // Perform health check when opening
-      performHealthCheck();
       // Gallery is closed by default - user opens via hamburger menu
     }
     function closeBox(){
@@ -2783,56 +2792,48 @@
       }
       
       try {
-        const res = await fetch(`${API_BASE}/chat`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ 
-            message: 'What product is in this image?',
-            image_url: imageSrc
-          })
-        });
-        
-        if (res.ok) {
-          const data = await res.json();
-          const botResponse = String(data?.answer || 'This is a beautiful Louis Vuitton x Yayoi Kusama piece.');
-          
-          hideThinking();
-          chatbotNav.classList.remove('is-disabled');
-          
-          // Display product card FIRST
-          displayProductCard(productInfo);
-          
-          // Then display text response
-          addMessage('bot', botResponse);
-          
-          // Store product with consistent naming from our database
-          droppedProducts.push(productInfo);
-          saveProducts(); // Save to localStorage
-          
-          // Also save to all collections for dashboard
-          if (typeof saveProductToCollections === 'function') {
-            saveProductToCollections({
-              src: productInfo.image,
-              title: productInfo.title,
-              model: productInfo.model,
-              price: productInfo.price
-            });
-          }
-          
-          // Trigger storage event for dashboard
-          window.dispatchEvent(new StorageEvent('storage', {
-            key: 'galleryImages',
-            newValue: localStorage.getItem('galleryImages')
-          }));
-          
-          // Track in ShopThatData if available
-          if (window.ShopThatData && currentSessionId) {
-            window.ShopThatData.addChatMessage(currentSessionId, '📸 Image dropped', 'user', []);
-            const botKeywords = window.ShopThatData.extractKeywordsFromText(botResponse);
-            window.ShopThatData.addChatMessage(currentSessionId, botResponse, 'bot', botKeywords);
-          }
+        if (!window.LuxuryIntelligence) throw new Error('no client');
+        const dropQuery =
+          'Context: user dragged a Louis Vuitton product into the assistant. Product title: ' +
+          (productInfo.title || 'Unknown') +
+          '. Describe this item, materials, and campaign context if known. Image reference: ' +
+          imageSrc;
+        const data = await window.LuxuryIntelligence.ask(dropQuery);
+        const botResponse = String(data.answer || 'This is a beautiful Louis Vuitton x Yayoi Kusama piece.');
+
+        hideThinking();
+        chatbotNav.classList.remove('is-disabled');
+
+        displayProductCard(productInfo);
+
+        addMessage('bot', botResponse, { renderMarkdown: true, domain: data.domain });
+        if (data.images && Array.isArray(data.images) && data.images.length > 0) {
+          displayImages(data.images);
         } else {
-          throw new Error('API failed');
+          finalizeAssistantTurnScroll();
+        }
+
+        droppedProducts.push(productInfo);
+        saveProducts();
+
+        if (typeof saveProductToCollections === 'function') {
+          saveProductToCollections({
+            src: productInfo.image,
+            title: productInfo.title,
+            model: productInfo.model,
+            price: productInfo.price
+          });
+        }
+
+        window.dispatchEvent(new StorageEvent('storage', {
+          key: 'galleryImages',
+          newValue: localStorage.getItem('galleryImages')
+        }));
+
+        if (window.ShopThatData && currentSessionId) {
+          window.ShopThatData.addChatMessage(currentSessionId, '📸 Image dropped', 'user', []);
+          const botKeywords = window.ShopThatData.extractKeywordsFromText(botResponse);
+          window.ShopThatData.addChatMessage(currentSessionId, botResponse, 'bot', botKeywords);
         }
       } catch (e) {
         // API failed, still show product card and text
@@ -2844,7 +2845,8 @@
         
         // Then display text response
         addMessage('bot', `I've added this ${productInfo.title} to your product library. You can view it in the Library tab or see it on the map!`);
-        
+        finalizeAssistantTurnScroll();
+
         droppedProducts.push(productInfo);
         saveProducts(); // Save to localStorage
         

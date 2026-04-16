@@ -433,6 +433,73 @@
 .article-url {
   font-size: 11px;
   color: #9ca3af;
+}
+
+/* Article card style (thumbnail + title + source/views) */
+.article-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 14px;
+  border: 1px solid #f0f0f5;
+  border-radius: 14px;
+  text-decoration: none;
+  color: inherit;
+  background: #fff;
+  transition: box-shadow 0.2s ease, transform 0.15s ease;
+  margin-bottom: 10px;
+}
+.article-card:last-child {
+  margin-bottom: 0;
+}
+.article-card:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  transform: translateY(-1px);
+}
+.article-card__thumb {
+  flex-shrink: 0;
+  width: 56px;
+  height: 56px;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #f3f4f6;
+}
+.article-card__thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.article-card__body {
+  flex: 1;
+  min-width: 0;
+}
+.article-card__title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #111827;
+  line-height: 1.35;
+  margin-bottom: 4px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.article-card__meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+}
+.article-card__source {
+  color: #6366f1;
+  font-weight: 500;
+}
+.article-card__dot {
+  color: #d1d5db;
+}
+.article-card__views {
+  color: #9ca3af;
+}
   word-break: break-all;
 }
 
@@ -2650,6 +2717,29 @@ svg#bubbleGraph { width: 100%; flex: 1; display: block; padding-top: 60px; min-h
 
 .dark-mode .article-item {
   border-bottom-color: #374151;
+}
+
+.dark-mode .article-card {
+  background: #1f2937;
+  border-color: #374151;
+}
+.dark-mode .article-card:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+.dark-mode .article-card__title {
+  color: #f3f4f6;
+}
+.dark-mode .article-card__source {
+  color: #818cf8;
+}
+.dark-mode .article-card__dot {
+  color: #4b5563;
+}
+.dark-mode .article-card__views {
+  color: #9ca3af;
+}
+.dark-mode .article-card__thumb {
+  background: #374151;
 }
 
 /* Dark mode for document gallery */
@@ -4913,5 +5003,207 @@ svg#bubbleGraph { width: 100%; flex: 1; display: block; padding-top: 60px; min-h
 .dark-mode .upload-preview__item { border-color: #374151; }
 .dark-mode .upload-gallery__card { border-color: #374151; background: #1f2937; }
 .dark-mode .upload-gallery__card .gallery-name { color: #9ca3af; }
+
+/* Image Licensing — Discovery patient sidebar + timeline */
+.discovery-shell {
+  display: flex;
+  gap: 1.25rem;
+  align-items: flex-start;
+  margin-top: 0.5rem;
+}
+.discovery-patients {
+  flex: 0 0 220px;
+  max-width: 100%;
+  border: 1px solid #e8e8ef;
+  border-radius: 12px;
+  background: #fafafa;
+  padding: 0.75rem 0;
+}
+.discovery-patients__header {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #6b7280;
+  padding: 0 0.75rem 0.5rem;
+  border-bottom: 1px solid #e5e7eb;
+  margin-bottom: 0.35rem;
+}
+.discovery-patients__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: 420px;
+  overflow-y: auto;
+}
+.discovery-patients__item {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.6rem 0.75rem;
+  cursor: pointer;
+  border-left: 3px solid transparent;
+  transition: background 0.15s ease;
+}
+.discovery-patients__item:hover {
+  background: rgba(8, 145, 178, 0.08);
+}
+.discovery-patients__item.is-active {
+  background: rgba(8, 145, 178, 0.12);
+  border-left-color: #0891b2;
+}
+.discovery-patients__avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #0891b2, #0e7490);
+  color: #fff;
+  font-size: 0.875rem;
+  font-weight: 600;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+.discovery-patients__meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.discovery-patients__name {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #111827;
+}
+.discovery-patients__sub {
+  font-size: 0.7rem;
+  color: #6b7280;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.discovery-main {
+  flex: 1;
+  min-width: 0;
+}
+.discovery-subtabs {
+  margin-bottom: 1rem;
+}
+.discovery-timeline-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.5rem;
+}
+.discovery-timeline-toolbar__title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+}
+.discovery-timeline-hint {
+  font-size: 0.8125rem;
+  color: #6b7280;
+  margin: 0 0 1rem;
+}
+.discovery-timeline {
+  position: relative;
+  padding-left: 1.25rem;
+  border-left: 2px solid #e5e7eb;
+}
+.discovery-timeline__item {
+  position: relative;
+  padding-bottom: 1.25rem;
+}
+.discovery-timeline__item:last-child {
+  padding-bottom: 0;
+}
+.discovery-timeline__dot {
+  position: absolute;
+  left: -1.4rem;
+  top: 0.35rem;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #0891b2;
+  border: 2px solid #fff;
+  box-shadow: 0 0 0 1px #e5e7eb;
+}
+.discovery-timeline__card {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 0.75rem 1rem;
+}
+.discovery-timeline__date {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #0891b2;
+  margin-bottom: 0.25rem;
+}
+.discovery-timeline__title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 0.35rem;
+}
+.discovery-timeline__detail {
+  font-size: 0.8125rem;
+  color: #4b5563;
+  line-height: 1.45;
+}
+.discovery-chart-wrap {
+  position: relative;
+  min-height: 240px;
+}
+@media (max-width: 900px) {
+  .discovery-shell {
+    flex-direction: column;
+  }
+  .discovery-patients {
+    flex: none;
+    width: 100%;
+  }
+  .discovery-patients__list {
+    max-height: 200px;
+  }
+}
+.dark-mode .discovery-patients {
+  background: #1f2937;
+  border-color: #374151;
+}
+.dark-mode .discovery-patients__header {
+  color: #9ca3af;
+  border-bottom-color: #374151;
+}
+.dark-mode .discovery-patients__name {
+  color: #f3f4f6;
+}
+.dark-mode .discovery-patients__sub {
+  color: #9ca3af;
+}
+.dark-mode .discovery-patients__item:hover {
+  background: rgba(99, 102, 241, 0.1);
+}
+.dark-mode .discovery-patients__item.is-active {
+  background: rgba(99, 102, 241, 0.15);
+  border-left-color: #818cf8;
+}
+.dark-mode .discovery-timeline {
+  border-left-color: #374151;
+}
+.dark-mode .discovery-timeline__card {
+  background: #111827;
+  border-color: #374151;
+}
+.dark-mode .discovery-timeline__title {
+  color: #f3f4f6;
+}
+.dark-mode .discovery-timeline__detail {
+  color: #d1d5db;
+}
+.dark-mode .discovery-scope-label {
+  color: #d1d5db !important;
+}
 
 /* Cache bust: Mon Sep 22 10:45:41 MDT 2025 */

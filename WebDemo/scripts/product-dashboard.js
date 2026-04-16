@@ -33,6 +33,31 @@
     return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
   }
 
+  /** Render Luxury Intelligence API response (markdown + optional domain + images) */
+  function appendLuxuryIntelligenceToChat(chatMessages, data) {
+    if (!chatMessages || !data) return;
+    const wrap = createEl('div', { class: 'ai-chat-message ai' });
+    const md = createEl('div', { class: 'ai-chat-markdown' });
+    if (window.LuxuryIntelligence) {
+      md.innerHTML = window.LuxuryIntelligence.markdownToHtml(data.answer || '');
+    } else {
+      md.textContent = data.answer || '';
+    }
+    wrap.appendChild(md);
+    if (data.domain) {
+      wrap.appendChild(createEl('div', { class: 'ai-chat-domain', text: String(data.domain) }));
+    }
+    if (data.images && data.images.length) {
+      const row = createEl('div', { class: 'ai-chat-images' });
+      data.images.forEach(function (url) {
+        row.appendChild(createEl('img', { src: url, alt: '', loading: 'lazy' }));
+      });
+      wrap.appendChild(row);
+    }
+    chatMessages.appendChild(wrap);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+  }
+
   // Navigation
   const navItems = document.querySelectorAll('.dashboard-nav-item');
   const views = {
@@ -269,15 +294,6 @@
     const newChatBtn = document.getElementById('newChatBtn');
     const viewHistoryBtn = document.getElementById('viewHistoryBtn');
     
-    // Sample AI responses
-    const sampleResponses = [
-      "The Kusama x Louis Vuitton collaboration features her iconic polka dot patterns across luxury handbags and accessories.",
-      "This campaign showcases Yayoi Kusama's vibrant, psychedelic art merged with Louis Vuitton's timeless elegance.",
-      "The collection includes limited edition pieces featuring Kusama's signature infinity dots and bold color palettes.",
-      "These images represent one of the most successful artist collaborations in luxury fashion history.",
-      "The campaign blends contemporary art with haute couture, creating collectible pieces that transcend traditional fashion."
-    ];
-    
     // Chat minimize/maximize functionality
     const minimizeBtn = document.getElementById('aiChatMinimize');
     const chatToggle = document.getElementById('aiChatToggle');
@@ -430,28 +446,33 @@
       });
     }
     
-    // Handle send
+    // Handle send — LV Luxury Intelligence API
     function sendMessage() {
       const message = chatInput.value.trim();
-      if (message) {
-        // Add user message
-        addMessage(message, true);
-        
-        // Clear input
-        chatInput.value = '';
-        
-        // Visual feedback
-        chatSend.style.transform = 'scale(0.9)';
-        setTimeout(() => {
-          chatSend.style.transform = '';
-        }, 200);
-        
-        // Show typing indicator and AI response after delay
-        setTimeout(() => {
-          const randomResponse = sampleResponses[Math.floor(Math.random() * sampleResponses.length)];
-          addMessage(randomResponse, false);
-        }, 800);
+      if (!message) return;
+      if (!window.LuxuryIntelligence) {
+        addMessage('Luxury Intelligence is not loaded. Refresh the page.', false);
+        return;
       }
+      addMessage(message, true);
+      chatInput.value = '';
+      if (chatSend) {
+        chatSend.style.transform = 'scale(0.9)';
+        setTimeout(() => { chatSend.style.transform = ''; }, 200);
+      }
+      const typing = createEl('div', { class: 'ai-chat-message ai ai-chat-typing' });
+      typing.textContent = '…';
+      chatMessages.appendChild(typing);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+      window.LuxuryIntelligence.ask(message).then(function (data) {
+        typing.remove();
+        appendLuxuryIntelligenceToChat(chatMessages, data);
+        updateButtonStates();
+      }).catch(function (err) {
+        console.error(err);
+        typing.remove();
+        addMessage('Could not reach Luxury Intelligence. Try again.', false);
+      });
     }
     
     // Send on button click
@@ -538,35 +559,33 @@
       // Scroll to bottom to show new message
       messagesContainer.scrollTop = messagesContainer.scrollHeight;
       
-      // Simulate AI analysis
-      setTimeout(() => {
-        previewStatus.textContent = 'Analysis complete';
-        
-        // Get image filename for description
-        const filename = imageSrc.split('/').pop().replace(/\.(jpg|png|jpeg|gif)$/i, '');
-        
-        // Add AI response about the image
-        const analysisResponses = [
-          `This image from the Kusama x Louis Vuitton campaign showcases the iconic polka dot pattern. The piece features Yayoi Kusama's distinctive infinity dots merged with Louis Vuitton's luxury craftsmanship.`,
-          `I've identified this as part of the exclusive Kusama collaboration. The image displays the artist's signature repetitive patterns that symbolize infinity and the cosmic universe.`,
-          `This campaign visual represents the fusion of contemporary art and haute couture. The vibrant colors and dot motifs are trademark elements of Kusama's artistic vision.`,
-          `The image captures the essence of the Kusama x LV partnership - a celebration of bold patterns and luxury fashion. Products associated include the Neverfull, Speedy, and various accessories.`
-        ];
-        
-        const randomAnalysis = analysisResponses[Math.floor(Math.random() * analysisResponses.length)];
-        addMessage(randomAnalysis, false);
-        
-        // Auto-add to favorites
-        addToFavorites(imageSrc, 'tab1');
-        
-        // Update status
-        previewStatus.textContent = 'Added to Favorites';
-        previewStatus.style.color = '#333';
-        
-        // Scroll to bottom to show latest message
-        messagesContainer.scrollTop = messagesContainer.scrollHeight;
-        
-      }, 1500);
+      const filename = imageSrc.split('/').pop().replace(/\.(jpg|png|jpeg|gif)$/i, '');
+      previewStatus.textContent = 'Asking Luxury Intelligence…';
+
+      (async function analyzeDrop() {
+        try {
+          if (!window.LuxuryIntelligence) throw new Error('no client');
+          const q =
+            'User shared a Louis Vuitton campaign or product image. File: ' +
+            filename +
+            '. Describe visual themes, Kusama motifs, and product context if inferable.';
+          const data = await window.LuxuryIntelligence.ask(q);
+          previewStatus.textContent = 'Analysis complete';
+          appendLuxuryIntelligenceToChat(messagesContainer, data);
+          addToFavorites(imageSrc, 'tab1');
+          previewStatus.textContent = 'Added to Favorites';
+          previewStatus.style.color = '#333';
+          messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        } catch (e) {
+          console.error(e);
+          previewStatus.textContent = 'Analysis unavailable';
+          addMessage(
+            'Luxury Intelligence could not analyze this image. It was still saved to your favorites.',
+            false
+          );
+          addToFavorites(imageSrc, 'tab1');
+        }
+      })();
     }
     
     // Add image to favorites
@@ -633,15 +652,6 @@
       chatPrompt.classList.add('minimized');
       chatToggle.classList.add('visible');
     }
-    
-    // Sample AI responses for map view
-    const sampleResponses = [
-      "The nearby restaurants offer excellent dining options for luxury shoppers visiting the Louis Vuitton flagship store.",
-      "This museum is known for its contemporary art exhibitions that often complement fashion and design.",
-      "The gallery features rotating exhibitions that frequently showcase fashion photography and luxury brand collaborations.",
-      "This location is a popular spot among fashion enthusiasts and offers great photo opportunities.",
-      "Many visitors to this area combine shopping at nearby luxury boutiques with cultural experiences."
-    ];
     
     // Minimize/maximize functionality
     if (minimizeBtn) {
@@ -758,34 +768,43 @@
       });
     }
     
-    // Handle send
+    // Handle send — LV Luxury Intelligence API (map context)
     function sendMessage() {
-      if (!chatInput) return;
+      if (!chatInput || !chatMessages) return;
       const message = chatInput.value.trim();
-      if (message) {
-        addMessage(message, true);
-        chatInput.value = '';
-        
-        if (chatSend) {
-          chatSend.style.transform = 'scale(0.9)';
-          setTimeout(() => {
-            chatSend.style.transform = '';
-          }, 200);
-        }
-        
-        setTimeout(() => {
-          const randomResponse = sampleResponses[Math.floor(Math.random() * sampleResponses.length)];
-          addMessage(randomResponse, false);
-        }, 800);
+      if (!message) return;
+      if (!window.LuxuryIntelligence) {
+        addMessage('Luxury Intelligence is not loaded. Refresh the page.', false);
+        return;
       }
+      const contextual =
+        message +
+        ' (Context: user is exploring Louis Vuitton NYC map — SoHo, 57th St, museums, galleries, restaurants, hotels.)';
+      addMessage(message, true);
+      chatInput.value = '';
+      if (chatSend) {
+        chatSend.style.transform = 'scale(0.9)';
+        setTimeout(() => { chatSend.style.transform = ''; }, 200);
+      }
+      const typing = createEl('div', { class: 'ai-chat-message ai ai-chat-typing' });
+      typing.textContent = '…';
+      chatMessages.appendChild(typing);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+      window.LuxuryIntelligence.ask(contextual).then(function (data) {
+        typing.remove();
+        appendLuxuryIntelligenceToChat(chatMessages, data);
+        updateButtonStates();
+      }).catch(function (err) {
+        console.error(err);
+        typing.remove();
+        addMessage('Could not reach Luxury Intelligence. Try again.', false);
+      });
     }
-    
-    // Send on button click
+
     if (chatSend) {
       chatSend.addEventListener('click', sendMessage);
     }
-    
-    // Send on Enter key
+
     if (chatInput) {
       chatInput.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') {

@@ -233,7 +233,6 @@
   <body>
     <div class="login-container">
       <div class="login-card">
-        <div class="login-brand">shopThat</div>
         <p class="login-subtitle">Sign in to your account</p>
         
         <form class="login-form" id="loginForm">
@@ -274,11 +273,11 @@
           <h3>Demo Credentials</h3>
           <div class="demo-cred-item">
             <span class="demo-cred-label">Email:</span>
-            <span class="demo-cred-value" onclick="fillCredentials('admin@shopthat.com', 'demo123')">admin@shopthat.com</span>
+            <span class="demo-cred-value" onclick="fillCredentials('admin@demo.com', 'demo123')">admin@demo.com</span>
           </div>
           <div class="demo-cred-item">
             <span class="demo-cred-label">Password:</span>
-            <span class="demo-cred-value" onclick="fillCredentials('admin@shopthat.com', 'demo123')">demo123</span>
+            <span class="demo-cred-value" onclick="fillCredentials('admin@demo.com', 'demo123')">demo123</span>
           </div>
         </div>
       </div>
@@ -287,7 +286,7 @@
     <script>
       // Demo credentials
       const validCredentials = {
-        'admin@shopthat.com': 'demo123',
+        'admin@demo.com': 'demo123',
         'demo@shopthat.com': 'password',
         'user@shopthat.com': 'shopThat2024'
       };
@@ -322,7 +321,7 @@
           
           // Redirect to dashboard after short delay
           setTimeout(() => {
-            window.location.href = '/dashboard.html';
+            window.location.href = 'dashboard.html';
           }, 1000);
         } else {
           // Show error message
@@ -332,7 +331,7 @@
 
       // Check if user is already logged in
       if (localStorage.getItem('shopThatLoggedIn') === 'true') {
-        window.location.href = '/dashboard.html';
+        window.location.href = 'dashboard.html';
       }
 
       // Dark mode detection

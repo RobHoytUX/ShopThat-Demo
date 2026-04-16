@@ -134,43 +134,43 @@ console.log('Document ready state:', document.readyState);
   // Article data - maps keywords to related articles
   const keywordArticles = {
     'LVMH': [
-      { title: 'Luxury Market Analysis 2024', publisher: 'Financial Times', image: 'assets/foundation-lv-png.png', views: '12,340' },
-      { title: 'LVMH Art & Culture Initiatives', publisher: 'Le Monde', image: 'assets/lv-art.avif', views: '8,920' },
-      { title: 'LV New York City Guide', publisher: 'Louis Vuitton', image: 'assets/lv-nyc-guide.png', views: '15,670' }
+      { title: 'Luxury Market Analysis 2024', publisher: 'Financial Times', image: 'assets/foundation-lv-png.png', views: '12,340', url: 'https://www.ft.com/content/198207f2-5f5e-441c-b033-7deee8a28feb' },
+      { title: 'LVMH Art & Culture Initiatives', publisher: 'Le Monde', image: 'assets/lv-art.avif', views: '8,920', url: 'https://www.lemonde.fr/en/economy/article/2024/01/25/lvmh-bets-on-art-and-culture_6457890_19.html' },
+      { title: 'LV New York City Guide', publisher: 'Louis Vuitton', image: 'assets/lv-nyc-guide.png', views: '15,670', url: 'https://us.louisvuitton.com/eng-us/magazine/articles/city-guide-new-york' }
     ],
     'The Modern': [
-      { title: 'MoMA Dining Experience', publisher: 'NY Times', image: 'assets/restaurants/the-modern.jpg', views: '5,230' },
-      { title: 'Modern Art & Fine Dining', publisher: 'Condé Nast', image: 'assets/museums/moma.jpg', views: '3,890' }
+      { title: 'MoMA Dining Experience', publisher: 'NY Times', image: 'assets/restaurants/the-modern.jpg', views: '5,230', url: 'https://www.nytimes.com/2023/12/05/dining/the-modern-review.html' },
+      { title: 'Modern Art & Fine Dining', publisher: 'Condé Nast', image: 'assets/museums/moma.jpg', views: '3,890', url: 'https://www.cntraveler.com/restaurants/new-york/the-modern' }
     ],
     'Le Bernardin': [
-      { title: 'Eric Ripert\'s Seafood Mastery', publisher: 'Eater', image: 'assets/restaurants/le-bernardin.jpg', views: '7,120' },
-      { title: 'Michelin Three Star Excellence', publisher: 'Michelin Guide', image: 'assets/restaurants/le-bernardin.jpg', views: '4,560' }
+      { title: 'Eric Ripert\'s Seafood Mastery', publisher: 'Eater', image: 'assets/restaurants/le-bernardin.jpg', views: '7,120', url: 'https://www.eater.com/2024/1/10/le-bernardin-eric-ripert' },
+      { title: 'Michelin Three Star Excellence', publisher: 'Michelin Guide', image: 'assets/restaurants/le-bernardin.jpg', views: '4,560', url: 'https://guide.michelin.com/us/en/new-york-state/new-york/restaurant/le-bernardin' }
     ],
     'Cafe Carlyle': [
-      { title: 'Iconic NYC Cabaret Scene', publisher: 'Vanity Fair', image: 'assets/restaurants/cafe-carlyle.jpg', views: '6,780' },
-      { title: 'The Carlyle Legacy', publisher: 'Town & Country', image: 'assets/restaurants/carlyle-hotel.jpg', views: '4,230' }
+      { title: 'Iconic NYC Cabaret Scene', publisher: 'Vanity Fair', image: 'assets/restaurants/cafe-carlyle.jpg', views: '6,780', url: 'https://www.vanityfair.com/style/cafe-carlyle-cabaret' },
+      { title: 'The Carlyle Legacy', publisher: 'Town & Country', image: 'assets/restaurants/carlyle-hotel.jpg', views: '4,230', url: 'https://www.townandcountrymag.com/leisure/travel-guide/the-carlyle-hotel' }
     ],
     'MoMA Museum': [
-      { title: 'Modern Art Masterpieces', publisher: 'Art News', image: 'assets/museums/moma.jpg', views: '9,450' },
-      { title: 'Kusama at MoMA', publisher: 'David Zwirner', image: 'assets/kusama-book.png', views: '11,200' }
+      { title: 'Modern Art Masterpieces', publisher: 'Art News', image: 'assets/museums/moma.jpg', views: '9,450', url: 'https://www.artnews.com/list/art-news/museums/moma-masterpieces/' },
+      { title: 'Kusama at MoMA', publisher: 'David Zwirner', image: 'assets/kusama-book.png', views: '11,200', url: 'https://www.davidzwirner.com/artists/yayoi-kusama' }
     ],
     'The Carlyle': [
-      { title: 'Manhattan\'s Most Storied Hotel', publisher: 'Architectural Digest', image: 'assets/restaurants/carlyle-hotel.jpg', views: '5,670' }
+      { title: 'Manhattan\'s Most Storied Hotel', publisher: 'Architectural Digest', image: 'assets/restaurants/carlyle-hotel.jpg', views: '5,670', url: 'https://www.architecturaldigest.com/story/the-carlyle-hotel-new-york' }
     ],
     'The Plaza': [
-      { title: 'Plaza Hotel Heritage', publisher: 'Condé Nast Traveler', image: 'assets/restaurants/the-plaza.jpg', views: '8,340' }
+      { title: 'Plaza Hotel Heritage', publisher: 'Condé Nast Traveler', image: 'assets/restaurants/the-plaza.jpg', views: '8,340', url: 'https://www.cntraveler.com/hotels/new-york/the-plaza' }
     ],
     'The St. Regis': [
-      { title: 'St. Regis NYC Experience', publisher: 'Forbes Travel', image: 'assets/restaurants/st-regis.jpg', views: '4,890' }
+      { title: 'St. Regis NYC Experience', publisher: 'Forbes Travel', image: 'assets/restaurants/st-regis.jpg', views: '4,890', url: 'https://www.forbes.com/sites/forbestravelguide/the-st-regis-new-york/' }
     ],
     'The Baccarat': [
-      { title: 'Crystal & Luxury', publisher: 'Robb Report', image: 'assets/restaurants/baccarat.jpg', views: '3,560' }
+      { title: 'Crystal & Luxury', publisher: 'Robb Report', image: 'assets/restaurants/baccarat.jpg', views: '3,560', url: 'https://robbreport.com/travel/hotels/baccarat-hotel-new-york/' }
     ],
     'The Mark Hotel': [
-      { title: 'Upper East Side Elegance', publisher: 'Travel + Leisure', image: 'assets/restaurants/mark-hotel.jpg', views: '4,120' }
+      { title: 'Upper East Side Elegance', publisher: 'Travel + Leisure', image: 'assets/restaurants/mark-hotel.jpg', views: '4,120', url: 'https://www.travelandleisure.com/hotels-resorts/the-mark-hotel-new-york' }
     ],
     'default': [
-      { title: 'Luxury Lifestyle Guide', publisher: 'Financial Times', image: 'assets/foundation-lv-png.png', views: '2,340' }
+      { title: 'Luxury Lifestyle Guide', publisher: 'Financial Times', image: 'assets/foundation-lv-png.png', views: '2,340', url: 'https://www.ft.com/luxury' }
     ]
   };
   
@@ -183,7 +183,7 @@ console.log('Document ready state:', document.readyState);
   function generateArticlesHTML(keyword) {
     const articles = getArticlesForKeyword(keyword);
     return articles.map(article => `
-      <div class="sidebar-article">
+      <a class="sidebar-article" href="${article.url || '#'}" target="_blank" rel="noopener noreferrer" style="text-decoration:none;color:inherit;cursor:pointer;">
         <div class="sidebar-article-image">
           <img src="${article.image}" alt="${article.title}" onerror="this.style.display='none'">
         </div>
@@ -194,7 +194,7 @@ console.log('Document ready state:', document.readyState);
             <span class="sidebar-article-views">${article.views} views</span>
           </div>
         </div>
-      </div>
+      </a>
     `).join('');
   }
 
