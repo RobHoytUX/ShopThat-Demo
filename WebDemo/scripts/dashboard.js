@@ -199,13 +199,6 @@
         url: 'https://www.ft.com/content/198207f2-5f5e-441c-b033-7deee8a28feb'
       },
       {
-        title: 'LVMH Art & Culture Initiatives',
-        source: 'Le Monde',
-        views: '8,920 views',
-        image: 'https://images.unsplash.com/photo-1499781350541-7783f6c6a0c8?w=120&h=120&fit=crop',
-        url: 'https://www.lemonde.fr/'
-      },
-      {
         title: 'LV New York City Guide',
         source: 'Louis Vuitton',
         views: '15,670 views',

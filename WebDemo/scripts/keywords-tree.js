@@ -5,19 +5,13 @@
   var searchInput = document.getElementById('treeSearch');
   var expandAllBtn = document.getElementById('treeExpandAll');
   var collapseAllBtn = document.getElementById('treeCollapseAll');
-  var clearSelectionBtn = document.getElementById('treeClearSelection');
-  var visibleCountEl = document.getElementById('treeVisibleCount');
-  var selectedCountEl = document.getElementById('treeSelectedCount');
   var drawerTitleEl = document.getElementById('treeDrawerTitle');
   var drawerBodyEl = document.getElementById('treeDrawerBody');
 
-  var selectedKeywords = new Set();
   /** Graph keyword ids dimmed via the side panel (same behaviour as bubbles). */
   var treeDisabledNodes = new Set();
   // Currently-focused node in the tree (the one whose details are shown in
-  // the side panel). Tracked separately from `selectedKeywords` so we can
-  // implement a true click-to-toggle: clicking a node again collapses its
-  // children AND closes its details panel.
+  // the side panel). Clicking it again collapses children and closes the panel.
   var selectedTreeNode = null;
   var root = null;
   var treeSvg = null;
@@ -326,9 +320,7 @@
       .data(treeNodes, function (d) { return d.id || (d.id = ++nodeIdCounter); });
 
     var nodeEnter = node.enter().append('g')
-      .attr('class', function (d) {
-        return 'node' + (selectedKeywords.has(d.data.name) ? ' is-selected' : '');
-      })
+      .attr('class', 'node')
       .attr('transform', function () {
         return 'translate(' + source.y0 + ',' + source.x0 + ')';
       })
@@ -383,12 +375,8 @@
     // UPDATE
     var nodeUpdate = nodeEnter.merge(node);
 
-    // Keep the “selected” visual marker in sync after toggles.
     nodeUpdate.attr('class', function (d) {
-      var cls = 'node';
-      if (selectedKeywords.has(d.data.name)) cls += ' is-selected';
-      if (selectedTreeNode === d) cls += ' is-focused';
-      return cls;
+      return 'node' + (selectedTreeNode === d ? ' is-focused' : '');
     });
 
     nodeUpdate.transition().duration(duration)
@@ -453,7 +441,6 @@
       d.y0 = d.y;
     });
 
-    updateCounts();
     updateTreeNodeDisabledVisuals();
 
     // Auto-fit zoom after transition (search uses treeSearchFocusIds for a tight frame)
@@ -544,16 +531,6 @@
     treeSvg.transition().duration(focused ? 650 : 500)
       .ease(d3.easeCubicOut)
       .call(zoomBehavior.transform, d3.zoomIdentity.translate(tx, ty).scale(scale));
-  }
-
-  function updateCounts() {
-    if (visibleCountEl) {
-      var count = treeG ? treeG.selectAll('g.node').size() : 0;
-      visibleCountEl.textContent = count;
-    }
-    if (selectedCountEl) {
-      selectedCountEl.textContent = selectedKeywords.size;
-    }
   }
 
   function resetTreeDetails() {
@@ -714,12 +691,6 @@
       }
       update(root);
     }
-  });
-  if (clearSelectionBtn) clearSelectionBtn.addEventListener('click', function () {
-    selectedKeywords.clear();
-    selectedTreeNode = null;
-    if (treeG) treeG.selectAll('g.node').classed('is-selected', false).classed('is-focused', false);
-    resetTreeDetails();
   });
   if (searchInput) searchInput.addEventListener('input', function () {
     searchTree(searchInput.value.trim());

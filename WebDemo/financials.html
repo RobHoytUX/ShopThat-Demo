@@ -13,38 +13,46 @@
   <body class="app app--financials">
     <aside class="sidebar" aria-label="Primary">
       <div class="sidebar__brand"></div>
-      <div class="sidebar__campaign-btn">
-        <a href="campaigns.html" class="btn btn--primary btn--campaign">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="10"/>
-            <path d="M12 8v8M8 12h8"/>
-          </svg>
-          Campaigns
+
+      <nav class="sidebar__nav">
+        <a href="dashboard.html">
+          <svg class="sidebar__nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          <span class="sidebar__nav-text">Dashboard</span>
+        </a>
+        <a href="keywords.html">
+          <svg class="sidebar__nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="4" y1="9" x2="20" y2="9"/><line x1="4" y1="15" x2="20" y2="15"/><line x1="10" y1="3" x2="8" y2="21"/><line x1="16" y1="3" x2="14" y2="21"/></svg>
+          <span class="sidebar__nav-text">Keywords</span>
+        </a>
+        <a href="internals.html">
+          <svg class="sidebar__nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+          <span class="sidebar__nav-text">Internals</span>
+        </a>
+        <a href="publishers.html">
+          <svg class="sidebar__nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          <span class="sidebar__nav-text">Publishers</span>
+        </a>
+        <a href="products.html">
+          <svg class="sidebar__nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+          <span class="sidebar__nav-text">Products</span>
+        </a>
+        <a href="image-licensing.html">
+          <svg class="sidebar__nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+          <span class="sidebar__nav-text">Image Licensing</span>
+        </a>
+        <a class="is-active" href="financials.html">
+          <svg class="sidebar__nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg>
+          <span class="sidebar__nav-text">Financials</span>
+        </a>
+      </nav>
+      <div class="sidebar__signout">
+        <a href="#" id="signOutLink">
+          <svg class="sidebar__nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          <span class="sidebar__nav-text">Sign Out</span>
         </a>
       </div>
-      <nav class="sidebar__nav">
-        <a href="dashboard.html">Dashboard</a>
-        <a href="keywords.html">Keywords</a>
-        <a href="internals.html">Internals</a>
-        <a href="publishers.html">Publishers</a>
-        <a href="products.html">Products</a>
-        <a href="image-licensing.html">Image Licensing</a>
-        <a class="is-active" href="financials.html">Financials</a>
-        <a href="#" id="signOutLink">Sign Out</a>
-      </nav>
-    </aside>
 
-    <header class="appbar" role="banner">
-      <div class="appbar__inner">
-        <h1 class="appbar__title">
-          <span class="appbar__title-row">Financials
-            <button class="icon-btn icon-btn--sm" id="calculatorBackBtn" aria-label="Back to Financials" title="Back to Financials" style="display: none;">←</button>
-          </span>
-        </h1>
-        <div class="appbar__search">
-          <input type="search" placeholder="Search here..." aria-label="Search" />
-        </div>
-        <div class="appbar__account">
+      <footer class="sidebar__footer" aria-label="Account and preferences">
+        <div class="sidebar__account">
           <span class="locale">Eng (US)</span>
           <button class="icon-btn" aria-label="Notifications" title="Notifications">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -60,12 +68,41 @@
           </button>
           <a href="product-dashboard.html" class="avatar" role="img" aria-label="Person, Admin" title="Open Dashboard"></a>
         </div>
+      </footer>
+    </aside>
+
+    <header class="appbar" role="banner">
+      <div class="appbar__inner">
+        <h1 class="appbar__title">
+          <span class="appbar__title-row">Financials
+            <button class="icon-btn icon-btn--sm" id="calculatorBackBtn" aria-label="Back to Financials" title="Back to Financials" style="display: none;">←</button>
+          </span>
+        </h1>
+        <div class="appbar__actions">
+          <button type="button" id="rewardsCalcBtn" class="btn btn--rewards-calc" aria-label="Open rewards calculator">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <rect x="4" y="2" width="16" height="20" rx="2"/>
+              <line x1="8" y1="6" x2="16" y2="6"/>
+              <line x1="8" y1="10" x2="16" y2="10"/>
+              <line x1="8" y1="14" x2="12" y2="14"/>
+              <line x1="8" y1="18" x2="12" y2="18"/>
+            </svg>
+            Rewards Calculator
+          </button>
+          <a href="campaigns.html" class="btn btn--primary btn--campaign">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="12" cy="12" r="10"/>
+              <path d="M12 8v8M8 12h8"/>
+            </svg>
+            Campaigns
+          </a>
+        </div>
       </div>
     </header>
 
     <main id="main" class="dashboard" role="main">
       <!-- Page Title with Campaign Switcher -->
-      <div class="page-header" style="display: flex; justify-content: space-between; align-items: center;">
+      <div class="page-header" style="display: flex; justify-content: flex-start; align-items: center;">
         <div class="campaign-selector">
           <div class="campaign-dropdown-wrapper">
             <div class="campaign-arrow">
@@ -81,16 +118,6 @@
             </div>
           </div>
         </div>
-        <button class="btn btn--primary" id="rewardsCalcBtn" style="padding: 10px 20px; font-size: 14px; display: flex; align-items: center; gap: 8px;">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <rect x="4" y="2" width="16" height="20" rx="2"/>
-            <line x1="8" y1="6" x2="16" y2="6"/>
-            <line x1="8" y1="10" x2="16" y2="10"/>
-            <line x1="8" y1="14" x2="12" y2="14"/>
-            <line x1="8" y1="18" x2="12" y2="18"/>
-          </svg>
-          Rewards Calculator
-        </button>
       </div>
 
       <!-- First Row - Spend Circle and Performance Metrics -->
@@ -1771,21 +1798,40 @@
         var mainView = document.getElementById('main');
         var exportBtn = document.getElementById('exportData');
 
+        function openRewardsCalculator() {
+          if (!mainView || !calcView || !backBtn) return;
+          mainView.style.display = 'none';
+          calcView.classList.add('active');
+          backBtn.style.display = 'inline-grid';
+          recalc();
+          if (history.replaceState) {
+            history.replaceState(null, '', window.location.pathname + window.location.search + '#rewards-calculator');
+          }
+        }
+        function closeRewardsCalculator() {
+          if (!mainView || !calcView || !backBtn) return;
+          calcView.classList.remove('active');
+          mainView.style.display = 'block';
+          backBtn.style.display = 'none';
+          if (location.hash === '#rewards-calculator' && history.replaceState) {
+            history.replaceState(null, '', window.location.pathname + window.location.search);
+          }
+        }
+
         if (calcBtn) {
-          calcBtn.addEventListener('click', function() {
-            mainView.style.display = 'none';
-            calcView.classList.add('active');
-            backBtn.style.display = 'inline-grid';
-            recalc();
-          });
+          calcBtn.addEventListener('click', openRewardsCalculator);
         }
         if (backBtn) {
-          backBtn.addEventListener('click', function() {
-            calcView.classList.remove('active');
-            mainView.style.display = 'block';
-            backBtn.style.display = 'none';
-          });
+          backBtn.addEventListener('click', closeRewardsCalculator);
         }
+        if (location.hash === '#rewards-calculator') {
+          openRewardsCalculator();
+        }
+        window.addEventListener('hashchange', function() {
+          if (location.hash === '#rewards-calculator' && calcView && !calcView.classList.contains('active')) {
+            openRewardsCalculator();
+          }
+        });
         if (exportBtn) exportBtn.addEventListener('click', exportToCSV);
 
         // Preset buttons
