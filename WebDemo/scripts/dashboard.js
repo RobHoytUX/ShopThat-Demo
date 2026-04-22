@@ -17,43 +17,47 @@
 
   const STORAGE_KEY = 'st_keywords_v1';
 
-  /** Populated from Luxury Intelligence API (see loadDashboardKeywords) */
-  let dashboardIntelKeywordsRows = null;
+  /**
+   * Dashboard “Top Keywords” — fixed demo taxonomy (Kusama tree + LV / New York / Stores),
+   * not AI-generated. Order is roughly strategic priority; table sorts by cost.
+   */
+  let dashboardKeywordRows = null;
   let dashboardKeywordsLoadPromise = null;
 
-  const FALLBACK_INTEL_KEYWORDS = [
-    { name: 'Kusama', cost: 12000, engagement: 48 },
-    { name: 'Louis Vuitton', cost: 10000, engagement: 45 },
-    { name: 'David Zwirner', cost: 6000, engagement: 42 },
-    { name: 'Café Carlyle', cost: 3000, engagement: 38 },
-    { name: 'Infinity Dots', cost: 2500, engagement: 35 },
-    { name: 'Capucines', cost: 2000, engagement: 32 },
-    { name: 'Central Park', cost: 500, engagement: 28 }
+  const DASHBOARD_STATIC_KEYWORD_NAMES = [
+    'Louis Vuitton', 'Kusama', 'New York', 'Stores', '57th Street', 'SoHo',
+    'Museums', 'Style', 'Galleries', 'Fondation LV', 'Kusama Museum',
+    'Polka Dots', 'Pumpkin', 'Infinity Mirrors', 'Victoria Miro', 'David Zwirner',
+    'Le Bernardin', 'The Plaza', 'GAGOSIAN', 'HAUSER & WIRTH', 'The Modern', 'Marea',
+    'Gabriel Kreuther', 'THE GRILL', 'KANG HO DONG', 'Le Pavillon', 'Cafe Carlyle',
+    'Ace Hotel', 'The Baccarat Hotel', 'CIVILIAN Hotel', 'ST Regis', 'Times Square Edition',
+    'DANIEL', 'Le Bilboquet', 'PUBLIC', 'The Mark',
+    '303 Gallery', 'Jack Shainman Gallery', 'LDGR', 'LUHRING AUGUSTINE', 'MARIAN GOODMAN',
+    'KASMIN Gallery', 'LEHMANN MAUPIN', 'MATTHEW MARKS GALLERY', 'NICOLA VASSELL GALLERY',
+    'TEMPLON', 'THE HOLE', 'GLADSTONE GALLERY', 'PETZEL',
+    'CROSBY STREET HOTEL', 'THE BOWERY HOTEL', 'THE STANDARD EAST VILLAGE', 'THE MERCER',
+    'THE GREENWICH', 'HOTEL BARRIERE FOUQUET',
+    'BAR PITTI', 'MINETTA TAVERN', 'SHUKO', 'IL BUCO ALIMENTARI', 'BALTHAZAR',
+    'JOSEPH LEONARD', 'ESTELLA', "JACK'S WIFE FRIEDA", 'FRENCHETTE', "L'ABEILLE",
+    'LOCANDA VERDE', 'DIRTY FRENCH', '63 CLINTON', 'ST AMBROEUS', 'OMEN',
+    "THE BUTCHER'S DAUGHTER", 'INDOCHINE', 'LA MERCERIE', 'LE COUCOU'
   ];
+
+  const DASHBOARD_STATIC_KEYWORDS = DASHBOARD_STATIC_KEYWORD_NAMES.map(function (name, i) {
+    var n = DASHBOARD_STATIC_KEYWORD_NAMES.length;
+    var t = n <= 1 ? 0 : i / (n - 1);
+    return {
+      name: name,
+      cost: Math.round(15000 - t * (15000 - 2800)),
+      engagement: Math.max(28, Math.round(50 - t * 22))
+    };
+  });
 
   function loadDashboardKeywords(){
     if (dashboardKeywordsLoadPromise) return dashboardKeywordsLoadPromise;
-    dashboardKeywordsLoadPromise = (async function(){
-      try {
-        if (window.LuxuryIntelligence) {
-          const data = await window.LuxuryIntelligence.ask(window.LuxuryIntelligence.DASHBOARD_KEYWORDS_QUERY);
-          const phrases = window.LuxuryIntelligence.extractKeywordPhrases(data.answer, 10);
-          if (phrases.length) {
-            dashboardIntelKeywordsRows = phrases.map(function(name, i){
-              return {
-                name: name,
-                cost: 12000 - i * 800,
-                engagement: Math.max(40, 48 - i * 2)
-              };
-            });
-            return;
-          }
-        }
-      } catch (e) {
-        console.warn('Dashboard keyword intelligence:', e);
-      }
-      dashboardIntelKeywordsRows = FALLBACK_INTEL_KEYWORDS.slice();
-    })();
+    dashboardKeywordsLoadPromise = Promise.resolve().then(function () {
+      dashboardKeywordRows = DASHBOARD_STATIC_KEYWORDS.slice();
+    });
     return dashboardKeywordsLoadPromise;
   }
 
@@ -85,14 +89,14 @@
     if (!body) return;
     body.replaceChildren();
     const loadingTr = document.createElement('tr');
-    loadingTr.innerHTML = '<td colspan="3" style="text-align:center;color:#6b7280;">Loading keyword intelligence…</td>';
+    loadingTr.innerHTML = '<td colspan="3" style="text-align:center;color:#6b7280;">Loading keywords…</td>';
     body.appendChild(loadingTr);
     await loadDashboardKeywords();
     loadingTr.remove();
 
-    const source = dashboardIntelKeywordsRows && dashboardIntelKeywordsRows.length
-      ? dashboardIntelKeywordsRows
-      : FALLBACK_INTEL_KEYWORDS;
+    const source = dashboardKeywordRows && dashboardKeywordRows.length
+      ? dashboardKeywordRows
+      : DASHBOARD_STATIC_KEYWORDS;
 
     const filteredKeywords = source
       .filter(k => k.name.toLowerCase().includes((filterTerm || '').toLowerCase()))

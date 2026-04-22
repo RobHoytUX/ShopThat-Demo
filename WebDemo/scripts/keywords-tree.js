@@ -12,6 +12,13 @@
   var drawerBodyEl = document.getElementById('treeDrawerBody');
 
   var selectedKeywords = new Set();
+  /** Graph keyword ids dimmed via the side panel (same behaviour as bubbles). */
+  var treeDisabledNodes = new Set();
+  // Currently-focused node in the tree (the one whose details are shown in
+  // the side panel). Tracked separately from `selectedKeywords` so we can
+  // implement a true click-to-toggle: clicking a node again collapses its
+  // children AND closes its details panel.
+  var selectedTreeNode = null;
   var root = null;
   var treeSvg = null;
   var treeG = null;
@@ -34,79 +41,80 @@
     var links = window.kwGetLinks ? window.kwGetLinks() : [];
     if (nodes.length === 0) return null;
 
-    var adjacency = {};
-    links.forEach(function (link) {
-      var src = typeof link.source === 'object' ? link.source.id : link.source;
-      var tgt = typeof link.target === 'object' ? link.target.id : link.target;
-      if (!adjacency[src]) adjacency[src] = [];
-      if (!adjacency[tgt]) adjacency[tgt] = [];
-      adjacency[src].push(tgt);
-      adjacency[tgt].push(src);
+    var byId = {};
+    nodes.forEach(function (n) { byId[n.id] = n; });
+
+    var rootNode =
+      nodes.find(function (n) { return n.isRoot; }) ||
+      byId['LVMH'] ||
+      nodes[0];
+    if (!rootNode) return null;
+
+    var hasParents = nodes.some(function (n) {
+      return n.parent && n.id !== rootNode.id;
     });
 
-    function neighborsOf(id) {
-      var seen = {};
-      var out = [];
-      (adjacency[id] || []).forEach(function (nid) {
-        if (!seen[nid]) { seen[nid] = true; out.push(nid); }
-      });
-      return out;
+    // childrenMap: parentId -> [child node, …] following the tree shape.
+    var childrenMap = {};
+    var claimed = {};
+    claimed[rootNode.id] = true;
+
+    function addChild(parentId, childNode) {
+      if (!parentId || !childNode || claimed[childNode.id]) return;
+      if (!byId[parentId]) return;
+      claimed[childNode.id] = true;
+      (childrenMap[parentId] = childrenMap[parentId] || []).push(childNode);
     }
 
-    function sortByValue(ids) {
-      return ids.slice().sort(function (a, b) {
-        var na = nodes.find(function (n) { return n.id === a; });
-        var nb = nodes.find(function (n) { return n.id === b; });
-        return ((nb ? nb.value : 0) - (na ? na.value : 0));
+    if (hasParents) {
+      // Primary path: explicit `parent` fields drive the tree.
+      nodes.forEach(function (n) {
+        if (n.id === rootNode.id) return;
+        var parentId = n.parent;
+        // Areas without an explicit parent default to the root, matching the
+        // previous flat behaviour.
+        if (!parentId && n.isArea) parentId = rootNode.id;
+        addChild(parentId, n);
       });
+    } else {
+      // Legacy fallback: BFS from the root along link adjacency, like before.
+      var adjacency = {};
+      links.forEach(function (link) {
+        var src = typeof link.source === 'object' ? link.source.id : link.source;
+        var tgt = typeof link.target === 'object' ? link.target.id : link.target;
+        (adjacency[src] = adjacency[src] || []).push(tgt);
+        (adjacency[tgt] = adjacency[tgt] || []).push(src);
+      });
+      var queue = [rootNode.id];
+      while (queue.length) {
+        var curId = queue.shift();
+        (adjacency[curId] || []).forEach(function (nid) {
+          var child = byId[nid];
+          if (!child || claimed[child.id]) return;
+          addChild(curId, child);
+          queue.push(nid);
+        });
+      }
     }
 
-    function nodeData(id) {
-      var n = nodes.find(function (nd) { return nd.id === id; });
-      return { group: n ? n.group : 4, value: n ? n.value : 50 };
+    function build(node) {
+      var rawKids = (childrenMap[node.id] || []).slice();
+      rawKids.sort(function (a, b) {
+        return ((b.value || 0) - (a.value || 0));
+      });
+      var displayName = (node.id === rootNode.id) ? 'Louis Vuitton' : node.id;
+      var built = {
+        name: displayName,
+        group: node.group != null ? node.group : 4,
+        value: node.value != null ? node.value : 50
+      };
+      if (rawKids.length) {
+        built.children = rawKids.map(build);
+      }
+      return built;
     }
 
-    var areaIds = nodes.filter(function (n) { return n.isArea; }).map(function (n) { return n.id; });
-    var rootNeighbors = neighborsOf('LVMH');
-    if (areaIds.length === 0) {
-      areaIds = rootNeighbors.slice();
-    }
-    var areaSet = {};
-    areaIds.forEach(function (id) { areaSet[id] = true; });
-
-    var areaChildren = [];
-    var globalClaimed = { 'LVMH': true };
-    areaIds.forEach(function (id) { globalClaimed[id] = true; });
-
-    areaIds.forEach(function (areaId) {
-      var kwIds = sortByValue(
-        neighborsOf(areaId).filter(function (nid) { return nid !== 'LVMH' && !areaSet[nid]; })
-      );
-
-      var kids = [];
-      kwIds.forEach(function (kwId) {
-        if (globalClaimed[kwId]) return;
-        globalClaimed[kwId] = true;
-        var d = nodeData(kwId);
-        kids.push({ name: kwId, group: d.group, value: d.value });
-      });
-
-      var ad = nodeData(areaId);
-      areaChildren.push({
-        name: areaId,
-        group: ad.group,
-        value: ad.value,
-        children: kids.length > 0 ? kids : undefined
-      });
-    });
-
-    var rd = nodeData('LVMH');
-    return {
-      name: 'Louis Vuitton',
-      group: rd.group,
-      value: rd.value,
-      children: areaChildren.length > 0 ? areaChildren : undefined
-    };
+    return build(rootNode);
   }
 
   function initTree() {
@@ -140,18 +148,35 @@
     treeSvg.call(zoomBehavior);
     treeSvg.call(zoomBehavior.transform, d3.zoomIdentity.translate(80, h / 2).scale(0.85));
 
-    treeLayout = d3.tree().nodeSize([38, 240]).separation(function (a, b) { return a.parent === b.parent ? 1 : 1.6; });
+    // Looser vertical spacing + stronger separation between subtrees so that
+    // when Kusama and New York (or any two branches of the root) are expanded
+    // simultaneously, their leaves don’t crowd into each other.
+    treeLayout = d3.tree()
+      .nodeSize([46, 240])
+      .separation(function (a, b) {
+        if (a.parent === b.parent) return 1;
+        // Different direct parents — walk up until we find the common
+        // ancestor, then scale the gap by how far the two nodes are from it.
+        // Nodes that sit in entirely different top-level branches (e.g. a
+        // Kusama leaf next to a 57th St. leaf) get the biggest gap.
+        var ap = a;
+        var bp = b;
+        while (ap.depth > bp.depth) ap = ap.parent;
+        while (bp.depth > ap.depth) bp = bp.parent;
+        while (ap && bp && ap !== bp) { ap = ap.parent; bp = bp.parent; }
+        var commonDepth = ap ? ap.depth : 0;
+        var dist = (a.depth - commonDepth) + (b.depth - commonDepth);
+        return 1.4 + dist * 0.35;
+      });
 
     root = d3.hierarchy(data);
     root.x0 = 0;
     root.y0 = 0;
 
-    // Collapse all except first two levels
+    // Collapse areas so user clicks to reveal keywords
     if (root.children) {
       root.children.forEach(function (child) {
-        if (child.children) {
-          child.children.forEach(collapse);
-        }
+        collapse(child);
       });
     }
 
@@ -197,6 +222,95 @@
       d.y + ' ' + d.x;
   }
 
+  function graphIdFromTreeDisplayName(displayName) {
+    return displayName === 'Louis Vuitton' ? 'LVMH' : displayName;
+  }
+
+  function updateTreeNodeDisabledVisuals() {
+    if (!treeG) return;
+    treeG.selectAll('g.node').each(function (d) {
+      var gid = graphIdFromTreeDisplayName(d.data.name);
+      var isDisabled = treeDisabledNodes.has(gid);
+      var nodeEl = d3.select(this);
+      nodeEl.select('circle')
+        .interrupt('treeDisabled')
+        .transition('treeDisabled')
+        .duration(200)
+        .attr('opacity', isDisabled ? 0.25 : 1)
+        .style('filter', isDisabled ? 'grayscale(0.8) brightness(1.3)' : 'none');
+      nodeEl.select('text:not(.toggle-icon)')
+        .interrupt('treeDisabledT')
+        .transition('treeDisabledT')
+        .duration(200)
+        .attr('opacity', isDisabled ? 0.4 : 1);
+    });
+  }
+
+  function syncTreeDrawerChipClasses() {
+    if (!drawerBodyEl) return;
+    drawerBodyEl.querySelectorAll('.sidebar-chip--toggle').forEach(function (chip) {
+      var kw = chip.getAttribute('data-keyword');
+      if (!kw) return;
+      chip.classList.toggle('sidebar-chip--disabled', treeDisabledNodes.has(kw));
+    });
+  }
+
+  function attachTreeChipClickHandlers() {
+    if (!drawerBodyEl) return;
+    var chips = drawerBodyEl.querySelectorAll('.sidebar-chip--toggle');
+    var resetBtn = drawerBodyEl.querySelector('#treeResetChipsBtn');
+
+    function updateResetBtnState() {
+      if (resetBtn) resetBtn.disabled = treeDisabledNodes.size === 0;
+    }
+
+    chips.forEach(function (chip) {
+      chip.addEventListener('click', function () {
+        var keyword = chip.getAttribute('data-keyword');
+        if (!keyword) return;
+        if (treeDisabledNodes.has(keyword)) {
+          treeDisabledNodes.delete(keyword);
+        } else {
+          treeDisabledNodes.add(keyword);
+        }
+        syncTreeDrawerChipClasses();
+        updateTreeNodeDisabledVisuals();
+        updateResetBtnState();
+      });
+    });
+
+    if (resetBtn) {
+      resetBtn.addEventListener('click', function () {
+        treeDisabledNodes.clear();
+        chips.forEach(function (c) { c.classList.remove('sidebar-chip--disabled'); });
+        updateTreeNodeDisabledVisuals();
+        resetBtn.disabled = true;
+      });
+    }
+  }
+
+  function treeResetChipsSvgBtn(disabled) {
+    return (
+      '<button type="button" class="sidebar-reset-btn" id="treeResetChipsBtn" title="Reset all"' +
+      (disabled ? ' disabled' : '') + '>' +
+      '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">' +
+      '<path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>' +
+      '<path d="M3 3v5h5"/>' +
+      '</svg>Reset</button>'
+    );
+  }
+
+  function treeKeywordChipsHtml(names) {
+    return names.map(function (name) {
+      var gid = graphIdFromTreeDisplayName(name);
+      var off = treeDisabledNodes.has(gid);
+      return (
+        '<span class="sidebar-chip sidebar-chip--toggle' + (off ? ' sidebar-chip--disabled' : '') + '" data-keyword="' +
+        gid + '">' + name + '</span>'
+      );
+    }).join('');
+  }
+
   function update(source) {
     var treeData = treeLayout(root);
     var treeNodes = treeData.descendants();
@@ -217,12 +331,26 @@
         return 'translate(' + source.y0 + ',' + source.x0 + ')';
       })
       .on('click', function (event, d) {
+        // Toggle: clicking the currently-selected node again collapses it
+        // and closes its details panel.
+        if (selectedTreeNode === d) {
+          if (d.children) {
+            d._children = d.children;
+            d.children = null;
+          }
+          selectedTreeNode = null;
+          resetTreeDetails();
+          update(d);
+          return;
+        }
+        // Otherwise: expand if collapsed, mark as selected, show details.
         if (d._children) {
           d.children = d._children;
           d._children = null;
-          update(d);
         }
+        selectedTreeNode = d;
         showNodeDetails(d);
+        update(d);
       });
 
     nodeEnter.append('circle')
@@ -252,6 +380,14 @@
 
     // UPDATE
     var nodeUpdate = nodeEnter.merge(node);
+
+    // Keep the “selected” visual marker in sync after toggles.
+    nodeUpdate.attr('class', function (d) {
+      var cls = 'node';
+      if (selectedKeywords.has(d.data.name)) cls += ' is-selected';
+      if (selectedTreeNode === d) cls += ' is-focused';
+      return cls;
+    });
 
     nodeUpdate.transition().duration(duration)
       .attr('transform', function (d) {
@@ -316,6 +452,7 @@
     });
 
     updateCounts();
+    updateTreeNodeDisabledVisuals();
 
     // Auto-fit zoom after transition
     setTimeout(function () { fitToView(treeNodes); }, duration + 50);
@@ -364,13 +501,12 @@
     }
   }
 
-  var groupLabels = {
-    0: 'Root',
-    1: 'Primary',
-    2: 'Connected',
-    3: 'Secondary',
-    4: 'Tertiary'
-  };
+  function resetTreeDetails() {
+    if (drawerTitleEl) drawerTitleEl.textContent = 'Select a Keyword';
+    if (drawerBodyEl) {
+      drawerBodyEl.innerHTML = '<p class="sidebar__placeholder">Click on a node in the tree to see its details.</p>';
+    }
+  }
 
   function showNodeDetails(d) {
     if (!drawerTitleEl || !drawerBodyEl) return;
@@ -388,7 +524,6 @@
 
     var nodeObj = nodes.find(function (n) { return n.id === realId; });
     var value = nodeObj ? nodeObj.value : (d.data.value || 0);
-    var group = nodeObj ? nodeObj.group : (d.data.group || 0);
 
     var connCount = 0;
     var connNames = [];
@@ -404,28 +539,23 @@
     html += '<div class="sidebar-stats">';
     html += '<div class="sidebar-stat"><span class="sidebar-stat-value">' + value + '</span><span class="sidebar-stat-label">Volume</span></div>';
     html += '<div class="sidebar-stat"><span class="sidebar-stat-value">' + connCount + '</span><span class="sidebar-stat-label">Connections</span></div>';
-    html += '<div class="sidebar-stat"><span class="sidebar-stat-value">' + (groupLabels[group] || 'Other') + '</span><span class="sidebar-stat-label">Group</span></div>';
     html += '</div>';
 
-    if (childNames.length > 0) {
+    if (childNames.length > 0 || connNames.length > 0) {
       html += '<div class="sidebar-section">';
-      html += '<div class="sidebar-section-label">Nested Keywords (' + childNames.length + ')</div>';
-      html += '<div class="sidebar-chips">';
-      childNames.forEach(function (cn) {
-        html += '<span class="sidebar-chip">' + cn + '</span>';
-      });
+      html += '<div class="sidebar-section-header">';
+      html += '<div class="sidebar-section-label">Related Keywords</div>';
+      html += treeResetChipsSvgBtn(treeDisabledNodes.size === 0);
       html += '</div>';
-      html += '</div>';
-    }
-
-    if (connNames.length > 0) {
-      html += '<div class="sidebar-section">';
-      html += '<div class="sidebar-section-label">All Connections</div>';
-      html += '<div class="sidebar-chips">';
-      connNames.forEach(function (cn) {
-        html += '<span class="sidebar-chip">' + cn + '</span>';
-      });
-      html += '</div>';
+      html += '<p class="sidebar-hint">Click a keyword to toggle visibility</p>';
+      if (childNames.length > 0) {
+        html += '<div class="sidebar-section-label">Nested Keywords (' + childNames.length + ')</div>';
+        html += '<div class="sidebar-chips">' + treeKeywordChipsHtml(childNames) + '</div>';
+      }
+      if (connNames.length > 0) {
+        html += '<div class="sidebar-section-label">All Connections</div>';
+        html += '<div class="sidebar-chips">' + treeKeywordChipsHtml(connNames) + '</div>';
+      }
       html += '</div>';
     }
 
@@ -438,6 +568,7 @@
 
     html += '</div>';
     drawerBodyEl.innerHTML = html;
+    attachTreeChipClickHandlers();
   }
 
   // Search: expand to matches
@@ -496,9 +627,9 @@
   });
   if (clearSelectionBtn) clearSelectionBtn.addEventListener('click', function () {
     selectedKeywords.clear();
-    if (treeG) treeG.selectAll('g.node').classed('is-selected', false);
-    if (drawerTitleEl) drawerTitleEl.textContent = 'Select a Keyword';
-    if (drawerBodyEl) drawerBodyEl.innerHTML = '<p class="sidebar__placeholder">Click on a node in the tree to see its details.</p>';
+    selectedTreeNode = null;
+    if (treeG) treeG.selectAll('g.node').classed('is-selected', false).classed('is-focused', false);
+    resetTreeDetails();
   });
   if (searchInput) searchInput.addEventListener('input', function () {
     searchTree(searchInput.value.trim());
@@ -518,6 +649,7 @@
 
   window.addEventListener('kw-data-updated', function () {
     initialized = false;
+    treeDisabledNodes.clear();
     var tab = document.getElementById('kw-tree-tab');
     if (tab && tab.style.display !== 'none') {
       setTimeout(initTree, 50);

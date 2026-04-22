@@ -53,12 +53,54 @@ console.log('Document ready state:', document.readyState);
   };
 
   // State management for hierarchical display
-  let currentViewMode = 'default'; // 'default' shows primary only, 'expanded' shows selected + connected, 'filtered' shows filtered, 'all' shows all
+  let currentViewMode = 'default'; // 'default' / 'tree' (bubbles drill-down) / 'expanded' / 'filtered' / 'all' / 'linear'
   let selectedNode = null;
   let allNodes = [];
   let allLinks = [];
   let visibleNodes = [];
   let visibleLinks = [];
+
+  // Tree-style bubble navigation: which node IDs currently have their direct
+  // children expanded into the visible bubble set. The Bubbles tab starts
+  // empty (only LVMH visible) and grows as the user clicks nodes.
+  // Declared with `var` to avoid TDZ when getVisibleNodes runs early.
+  var bubblesExpandedIds = new Set();
+
+  function getBubbleChildrenOf(parentId) {
+    return allNodes.filter(function (n) { return n.parent === parentId; });
+  }
+
+  function collapseBubbleSubtree(id) {
+    // Drop `id` and every descendant id from the expanded set so collapsing
+    // a parent also folds back any deeper expansions underneath it.
+    var stack = [id];
+    while (stack.length) {
+      var cur = stack.pop();
+      bubblesExpandedIds.delete(cur);
+      getBubbleChildrenOf(cur).forEach(function (child) { stack.push(child.id); });
+    }
+  }
+
+  function getBubbleVisibleNodeIds() {
+    var visible = new Set();
+    var rootNode = allNodes.find(function (n) { return n.isRoot; }) ||
+                   allNodes.find(function (n) { return n.id === 'LVMH'; });
+    if (!rootNode) return visible;
+    visible.add(rootNode.id);
+
+    var queue = [rootNode.id];
+    while (queue.length) {
+      var cur = queue.shift();
+      if (!bubblesExpandedIds.has(cur)) continue;
+      getBubbleChildrenOf(cur).forEach(function (child) {
+        if (!visible.has(child.id)) {
+          visible.add(child.id);
+          queue.push(child.id);
+        }
+      });
+    }
+    return visible;
+  }
   
   // State history for back navigation
   const stateHistory = [];
@@ -198,19 +240,115 @@ console.log('Document ready state:', document.readyState);
     `).join('');
   }
 
-  // Restaurant graph data (also used for seeding Neo4j). Will be overridden by localStorage if present.
+  // ──────────────────────────────────────────────────────────────────────────
+  // Demo keyword graph (Louis Vuitton ▸ Kusama / New York ▸ …).
+  // Source of truth = the curated screenshots, NOT AI generation.
+  //
+  // Hierarchy (every non-root node has a `parent` field; the tree view follows
+  // those parents directly, so depth is unbounded):
+  //
+  //   Louis Vuitton (LVMH)
+  //     ├── Kusama
+  //     │     ├── Museums  ─ Fondation LV, Kusama Museum
+  //     │     ├── Style    ─ Polka Dots, Pumpkin, Infinity Mirrors
+  //     │     └── Galleries ─ Victoria Miro, David Zwirner
+  //     └── New York
+  //           └── Stores
+  //                 ├── 57th St.
+  //                 │     ├── 57th St. Restaurants ─ …
+  //                 │     └── 57th St. Hotels      ─ …
+  //                 └── Soho
+  //                       ├── SoHo Hotels       ─ …
+  //                       └── SoHo Restaurants  ─ …
+  // ──────────────────────────────────────────────────────────────────────────
   const defaultNodes = [
-    // ============================================
-    // LVMH ROOT NODE - Central hub connecting all primary nodes
-    // ============================================
-    // Group 0 - Root Node (LVMH) - Dark gradient blue, 4x larger
+    // Root (rendered as “Louis Vuitton” by the tree view).
     { id: 'LVMH', group: 0, value: 100, isRoot: true },
-    
-    // ============================================
-    // AREA GROUPING NODES - Nested under LVMH
-    // ============================================
-    { id: '57th St.', group: 1, value: 90, isArea: true },
-    { id: 'Soho', group: 1, value: 90, isArea: true },
+
+    // Top-level pillars.
+    { id: 'Kusama',   group: 1, value: 95, isArea: true, parent: 'LVMH' },
+    { id: 'New York', group: 1, value: 95, isArea: true, parent: 'LVMH' },
+
+    // ── Kusama subtree ──────────────────────────────────────────────────
+    { id: 'Museums',   group: 2, value: 85, parent: 'Kusama' },
+    { id: 'Style',     group: 2, value: 85, parent: 'Kusama' },
+    { id: 'Galleries', group: 2, value: 85, parent: 'Kusama' },
+    { id: 'Fondation LV',     group: 4, value: 72, parent: 'Museums' },
+    { id: 'Kusama Museum',    group: 4, value: 72, parent: 'Museums' },
+    { id: 'Polka Dots',       group: 4, value: 78, parent: 'Style' },
+    { id: 'Pumpkin',          group: 4, value: 78, parent: 'Style' },
+    { id: 'Infinity Mirrors', group: 4, value: 78, parent: 'Style' },
+    { id: 'Victoria Miro',    group: 4, value: 70, parent: 'Galleries' },
+    { id: 'David Zwirner',    group: 4, value: 75, parent: 'Galleries' },
+
+    // ── New York → Stores → (57th St., Soho) ────────────────────────────
+    { id: 'Stores',  group: 2, value: 90, parent: 'New York' },
+    { id: '57th St.', group: 3, value: 88, isArea: true, parent: 'Stores' },
+    { id: 'Soho',     group: 3, value: 88, isArea: true, parent: 'Stores' },
+
+    // 57th St. categories — only Restaurants and Hotels per the spec.
+    { id: '57th St. Restaurants', group: 3, value: 80, parent: '57th St.' },
+    { id: '57th St. Hotels',      group: 3, value: 80, parent: '57th St.' },
+
+    // 57th St. restaurants
+    { id: 'The Mark',         group: 4, value: 70, parent: '57th St. Restaurants' },
+    { id: 'Gabriel Kreuther', group: 4, value: 70, parent: '57th St. Restaurants' },
+    { id: 'THE GRILL',        group: 4, value: 70, parent: '57th St. Restaurants' },
+    { id: 'KANG HO DONG',     group: 4, value: 65, parent: '57th St. Restaurants' },
+    { id: 'Le Pavillon',      group: 4, value: 70, parent: '57th St. Restaurants' },
+    { id: 'Marea',            group: 4, value: 68, parent: '57th St. Restaurants' },
+    { id: 'The Modern',       group: 4, value: 75, parent: '57th St. Restaurants' },
+    { id: 'Le Bernardin',     group: 4, value: 80, parent: '57th St. Restaurants' },
+    { id: 'Cafe Carlyle',     group: 4, value: 70, parent: '57th St. Restaurants' },
+
+    // 57th St. hotels
+    { id: 'Ace Hotel',            group: 4, value: 65, parent: '57th St. Hotels' },
+    { id: 'The Baccarat Hotel',   group: 4, value: 70, parent: '57th St. Hotels' },
+    { id: 'The Plaza',            group: 4, value: 80, parent: '57th St. Hotels' },
+    { id: 'CIVILIAN Hotel',       group: 4, value: 60, parent: '57th St. Hotels' },
+    { id: 'ST Regis',             group: 4, value: 78, parent: '57th St. Hotels' },
+    { id: 'Times Square Edition', group: 4, value: 65, parent: '57th St. Hotels' },
+    { id: 'DANIEL',               group: 4, value: 70, parent: '57th St. Hotels' },
+    { id: 'Le Bilboquet',         group: 4, value: 65, parent: '57th St. Hotels' },
+    { id: 'The Mark Hotel',       group: 4, value: 75, parent: '57th St. Hotels' },
+
+    // SoHo categories
+    { id: 'SoHo Hotels',      group: 3, value: 80, parent: 'Soho' },
+    { id: 'SoHo Restaurants', group: 3, value: 80, parent: 'Soho' },
+
+    // SoHo hotels
+    { id: 'CROSBY STREET HOTEL',       group: 4, value: 70, parent: 'SoHo Hotels' },
+    { id: 'THE BOWERY HOTEL',          group: 4, value: 70, parent: 'SoHo Hotels' },
+    { id: 'THE STANDARD EAST VILLAGE', group: 4, value: 65, parent: 'SoHo Hotels' },
+    { id: 'THE MERCER',                group: 4, value: 70, parent: 'SoHo Hotels' },
+    { id: 'THE GREENWICH',             group: 4, value: 65, parent: 'SoHo Hotels' },
+    { id: 'HOTEL BARRIERE FOUQUET',    group: 4, value: 60, parent: 'SoHo Hotels' },
+    { id: 'PUBLIC',                    group: 4, value: 65, parent: 'SoHo Hotels' },
+
+    // SoHo restaurants
+    { id: 'BAR PITTI',              group: 4, value: 65, parent: 'SoHo Restaurants' },
+    { id: 'MINETTA TAVERN',         group: 4, value: 70, parent: 'SoHo Restaurants' },
+    { id: 'SHUKO',                  group: 4, value: 65, parent: 'SoHo Restaurants' },
+    { id: 'IL BUCO ALIMENTARI',     group: 4, value: 60, parent: 'SoHo Restaurants' },
+    { id: 'BALTHAZAR',              group: 4, value: 70, parent: 'SoHo Restaurants' },
+    { id: 'JOSEPH LEONARD',         group: 4, value: 60, parent: 'SoHo Restaurants' },
+    { id: 'ESTELLA',                group: 4, value: 60, parent: 'SoHo Restaurants' },
+    { id: "JACK'S WIFE FRIEDA",     group: 4, value: 60, parent: 'SoHo Restaurants' },
+    { id: 'FRENCHETTE',             group: 4, value: 65, parent: 'SoHo Restaurants' },
+    { id: "L'ABEILLE",              group: 4, value: 60, parent: 'SoHo Restaurants' },
+    { id: 'LOCANDA VERDE',          group: 4, value: 65, parent: 'SoHo Restaurants' },
+    { id: 'DIRTY FRENCH',           group: 4, value: 60, parent: 'SoHo Restaurants' },
+    { id: '63 CLINTON',             group: 4, value: 55, parent: 'SoHo Restaurants' },
+    { id: 'ST AMBROEUS',            group: 4, value: 65, parent: 'SoHo Restaurants' },
+    { id: 'OMEN',                   group: 4, value: 55, parent: 'SoHo Restaurants' },
+    { id: "THE BUTCHER'S DAUGHTER", group: 4, value: 55, parent: 'SoHo Restaurants' },
+    { id: 'INDOCHINE',              group: 4, value: 60, parent: 'SoHo Restaurants' },
+    { id: 'LA MERCERIE',            group: 4, value: 60, parent: 'SoHo Restaurants' },
+    { id: 'LE COUCOU',              group: 4, value: 65, parent: 'SoHo Restaurants' }
+  ];
+  // Legacy nodes kept only so existing references compile; they’re unused.
+  const _legacyDefaultNodes_unused = [
+    { id: '__legacy', group: 1, value: 1 },
     
     // ============================================
     // THE MODERN RESTAURANT
@@ -414,10 +552,9 @@ console.log('Document ready state:', document.readyState);
     { id: 'Hotel', group: 2, value: 70 },
     { id: 'Luxury', group: 2, value: 75 }
   ];
-  const defaultLinks = [
-    // ============================================
-    // LVMH ROOT CONNECTIONS - Connects to area nodes
-    // ============================================
+  // Legacy link list — retained only so the diff stays readable. It is not used
+  // anywhere; the active `defaultLinks` is declared below this block.
+  const _legacyDefaultLinks_unused = [
     { source: 'LVMH', target: '57th St.' },
     { source: 'LVMH', target: 'Soho' },
     
@@ -672,7 +809,28 @@ console.log('Document ready state:', document.readyState);
     { source: 'Luxury', target: 'Five-Star' }
   ];
 
+  // Auto-generate links from the parent fields above so the bubble graph
+  // adjacency mirrors the tree exactly. Cross-area extras (e.g. David Zwirner
+  // also lives in 57th St. Galleries semantically) are appended at the end.
+  const defaultLinks = (function buildDefaultLinks() {
+    var out = [];
+    defaultNodes.forEach(function (n) {
+      if (n.parent) out.push({ source: n.parent, target: n.id });
+    });
+    return out;
+  })();
+
   const STORAGE_KEY = 'st_keywords_v1';
+
+  // The keywords page is the source of truth for the demo keyword graph, so
+  // every load re-seeds localStorage with the curated `defaultNodes` /
+  // `defaultLinks` above. This prevents stale AI-cached data (e.g. the old
+  // “Le Bernardin / MoMA / Three Michelin Stars” cluster) from surviving
+  // across sessions and collapsing the tree back to a flat structure.
+  try {
+    localStorage.removeItem('st_ai_keywords_graph_v2');
+  } catch (e) { /* ignore quota / privacy errors */ }
+
   function loadStored(){
     if (window.ShopThatData) return window.ShopThatData.getKeywords();
     try { return JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]'); } catch { return []; }
@@ -899,76 +1057,49 @@ console.log('Document ready state:', document.readyState);
     }
   }
   
-  // Initialize with default data first, then try to load from storage
-  let initialNodes = defaultNodes.slice();
-  let initialLinks = defaultLinks.slice();
-  
-  // Try to load from shared data system
-  const storedNodes = loadStored();
-  const storedConnections = loadStoredConnections();
-  
-  if (storedNodes.length > 0) {
-    // Convert stored format to D3 format if needed
-    initialNodes = storedNodes.map(node => ({
-      id: node.id || node.name,
-      group: node.group || 1,
-      value: node.value || 50,
-      isArea: node.isArea || false,
-      isRoot: node.isRoot || false
-    }));
-    console.log('Loaded stored nodes:', initialNodes.map(n => ({ id: n.id, group: n.group })));
-  }
-  
-  if (storedConnections.length > 0) {
-    initialLinks = storedConnections.slice();
-  }
-  
-  // Ensure we always have some data to display
-  if (initialNodes.length === 0) {
-    console.warn('No nodes found, using default data');
-    initialNodes = defaultNodes.slice();
-    initialLinks = defaultLinks.slice();
-  } else {
-    // If we have stored data but it's all group 1, let's add some variety for demonstration
-    const hasVariety = initialNodes.some(node => node.group !== 1);
-    if (!hasVariety && initialNodes.length > 4) {
-      console.log('Adding group variety to stored nodes');
-      // Make some nodes isolated (group 4) for demonstration
-      if (initialNodes.length > 6) {
-        initialNodes[initialNodes.length - 1].group = 4;
-        initialNodes[initialNodes.length - 2].group = 4;
-      }
-      // Make some nodes secondary (group 3)
-      if (initialNodes.length > 4) {
-        initialNodes[Math.floor(initialNodes.length / 2)].group = 3;
-        initialNodes[Math.floor(initialNodes.length / 2) + 1].group = 3;
-      }
-      // Make some nodes connected (group 2)
-      if (initialNodes.length > 2) {
-        initialNodes[1].group = 2;
-        initialNodes[2].group = 2;
-      }
+  // Always rebuild the keyword graph from the curated defaults above. Stored
+  // data from previous sessions (localStorage / ShopThatData) is intentionally
+  // ignored so the Louis Vuitton ▸ New York ▸ Stores ▸ 57th St./Soho hierarchy
+  // cannot regress to legacy flat structures or AI-cached clusters.
+  void loadStored;
+  void loadStoredConnections;
+  const initialNodes = defaultNodes.map(n => ({ ...n }));
+  const initialLinks = defaultLinks.map(l => ({ ...l }));
+
+  // Re-seed ShopThatData so other pages (keywords-manage, dashboard, etc.)
+  // observe the same curated graph instead of stale cached nodes.
+  try {
+    if (window.ShopThatData) {
+      const nowIso = new Date().toISOString();
+      const seededKeywords = initialNodes.map(n => ({
+        id: n.id,
+        name: n.id,
+        value: n.value || 50,
+        group: n.group || 1,
+        isArea: !!n.isArea,
+        isRoot: !!n.isRoot,
+        parent: n.parent || null,
+        uses: 0,
+        cost: 0,
+        totalCost: 0,
+        lastUsed: null,
+        created: nowIso
+      }));
+      window.ShopThatData.saveKeywords(seededKeywords);
+      window.ShopThatData.saveConnections(initialLinks.map(l => ({
+        source: typeof l.source === 'object' ? l.source.id : l.source,
+        target: typeof l.target === 'object' ? l.target.id : l.target
+      })));
     }
+  } catch (e) {
+    console.warn('Keyword graph re-seed failed:', e);
   }
-  
-  // Ensure LVMH + area nodes always exist in initial data
-  if (!initialNodes.some(n => n.id === 'LVMH')) {
-    initialNodes.unshift({ id: 'LVMH', group: 0, value: 100, isRoot: true });
-  }
-  // Ensure area nodes exist
-  [{ id: '57th St.', group: 1, value: 90, isArea: true }, { id: 'Soho', group: 1, value: 90, isArea: true }].forEach(area => {
-    let existing = initialNodes.find(n => n.id === area.id);
-    if (!existing) {
-      initialNodes.push({ ...area });
-    } else {
-      existing.isArea = true;
-    }
-    // Ensure LVMH → area link
-    if (!initialLinks.some(l => (l.source === 'LVMH' && l.target === area.id) || (l.source === area.id && l.target === 'LVMH'))) {
-      initialLinks.push({ source: 'LVMH', target: area.id });
-    }
+
+  console.log('Keyword graph seeded:', {
+    nodes: initialNodes.length,
+    links: initialLinks.length,
+    areas: initialNodes.filter(n => n.isArea).map(n => n.id)
   });
-  console.log('LVMH + area nodes ensured');
   
   // Set up initial graph data using the new system
   allNodes = initialNodes;
@@ -1152,6 +1283,12 @@ console.log('Document ready state:', document.readyState);
 
   // Function to determine which nodes to show based on current mode
   function getVisibleNodes() {
+    // Tree-style bubble navigation: only LVMH is visible by default; clicking
+    // a bubble adds its `parent` children to the visible set.
+    if (currentViewMode === 'tree') {
+      var visibleIds = getBubbleVisibleNodeIds();
+      return allNodes.filter(function (node) { return visibleIds.has(node.id); });
+    }
     if (currentViewMode === 'default') {
       // Show LVMH and its direct connections (area nodes) on page load
       const lvmhConnectedIds = new Set(['LVMH']);
@@ -1684,7 +1821,7 @@ console.log('Document ready state:', document.readyState);
     })
     .force('cluster', () => {
       // Cluster force for non-default modes
-      if (currentViewMode === 'default') return;
+      if (currentViewMode === 'default' || currentViewMode === 'tree') return;
       
       const w = width();
       const h = height();
@@ -1856,7 +1993,7 @@ console.log('Document ready state:', document.readyState);
     const lvmhNode = graphNodes.find(n => n.group === 0);
     const otherNodes = graphNodes.filter(n => n.group !== 0);
     
-    if (lvmhNode && currentViewMode === 'default') {
+    if (lvmhNode && (currentViewMode === 'default' || currentViewMode === 'tree')) {
       // Solar system layout: LVMH at center, primary nodes in tight orbit
       const lvmhRadius = radius(lvmhNode.value, lvmhNode.group, lvmhNode.isArea);
       const areaRadius = 70;
@@ -2678,100 +2815,86 @@ console.log('Document ready state:', document.readyState);
   // Track bubble view navigation history
   const bubbleHistory = [];
 
-  function showBubbleView(startNode) {
+  function showBubbleView(/* startNode */) {
     isBubbleView = true;
-
-    // Remember current node for sidebar continuity
-    const currentNode = startNode || selectedNode;
-
-    // Hide linear view, show SVG
     hideLinearView();
 
-    // Build bubble history from linear state history so back works
-    if (!startNode && stateHistory.length > 0) {
-      bubbleHistory.length = 0;
-      stateHistory.forEach(entry => {
-        bubbleHistory.push({
-          selectedNodeId: entry.selectedNodeId === 'LVMH' ? null : entry.selectedNodeId,
-          viewMode: entry.selectedNodeId === 'LVMH' ? 'default' : 'expanded'
-        });
-      });
-    } else if (!startNode && !currentNode) {
-      bubbleHistory.length = 0;
-    }
+    // Reset to tree-style navigation: only LVMH (Louis Vuitton) is visible.
+    bubblesExpandedIds.clear();
+    bubbleHistory.length = 0;
 
-    const lvmhNode = allNodes.find(n => n.id === 'LVMH');
-    const nodeToShow = currentNode || lvmhNode;
-
+    selectedNode = null;
     clickedNode = null;
     hoveredNode = null;
-
-    if (nodeToShow && nodeToShow.id === 'LVMH') {
-      selectedNode = null;
-      currentViewMode = 'default';
-    } else if (nodeToShow) {
-      selectedNode = nodeToShow;
-      currentViewMode = 'expanded';
-    }
+    isHoverClustering = false;
+    currentViewMode = 'tree';
 
     allNodes.forEach(n => { delete n.x; delete n.y; delete n.vx; delete n.vy; delete n.fx; delete n.fy; });
     setGraphData(allNodes, allLinks, true);
     setTimeout(() => svg.transition().duration(250).call(zoom.transform, d3.zoomIdentity), 300);
 
-    // Keep sidebar showing the current node's info
-    if (nodeToShow && nodeToShow.id !== 'LVMH') {
-      openDrawer(nodeToShow);
-    } else {
-      showLVMHDetails();
-    }
+    showLVMHDetails();
   }
 
-  // Expand into a node in bubble view (show its connections as bubbles)
+  // Tree-style toggle: clicking a bubble expands its direct children; clicking
+  // an already-expanded bubble collapses its subtree and closes the side
+  // panel (mirroring the Tree view behavior).
   function expandBubbleNode(nodeData) {
-    // Push current state to bubble history
-    bubbleHistory.push({
-      selectedNodeId: selectedNode ? selectedNode.id : null,
-      viewMode: currentViewMode
-    });
+    if (!nodeData) return;
+    var id = nodeData.id;
 
-    selectedNode = nodeData;
-    currentViewMode = 'expanded';
+    if (bubblesExpandedIds.has(id)) {
+      // Collapse this node and any deeper expansions beneath it.
+      collapseBubbleSubtree(id);
+      if (selectedNode && selectedNode.id === id) {
+        selectedNode = null;
+        showLVMHDetails();
+      }
+    } else {
+      bubblesExpandedIds.add(id);
+      selectedNode = nodeData;
+      openDrawer(nodeData);
+    }
+
     clickedNode = null;
     hoveredNode = null;
     isHoverClustering = false;
+    currentViewMode = 'tree';
 
     allNodes.forEach(n => { delete n.x; delete n.y; delete n.vx; delete n.vy; delete n.fx; delete n.fy; });
     setGraphData(allNodes, allLinks, true);
     setTimeout(() => svg.transition().duration(250).call(zoom.transform, d3.zoomIdentity), 300);
-
-    openDrawer(nodeData);
   }
 
-  // Go back one level in bubble view
+  // Background click in bubble view: collapse the deepest expansion (acts
+  // like a one-step "back"). Returns false when there's nothing to collapse
+  // so the outer click handler can fall through to its default behavior.
   function bubbleBack() {
-    if (bubbleHistory.length === 0) return false;
-    const prev = bubbleHistory.pop();
-    clickedNode = null;
-    hoveredNode = null;
-    isHoverClustering = false;
+    if (bubblesExpandedIds.size === 0) return false;
+    // Find the deepest expanded id (longest path from root via parent chain).
+    var nodesById = {};
+    allNodes.forEach(function (n) { nodesById[n.id] = n; });
+    function depthOf(id) {
+      var d = 0; var cur = nodesById[id];
+      while (cur && cur.parent) { d++; cur = nodesById[cur.parent]; }
+      return d;
+    }
+    var deepest = null; var deepestDepth = -1;
+    bubblesExpandedIds.forEach(function (id) {
+      var dep = depthOf(id);
+      if (dep > deepestDepth) { deepestDepth = dep; deepest = id; }
+    });
+    if (!deepest) return false;
 
-    if (prev.selectedNodeId) {
-      selectedNode = allNodes.find(n => n.id === prev.selectedNodeId);
-      currentViewMode = prev.viewMode;
-    } else {
+    collapseBubbleSubtree(deepest);
+    if (selectedNode && selectedNode.id === deepest) {
       selectedNode = null;
-      currentViewMode = 'default';
+      showLVMHDetails();
     }
 
     allNodes.forEach(n => { delete n.x; delete n.y; delete n.vx; delete n.vy; delete n.fx; delete n.fy; });
     setGraphData(allNodes, allLinks, true);
     setTimeout(() => svg.transition().duration(250).call(zoom.transform, d3.zoomIdentity), 300);
-
-    if (selectedNode) {
-      openDrawer(selectedNode);
-    } else {
-      showLVMHDetails();
-    }
     return true;
   }
 
@@ -2966,8 +3089,12 @@ console.log('Document ready state:', document.readyState);
     } catch(err){ console.error(err); setStatus('Load failed'); }
   });
 
-  // Real-time synchronization with shared data system
-  if (window.ShopThatData) {
+  // Real-time synchronization with shared data system — DISABLED for the
+  // keyword graph view. This page is the source of truth for the curated
+  // Louis Vuitton ▸ Kusama / New York hierarchy, so reacting to other pages’
+  // ShopThatData mutations would (a) strip the `parent` fields the bubble &
+  // tree views need, and (b) re-inject the legacy AREA_DEFS keyword links.
+  if (window.ShopThatData && false) {
     // Listen for keyword changes from other pages
     window.ShopThatData.on('keywords', (keywords) => {
       let newNodes = keywords.map(node => ({
@@ -2975,7 +3102,8 @@ console.log('Document ready state:', document.readyState);
         group: node.group || 1,
         value: node.value || 50,
         isArea: node.isArea || false,
-        isRoot: node.isRoot || false
+        isRoot: node.isRoot || false,
+        parent: node.parent || undefined
       }));
       let newLinks = allLinks.slice();
       const result = ensureLVMH(newNodes, newLinks);
@@ -3061,15 +3189,12 @@ console.log('Document ready state:', document.readyState);
     }
   }
 
-  // Refresh data when page becomes visible (handles tab switching)
-  document.addEventListener('visibilitychange', () => {
-    if (!document.hidden) {
-      refreshFromSharedData();
-    }
-  });
-
-  // Initial refresh in case data was updated while page was loading
-  setTimeout(refreshFromSharedData, 100);
+  // Visibility / startup auto-refresh — DISABLED. Both paths called
+  // refreshFromSharedData() which dropped the `parent` fields and ran
+  // ensureLVMH() (legacy AREA_DEFS), collapsing the curated hierarchy back
+  // to the flat 57th St./Soho list. We rebuild from defaults on every load
+  // instead, so these handlers are no-ops on this page.
+  void refreshFromSharedData;
 
   // Dark mode functionality
   function initDarkMode() {
@@ -3242,8 +3367,12 @@ console.log('Document ready state:', document.readyState);
   // Initialize dark mode
   initDarkMode();
 
-  // Bootstrap graph keywords from Luxury Intelligence API
-  setTimeout(bootstrapAiKeywordGraph, 180);
+  // Bootstrap graph keywords from Luxury Intelligence API — DISABLED.
+  // The keyword graph is now driven by the curated `defaultNodes`/`defaultLinks`
+  // above (Louis Vuitton ▸ Kusama / 57th St. / SoHo). Re-enable only if the
+  // demo should pull live AI keywords again.
+  // setTimeout(bootstrapAiKeywordGraph, 180);
+  void bootstrapAiKeywordGraph; // keep symbol referenced so linters stay quiet
 
   // Initialize AI Side Panel
   initAISidePanel();

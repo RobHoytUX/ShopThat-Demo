@@ -57,6 +57,80 @@
   var lightboxPrev = document.getElementById('lightboxPrev');
   var lightboxNext = document.getElementById('lightboxNext');
 
+  // ─── Permanent seed images (always present) ───
+  var PERMANENT_IMAGES = [
+    { name: '1945 to Now – Mannequins', src: 'assets/kusama/1945-to-now-mannequins.png' },
+    { name: 'Dreaming of Earth\'s Sphericity', src: 'assets/kusama/dreaming-of-earth-sphericity.png' },
+    { name: '1945 to Now – Dots Room', src: 'assets/kusama/1945-to-now-dots-room.png' },
+    { name: 'My Soul Blooms Forever – Flowers', src: 'assets/kusama/soul-blooms-forever-flowers.png' },
+    { name: 'Cosmic Nature – NYBG', src: 'assets/kusama/cosmic-nature-nybg.png' },
+    { name: 'Embracing Flowers – Zwirner', src: 'assets/kusama/embracing-flowers-zwirner.png' },
+    { name: 'Phallic Girl (1967)', src: 'assets/kusama/phallic-girl-1967.png' },
+    { name: 'Flower Bud No. 6 (1952)', src: 'assets/kusama/flower-bud-no6-1952.png' },
+    { name: 'My Soul Blooms Forever – Pumpkin', src: 'assets/kusama/soul-blooms-forever-pumpkin.png' },
+    { name: 'Give Me Love – Zwirner', src: 'assets/kusama/give-me-love-zwirner.png' },
+    { name: 'Aspiring to Pumpkin\'s Love', src: 'assets/kusama/aspiring-pumpkins-love.png' },
+    { name: '1945 to Now – Gallery View', src: 'assets/kusama/1945-to-now-gallery.png' },
+    { name: '1945 to Now – Overview', src: 'assets/kusama/1945-to-now-overview.png' },
+    { name: 'Pumpkin (2015)', src: 'assets/kusama/pumpkin-2015.png' },
+    { name: 'Aspiring to Pumpkin\'s Love – Installation', src: 'assets/kusama/aspiring-pumpkins-installation.png' },
+    { name: 'Pumpkin – Stainless Steel (2015)', src: 'assets/kusama/pumpkin-stainless-steel-2015.png' },
+    { name: 'Snow Ball in Sunset (1953)', src: 'assets/kusama/snow-ball-sunset-1953.png' },
+    { name: 'Narcissus Garden – Louisiana Museum', src: 'assets/kusama/louisiana-museum-balls.png' },
+    { name: 'Women in the Memories (2013)', src: 'assets/kusama/women-in-memories-2013.png' },
+    { name: 'A Woman with Pink Hair (2013)', src: 'assets/kusama/woman-pink-hair-2013.png' },
+    { name: 'Life – Repetitive Vision (1998)', src: 'assets/kusama/life-repetitive-vision.png' },
+    { name: 'Embracing Flowers – Tentacles', src: 'assets/kusama/embracing-flowers-tentacles.png' },
+    { name: 'Every Day I Pray for Love (2023)', src: 'assets/kusama/every-day-pray-for-love.png' },
+    { name: 'The Flower No. 8 (1952)', src: 'assets/kusama/flower-no8-1952.png' },
+    { name: 'Accumulation No. 1 (1962)', src: 'assets/kusama/accumulation-no1-1962.png' },
+    { name: 'In Infinity – Louisiana Museum', src: 'assets/kusama/in-infinity-louisiana.png' },
+    { name: 'Resting at the Riverside (2014)', src: 'assets/kusama/resting-at-riverside-2014.png' },
+    { name: 'Flowers and Self-Portrait (1973)', src: 'assets/kusama/flowers-self-portrait-1973.png' },
+    { name: 'Give Me Love (2015)', src: 'assets/kusama/give-me-love-2015.png' },
+    { name: 'I Who Cry in the Flowering Season', src: 'assets/kusama/cry-in-flowering-season.png' },
+    { name: 'Aggregation – One Thousand Boats (1963)', src: 'assets/kusama/aggregation-boats-1963.png' },
+    { name: 'I\'m Here, but Nothing (2009)', src: 'assets/kusama/im-here-but-nothing.png' },
+    { name: 'Lingering Dream (1949)', src: 'assets/kusama/lingering-dream-1949.png' },
+    { name: 'Infinity-Nets SRVQT (2013)', src: 'assets/kusama/infinity-nets-srvqt-2013.png' },
+    { name: 'My Heart (2015)', src: 'assets/kusama/my-heart-2015.png' },
+    { name: 'Air Mail Stickers (1962)', src: 'assets/kusama/air-mail-stickers-1962.png' },
+    { name: 'Embracing Flowers – Sculpture', src: 'assets/kusama/embracing-flowers-sculpture.png' },
+    { name: 'Macaroni Pants (1968)', src: 'assets/kusama/macaroni-pants-1968.png' },
+    { name: 'Narcissus Garden (1966)', src: 'assets/kusama/narcissus-garden-1966.png' },
+    { name: 'Nets (1957)', src: 'assets/kusama/nets-1957.png' },
+    { name: 'Self-Obliteration No. 1 (1962)', src: 'assets/kusama/self-obliteration-1962.png' },
+    { name: 'The Visionary Flowers (2002)', src: 'assets/kusama/visionary-flowers-2002.png' },
+    { name: 'Infinity-Nets (2006)', src: 'assets/kusama/infinity-nets-2006.png' },
+    { name: 'Visionary Death (2014)', src: 'assets/kusama/visionary-death-2014.png' },
+    { name: 'Brilliance of Life (2013)', src: 'assets/kusama/brilliance-of-life-2013.png' },
+    { name: 'My Soul Blooms Forever – Doha', src: 'assets/kusama/soul-blooms-doha-museum.png' },
+    { name: 'No. F (1959)', src: 'assets/kusama/no-f-1959.png' },
+    { name: 'Kusama in NY Studio (1961)', src: 'assets/kusama/kusama-ny-studio-1961.png' },
+    { name: 'Dots Obsession (1998)', src: 'assets/kusama/dots-obsession-1998.png' },
+    { name: 'Accumulation of Corpses (1950)', src: 'assets/kusama/accumulation-corpses-1950.png' },
+    { name: 'Infinity-Nets RMOST (2013)', src: 'assets/kusama/infinity-nets-rmost-2013.png' },
+    { name: 'Infinity Mirrored Room – Phalli\'s Field', src: 'assets/kusama/infinity-room-phallis-field.png' },
+    { name: 'Aftermath of Obliteration of Eternity', src: 'assets/kusama/aftermath-obliteration-eternity.png' },
+    { name: 'Infinity Mirrored Room – Souls of Millions', src: 'assets/kusama/infinity-room-souls-lightyears.png' },
+    { name: 'Narcissus Garden – Venice Biennale', src: 'assets/kusama/narcissus-garden-venice.png' },
+    { name: 'Dancing Pumpkin (2020)', src: 'assets/kusama/dancing-pumpkin-2020.png' },
+    { name: 'Love Is Calling (2013)', src: 'assets/kusama/love-is-calling-2013.png' },
+    { name: 'I Want to Fly to the Universe (2020)', src: 'assets/kusama/fly-to-universe-2020.png' },
+    { name: 'Aftermath of Obliteration – Red', src: 'assets/kusama/aftermath-obliteration-red.png' },
+    { name: 'A-Crab (2008)', src: 'assets/kusama/a-crab-2008.png' },
+    { name: 'Infinity Mirrored Room – Dancing Lights', src: 'assets/kusama/infinity-room-dancing-lights.png' },
+    { name: 'Festival of Life – Zwirner', src: 'assets/kusama/festival-of-life-zwirner.png' }
+  ];
+
+  var PERMANENT_ID_START = -1000;
+
+  function buildPermanentGalleryItems() {
+    return PERMANENT_IMAGES.map(function (img, i) {
+      return { id: PERMANENT_ID_START - i, name: img.name, dataUrl: img.src, folder: null, isPermanent: true };
+    });
+  }
+
   // ─── State ───
   var stagedFiles = [];
   var galleryImages = [];
@@ -87,11 +161,24 @@
     openDB().then(function (db) {
       var tx = db.transaction(STORE_NAME, 'readwrite');
       var store = tx.objectStore(STORE_NAME);
-      store.put(galleryImages, 'galleryImages');
+      var userImages = galleryImages.filter(function (img) { return !img.isPermanent; });
+      store.put(userImages, 'galleryImages');
       store.put(folders, 'folders');
       store.put(nextId, 'nextId');
     }).catch(function (e) {
       console.warn('Could not save to IndexedDB:', e);
+    });
+  }
+
+  function mergePermanentImages() {
+    var permanents = buildPermanentGalleryItems();
+    var existingPermanentIds = new Set(
+      galleryImages.filter(function (img) { return img.isPermanent; }).map(function (img) { return img.id; })
+    );
+    permanents.forEach(function (p) {
+      if (!existingPermanentIds.has(p.id)) {
+        galleryImages.push(p);
+      }
     });
   }
 
@@ -106,7 +193,7 @@
 
         tx.oncomplete = function () {
           if (imgReq.result && Array.isArray(imgReq.result)) {
-            galleryImages = imgReq.result;
+            galleryImages = imgReq.result.filter(function (img) { return !img.isPermanent; });
           }
           if (fldReq.result && Array.isArray(fldReq.result)) {
             folders = fldReq.result;
@@ -114,12 +201,17 @@
           if (idReq.result) {
             nextId = idReq.result;
           }
+          mergePermanentImages();
           resolve();
         };
-        tx.onerror = function () { resolve(); };
+        tx.onerror = function () {
+          mergePermanentImages();
+          resolve();
+        };
       });
     }).catch(function (e) {
       console.warn('Could not load from IndexedDB:', e);
+      mergePermanentImages();
     });
   }
 
@@ -394,25 +486,27 @@
     nameEl.textContent = item.name;
     nameEl.title = item.name;
 
-    var removeBtn = document.createElement('button');
-    removeBtn.className = 'gallery-remove';
-    removeBtn.textContent = '\u00d7';
-    removeBtn.title = 'Remove';
-    removeBtn.addEventListener('click', function (e) {
-      e.stopPropagation();
-      galleryImages = galleryImages.filter(function (g) { return g.id !== item.id; });
-      selectedIds.delete(item.id);
-      saveState();
-      renderGallery();
-    });
-
     card.appendChild(selectDot);
     card.appendChild(img);
     card.appendChild(nameEl);
-    card.appendChild(removeBtn);
+
+    if (!item.isPermanent) {
+      var removeBtn = document.createElement('button');
+      removeBtn.className = 'gallery-remove';
+      removeBtn.textContent = '\u00d7';
+      removeBtn.title = 'Remove';
+      removeBtn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        galleryImages = galleryImages.filter(function (g) { return g.id !== item.id; });
+        selectedIds.delete(item.id);
+        saveState();
+        renderGallery();
+      });
+      card.appendChild(removeBtn);
+    }
 
     card.addEventListener('click', function (e) {
-      if (e.target === removeBtn) return;
+      if (e.target.closest('.gallery-remove')) return;
 
       if (e.shiftKey || e.ctrlKey || e.metaKey || selectedIds.size > 0) {
         toggleSelection(item.id, card);
@@ -686,7 +780,7 @@
   // ─── Event listeners: Gallery ───
 
   clearGalleryBtn.addEventListener('click', function () {
-    galleryImages = [];
+    galleryImages = galleryImages.filter(function (img) { return img.isPermanent; });
     folders = [];
     currentFolder = null;
     selectedIds.clear();
