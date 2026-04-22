@@ -5,6 +5,7 @@
   var drawerTitle = document.getElementById('beeswarmDrawerTitle');
   var drawerBody = document.getElementById('beeswarmDrawerBody');
   var initialized = false;
+  var beeswarmDotSel = null;
 
   var groupColorMap = {
     0: '#1e3a8a',
@@ -156,6 +157,8 @@
     dots.transition().duration(600).delay(function (d, i) { return i * 2; })
       .attr('r', function (d) { return d.r; });
 
+    beeswarmDotSel = g.selectAll('.beeswarm-dot');
+
     dots.on('mouseover', function (event, d) {
         d3.select(this).transition().duration(100)
           .attr('r', d.r + 3).attr('fill-opacity', 1);
@@ -198,6 +201,31 @@
 
     initialized = true;
   }
+
+  window.kwBeeswarmSearch = function (raw) {
+    if (!beeswarmDotSel || beeswarmDotSel.empty()) return;
+    var q = (raw || '').trim();
+    var ids = q && window.kwNeighborhoodIdsForSearch ? window.kwNeighborhoodIdsForSearch(q) : null;
+    if (!q) {
+      beeswarmDotSel.interrupt('kwsearch');
+      beeswarmDotSel.transition('kwsearch').duration(150)
+        .attr('fill-opacity', 0.75)
+        .style('opacity', 1)
+        .style('pointer-events', 'auto');
+      return;
+    }
+    if (!ids || ids.size === 0) {
+      beeswarmDotSel.interrupt('kwsearch');
+      beeswarmDotSel.transition('kwsearch').duration(150)
+        .attr('fill-opacity', 0.06)
+        .style('pointer-events', 'none');
+      return;
+    }
+    beeswarmDotSel.interrupt('kwsearch');
+    beeswarmDotSel.transition('kwsearch').duration(150)
+      .attr('fill-opacity', function (d) { return ids.has(d.id) ? 0.95 : 0.08; })
+      .style('pointer-events', function (d) { return ids.has(d.id) ? 'auto' : 'none'; });
+  };
 
   function selectDot(d) {
     if (drawerTitle) drawerTitle.textContent = d.id;

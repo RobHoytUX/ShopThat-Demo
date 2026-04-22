@@ -5,6 +5,8 @@
   var drawerTitle = document.getElementById('sankeyDrawerTitle');
   var drawerBody = document.getElementById('sankeyDrawerBody');
   var initialized = false;
+  var sankeyLinkSel = null;
+  var sankeyNodeSel = null;
 
   var groupColorMap = {
     0: '#1e3a8a',
@@ -233,8 +235,44 @@
 
     svg.call(zoom);
 
+    sankeyLinkSel = allLinks;
+    sankeyNodeSel = allNodeGroups;
+
     initialized = true;
   }
+
+  window.kwSankeySearch = function (raw) {
+    if (!sankeyLinkSel || !sankeyNodeSel || sankeyLinkSel.empty()) return;
+    var q = (raw || '').trim();
+    var ids = q && window.kwNeighborhoodIdsForSearch ? window.kwNeighborhoodIdsForSearch(q) : null;
+    if (!q) {
+      sankeyLinkSel.interrupt('kwsearch');
+      sankeyNodeSel.interrupt('kwsearch');
+      sankeyLinkSel.transition('kwsearch').duration(150).attr('stroke-opacity', 0.25);
+      sankeyNodeSel.select('rect').transition('kwsearch').duration(150).attr('opacity', 0.85);
+      sankeyNodeSel.select('text').transition('kwsearch').duration(150).attr('opacity', 1);
+      sankeyNodeSel.style('pointer-events', null);
+      return;
+    }
+    if (!ids || ids.size === 0) {
+      sankeyLinkSel.transition('kwsearch').duration(150).attr('stroke-opacity', 0.04);
+      sankeyNodeSel.select('rect').transition('kwsearch').duration(150).attr('opacity', 0.08);
+      sankeyNodeSel.select('text').transition('kwsearch').duration(150).attr('opacity', 0.12);
+      sankeyNodeSel.style('pointer-events', 'none');
+      return;
+    }
+    sankeyLinkSel.transition('kwsearch').duration(150)
+      .attr('stroke-opacity', function (d) {
+        return ids.has(d.source.name) && ids.has(d.target.name) ? 0.55 : 0.04;
+      });
+    sankeyNodeSel.select('rect').transition('kwsearch').duration(150)
+      .attr('opacity', function (d) { return ids.has(d.name) ? 0.9 : 0.1; });
+    sankeyNodeSel.select('text').transition('kwsearch').duration(150)
+      .attr('opacity', function (d) { return ids.has(d.name) ? 1 : 0.15; });
+    sankeyNodeSel.style('pointer-events', function (d) {
+      return ids.has(d.name) ? 'auto' : 'none';
+    });
+  };
 
   function showNodeDetails(d, allDataNodes) {
     if (drawerTitle) drawerTitle.textContent = d.name;

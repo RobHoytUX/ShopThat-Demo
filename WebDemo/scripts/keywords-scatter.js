@@ -7,6 +7,7 @@
   var initialized = false;
   var scatterSvg, scatterG, xScale, yScale, xAxis, yAxis, dotGroup;
   var zoomBehavior;
+  var scatterDotSel = null;
 
   var groupColorMap = {
     0: '#1e3a8a',
@@ -152,6 +153,8 @@
       .attr('r', 7);
 
     // Hover
+    scatterDotSel = dotGroup.selectAll('.scatter-dot');
+
     dots.on('mouseover', function (event, d) {
         d3.select(this).transition().duration(150).attr('r', 11).attr('fill-opacity', 1);
         showTooltip(event, d);
@@ -220,6 +223,31 @@
 
     initialized = true;
   }
+
+  window.kwScatterSearch = function (raw) {
+    if (!scatterDotSel || scatterDotSel.empty()) return;
+    var q = (raw || '').trim();
+    var ids = q && window.kwNeighborhoodIdsForSearch ? window.kwNeighborhoodIdsForSearch(q) : null;
+    if (!q) {
+      scatterDotSel.interrupt('kwsearch');
+      scatterDotSel.transition('kwsearch').duration(150)
+        .attr('fill-opacity', 0.7)
+        .style('opacity', 1)
+        .style('pointer-events', 'auto');
+      return;
+    }
+    if (!ids || ids.size === 0) {
+      scatterDotSel.interrupt('kwsearch');
+      scatterDotSel.transition('kwsearch').duration(150)
+        .attr('fill-opacity', 0.06)
+        .style('pointer-events', 'none');
+      return;
+    }
+    scatterDotSel.interrupt('kwsearch');
+    scatterDotSel.transition('kwsearch').duration(150)
+      .attr('fill-opacity', function (d) { return ids.has(d.id) ? 0.95 : 0.08; })
+      .style('pointer-events', function (d) { return ids.has(d.id) ? 'auto' : 'none'; });
+  };
 
   function selectPoint(d) {
     if (drawerTitle) drawerTitle.textContent = d.id;

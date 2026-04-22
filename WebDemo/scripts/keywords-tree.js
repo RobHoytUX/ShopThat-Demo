@@ -27,6 +27,8 @@
   var initialized = false;
   var duration = 400;
   var nodeIdCounter = 0;
+  /** When set, fitToView zooms to these graph ids only (search neighbourhood). */
+  var treeSearchFocusIds = null;
 
   var groupColorMap = {
     0: '#1e3a8a',
@@ -454,32 +456,84 @@
     updateCounts();
     updateTreeNodeDisabledVisuals();
 
-    // Auto-fit zoom after transition
-    setTimeout(function () { fitToView(treeNodes); }, duration + 50);
+    // Auto-fit zoom after transition (search uses treeSearchFocusIds for a tight frame)
+    setTimeout(function () { fitToView(treeNodes, treeSearchFocusIds); }, duration + 50);
   }
 
-  function fitToView(nodes) {
+  function fitToView(nodes, focusIds) {
     if (!treeSvg || !zoomBehavior || !nodes || nodes.length === 0) return;
 
     var rect = containerEl.getBoundingClientRect();
     var svgW = rect.width || 800;
     var svgH = rect.height || 600;
 
-    var minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
-    nodes.forEach(function (d) {
-      if (d.x < minX) minX = d.x;
-      if (d.x > maxX) maxX = d.x;
-      if (d.y < minY) minY = d.y;
-      if (d.y > maxY) maxY = d.y;
+    var subset = nodes;
+    if (focusIds && focusIds.size > 0) {
+      subset = nodes.filter(function (d) {
+        return focusIds.has(graphIdFromTreeDisplayName(d.data.name));
+      });
+    }
+    if (!subset.length) {
+      subset = nodes;
+    }
+
+    var focused = focusIds && focusIds.size > 0;
+    var longestLabel = 0;
+    subset.forEach(function (d) {
+      var L = (d.data.name || '').length;
+      if (L > longestLabel) longestLabel = L;
     });
 
-    var treeW = (maxY - minY) + 250;
-    var treeH = (maxX - minX) + 80;
+    // Bounds must include label geometry (pixel offsets on each node), not just circle centers —
+    // otherwise roots with text-anchor:end clip on the left and leaves clip on the right.
+    var minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+    subset.forEach(function (d) {
+      var name = d.data.name || '';
+      var internal = !!(d.children || d._children);
+      var estW = 20 + name.length * 7.4;
+      var r = d.depth === 0 ? 10 : 6;
+      var yL;
+      var yR;
+      if (internal) {
+        yL = d.y - 14 - estW - r;
+        yR = d.y + r + 10;
+      } else {
+        yL = d.y - r - 4;
+        yR = d.y + 14 + estW + r;
+      }
+      var xT = d.x - 22;
+      var xB = d.x + 22;
+      if (yL < minY) minY = yL;
+      if (yR > maxY) maxY = yR;
+      if (xT < minX) minX = xT;
+      if (xB > maxX) maxX = xB;
+    });
 
-    if (treeW <= 0 || treeH <= 0) return;
+    if (!isFinite(minX) || minX === Infinity) return;
 
-    var scale = Math.min(svgW / treeW, svgH / treeH, 1.2);
-    scale = Math.max(scale, 0.25);
+    // Horizontal slack for same-depth stacks; keep modest so the default zoom feels like the reference screenshot.
+    var labelSlackY = Math.min(400, longestLabel * 9 + (focused ? 200 : 95));
+
+    var padX = focused ? 88 : 52;
+    var padY = focused ? 220 : 145;
+    if (subset.length > 18) {
+      padX += 22;
+      padY += 26;
+    }
+    var spanX = Math.max(maxX - minX, 24);
+    var spanY = Math.max(maxY - minY, 24);
+    if (focused) spanY = Math.max(spanY, 100);
+
+    var treeW = spanY + padY + labelSlackY;
+    var treeH = spanX + padX;
+
+    var marginPx = focused ? 64 : 28;
+    var svgWEff = Math.max(280, svgW - marginPx * 2);
+    var svgHEff = Math.max(240, svgH - marginPx * 2);
+
+    var maxScale = focused ? 2.2 : 1.38;
+    var scale = Math.min(svgWEff / treeW, svgHEff / treeH, maxScale);
+    scale = Math.max(scale, focused ? 0.45 : 0.22);
 
     var centerX = (minX + maxX) / 2;
     var centerY = (minY + maxY) / 2;
@@ -487,7 +541,8 @@
     var tx = svgW / 2 - centerY * scale;
     var ty = svgH / 2 - centerX * scale;
 
-    treeSvg.transition().duration(500)
+    treeSvg.transition().duration(focused ? 650 : 500)
+      .ease(d3.easeCubicOut)
       .call(zoomBehavior.transform, d3.zoomIdentity.translate(tx, ty).scale(scale));
   }
 
@@ -571,14 +626,29 @@
     attachTreeChipClickHandlers();
   }
 
-  // Search: expand to matches
+  // Search: expand to matches, then show only the keyword(s) matching the query and their graph neighbors
   function searchTree(query) {
     if (!root) return;
-    if (!query) {
+    var q = (query || '').trim();
+    var ids = window.kwNeighborhoodIdsForSearch ? window.kwNeighborhoodIdsForSearch(q) : null;
+
+    if (!q) {
+      treeSearchFocusIds = null;
+      if (treeG) {
+        treeG.selectAll('g.node').style('opacity', null).style('pointer-events', null);
+        treeG.selectAll('path.link').style('opacity', null);
+        treeG.selectAll('g.node text:not(.toggle-icon)').each(function (d) {
+          d3.select(this).style('fill', null).style('font-weight', d.depth < 2 ? '600' : '400');
+        });
+      }
       update(root);
+      updateTreeNodeDisabledVisuals();
       return;
     }
-    var lower = query.toLowerCase();
+
+    treeSearchFocusIds = (ids && ids.size > 0) ? ids : null;
+
+    var lower = q.toLowerCase();
 
     function expandToMatch(d) {
       var match = d.data.name.toLowerCase().includes(lower);
@@ -602,7 +672,26 @@
     expandToMatch(root);
     update(root);
 
-    // Highlight matching text
+    if (treeG && ids) {
+      var active = ids.size > 0;
+      treeG.selectAll('g.node')
+        .style('opacity', function (d) {
+          var gid = graphIdFromTreeDisplayName(d.data.name);
+          return active && ids.has(gid) ? 1 : (active ? 0.06 : 1);
+        })
+        .style('pointer-events', function (d) {
+          var gid = graphIdFromTreeDisplayName(d.data.name);
+          return active && ids.has(gid) ? 'auto' : (active ? 'none' : 'auto');
+        });
+      treeG.selectAll('path.link')
+        .style('opacity', function (d) {
+          var s = graphIdFromTreeDisplayName(d.source.data.name);
+          var t = graphIdFromTreeDisplayName(d.target.data.name);
+          if (!active) return null;
+          return ids.has(s) && ids.has(t) ? 1 : 0.05;
+        });
+    }
+
     treeG.selectAll('g.node text:not(.toggle-icon)').each(function (d) {
       var el = d3.select(this);
       if (d.data.name.toLowerCase().includes(lower)) {
@@ -611,6 +700,7 @@
         el.style('fill', null).style('font-weight', d.depth < 2 ? '600' : '400');
       }
     });
+    updateTreeNodeDisabledVisuals();
   }
 
   // Event listeners

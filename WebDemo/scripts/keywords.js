@@ -1377,6 +1377,19 @@ console.log('Document ready state:', document.readyState);
     return connectedIds;
   }
 
+  /** Non-empty query: Set of keyword ids (matches + all graph neighbors). Empty query: null. No matches: empty Set. */
+  function neighborhoodIdsForSearchQuery(raw) {
+    const q = String(raw || '').trim().toLowerCase();
+    if (!q) return null;
+    const targets = allNodes.filter(n => n.id.toLowerCase().includes(q));
+    if (targets.length === 0) return new Set();
+    const ids = new Set();
+    targets.forEach(t => {
+      getConnectedNodeIds(t).forEach(id => ids.add(id));
+    });
+    return ids;
+  }
+
   // Store original positions for hover clustering
   let originalPositions = {};
   let isHoverClustering = false;
@@ -1469,6 +1482,10 @@ console.log('Document ready state:', document.readyState);
       .duration(200)
       .attr('opacity', 0)
       .attr('stroke-width', 1.5);
+
+    if (filterInput && String(filterInput.value || '').trim()) {
+      queueMicrotask(() => applyFilter(filterInput.value));
+    }
   }
 
   // Function to update mode indicator
@@ -2181,6 +2198,10 @@ console.log('Document ready state:', document.readyState);
     
     // Restart simulation with enough energy to properly settle nodes
     sim.alpha(0.3).alphaTarget(0).restart();
+
+    if (filterInput && String(filterInput.value || '').trim()) {
+      requestAnimationFrame(() => applyFilter(filterInput.value));
+    }
   }
 
   // Node click handler - expand to show connected nodes
@@ -2530,20 +2551,42 @@ console.log('Document ready state:', document.readyState);
   neo4jClose && neo4jClose.addEventListener('click', ()=>{ neo4jDrawer.setAttribute('aria-hidden','true'); });
   openNeo4jBtn && openNeo4jBtn.addEventListener('click', ()=>{ neo4jDrawer.setAttribute('aria-hidden','false'); });
 
-  // Filtering
-  function applyFilter(term){
-    const t = String(term||'').toLowerCase();
-    node.style('opacity', d => d.id.toLowerCase().includes(t) ? 1 : 0.3);
-    link.style('opacity', l => {
-      const s = (l.source.id?l.source.id:l.source).toLowerCase();
-      const tg = (l.target.id?l.target.id:l.target).toLowerCase();
-      return (s.includes(t) || tg.includes(t)) ? 0.15 : 0.05;
-    });
+  // Search: show only matched keyword(s) and anything linked to them in the graph
+  function applyFilter(term) {
+    const ids = neighborhoodIdsForSearchQuery(term);
+    if (ids === null) {
+      node.interrupt('search');
+      link.interrupt('search');
+      node.transition('search').duration(150)
+        .style('opacity', 1)
+        .style('pointer-events', 'auto');
+      link.transition('search').duration(150)
+        .attr('opacity', 0);
+      updateNodeDisabledStates();
+      return;
+    }
+    const active = ids.size > 0;
+    node.interrupt('search');
+    link.interrupt('search');
+    node.transition('search').duration(150)
+      .style('opacity', d => active && ids.has(d.id) ? 1 : 0)
+      .style('pointer-events', d => active && ids.has(d.id) ? 'auto' : 'none');
+    link.transition('search').duration(150)
+      .attr('opacity', l => {
+        if (!active) return 0;
+        const s = typeof l.source === 'object' ? l.source.id : l.source;
+        const t = typeof l.target === 'object' ? l.target.id : l.target;
+        return ids.has(s) && ids.has(t) ? 0.55 : 0;
+      });
+    updateNodeDisabledStates();
   }
   filterInput && filterInput.addEventListener('input', (e)=> applyFilter(e.target.value));
   resetBtn && resetBtn.addEventListener('click', ()=>{ 
-    filterInput && (filterInput.value=''); 
-    
+    filterInput && (filterInput.value='');
+    applyFilter('');
+    const globalSearchEl = document.getElementById('kwGlobalSearch');
+    if (globalSearchEl) globalSearchEl.value = '';
+
     // Hide linear view if active
     hideLinearView();
     
@@ -2989,6 +3032,7 @@ console.log('Document ready state:', document.readyState);
   window.kwGetNodes = function() { return allNodes; };
   window.kwGetLinks = function() { return allLinks; };
   window.kwGetConnected = getConnectedNodeIds;
+  window.kwNeighborhoodIdsForSearch = neighborhoodIdsForSearchQuery;
   window.kwGetArticlesHTML = generateArticlesHTML;
 
   // Fullscreen toggle

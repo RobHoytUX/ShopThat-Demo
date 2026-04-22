@@ -316,12 +316,12 @@
     <script src="https://cdn.jsdelivr.net/npm/neo4j-driver-lite@5.23.0/lib/browser/neo4j-web.min.js"></script>
     <script src="scripts/shared-data.js"></script>
     <script src="scripts/luxury-intelligence.js"></script>
-    <script src="scripts/keywords.js?v=25" defer></script>
-    <script src="scripts/keywords-tree.js?v=6" defer></script>
-    <script src="scripts/keywords-scatter.js?v=1" defer></script>
+    <script src="scripts/keywords.js?v=26" defer></script>
+    <script src="scripts/keywords-tree.js?v=11" defer></script>
+    <script src="scripts/keywords-scatter.js?v=2" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/d3-sankey@0.12.3/dist/d3-sankey.min.js"></script>
-    <script src="scripts/keywords-sankey.js?v=1" defer></script>
-    <script src="scripts/keywords-beeswarm.js?v=1" defer></script>
+    <script src="scripts/keywords-sankey.js?v=2" defer></script>
+    <script src="scripts/keywords-beeswarm.js?v=2" defer></script>
     <script>
       document.addEventListener('DOMContentLoaded', function() {
         var tabBtns = document.querySelectorAll('[data-kw-tab]');
@@ -375,17 +375,32 @@
             var treeSearch = document.getElementById('treeSearch');
             if (treeSearch) { treeSearch.value = q; treeSearch.dispatchEvent(new Event('input')); }
           } else if (currentTab === 'list') {
-            var items = document.querySelectorAll('#listViewContainer .linear-view__item');
-            var cats = document.querySelectorAll('#listViewContainer .linear-view__category');
-            var lower = q.toLowerCase();
-            items.forEach(function(item) {
-              var name = item.querySelector('.linear-view__item-name');
-              item.style.display = (!q || (name && name.textContent.toLowerCase().includes(lower))) ? '' : 'none';
-            });
+            var listContainer = document.getElementById('listViewContainer');
+            if (listContainer) {
+              var qt = (q || '').trim();
+              var focusIds = qt && window.kwNeighborhoodIdsForSearch ? window.kwNeighborhoodIdsForSearch(qt) : null;
+              listContainer.querySelectorAll(':scope > div').forEach(function(section) {
+                var items = section.querySelectorAll('.linear-view__item');
+                var visible = 0;
+                items.forEach(function(item) {
+                  var id = item.getAttribute('data-id');
+                  var show = true;
+                  if (focusIds) {
+                    show = focusIds.size > 0 && focusIds.has(id);
+                  }
+                  item.style.display = show ? '' : 'none';
+                  if (show) visible++;
+                });
+                var cat = section.querySelector('.linear-view__category');
+                if (cat) cat.style.display = (!qt || visible > 0) ? '' : 'none';
+              });
+            }
           } else if (currentTab === 'scatter' && window.kwScatterSearch) {
             window.kwScatterSearch(q);
           } else if (currentTab === 'sankey' && window.kwSankeySearch) {
             window.kwSankeySearch(q);
+          } else if (currentTab === 'beeswarm' && window.kwBeeswarmSearch) {
+            window.kwBeeswarmSearch(q);
           }
         });
       });
