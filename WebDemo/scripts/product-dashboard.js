@@ -47,7 +47,10 @@
     if (data.domain) {
       wrap.appendChild(createEl('div', { class: 'ai-chat-domain', text: String(data.domain) }));
     }
+    chatMessages.appendChild(wrap);
+
     if (data.images && data.images.length) {
+      const imageMessage = createEl('div', { class: 'ai-chat-message ai ai-chat-images-message' });
       const row = createEl('div', { class: 'ai-chat-images' });
       data.images.forEach(function (url) {
         const imageWrap = createEl('div', { class: 'ai-chat-image' });
@@ -61,9 +64,10 @@
         }
         row.appendChild(imageWrap);
       });
-      wrap.appendChild(row);
+      imageMessage.appendChild(row);
+      chatMessages.appendChild(imageMessage);
     }
-    chatMessages.appendChild(wrap);
+
     chatMessages.scrollTop = chatMessages.scrollHeight;
   }
 
@@ -301,7 +305,6 @@
     const chatMessages = document.getElementById('aiChatMessages');
     const chatActions = document.querySelector('.ai-chat-actions');
     const newChatBtn = document.getElementById('newChatBtn');
-    const viewHistoryBtn = document.getElementById('viewHistoryBtn');
     
     // Chat minimize/maximize functionality
     const minimizeBtn = document.getElementById('aiChatMinimize');
@@ -378,82 +381,6 @@
     
     // Initialize button states
     updateButtonStates();
-    
-    // View History button
-    if (viewHistoryBtn) {
-      viewHistoryBtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        console.log('History button clicked');
-        toggleHistoryView();
-      });
-    } else {
-      console.error('viewHistoryBtn not found');
-    }
-    
-    // Close history button
-    const closeHistoryBtn = document.getElementById('closeHistoryBtn');
-    if (closeHistoryBtn) {
-      closeHistoryBtn.addEventListener('click', () => {
-        toggleHistoryView();
-      });
-    }
-    
-    // Toggle history view
-    function toggleHistoryView() {
-      if (!chatPrompt) {
-        console.error('chatPrompt is null in toggleHistoryView');
-        return;
-      }
-      
-      const isExpanded = chatPrompt.classList.contains('expanded');
-      console.log('Toggling history view. Current state:', isExpanded);
-      
-      if (isExpanded) {
-        chatPrompt.classList.remove('expanded');
-      } else {
-        chatPrompt.classList.add('expanded');
-        populateHistory();
-      }
-    }
-    
-    // Populate chat history with sample data
-    function populateHistory() {
-      const historyList = document.getElementById('chatHistoryList');
-      if (!historyList) return;
-      
-      historyList.replaceChildren();
-      
-      const sampleHistory = [
-        { title: 'Campaign Overview', preview: 'Tell me about this campaign...', date: 'Today' },
-        { title: 'Product Details', preview: 'What products are featured?', date: 'Yesterday' },
-        { title: 'Artist Collaboration', preview: 'Who is Yayoi Kusama?', date: '2 days ago' },
-        { title: 'Collection Launch', preview: 'When was this released?', date: '1 week ago' }
-      ];
-      
-      sampleHistory.forEach(chat => {
-        const item = createEl('div', { class: 'ai-chat-history-item' });
-        const title = createEl('p', { 
-          class: 'ai-chat-history-item-title', 
-          text: chat.title 
-        });
-        const preview = createEl('p', { 
-          class: 'ai-chat-history-item-preview', 
-          text: chat.preview 
-        });
-        
-        item.appendChild(title);
-        item.appendChild(preview);
-        
-        item.addEventListener('click', () => {
-          console.log('Loading chat:', chat.title);
-          // TODO: Load selected chat
-          toggleHistoryView();
-        });
-        
-        historyList.appendChild(item);
-      });
-    }
     
     // Handle send — LV Luxury Intelligence API
     function sendMessage() {
@@ -640,8 +567,6 @@
     const chatSend = document.getElementById('mapAiChatSend');
     const chatMessages = document.getElementById('mapAiChatMessages');
     const newChatBtn = document.getElementById('mapNewChatBtn');
-    const viewHistoryBtn = document.getElementById('mapViewHistoryBtn');
-    const closeHistoryBtn = document.getElementById('mapCloseHistoryBtn');
     
     if (!chatPrompt || !chatToggle) {
       console.error('Map AI chat elements not found');
@@ -713,69 +638,6 @@
     
     // Initialize button states
     updateButtonStates();
-    
-    // Toggle history view
-    function toggleHistoryView() {
-      if (!chatPrompt) return;
-      const isExpanded = chatPrompt.classList.contains('expanded');
-      if (isExpanded) {
-        chatPrompt.classList.remove('expanded');
-      } else {
-        chatPrompt.classList.add('expanded');
-        populateHistory();
-      }
-    }
-    
-    // View History button
-    if (viewHistoryBtn) {
-      viewHistoryBtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        toggleHistoryView();
-      });
-    }
-    
-    // Close history button
-    if (closeHistoryBtn) {
-      closeHistoryBtn.addEventListener('click', () => {
-        toggleHistoryView();
-      });
-    }
-    
-    // Populate chat history
-    function populateHistory() {
-      const historyList = document.getElementById('mapChatHistoryList');
-      if (!historyList) return;
-      
-      historyList.replaceChildren();
-      
-      const sampleHistory = [
-        { title: 'Nearby Restaurants', preview: 'What restaurants are nearby?', date: 'Today' },
-        { title: 'Museum Info', preview: 'Tell me about the museums...', date: 'Yesterday' },
-        { title: 'Gallery Locations', preview: 'Where are the art galleries?', date: '2 days ago' }
-      ];
-      
-      sampleHistory.forEach(chat => {
-        const item = createEl('div', { class: 'ai-chat-history-item' });
-        const title = createEl('p', { 
-          class: 'ai-chat-history-item-title', 
-          text: chat.title 
-        });
-        const preview = createEl('p', { 
-          class: 'ai-chat-history-item-preview', 
-          text: chat.preview 
-        });
-        
-        item.appendChild(title);
-        item.appendChild(preview);
-        
-        item.addEventListener('click', () => {
-          toggleHistoryView();
-        });
-        
-        historyList.appendChild(item);
-      });
-    }
     
     // Handle send — LV Luxury Intelligence API (map context)
     function sendMessage() {

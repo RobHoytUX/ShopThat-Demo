@@ -242,7 +242,19 @@
   .chatbot-product-card-link{display:inline-flex;align-items:center;gap:4px;font-size:12px;color:#4A90E2;margin-top:6px;text-decoration:none;transition:color 150ms ease}
   .chatbot-product-card-link:hover{color:#357ABD}
   .chatbot-product-card-link svg{width:14px;height:14px}
-  .chatbot-wrapper{position:fixed;bottom:104px;right:20px;z-index:999;transition:bottom 0.3s ease}
+  .lv-header,.lv-main,.lv-footer{transition:transform 300ms ease}
+  body.luxury-preview-open .lv-header,body.luxury-preview-open .lv-main,body.luxury-preview-open .lv-footer{transform:translateX(-25vw)}
+  body.luxury-preview-open .chatbot-wrapper{right:calc(50vw + 20px)}
+  body.luxury-preview-open .image-gallery-wrapper{right:calc(50vw + 20px)}
+  .luxury-image-preview-panel{position:fixed;inset:0 0 0 auto;width:50vw;height:100vh;z-index:10001;background:rgba(255,255,255,0.96);box-shadow:-16px 0 44px rgba(0,0,0,0.18);backdrop-filter:blur(18px) saturate(160%);-webkit-backdrop-filter:blur(18px) saturate(160%);transform:translateX(100%);opacity:0;pointer-events:none;transition:transform 300ms ease,opacity 300ms ease;display:flex;flex-direction:column;padding:28px;box-sizing:border-box}
+  .luxury-image-preview-panel.is-visible{transform:translateX(0);opacity:1;pointer-events:auto}
+  .luxury-image-preview-panel[hidden]{display:none}
+  .luxury-image-preview-close{align-self:flex-end;width:44px;height:44px;border-radius:50%;border:1px solid rgba(0,0,0,0.14);background:#fff;color:#111;font-size:28px;line-height:1;display:grid;place-items:center;cursor:pointer;box-shadow:0 8px 24px rgba(0,0,0,0.1)}
+  .luxury-image-preview-close:hover{transform:scale(1.04)}
+  .luxury-image-preview-body{flex:1;display:grid;place-items:center;min-height:0;padding:20px 0}
+  .luxury-image-preview-img{max-width:100%;max-height:calc(100vh - 140px);object-fit:contain;border-radius:18px;box-shadow:0 18px 54px rgba(0,0,0,0.22);background:#f5f5f5}
+  .luxury-image-preview-caption{font-size:13px;color:#555;text-align:center;margin:0}
+  .chatbot-wrapper{position:fixed;bottom:104px;right:20px;z-index:999;transition:bottom 0.3s ease,right 300ms ease}
   .chatbot-wrapper.expanded{bottom:104px}
   .chatbot-wrapper.gallery-open{bottom:310px}
   .chatbot-wrapper.gallery-open.map-view-active{bottom:200px}
@@ -389,6 +401,8 @@
   .chatbot-messages::-webkit-scrollbar{width:10px}
   .chatbot-messages::-webkit-scrollbar-track{background:rgba(0,0,0,0.06);border-radius:8px}
   .chatbot-messages::-webkit-scrollbar-thumb{background:rgba(0,0,0,0.25);border-radius:8px}
+  .chatbot-wrapper[data-chatbot-view=chat] .chatbot-messages .chatbot-product-card,
+  .chatbot-wrapper[data-chatbot-view=chat] .chatbot-messages .product-list-grid{display:none !important}
   .chatbot-msg{max-width:80%;padding:10px 12px;border-radius:16px;line-height:1.35;font-size:14px;word-wrap:break-word;white-space:pre-wrap;position:relative;transition:opacity 200ms ease}
   .chatbot-msg.chatbot-msg-markdown{white-space:normal}
   .chatbot-msg-markdown p{margin:0 0 8px}
@@ -400,8 +414,8 @@
   .chatbot-msg-domain{font-size:11px;color:#666;margin-top:6px;font-weight:500}
   .chatbot-msg-user{align-self:flex-end;background:rgba(0,0,0,0.78);color:#fff;border-radius:30px 30px 6px 30px;margin-right:8px}
   .chatbot-msg-bot{align-self:flex-start;background:#f2f2f2;color:#111;border-radius:30px 30px 30px 6px}
-  .chatbot-images{background:transparent;padding:8px;border-radius:12px;display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-start}
-  .chatbot-image-wrap{position:relative;display:inline-block}
+  .chatbot-images{align-self:stretch;width:100%;max-width:100%;background:transparent;padding:8px;border-radius:12px;display:flex;flex-wrap:nowrap;gap:8px;justify-content:flex-start;box-sizing:border-box;overflow:visible}
+  .chatbot-image-wrap{position:relative;display:inline-block;flex:1 1 0;min-width:0}
   .chatbot-rank-badge{position:absolute;top:8px;left:8px;border-radius:999px;background:rgba(17,17,17,0.82);color:#fff;font-size:10px;font-weight:600;line-height:1;padding:5px 7px;pointer-events:none;box-shadow:0 2px 8px rgba(0,0,0,0.22)}
   .chatbot-images img{border-radius:8px;transition:transform 0.2s ease}
   .chatbot-images img:hover{transform:scale(1.05)}
@@ -436,6 +450,7 @@
   .product-list-bookmark svg{width:18px;height:18px;color:#4A90E2}
   .product-list-bookmark.is-active svg{fill:#4A90E2}
   .nav-badge{position:absolute;top:-4px;right:-4px;background:#e74c3c;color:#fff;border-radius:10px;padding:0 6px;font-size:10px;line-height:18px;height:18px;min-width:18px;display:inline-grid;place-items:center;font-weight:600}
+  @media (max-width:900px){body.luxury-preview-open .lv-header,body.luxury-preview-open .lv-main,body.luxury-preview-open .lv-footer{transform:none}.luxury-image-preview-panel{width:100vw}.chatbot-wrapper{transition:bottom 0.3s ease}body.luxury-preview-open .chatbot-wrapper,body.luxury-preview-open .image-gallery-wrapper{right:20px}}
   .chatbot-product-item--filled{background:transparent;border:1px solid rgba(0,0,0,0.15);position:relative;overflow:hidden}
   .chatbot-product-item--filled img{width:100%;height:100%;object-fit:cover}
   .chatbot-map-legend{position:absolute;bottom:20px;right:20px;background:white;padding:12px 16px;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,0.15);z-index:1000;min-width:180px}
@@ -487,7 +502,7 @@
     async function initChatbot(){
     injectStyles();
 
-    const wrapper = createEl('div', { class: 'chatbot-wrapper', role: 'complementary', 'aria-label': 'Chatbot' });
+    const wrapper = createEl('div', { class: 'chatbot-wrapper', role: 'complementary', 'aria-label': 'Chatbot', 'data-chatbot-view': 'chat' });
     const toggle  = createEl('button', { class: 'chatbot-toggle', 'aria-expanded': 'true', 'aria-controls': 'chatbot-box', title: 'Open chat' });
     const box     = createEl('div', { class: 'chatbot-box', id: 'chatbot-box' });
     
@@ -629,6 +644,54 @@
     productComponentInner.appendChild(productComponentContent);
     productComponent.appendChild(productComponentInner);
     document.body.appendChild(productComponent);
+
+    const imagePreviewPanel = createEl('aside', {
+      class: 'luxury-image-preview-panel',
+      'aria-label': 'Image preview',
+      hidden: ''
+    });
+    const imagePreviewClose = createEl('button', {
+      class: 'luxury-image-preview-close',
+      type: 'button',
+      'aria-label': 'Close image preview',
+      text: 'x'
+    });
+    const imagePreviewBody = createEl('div', { class: 'luxury-image-preview-body' });
+    const imagePreviewImg = createEl('img', { class: 'luxury-image-preview-img', alt: 'Luxury Intelligence preview' });
+    const imagePreviewCaption = createEl('p', { class: 'luxury-image-preview-caption', text: 'Luxury Intelligence image preview' });
+    imagePreviewBody.appendChild(imagePreviewImg);
+    imagePreviewPanel.appendChild(imagePreviewClose);
+    imagePreviewPanel.appendChild(imagePreviewBody);
+    imagePreviewPanel.appendChild(imagePreviewCaption);
+    document.body.appendChild(imagePreviewPanel);
+
+    function openImagePreview(imageUrl) {
+      imagePreviewImg.src = imageUrl;
+      imagePreviewPanel.removeAttribute('hidden');
+      requestAnimationFrame(() => {
+        document.body.classList.add('luxury-preview-open');
+        imagePreviewPanel.classList.add('is-visible');
+      });
+    }
+
+    function closeImagePreview() {
+      document.body.classList.remove('luxury-preview-open');
+      imagePreviewPanel.classList.remove('is-visible');
+      window.setTimeout(() => {
+        if (!imagePreviewPanel.classList.contains('is-visible')) {
+          imagePreviewPanel.setAttribute('hidden', '');
+          imagePreviewImg.removeAttribute('src');
+        }
+      }, 300);
+    }
+
+    imagePreviewClose.addEventListener('click', closeImagePreview);
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && imagePreviewPanel.classList.contains('is-visible')) {
+        closeImagePreview();
+      }
+    });
+
     let navVisible = false;
     let galleryVisible = false; // Track gallery visibility state
     
@@ -680,7 +743,6 @@
       { icon: 'user', id: 'nav-user', title: 'Chat', view: 'chat', active: true, closeNav: true },
       { icon: 'book', id: 'nav-library', title: 'Library', view: 'library', closeNav: false },
       { icon: 'map', id: 'nav-map', title: 'Map', view: 'map', closeNav: false },
-      { icon: 'bookmark', id: 'nav-favorites', title: 'Favorites', view: 'favorites', closeNav: false },
       { icon: 'grid', id: 'nav-grid', title: 'Grid View', view: 'grid', closeNav: true }
     ];
     
@@ -976,6 +1038,7 @@
     
     // Function to switch chatbot views
     function switchChatbotView(view) {
+      wrapper.setAttribute('data-chatbot-view', view);
       // Clear map view classes for non-map views
       if (view !== 'map') {
         clearMapViewClasses();
@@ -1034,9 +1097,9 @@
 
         // Add map-view-active class to wrapper for compact gallery positioning
         wrapper.classList.add('map-view-active');
-        // Scale down gallery when map view is open
+        // Keep My Media at full size in map view
         if (galleryWrapper) {
-          galleryWrapper.classList.add('compact-mode');
+          galleryWrapper.classList.remove('compact-mode');
         }
 
         // Set appropriate height for map view with product cards (no explorer)
@@ -1547,7 +1610,7 @@
         const img = createEl('img', {
           src: imageUrl,
           alt: 'Related image',
-          style: 'max-width: 120px; max-height: 120px; border-radius: 8px; margin: 4px; cursor: pointer;'
+          style: 'width: 100%; height: 112px; object-fit: cover; border-radius: 8px; cursor: pointer; display: block;'
         });
         img.setAttribute('draggable', 'false'); // Prevent default image drag
         
@@ -1566,9 +1629,7 @@
           imgWrapper.style.opacity = '1';
         });
         
-        img.addEventListener('click', () => {
-          window.open(imageUrl, '_blank');
-        });
+        img.addEventListener('click', () => openImagePreview(imageUrl));
         img.addEventListener('error', () => {
           imgWrapper.style.display = 'none';
         });
@@ -1585,11 +1646,14 @@
       });
       
       messages.appendChild(imageContainer);
-      finalizeAssistantTurnScroll();
+      requestAnimationFrame(() => {
+        messages.scrollTop = messages.scrollHeight;
+      });
       ensureSizeForContent();
     }
 
     function displayProductCard(product) {
+      if (currentView === 'chat') return;
       // Create product card element
       const card = createEl('div', { class: 'chatbot-product-card' });
       
@@ -3301,10 +3365,12 @@ setTimeout(() => {
           window.addProductToGallery(productData.src, productData);
         }
         
-        // Display product card in chatbot
-        const productCard = document.createElement('div');
-        productCard.className = 'chatbot-product-card';
-        productCard.innerHTML = `
+        // Product cards in the message list are reserved for non-chat views (see data-chatbot-view=chat)
+        const chatMode = document.querySelector('.chatbot-wrapper')?.getAttribute('data-chatbot-view') === 'chat';
+        if (!chatMode) {
+          const productCard = document.createElement('div');
+          productCard.className = 'chatbot-product-card';
+          productCard.innerHTML = `
           <img class="chatbot-product-card-image" src="${productData.src}" alt="${productData.title || 'Product'}" />
           <div class="chatbot-product-card-info">
             <div class="chatbot-product-card-title">${productData.title || 'Product'}</div>
@@ -3318,12 +3384,11 @@ setTimeout(() => {
             </a>
           </div>
         `;
-        
-        // Find messages container and add the card
-        const messagesContainer = document.querySelector('.chatbot-messages');
-        if (messagesContainer) {
-          messagesContainer.appendChild(productCard);
-          messagesContainer.scrollTop = messagesContainer.scrollHeight;
+          const messagesContainer = document.querySelector('.chatbot-messages');
+          if (messagesContainer) {
+            messagesContainer.appendChild(productCard);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+          }
         }
         
         // Show success toast
