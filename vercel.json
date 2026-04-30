@@ -3,6 +3,7 @@
   "buildCommand": null,
   "outputDirectory": "WebDemo",
   "rewrites": [
+    { "source": "/luxury-intelligence/:path*", "destination": "http://18.221.156.51/:path*" },
     { "source": "/(.*)", "destination": "/$1" }
   ],
   "headers": [
