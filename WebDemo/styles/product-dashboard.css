@@ -1516,9 +1516,11 @@ html, body {
 
 .ai-chat-images-message {
   align-self: stretch;
+  width: 100%;
   max-width: 100%;
   padding: 0;
   background: transparent;
+  box-sizing: border-box;
 }
 
 .ai-chat-images {
