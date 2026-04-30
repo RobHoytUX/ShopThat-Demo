@@ -1,11 +1,12 @@
 /**
- * LV Luxury Intelligence API (v2.1) — shared client for WebDemo.
+ * LV Luxury Intelligence API (v2.2) — shared client for WebDemo.
  * POST http://18.221.156.51/ask  { "query": "..." }
  */
 (function (global) {
   'use strict';
 
   var ASK_URL = 'http://18.221.156.51/ask';
+  var ANALYZING_TEXT = 'Analyzing Luxury Catalogs';
 
   /** Prompt tuned so dashboard can parse a bullet list of keyword phrases */
   var DASHBOARD_KEYWORDS_QUERY =
@@ -58,6 +59,21 @@
     });
   }
 
+  function getImageRank(rankData, imageUrl) {
+    if (!Array.isArray(rankData)) return null;
+    var match = rankData.find(function (item) {
+      return item && String(item.url || '') === String(imageUrl || '');
+    });
+    if (!match || match.priority_rank == null) return null;
+    var rank = Number(match.priority_rank);
+    return Number.isFinite(rank) ? rank : null;
+  }
+
+  function getRankBadgeLabel(rank) {
+    if (rank == null) return '';
+    return Number(rank) === 1 ? 'Top Choice' : 'Recommended #' + rank;
+  }
+
   /**
    * Pull candidate keyword labels from a prose / markdown answer.
    */
@@ -101,9 +117,12 @@
 
   global.LuxuryIntelligence = {
     ASK_URL: ASK_URL,
+    ANALYZING_TEXT: ANALYZING_TEXT,
     DASHBOARD_KEYWORDS_QUERY: DASHBOARD_KEYWORDS_QUERY,
     ask: ask,
     markdownToHtml: markdownToHtml,
+    getImageRank: getImageRank,
+    getRankBadgeLabel: getRankBadgeLabel,
     extractKeywordPhrases: extractKeywordPhrases
   };
 })(typeof window !== 'undefined' ? window : this);

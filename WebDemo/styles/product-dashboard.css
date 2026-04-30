@@ -1116,11 +1116,31 @@ html, body {
   flex-wrap: wrap;
 }
 
+.ai-chat-image {
+  position: relative;
+  display: inline-block;
+}
+
 .ai-chat-images img {
   width: 72px;
   height: 72px;
   object-fit: cover;
   border-radius: 8px;
+}
+
+.ai-chat-rank-badge {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  border-radius: 999px;
+  background: rgba(17, 17, 17, 0.82);
+  color: #fff;
+  font-size: 9px;
+  font-weight: 600;
+  line-height: 1;
+  padding: 4px 6px;
+  pointer-events: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.22);
 }
 
 .ai-chat-typing {

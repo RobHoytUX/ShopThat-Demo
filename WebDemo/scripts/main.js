@@ -401,6 +401,8 @@
   .chatbot-msg-user{align-self:flex-end;background:rgba(0,0,0,0.78);color:#fff;border-radius:30px 30px 6px 30px;margin-right:8px}
   .chatbot-msg-bot{align-self:flex-start;background:#f2f2f2;color:#111;border-radius:30px 30px 30px 6px}
   .chatbot-images{background:transparent;padding:8px;border-radius:12px;display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-start}
+  .chatbot-image-wrap{position:relative;display:inline-block}
+  .chatbot-rank-badge{position:absolute;top:8px;left:8px;border-radius:999px;background:rgba(17,17,17,0.82);color:#fff;font-size:10px;font-weight:600;line-height:1;padding:5px 7px;pointer-events:none;box-shadow:0 2px 8px rgba(0,0,0,0.22)}
   .chatbot-images img{border-radius:8px;transition:transform 0.2s ease}
   .chatbot-images img:hover{transform:scale(1.05)}
   .chatbot-thinking{align-self:flex-start;background:#f2f2f2;color:#111;border-radius:30px 30px 30px 6px;padding:10px 16px;display:flex;align-items:center;gap:8px}
@@ -1252,7 +1254,7 @@
           domain: data.domain
         });
         if (data.images && Array.isArray(data.images) && data.images.length > 0) {
-          displayImages(data.images);
+          displayImages(data.images, data.rank_data);
         } else {
           finalizeAssistantTurnScroll();
         }
@@ -1532,13 +1534,13 @@
       ensureSizeForContent();
     }
 
-    function displayImages(imageUrls) {
+    function displayImages(imageUrls, rankData) {
       if (!imageUrls || !Array.isArray(imageUrls) || imageUrls.length === 0) return;
       
       const imageContainer = createEl('div', { class: 'chatbot-msg chatbot-msg-bot chatbot-images' });
       imageUrls.forEach(imageUrl => {
         const imgWrapper = createEl('div', {
-          style: 'position: relative; display: inline-block;'
+          class: 'chatbot-image-wrap'
         });
         imgWrapper.setAttribute('draggable', 'true');
         
@@ -1572,6 +1574,13 @@
         });
         
         imgWrapper.appendChild(img);
+        if (window.LuxuryIntelligence && window.LuxuryIntelligence.getImageRank) {
+          const rank = window.LuxuryIntelligence.getImageRank(rankData, imageUrl);
+          const label = window.LuxuryIntelligence.getRankBadgeLabel(rank);
+          if (label) {
+            imgWrapper.appendChild(createEl('span', { class: 'chatbot-rank-badge', text: label }));
+          }
+        }
         imageContainer.appendChild(imgWrapper);
       });
       
@@ -1650,7 +1659,7 @@
       if (thinkingIndicator) return; // Already showing
       
       thinkingIndicator = createEl('div', { class: 'chatbot-thinking' });
-      const thinkingText = createEl('span', { class: 'chatbot-thinking-text', text: 'Thinking' });
+      const thinkingText = createEl('span', { class: 'chatbot-thinking-text', text: (window.LuxuryIntelligence && window.LuxuryIntelligence.ANALYZING_TEXT) || 'Analyzing Luxury Catalogs' });
       const dots = createEl('div', { class: 'chatbot-dots' });
       
       // Create three animated dots
@@ -1707,7 +1716,7 @@
         addMessage('bot', botResponse, { renderMarkdown: true, domain: d.domain });
 
         if (d.images && Array.isArray(d.images) && d.images.length > 0) {
-          displayImages(d.images);
+          displayImages(d.images, d.rank_data);
         } else {
           finalizeAssistantTurnScroll();
         }
@@ -2808,7 +2817,7 @@
 
         addMessage('bot', botResponse, { renderMarkdown: true, domain: data.domain });
         if (data.images && Array.isArray(data.images) && data.images.length > 0) {
-          displayImages(data.images);
+          displayImages(data.images, data.rank_data);
         } else {
           finalizeAssistantTurnScroll();
         }

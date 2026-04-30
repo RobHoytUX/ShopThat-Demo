@@ -33,7 +33,7 @@
     return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
   }
 
-  /** Render Luxury Intelligence API response (markdown + optional domain + images) */
+  /** Render Luxury Intelligence API response (markdown + domain + ranked images) */
   function appendLuxuryIntelligenceToChat(chatMessages, data) {
     if (!chatMessages || !data) return;
     const wrap = createEl('div', { class: 'ai-chat-message ai' });
@@ -50,7 +50,16 @@
     if (data.images && data.images.length) {
       const row = createEl('div', { class: 'ai-chat-images' });
       data.images.forEach(function (url) {
-        row.appendChild(createEl('img', { src: url, alt: '', loading: 'lazy' }));
+        const imageWrap = createEl('div', { class: 'ai-chat-image' });
+        imageWrap.appendChild(createEl('img', { src: url, alt: '', loading: 'lazy' }));
+        if (window.LuxuryIntelligence && window.LuxuryIntelligence.getImageRank) {
+          const rank = window.LuxuryIntelligence.getImageRank(data.rank_data, url);
+          const label = window.LuxuryIntelligence.getRankBadgeLabel(rank);
+          if (label) {
+            imageWrap.appendChild(createEl('span', { class: 'ai-chat-rank-badge', text: label }));
+          }
+        }
+        row.appendChild(imageWrap);
       });
       wrap.appendChild(row);
     }
@@ -461,7 +470,7 @@
         setTimeout(() => { chatSend.style.transform = ''; }, 200);
       }
       const typing = createEl('div', { class: 'ai-chat-message ai ai-chat-typing' });
-      typing.textContent = '…';
+      typing.textContent = ((window.LuxuryIntelligence && window.LuxuryIntelligence.ANALYZING_TEXT) || 'Analyzing Luxury Catalogs') + '...';
       chatMessages.appendChild(typing);
       chatMessages.scrollTop = chatMessages.scrollHeight;
       window.LuxuryIntelligence.ask(message).then(function (data) {
@@ -787,7 +796,7 @@
         setTimeout(() => { chatSend.style.transform = ''; }, 200);
       }
       const typing = createEl('div', { class: 'ai-chat-message ai ai-chat-typing' });
-      typing.textContent = '…';
+      typing.textContent = ((window.LuxuryIntelligence && window.LuxuryIntelligence.ANALYZING_TEXT) || 'Analyzing Luxury Catalogs') + '...';
       chatMessages.appendChild(typing);
       chatMessages.scrollTop = chatMessages.scrollHeight;
       window.LuxuryIntelligence.ask(contextual).then(function (data) {
