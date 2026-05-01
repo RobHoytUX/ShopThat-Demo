@@ -7,8 +7,11 @@ This plan captures the current module boundaries after the first extraction pass
 - `WebDemo/scripts/keywords-graph-api.js` owns same-origin keyword graph API calls.
 - `WebDemo/scripts/keywords-ai-panel.js` owns the keywords page AI side panel.
 - `WebDemo/scripts/main-drag-drop.js` owns landing page product drag/drop collection behavior.
+- `WebDemo/scripts/main-map-data.js` owns landing page chatbot map location data.
 - `WebDemo/scripts/dashboard-storage.js` owns dashboard storage fallback reads.
 - `WebDemo/scripts/financials.js` and `WebDemo/scripts/campaigns.js` hold logic extracted from inline page scripts.
+- `WebDemo/scripts/keywords-data.js` owns curated keyword graph data, article metadata, groups, and categories.
+- `WebDemo/scripts/keywords-graph-utils.js` owns pure keyword graph utility functions.
 
 ## Next Frontend Splits
 
@@ -16,7 +19,8 @@ This plan captures the current module boundaries after the first extraction pass
 
 Target modules:
 
-- `keywords-data.js` for default nodes, links, categories, and article metadata.
+- `keywords-data.js` for default nodes, links, categories, and article metadata. Done.
+- `keywords-graph-utils.js` for pure graph neighborhood/search helpers. Done.
 - `keywords-bubble-view.js` for D3 bubble graph rendering and zoom/fullscreen controls.
 - `keywords-linear-view.js` for linear connected-keyword rendering.
 - `keywords-filters.js` for group filters, search, and disabled-node state.
