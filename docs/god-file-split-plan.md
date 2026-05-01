@@ -13,6 +13,7 @@ This plan captures the current module boundaries after the first extraction pass
 - `WebDemo/scripts/dashboard-map-data.js` owns product dashboard map locations and store coordinates.
 - `WebDemo/scripts/financials.js` and `WebDemo/scripts/campaigns.js` hold logic extracted from inline page scripts.
 - `WebDemo/scripts/keywords-data.js` owns curated keyword graph data, article metadata, groups, and categories.
+- `WebDemo/scripts/keywords-bubble-state.js` owns pure bubble hierarchy state helpers.
 - `WebDemo/scripts/keywords-graph-utils.js` owns pure keyword graph utility functions.
 - `WebDemo/scripts/keywords-linear-view.js` owns linear/list view HTML rendering helpers.
 
@@ -23,6 +24,7 @@ This plan captures the current module boundaries after the first extraction pass
 Target modules:
 
 - `keywords-data.js` for default nodes, links, categories, and article metadata. Done.
+- `keywords-bubble-state.js` for pure bubble hierarchy state helpers. Done.
 - `keywords-graph-utils.js` for pure graph neighborhood/search helpers. Done.
 - `keywords-linear-view.js` for linear/list view HTML rendering helpers. Done.
 - `keywords-bubble-view.js` for D3 bubble graph rendering and zoom/fullscreen controls.

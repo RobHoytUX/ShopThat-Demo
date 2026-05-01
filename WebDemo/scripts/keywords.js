@@ -80,40 +80,16 @@ console.log('Document ready state:', document.readyState);
   // Declared with `var` to avoid TDZ when getVisibleNodes runs early.
   var bubblesExpandedIds = new Set();
 
-  function getBubbleChildrenOf(parentId) {
-    return allNodes.filter(function (n) { return n.parent === parentId; });
-  }
-
   function collapseBubbleSubtree(id) {
-    // Drop `id` and every descendant id from the expanded set so collapsing
-    // a parent also folds back any deeper expansions underneath it.
-    var stack = [id];
-    while (stack.length) {
-      var cur = stack.pop();
-      bubblesExpandedIds.delete(cur);
-      getBubbleChildrenOf(cur).forEach(function (child) { stack.push(child.id); });
+    if (bubbleState.collapseSubtree) {
+      bubbleState.collapseSubtree(allNodes, bubblesExpandedIds, id);
     }
   }
 
   function getBubbleVisibleNodeIds() {
-    var visible = new Set();
-    var rootNode = allNodes.find(function (n) { return n.isRoot; }) ||
-                   allNodes.find(function (n) { return n.id === 'LVMH'; });
-    if (!rootNode) return visible;
-    visible.add(rootNode.id);
-
-    var queue = [rootNode.id];
-    while (queue.length) {
-      var cur = queue.shift();
-      if (!bubblesExpandedIds.has(cur)) continue;
-      getBubbleChildrenOf(cur).forEach(function (child) {
-        if (!visible.has(child.id)) {
-          visible.add(child.id);
-          queue.push(child.id);
-        }
-      });
-    }
-    return visible;
+    return bubbleState.visibleNodeIds
+      ? bubbleState.visibleNodeIds(allNodes, bubblesExpandedIds)
+      : new Set();
   }
   
   // State history for back navigation
@@ -195,6 +171,7 @@ console.log('Document ready state:', document.readyState);
   const categoryOrder = keywordsData.categoryOrder || ['Other'];
   const generateArticlesHTML = keywordsData.generateArticlesHTML || function () { return ''; };
   const graphUtils = window.ShopThatKeywordGraphUtils || {};
+  const bubbleState = window.ShopThatKeywordsBubbleState || {};
 
   function linearViewOptions() {
     return {
@@ -574,9 +551,7 @@ console.log('Document ready state:', document.readyState);
   let clickedNode = null;
 
   function bubbleNodeLabel(d) {
-    if (!d) return '';
-    if (d.id === 'LVMH' || (d.group === 0 && d.isRoot)) return 'Louis Vuitton';
-    return d.id;
+    return bubbleState.nodeLabel ? bubbleState.nodeLabel(d) : (d ? d.id : '');
   }
 
   function computeFontSizeForRadius(r){
@@ -2146,19 +2121,9 @@ console.log('Document ready state:', document.readyState);
   // so the outer click handler can fall through to its default behavior.
   function bubbleBack() {
     if (bubblesExpandedIds.size === 0) return false;
-    // Find the deepest expanded id (longest path from root via parent chain).
-    var nodesById = {};
-    allNodes.forEach(function (n) { nodesById[n.id] = n; });
-    function depthOf(id) {
-      var d = 0; var cur = nodesById[id];
-      while (cur && cur.parent) { d++; cur = nodesById[cur.parent]; }
-      return d;
-    }
-    var deepest = null; var deepestDepth = -1;
-    bubblesExpandedIds.forEach(function (id) {
-      var dep = depthOf(id);
-      if (dep > deepestDepth) { deepestDepth = dep; deepest = id; }
-    });
+    var deepest = bubbleState.deepestExpandedId
+      ? bubbleState.deepestExpandedId(allNodes, bubblesExpandedIds)
+      : null;
     if (!deepest) return false;
 
     collapseBubbleSubtree(deepest);
