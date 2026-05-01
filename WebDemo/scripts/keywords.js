@@ -196,6 +196,16 @@ console.log('Document ready state:', document.readyState);
   const generateArticlesHTML = keywordsData.generateArticlesHTML || function () { return ''; };
   const graphUtils = window.ShopThatKeywordGraphUtils || {};
 
+  function linearViewOptions() {
+    return {
+      categoryOrder,
+      getConnectedNodeIds,
+      groupColors,
+      keywordCategories,
+      nodeLabel: bubbleNodeLabel
+    };
+  }
+
   const STORAGE_KEY = 'st_keywords_v1';
 
   // The keywords page is the source of truth for the demo keyword graph, so
@@ -883,54 +893,6 @@ console.log('Document ready state:', document.readyState);
     const connectedIds = getConnectedNodeIds(nodeData);
     const connectedNodes = allNodes.filter(n => connectedIds.has(n.id) && n.id !== nodeData.id && n.group !== 0);
 
-    // Group connected nodes by category
-    const grouped = {};
-    connectedNodes.forEach(n => {
-      const cat = keywordCategories[n.id] || 'Other';
-      if (!grouped[cat]) grouped[cat] = [];
-      grouped[cat].push(n);
-    });
-
-    // Sort within each category by value descending
-    Object.values(grouped).forEach(items => {
-      items.sort((a, b) => b.value - a.value);
-    });
-
-    // Sort categories by preferred order
-    const sortedCategories = Object.keys(grouped).sort((a, b) => {
-      const ai = categoryOrder.indexOf(a);
-      const bi = categoryOrder.indexOf(b);
-      return (ai === -1 ? 999 : ai) - (bi === -1 ? 999 : bi);
-    });
-
-    const mainColor = groupColors[nodeData.group] || groupColors[1];
-
-    // Build category-grouped list HTML
-    let itemIndex = 0;
-    const listHTML = sortedCategories.map(cat => {
-      const items = grouped[cat];
-      const headerHTML = `<div class="linear-view__category"><span class="linear-view__category-label">${escapeHtml(cat)}</span><span class="linear-view__category-count">${items.length}</span><div class="linear-view__category-line"></div></div>`;
-      const itemsHTML = items.map(n => {
-        const nColor = groupColors[n.group] || groupColors[1];
-        const count = getConnectedNodeIds(n).size - 1;
-        const delay = itemIndex * 0.04;
-        itemIndex++;
-        return `
-          <div class="linear-view__item" data-id="${escapeHtml(n.id)}" style="animation-delay: ${delay}s">
-            <div class="linear-view__item-indicator" style="background: ${nColor.gradient}"></div>
-            <div class="linear-view__item-info">
-              <span class="linear-view__item-name">${escapeHtml(n.id)}</span>
-              <span class="linear-view__item-meta">${count} connections</span>
-            </div>
-            <svg class="linear-view__item-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M9 18l6-6-6-6" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-          </div>
-        `;
-      }).join('');
-      return headerHTML + itemsHTML;
-    }).join('');
-
     // Create or reuse container
     let linearView = document.getElementById('linearView');
     if (!linearView) {
@@ -940,23 +902,9 @@ console.log('Document ready state:', document.readyState);
       document.querySelector('.keywords__canvas').appendChild(linearView);
     }
 
-    linearView.innerHTML = `
-      <div class="linear-view__main">
-        <div class="linear-view__main-bubble" style="background: ${mainColor.gradient}">
-          <span class="linear-view__main-name">${escapeHtml(bubbleNodeLabel(nodeData))}</span>
-        </div>
-        <div class="linear-view__main-meta">
-          <span class="linear-view__main-group">${escapeHtml(mainColor.label)}</span>
-          <span class="linear-view__main-connections">${connectedNodes.length} connections</span>
-        </div>
-      </div>
-      <div class="linear-view__divider">
-        <span>Connected Keywords</span>
-      </div>
-      <div class="linear-view__list">
-        ${listHTML}
-      </div>
-    `;
+    linearView.innerHTML = window.ShopThatKeywordsLinearView
+      ? window.ShopThatKeywordsLinearView.fullLinearViewHtml(nodeData, connectedNodes, linearViewOptions())
+      : '';
 
     linearView.style.display = 'flex';
     linearView.scrollTop = 0;
@@ -2270,34 +2218,20 @@ console.log('Document ready state:', document.readyState);
     if (!container) return;
     container.innerHTML = '';
 
-    const grouped = {};
-    allNodes.forEach(n => {
-      if (n.group === 0) return;
-      const cat = keywordCategories[n.id] || 'Other';
-      if (!grouped[cat]) grouped[cat] = [];
-      grouped[cat].push(n);
-    });
-    Object.values(grouped).forEach(items => items.sort((a, b) => b.value - a.value));
+    const sections = window.ShopThatKeywordsLinearView
+      ? window.ShopThatKeywordsLinearView.listTabSections(allNodes, linearViewOptions())
+      : [];
 
-    const sortedCats = Object.keys(grouped).sort((a, b) => {
-      const ai = categoryOrder.indexOf(a);
-      const bi = categoryOrder.indexOf(b);
-      return (ai === -1 ? 999 : ai) - (bi === -1 ? 999 : bi);
-    });
-
-    sortedCats.forEach(cat => {
-      const items = grouped[cat];
+    sections.forEach(sectionData => {
       const section = document.createElement('div');
-      section.innerHTML = '<div class="linear-view__category"><span class="linear-view__category-label">' + escapeHtml(cat) + '</span><span class="linear-view__category-count">' + items.length + '</span><div class="linear-view__category-line"></div></div>';
-      items.forEach(n => {
-        const color = groupColors[n.group] || groupColors[1];
-        const count = getConnectedNodeIds(n).size - 1;
+      section.innerHTML = sectionData.html;
+      sectionData.items.forEach(itemData => {
         const el = document.createElement('div');
-        el.className = 'linear-view__item';
-        el.dataset.id = n.id;
-        el.innerHTML = '<div class="linear-view__item-indicator" style="background:' + color.gradient + '"></div><div class="linear-view__item-info"><span class="linear-view__item-name">' + escapeHtml(n.id) + '</span><span class="linear-view__item-meta">' + count + ' connections</span></div><svg class="linear-view__item-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-        el.addEventListener('click', function() {
-          var target = allNodes.find(function(nd) { return nd.id === n.id; });
+        el.innerHTML = itemData.html;
+        const item = el.firstElementChild;
+        if (!item) return;
+        item.addEventListener('click', function() {
+          var target = allNodes.find(function(nd) { return nd.id === itemData.id; });
           if (target) {
             var title = document.getElementById('listDrawerTitle');
             var body = document.getElementById('listDrawerBody');
@@ -2309,7 +2243,7 @@ console.log('Document ready state:', document.readyState);
             }
           }
         });
-        section.appendChild(el);
+        section.appendChild(item);
       });
       container.appendChild(section);
     });
