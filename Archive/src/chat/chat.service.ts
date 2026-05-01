@@ -71,7 +71,12 @@ export class ChatService {
 
   async getGroqChatCompletion(message: string ) {
     const systemPrompt = await this.prisma.chatBotSettings.findFirst({ where: { key: 'system' } });
-    const groq = new Groq({ apiKey: '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' });
+    const groqApiKey = process.env.GROQ_API_KEY;
+    if (!groqApiKey) {
+      throw new Error('GROQ_API_KEY environment variable is required');
+    }
+
+    const groq = new Groq({ apiKey: groqApiKey });
     const disabledWords = await this.prisma.keyWords.findMany({where: {active: false}})
     const disabledWordsString = disabledWords.map(word => word.keyWord).join(',');
     const excludeRule = 'Word Exclusion Policy:\n' +

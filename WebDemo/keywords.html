@@ -172,7 +172,7 @@
           <div class="graph-legend-filter">
             <label class="legend-filter-item legend-filter-item--lvmh">
               <span class="legend-color legend-color--lvmh" style="background: linear-gradient(135deg, #1e3a8a, #1e40af, #312e81);"></span>
-              <span>LVMH (Root)</span>
+              <span>Louis Vuitton (Root)</span>
             </label>
             <label class="legend-filter-item">
               <input type="checkbox" id="filterTopLevel" checked>
@@ -300,10 +300,10 @@
         </div>
         <div class="drawer__body">
           <div class="neo4j-panel" id="neo4jPanel">
-            <input id="neo4jUri" class="input" type="text" placeholder="neo4j+s://<host> (or bolt://localhost:7687)" />
-            <input id="neo4jUser" class="input" type="text" placeholder="username" />
-            <input id="neo4jPass" class="input" type="password" placeholder="password" />
-            <button type="button" class="btn btn--secondary" id="neo4jConnect">Connect</button>
+            <p class="sidebar__placeholder">
+              Graph database access is managed by the backend. No Neo4j credentials are entered in the browser.
+            </p>
+            <button type="button" class="btn btn--secondary" id="neo4jConnect">Check Backend</button>
             <button type="button" class="btn btn--primary" id="neo4jLoad" disabled>Load Graph</button>
             <button type="button" class="btn" id="neo4jSeed">Seed Sample</button>
             <span id="neo4jStatus" style="color:#666"></span>
@@ -345,10 +345,11 @@
 
     <script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/neo4j-driver-lite@5.23.0/lib/browser/neo4j-web.min.js"></script>
     <script src="scripts/shared-data.js"></script>
     <script src="scripts/luxury-intelligence.js?v=3"></script>
-    <script src="scripts/keywords.js?v=26" defer></script>
+    <script src="scripts/keywords-graph-api.js"></script>
+    <script src="scripts/keywords-ai-panel.js"></script>
+    <script src="scripts/keywords.js?v=29" defer></script>
     <script src="scripts/keywords-tree.js?v=12" defer></script>
     <script src="scripts/keywords-scatter.js?v=2" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/d3-sankey@0.12.3/dist/d3-sankey.min.js"></script>

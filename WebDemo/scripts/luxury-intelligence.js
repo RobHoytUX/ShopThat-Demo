@@ -1,13 +1,11 @@
 /**
  * LV Luxury Intelligence API (v2.2) — shared client for WebDemo.
- * POST /luxury-intelligence/ask on HTTPS, or http://18.221.156.51/ask locally.
+ * POST /api/luxury-intelligence/ask through the authenticated backend proxy.
  */
 (function (global) {
   'use strict';
 
-  var DIRECT_ASK_URL = 'http://18.221.156.51/ask';
-  var PROXY_ASK_URL = '/luxury-intelligence/ask';
-  var ASK_URL = global.location && global.location.protocol === 'https:' ? PROXY_ASK_URL : DIRECT_ASK_URL;
+  var ASK_URL = '/api/luxury-intelligence/ask';
   var ANALYZING_TEXT = 'Analyzing Luxury Catalogs';
 
   /** Prompt tuned so dashboard can parse a bullet list of keyword phrases */
@@ -40,7 +38,7 @@
     var raw = String(md || '');
     if (typeof global.marked !== 'undefined' && global.marked.parse) {
       try {
-        var out = global.marked.parse(raw, { breaks: true });
+        var out = global.marked.parse(escapeHtml(raw), { breaks: true });
         return stripUnsafeHtml(out);
       } catch (e) {
         console.warn('marked parse failed', e);
@@ -54,6 +52,7 @@
     return fetch(ASK_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
+      credentials: 'same-origin',
       body: JSON.stringify({ query: String(query) })
     }).then(function (res) {
       if (!res.ok) throw new Error('HTTP ' + res.status);

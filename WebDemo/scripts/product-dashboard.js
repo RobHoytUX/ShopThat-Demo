@@ -16,6 +16,18 @@
     return el;
   }
 
+  function readStoredArray(key) {
+    return window.ShopThatDashboardStorage
+      ? window.ShopThatDashboardStorage.readArray(key)
+      : [];
+  }
+
+  function readStoredObject(key) {
+    return window.ShopThatDashboardStorage
+      ? window.ShopThatDashboardStorage.readObject(key)
+      : {};
+  }
+
   // Helper to format date
   function formatDate(timestamp) {
     const date = new Date(timestamp);
@@ -257,7 +269,7 @@
     // Get products from localStorage (from chatbot interactions)
     const productsJson = localStorage.getItem('droppedProducts');
     console.log('Raw droppedProducts from localStorage:', productsJson);
-    const products = productsJson ? JSON.parse(productsJson) : [];
+    const products = readStoredArray('droppedProducts');
     console.log('Parsed products:', products);
     
     updateBadge('libraryCount', products.length);
@@ -526,7 +538,7 @@
     
     // Add image to favorites
     function addToFavorites(imageSrc, tab = 'tab1') {
-      let favorites = JSON.parse(localStorage.getItem('categorizedFavorites') || '{}');
+      let favorites = readStoredObject('categorizedFavorites');
       if (!favorites[tab]) {
         favorites[tab] = [];
       }
@@ -753,7 +765,7 @@
     const drawer = document.querySelector('.my-media-drawer');
     
     // Get drawer images from localStorage or initialize with empty
-    let drawerImagesList = JSON.parse(localStorage.getItem('drawerImages') || '[]');
+    let drawerImagesList = readStoredArray('drawerImages');
     
     // Start with empty drawer - will be populated when a card is clicked
     if (currentLoadedCardIndex === -1) {
@@ -835,7 +847,7 @@
       
       if (imageSrc && source === 'drawer') {
         // Add new image to gallery
-        const currentMedia = JSON.parse(localStorage.getItem('galleryImages') || '[]');
+        const currentMedia = readStoredArray('galleryImages');
         currentMedia.push({
           src: imageSrc,
           productData: { title: 'Dropped Image' }
@@ -868,7 +880,7 @@
       
       if (imageSrc) {
         // Remove from gallery
-        let currentMedia = JSON.parse(localStorage.getItem('galleryImages') || '[]');
+        let currentMedia = readStoredArray('galleryImages');
         const indexToRemove = currentMedia.findIndex(item => item.src === imageSrc);
         
         if (indexToRemove > -1) {
@@ -897,7 +909,7 @@
     // Get media from localStorage (gallery images)
     const mediaJson = localStorage.getItem('galleryImages');
     console.log('Raw galleryImages from localStorage:', mediaJson);
-    const media = mediaJson ? JSON.parse(mediaJson) : [];
+    const media = readStoredArray('galleryImages');
     console.log('Parsed media:', media);
     
     updateBadge('mediaCount', media.length);
@@ -1246,7 +1258,7 @@
               
               setTimeout(() => {
                 // Remove from gallery
-                let currentMedia = JSON.parse(localStorage.getItem('galleryImages') || '[]');
+                let currentMedia = readStoredArray('galleryImages');
                 const indexToRemove = currentMedia.findIndex(mediaItem => mediaItem.src === item.src);
                 
                 console.log('Removing card at index:', indexToRemove);
@@ -1256,7 +1268,7 @@
                   localStorage.setItem('galleryImages', JSON.stringify(currentMedia));
                   
                   // Add to drawer at the BEGINNING
-                  let drawerImagesList = JSON.parse(localStorage.getItem('drawerImages') || '[]');
+                  let drawerImagesList = readStoredArray('drawerImages');
                   if (!drawerImagesList.includes(item.src)) {
                     drawerImagesList.unshift(item.src); // Add to beginning
                     localStorage.setItem('drawerImages', JSON.stringify(drawerImagesList));
@@ -1421,7 +1433,7 @@
           bookmarkBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0 1 11.186 0Z" stroke-linecap="round" stroke-linejoin="round"/></svg>';
           
           // Check if already bookmarked
-          const favorites = JSON.parse(localStorage.getItem('categorizedFavorites') || '{}');
+          const favorites = readStoredObject('categorizedFavorites');
           const isBookmarked = Object.values(favorites).some(arr => arr.some(item => item.src === src));
           if (isBookmarked) {
             bookmarkBtn.classList.add('is-bookmarked');
@@ -1937,19 +1949,18 @@
         });
       };
       
-      // Add nearby locations after a short delay
-      setTimeout(addNearbyLocations, 200);
+      addNearbyLocations();
       
-      setTimeout(() => {
+      requestAnimationFrame(() => {
         if (leafletMap) leafletMap.invalidateSize();
-      }, 100);
+      });
     }
 
     // Render products with locations
     productsEl.replaceChildren();
     const productsJson = localStorage.getItem('droppedProducts');
     console.log('Map view - Raw products from localStorage:', productsJson);
-    const products = productsJson ? JSON.parse(productsJson) : [];
+    const products = readStoredArray('droppedProducts');
     console.log('Map view - Parsed products:', products);
     
     // NYC LV store locations for product assignment
@@ -2177,11 +2188,11 @@
     setupFavoritesTabs();
     
     // Get categorized favorites
-    const categorizedFavorites = JSON.parse(localStorage.getItem('categorizedFavorites') || '{}');
+    const categorizedFavorites = readStoredObject('categorizedFavorites');
     const currentTabFavorites = categorizedFavorites[currentFavoritesTab] || [];
     
     // Also get legacy wishlist products
-    const legacyFavorites = JSON.parse(localStorage.getItem('wishlistProducts') || '[]');
+    const legacyFavorites = readStoredArray('wishlistProducts');
     
     // Combine for badge count
     const allFavoritesCount = Object.values(categorizedFavorites).reduce((sum, arr) => sum + arr.length, 0) + legacyFavorites.length;
@@ -2267,7 +2278,7 @@
   
   // Remove from favorites
   function removeFromFavorites(src, tab) {
-    let favorites = JSON.parse(localStorage.getItem('categorizedFavorites') || '{}');
+    let favorites = readStoredObject('categorizedFavorites');
     if (favorites[tab]) {
       favorites[tab] = favorites[tab].filter(item => item.src !== src);
       localStorage.setItem('categorizedFavorites', JSON.stringify(favorites));
@@ -2283,7 +2294,7 @@
     const itemId = item.id;
     
     // Remove from categorizedFavorites
-    let categorizedFavorites = JSON.parse(localStorage.getItem('categorizedFavorites') || '{}');
+    let categorizedFavorites = readStoredObject('categorizedFavorites');
     Object.keys(categorizedFavorites).forEach(tab => {
       categorizedFavorites[tab] = categorizedFavorites[tab].filter(
         i => i.src !== itemSrc && i.title !== itemTitle
@@ -2292,21 +2303,21 @@
     localStorage.setItem('categorizedFavorites', JSON.stringify(categorizedFavorites));
     
     // Remove from wishlistProducts (legacy favorites)
-    let wishlistProducts = JSON.parse(localStorage.getItem('wishlistProducts') || '[]');
+    let wishlistProducts = readStoredArray('wishlistProducts');
     wishlistProducts = wishlistProducts.filter(
       p => (p.image || p.src) !== itemSrc && p.title !== itemTitle && p.id !== itemId
     );
     localStorage.setItem('wishlistProducts', JSON.stringify(wishlistProducts));
     
     // Remove from droppedProducts
-    let droppedProducts = JSON.parse(localStorage.getItem('droppedProducts') || '[]');
+    let droppedProducts = readStoredArray('droppedProducts');
     droppedProducts = droppedProducts.filter(
       p => (p.image || p.src) !== itemSrc && p.title !== itemTitle && p.id !== itemId
     );
     localStorage.setItem('droppedProducts', JSON.stringify(droppedProducts));
     
     // Remove from galleryImages
-    let galleryImages = JSON.parse(localStorage.getItem('galleryImages') || '[]');
+    let galleryImages = readStoredArray('galleryImages');
     galleryImages = galleryImages.filter(
       g => g.src !== itemSrc && g.title !== itemTitle
     );
@@ -2328,8 +2339,8 @@
   
   // Update favorites badge
   function updateFavoritesBadge() {
-    const categorizedFavorites = JSON.parse(localStorage.getItem('categorizedFavorites') || '{}');
-    const legacyFavorites = JSON.parse(localStorage.getItem('wishlistProducts') || '[]');
+    const categorizedFavorites = readStoredObject('categorizedFavorites');
+    const legacyFavorites = readStoredArray('wishlistProducts');
     const allFavoritesCount = Object.values(categorizedFavorites).reduce((sum, arr) => sum + arr.length, 0) + legacyFavorites.length;
     updateBadge('favoritesCount', allFavoritesCount);
   }
@@ -2373,7 +2384,7 @@
     });
     
     // Favorite button
-    const wishlist = JSON.parse(localStorage.getItem('wishlistProducts') || '[]');
+    const wishlist = readStoredArray('wishlistProducts');
     const isFavorite = wishlist.some(p => p.id === product.id);
     
     const favoriteBtn = createEl('button', {
@@ -2430,7 +2441,7 @@
 
   // Toggle wishlist
   function toggleWishlist(product, button, svg) {
-    let wishlist = JSON.parse(localStorage.getItem('wishlistProducts') || '[]');
+    let wishlist = readStoredArray('wishlistProducts');
     const index = wishlist.findIndex(p => p.id === product.id);
     
     if (index > -1) {
@@ -2498,9 +2509,9 @@
       const data = {
         exportDate: new Date().toISOString(),
         chatSessions: window.ShopThatData ? window.ShopThatData.getChatSessions() : [],
-        products: JSON.parse(localStorage.getItem('droppedProducts') || '[]'),
-        media: JSON.parse(localStorage.getItem('galleryImages') || '[]'),
-        favorites: JSON.parse(localStorage.getItem('wishlistProducts') || '[]')
+        products: readStoredArray('droppedProducts'),
+        media: readStoredArray('galleryImages'),
+        favorites: readStoredArray('wishlistProducts')
       };
       
       const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
@@ -2573,12 +2584,12 @@
   });
   
   // Also refresh when window receives focus (user switches back to this tab)
-  let lastMediaCount = JSON.parse(localStorage.getItem('galleryImages') || '[]').length;
-  let lastProductsCount = JSON.parse(localStorage.getItem('droppedProducts') || '[]').length;
+  let lastMediaCount = readStoredArray('galleryImages').length;
+  let lastProductsCount = readStoredArray('droppedProducts').length;
   
   window.addEventListener('focus', () => {
-    const currentMediaCount = JSON.parse(localStorage.getItem('galleryImages') || '[]').length;
-    const currentProductsCount = JSON.parse(localStorage.getItem('droppedProducts') || '[]').length;
+    const currentMediaCount = readStoredArray('galleryImages').length;
+    const currentProductsCount = readStoredArray('droppedProducts').length;
     
     if (currentMediaCount !== lastMediaCount || currentProductsCount !== lastProductsCount) {
       console.log('Data changed, refreshing view...');
@@ -2590,9 +2601,9 @@
   });
   
   function updateAllBadges() {
-    const products = JSON.parse(localStorage.getItem('droppedProducts') || '[]');
-    const media = JSON.parse(localStorage.getItem('galleryImages') || '[]');
-    const favorites = JSON.parse(localStorage.getItem('wishlistProducts') || '[]');
+    const products = readStoredArray('droppedProducts');
+    const media = readStoredArray('galleryImages');
+    const favorites = readStoredArray('wishlistProducts');
     updateBadge('libraryCount', products.length);
     updateBadge('mediaCount', media.length);
     updateBadge('favoritesCount', favorites.length);
@@ -2609,7 +2620,7 @@
       { src: 'assets/canvas-5.jpg', productData: { title: 'Blue Paint Swatch' } }
     ];
 
-    const existingMedia = JSON.parse(localStorage.getItem('galleryImages') || '[]');
+    const existingMedia = readStoredArray('galleryImages');
 
     // Remove old image1-7.png defaults
     const legacySrcs = [
@@ -2639,9 +2650,9 @@
   console.log('galleryImages:', localStorage.getItem('galleryImages'));
   console.log('wishlistProducts:', localStorage.getItem('wishlistProducts'));
   
-  const products = JSON.parse(localStorage.getItem('droppedProducts') || '[]');
-  const media = JSON.parse(localStorage.getItem('galleryImages') || '[]');
-  const favorites = JSON.parse(localStorage.getItem('wishlistProducts') || '[]');
+  const products = readStoredArray('droppedProducts');
+  const media = readStoredArray('galleryImages');
+  const favorites = readStoredArray('wishlistProducts');
   
   console.log('Loaded products count:', products.length);
   console.log('Loaded media count:', media.length);

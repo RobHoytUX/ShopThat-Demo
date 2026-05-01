@@ -28,29 +28,43 @@ console.log('Document ready state:', document.readyState);
     containerExists: !!container
   });
 
-  // Get dimensions - use clientWidth/Height if available, otherwise parse viewBox
+  // Graph layout must use viewBox width/height — SVG `clientHeight` includes CSS
+  // padding (e.g. legend offset), which skews the center downward/right in user space.
+  function graphInnerSize() {
+    const vb = svg.attr('viewBox');
+    if (!vb) return null;
+    const parts = vb.trim().split(/[\s,]+/);
+    if (parts.length < 4) return null;
+    const vw = parseFloat(parts[2]);
+    const vh = parseFloat(parts[3]);
+    if (vw > 0 && vh > 0) return { w: vw, h: vh };
+    return null;
+  }
   const width = () => {
+    const g = graphInnerSize();
+    if (g) return g.w;
     const w = svg.node().clientWidth;
     if (w > 0) return w;
-    // Fallback to viewBox width
-    const viewBox = svg.attr('viewBox');
-    if (viewBox) {
-      const parts = viewBox.split(' ');
-      return parseFloat(parts[2]) || 800;
-    }
     return 800;
   };
   const height = () => {
+    const g = graphInnerSize();
+    if (g) return g.h;
     const h = svg.node().clientHeight;
     if (h > 0) return h;
-    // Fallback to viewBox height
-    const viewBox = svg.attr('viewBox');
-    if (viewBox) {
-      const parts = viewBox.split(' ');
-      return parseFloat(parts[3]) || 600;
-    }
     return 600;
   };
+
+  /** Canvas that has real layout width/height (bubbles tab may be `display:none` on load). */
+  function getBubbleSizingCanvas() {
+    const bubble = document.querySelector('#kw-bubbles-tab .keywords__canvas');
+    if (bubble && bubble.clientWidth > 0 && bubble.clientHeight > 0) return bubble;
+    const tree = document.querySelector('#kw-tree-tab .keywords__canvas');
+    if (tree && tree.clientWidth > 0 && tree.clientHeight > 0) return tree;
+    const list = document.querySelector('#kw-list-tab .keywords__canvas');
+    if (list && list.clientWidth > 0 && list.clientHeight > 0) return list;
+    return bubble || tree || container.querySelector('.keywords__canvas');
+  }
 
   // State management for hierarchical display
   let currentViewMode = 'default'; // 'default' / 'tree' (bubbles drill-down) / 'expanded' / 'filtered' / 'all' / 'linear'
@@ -1187,6 +1201,12 @@ console.log('Document ready state:', document.readyState);
   let hoveredNode = null;
   let clickedNode = null;
 
+  function bubbleNodeLabel(d) {
+    if (!d) return '';
+    if (d.id === 'LVMH' || (d.group === 0 && d.isRoot)) return 'Louis Vuitton';
+    return d.id;
+  }
+
   function computeFontSizeForRadius(r){
     // Scale font size based on radius, with larger max for LVMH node
     if (r >= 140) {
@@ -1711,17 +1731,17 @@ console.log('Document ready state:', document.readyState);
     let itemIndex = 0;
     const listHTML = sortedCategories.map(cat => {
       const items = grouped[cat];
-      const headerHTML = `<div class="linear-view__category"><span class="linear-view__category-label">${cat}</span><span class="linear-view__category-count">${items.length}</span><div class="linear-view__category-line"></div></div>`;
+      const headerHTML = `<div class="linear-view__category"><span class="linear-view__category-label">${escapeHtml(cat)}</span><span class="linear-view__category-count">${items.length}</span><div class="linear-view__category-line"></div></div>`;
       const itemsHTML = items.map(n => {
         const nColor = groupColors[n.group] || groupColors[1];
         const count = getConnectedNodeIds(n).size - 1;
         const delay = itemIndex * 0.04;
         itemIndex++;
         return `
-          <div class="linear-view__item" data-id="${n.id}" style="animation-delay: ${delay}s">
+          <div class="linear-view__item" data-id="${escapeHtml(n.id)}" style="animation-delay: ${delay}s">
             <div class="linear-view__item-indicator" style="background: ${nColor.gradient}"></div>
             <div class="linear-view__item-info">
-              <span class="linear-view__item-name">${n.id}</span>
+              <span class="linear-view__item-name">${escapeHtml(n.id)}</span>
               <span class="linear-view__item-meta">${count} connections</span>
             </div>
             <svg class="linear-view__item-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -1745,10 +1765,10 @@ console.log('Document ready state:', document.readyState);
     linearView.innerHTML = `
       <div class="linear-view__main">
         <div class="linear-view__main-bubble" style="background: ${mainColor.gradient}">
-          <span class="linear-view__main-name">${nodeData.id}</span>
+          <span class="linear-view__main-name">${escapeHtml(bubbleNodeLabel(nodeData))}</span>
         </div>
         <div class="linear-view__main-meta">
-          <span class="linear-view__main-group">${mainColor.label}</span>
+          <span class="linear-view__main-group">${escapeHtml(mainColor.label)}</span>
           <span class="linear-view__main-connections">${connectedNodes.length} connections</span>
         </div>
       </div>
@@ -1806,34 +1826,50 @@ console.log('Document ready state:', document.readyState);
     .velocityDecay(0.85)
     .alphaMin(0.005)
     .force('orbit', () => {
-      // Solar system force: keep primary nodes in tight orbit around LVMH
-      if (currentViewMode !== 'default') return;
-      
+      // Tight horizontal flanking of the root in default + tree (Bubbles) modes
+      if (currentViewMode !== 'default' && currentViewMode !== 'tree') return;
+
       const lvmhNode = graphNodes.find(n => n.group === 0);
       if (!lvmhNode) return;
-      
+
       const w = width();
       const h = height();
       const centerX = w / 2;
       const centerY = h / 2;
       const lvmhRadius = radius(lvmhNode.value, lvmhNode.group, lvmhNode.isArea);
-      const areaRadius = 70; // Area node radius
-      const belowOffset = lvmhRadius + areaRadius + 20; // Gap between LVMH and area nodes
-      const sideSpacing = areaRadius + 30; // Horizontal spacing between area nodes
-      
+      const areaRadius = 70;
+      const belowOffset = lvmhRadius + areaRadius + 20;
+      const sideSpacing = areaRadius + 30;
+      const childPad = 14;
+      const childDx = lvmhRadius + areaRadius + childPad;
+
       const otherNodes = graphNodes.filter(n => n.group !== 0);
-      
+      const directLv = otherNodes.filter(n => n.parent === lvmhNode.id);
+      const hasDeep = otherNodes.some(n => n.parent !== lvmhNode.id);
+
       otherNodes.forEach((node, i) => {
-        // Position area nodes below LVMH, side by side
-        const xOffset = otherNodes.length === 1 ? 0 : (i === 0 ? -sideSpacing : sideSpacing);
-        const targetX = centerX + xOffset;
-        const targetY = centerY + belowOffset;
-        
-        // Stronger force toward target position for tighter grouping
+        let targetX;
+        let targetY;
+        if (!hasDeep && directLv.length === 2) {
+          const pair = directLv.slice().sort((a, b) => a.id.localeCompare(b.id));
+          const idx = pair.findIndex(p => p.id === node.id);
+          if (idx === 0) { targetX = centerX - childDx; targetY = centerY; }
+          else if (idx === 1) { targetX = centerX + childDx; targetY = centerY; }
+          else return;
+        } else if (!hasDeep && directLv.length === 1) {
+          if (node.id !== directLv[0].id) return;
+          targetX = centerX + childDx;
+          targetY = centerY;
+        } else {
+          const lvmhY = centerY - belowOffset / 2;
+          const xOffset = otherNodes.length === 1 ? 0 : (i === 0 ? -sideSpacing : sideSpacing);
+          targetX = centerX + xOffset;
+          targetY = lvmhY + belowOffset;
+        }
         const dx = targetX - node.x;
         const dy = targetY - node.y;
-        node.vx += dx * 0.08;
-        node.vy += dy * 0.08;
+        node.vx += dx * 0.12;
+        node.vy += dy * 0.12;
       });
     })
     .force('cluster', () => {
@@ -1994,6 +2030,74 @@ console.log('Document ready state:', document.readyState);
     
     updateModeIndicator();
   }
+
+  function applySolarSystemLayout(centerX, centerY) {
+    if (!graphNodes || graphNodes.length === 0) return;
+    const lvmhNode = graphNodes.find(n => n.group === 0);
+    const otherNodes = graphNodes.filter(n => n.group !== 0);
+    if (!lvmhNode || (currentViewMode !== 'default' && currentViewMode !== 'tree')) return;
+
+    const lvmhRadius = radius(lvmhNode.value, lvmhNode.group, lvmhNode.isArea);
+    const areaRadius = 70;
+    const belowOffset = lvmhRadius + areaRadius + 20;
+    const sideSpacing = areaRadius + 30;
+    const childPad = 14;
+    const childDx = lvmhRadius + areaRadius + childPad;
+
+    if (otherNodes.length === 0) {
+      lvmhNode.x = centerX;
+      lvmhNode.y = centerY;
+      lvmhNode.vx = 0;
+      lvmhNode.vy = 0;
+      lvmhNode.fx = centerX;
+      lvmhNode.fy = centerY;
+    } else {
+      const directLv = otherNodes.filter(n => n.parent === lvmhNode.id);
+      const hasDeep = otherNodes.some(n => n.parent !== lvmhNode.id);
+
+      lvmhNode.x = centerX;
+      lvmhNode.y = centerY;
+      lvmhNode.vx = 0;
+      lvmhNode.vy = 0;
+      lvmhNode.fx = centerX;
+      lvmhNode.fy = centerY;
+
+      if (!hasDeep && directLv.length === 2) {
+        const pair = directLv.slice().sort((a, b) => a.id.localeCompare(b.id));
+        pair[0].x = centerX - childDx;
+        pair[0].y = centerY;
+        pair[1].x = centerX + childDx;
+        pair[1].y = centerY;
+        pair.forEach(n => {
+          n.vx = 0;
+          n.vy = 0;
+          n.fx = n.x;
+          n.fy = n.y;
+        });
+      } else if (!hasDeep && directLv.length === 1) {
+        const n = directLv[0];
+        n.x = centerX + childDx;
+        n.y = centerY;
+        n.vx = 0;
+        n.vy = 0;
+        n.fx = n.x;
+        n.fy = n.y;
+      } else {
+        const lvmhY = centerY - belowOffset / 2;
+        lvmhNode.y = lvmhY;
+        lvmhNode.fy = lvmhY;
+        otherNodes.forEach((n, i) => {
+          const xOffset = otherNodes.length === 1 ? 0 : (i === 0 ? -sideSpacing : sideSpacing);
+          n.x = centerX + xOffset;
+          n.y = lvmhY + belowOffset;
+          n.vx = 0;
+          n.vy = 0;
+          n.fx = null;
+          n.fy = null;
+        });
+      }
+    }
+  }
   
   function performGraphUpdate(newVisibleNodes, newVisibleLinks, centerX, centerY, animateEntry) {
     graphNodes = newVisibleNodes;
@@ -2006,36 +2110,9 @@ console.log('Document ready state:', document.readyState);
       viewMode: currentViewMode
     });
     
-    // Check if we have LVMH in this set (solar system layout)
-    const lvmhNode = graphNodes.find(n => n.group === 0);
-    const otherNodes = graphNodes.filter(n => n.group !== 0);
-    
-    if (lvmhNode && (currentViewMode === 'default' || currentViewMode === 'tree')) {
-      // Solar system layout: LVMH at center, primary nodes in tight orbit
-      const lvmhRadius = radius(lvmhNode.value, lvmhNode.group, lvmhNode.isArea);
-      const areaRadius = 70;
-      const belowOffset = lvmhRadius + areaRadius + 20;
-      const sideSpacing = areaRadius + 30;
-      
-      // Position LVMH above center to make room for area nodes below
-      const lvmhY = centerY - belowOffset / 2;
-      lvmhNode.x = centerX;
-      lvmhNode.y = lvmhY;
-      lvmhNode.vx = 0;
-      lvmhNode.vy = 0;
-      lvmhNode.fx = centerX;
-      lvmhNode.fy = lvmhY;
-      
-      // Position area nodes below LVMH, side by side
-      otherNodes.forEach((n, i) => {
-        const xOffset = otherNodes.length === 1 ? 0 : (i === 0 ? -sideSpacing : sideSpacing);
-        n.x = centerX + xOffset;
-        n.y = lvmhY + belowOffset;
-        n.vx = 0;
-        n.vy = 0;
-      });
-      
-      console.log('Layout: LVMH + ' + otherNodes.length + ' area nodes below');
+    if (graphNodes.find(n => n.group === 0) && (currentViewMode === 'default' || currentViewMode === 'tree')) {
+      applySolarSystemLayout(centerX, centerY);
+      console.log('Layout: LVMH + ' + graphNodes.filter(n => n.group !== 0).length + ' non-root nodes');
     } else {
       // Standard tight cluster layout for other view modes
       graphNodes.forEach((n, i) => {
@@ -2096,7 +2173,7 @@ console.log('Document ready state:', document.readyState);
         text.each(function(d) {
           const r = radius(d.value, d.group, d.isArea);
           d3.select(this).style('font-size', `${computeFontSizeForRadius(r)}px`);
-          wrapText(d3.select(this), d.id, r);
+          wrapText(d3.select(this), bubbleNodeLabel(d), r);
         });
         
         // Animate entry
@@ -2136,6 +2213,12 @@ console.log('Document ready state:', document.readyState);
       },
       exit => exit.remove()
     );
+
+    node.select('text').each(function(d) {
+      const r = radius(d.value, d.group, d.isArea);
+      d3.select(this).style('font-size', `${computeFontSizeForRadius(r)}px`);
+      wrapText(d3.select(this), bubbleNodeLabel(d), r);
+    });
     
     // Re-attach event handlers
     node.on('mouseenter', (event, d) => {
@@ -2188,7 +2271,7 @@ console.log('Document ready state:', document.readyState);
     
     // Position nodes in tight cluster centered on screen
     graphNodes.forEach((n, i) => {
-      if (!n.x || !n.y || isNaN(n.x) || isNaN(n.y)) {
+      if (n.x == null || n.y == null || isNaN(n.x) || isNaN(n.y)) {
         const angle = (i / graphNodes.length) * 2 * Math.PI;
         const clusterRadius = 15;
         n.x = centerX + Math.cos(angle) * clusterRadius;
@@ -2268,7 +2351,7 @@ console.log('Document ready state:', document.readyState);
         return sourceId === 'LVMH' ? targetId : sourceId;
       });
       
-      drawerTitle.textContent = 'LVMH';
+      drawerTitle.textContent = 'Louis Vuitton';
       drawerBody.innerHTML = `
         <div class="sidebar-content">
           <div class="sidebar-stats">
@@ -2283,7 +2366,7 @@ console.log('Document ready state:', document.readyState);
           </div>
           <div class="sidebar-section">
             <div class="sidebar-section-label">Description</div>
-            <p class="sidebar-description">LVMH is the central hub of the knowledge graph. Click on an area to explore the restaurants, hotels, galleries, and more within it.</p>
+            <p class="sidebar-description">Louis Vuitton is the central hub of the knowledge graph. Click on an area to explore the restaurants, hotels, galleries, and more within it.</p>
           </div>
           <div class="sidebar-section">
             <div class="sidebar-section-header">
@@ -2298,7 +2381,7 @@ console.log('Document ready state:', document.readyState);
             </div>
             <p class="sidebar-hint">Click a keyword to toggle visibility</p>
             <div class="sidebar-chips">
-              ${relatedKeywords.map(kw => `<span class="sidebar-chip sidebar-chip--toggle${disabledNodes.has(kw) ? ' sidebar-chip--disabled' : ''}" data-keyword="${kw}">${kw}</span>`).join('')}
+              ${relatedKeywords.map(kw => `<span class="sidebar-chip sidebar-chip--toggle${disabledNodes.has(kw) ? ' sidebar-chip--disabled' : ''}" data-keyword="${escapeHtml(kw)}">${escapeHtml(kw)}</span>`).join('')}
             </div>
           </div>
           <div class="sidebar-section">
@@ -2388,40 +2471,60 @@ console.log('Document ready state:', document.readyState);
   }
 
   function resize(){
-    const canvasEl = container.querySelector('.keywords__canvas');
-    const w = canvasEl?.clientWidth || 800;
-    const h = Math.max(window.innerHeight * 0.7, 400);
+    const canvasEl = getBubbleSizingCanvas();
+    const w = (canvasEl && canvasEl.clientWidth > 0) ? canvasEl.clientWidth : Math.min(1200, Math.max(400, window.innerWidth - 80));
+    const h = (canvasEl && canvasEl.clientHeight > 0)
+      ? canvasEl.clientHeight
+      : Math.max(window.innerHeight * 0.7, 400);
     console.log('Resize called with dimensions:', { w, h });
     svg.attr('viewBox', `0 0 ${w} ${h}`).attr('width', w).attr('height', h);
     centerForce.x(w/2).y(h/2);
-    
+
+    const cx = w / 2;
+    const cy = h / 2;
+    applySolarSystemLayout(cx, cy);
+
     // Center nodes initially if they don't have positions
-    if (graphNodes.some(node => !node.x || !node.y)) {
+    if (graphNodes.some(node => node.x == null || node.y == null || isNaN(node.x) || isNaN(node.y))) {
       graphNodes.forEach((node, i) => {
-        if (!node.x || !node.y) {
-          // Arrange in a tight cluster in the center
+        if (node.x == null || node.y == null || isNaN(node.x) || isNaN(node.y)) {
           const angle = (i / graphNodes.length) * 2 * Math.PI;
           const clusterRadius = 15;
-          node.x = w/2 + Math.cos(angle) * clusterRadius;
-          node.y = h/2 + Math.sin(angle) * clusterRadius;
+          node.x = cx + Math.cos(angle) * clusterRadius;
+          node.y = cy + Math.sin(angle) * clusterRadius;
         }
       });
     }
-    
+
+    if (node && graphNodes.length) {
+      node.attr('transform', d => `translate(${Math.round(d.x)},${Math.round(d.y)})`);
+    }
+
     sim.alpha(0.3).alphaTarget(0).restart();
     rescaleForDrawer();
   }
   
-  // Ensure resize is called after DOM is ready and elements have dimensions
+  function afterLayoutReady(callback) {
+    requestAnimationFrame(() => {
+      const canvasEl = getBubbleSizingCanvas();
+      if (canvasEl && canvasEl.clientWidth > 0 && canvasEl.clientHeight > 0) {
+        callback(canvasEl);
+        return;
+      }
+
+      requestAnimationFrame(() => callback(getBubbleSizingCanvas()));
+    });
+  }
+
+  // Ensure resize is called after DOM is ready and layout has been calculated
   function initializeGraph() {
     console.log('initializeGraph called');
     console.log('SVG element exists:', !!svg.node());
     console.log('Container element exists:', !!container);
     console.log('D3 version:', d3.version);
     
-    setTimeout(() => {
-      console.log('Delayed initialization starting...');
-      const canvasEl = container.querySelector('.keywords__canvas');
+    afterLayoutReady((canvasEl) => {
+      console.log('Layout-ready initialization starting...');
       console.log('Canvas element dimensions:', {
         width: canvasEl?.clientWidth,
         height: canvasEl?.clientHeight,
@@ -2429,8 +2532,8 @@ console.log('Document ready state:', document.readyState);
       });
       
       // IMPORTANT: Set SVG dimensions FIRST before creating nodes
-      const w = canvasEl?.clientWidth || 800;
-      const h = Math.max(window.innerHeight * 0.7, 400);
+      const w = (canvasEl && canvasEl.clientWidth > 0) ? canvasEl.clientWidth : Math.min(1200, Math.max(400, window.innerWidth - 80));
+      const h = (canvasEl && canvasEl.clientHeight > 0) ? canvasEl.clientHeight : Math.max(window.innerHeight * 0.7, 400);
       svg.attr('viewBox', `0 0 ${w} ${h}`).attr('width', w).attr('height', h);
       centerForce.x(w/2).y(h/2);
       
@@ -2448,21 +2551,20 @@ console.log('Document ready state:', document.readyState);
       // Call resize to finalize positioning
       resize();
       
-      // Show bubble view on page load (LVMH centered)
-      setTimeout(() => {
+      requestAnimationFrame(() => {
         showBubbleView();
-      }, 150);
+      });
       
       console.log('After initialization:');
       console.log('Graph nodes in simulation:', sim.nodes().length);
       console.log('Graph links in simulation:', sim.force('link').links().length);
       console.log('DOM nodes count:', gNodes.selectAll('g.node').size());
-    }, 100);
+    });
   }
   
   window.addEventListener('resize', resize);
   
-  // Call initialization after a short delay to ensure DOM is ready
+  // Call initialization when DOM is ready; layout readiness is handled above.
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initializeGraph);
   } else {
@@ -2507,7 +2609,7 @@ console.log('Document ready state:', document.readyState);
           </div>
         <div class="sidebar-section">
           <div class="sidebar-section-label">Description</div>
-          <p class="sidebar-description">Placeholder description about ${d.id} with sample insights.</p>
+          <p class="sidebar-description">Placeholder description about ${escapeHtml(d.id)} with sample insights.</p>
         </div>
         <div class="sidebar-section">
           <div class="sidebar-section-header">
@@ -2523,7 +2625,7 @@ console.log('Document ready state:', document.readyState);
           <p class="sidebar-hint">Click a keyword to toggle visibility</p>
           <div class="sidebar-chips">
             ${uniqueKeywords.length > 0 
-              ? uniqueKeywords.map(kw => `<span class="sidebar-chip sidebar-chip--toggle${disabledNodes.has(kw) ? ' sidebar-chip--disabled' : ''}" data-keyword="${kw}">${kw}</span>`).join('')
+              ? uniqueKeywords.map(kw => `<span class="sidebar-chip sidebar-chip--toggle${disabledNodes.has(kw) ? ' sidebar-chip--disabled' : ''}" data-keyword="${escapeHtml(kw)}">${escapeHtml(kw)}</span>`).join('')
               : '<span class="sidebar-no-data">No related keywords</span>'
             }
           </div>
@@ -2872,6 +2974,8 @@ console.log('Document ready state:', document.readyState);
     isHoverClustering = false;
     currentViewMode = 'tree';
 
+    resize();
+
     allNodes.forEach(n => { delete n.x; delete n.y; delete n.vx; delete n.vy; delete n.fx; delete n.fy; });
     setGraphData(allNodes, allLinks, true);
     setTimeout(() => svg.transition().duration(250).call(zoom.transform, d3.zoomIdentity), 300);
@@ -2904,6 +3008,8 @@ console.log('Document ready state:', document.readyState);
     isHoverClustering = false;
     currentViewMode = 'tree';
 
+    resize();
+
     allNodes.forEach(n => { delete n.x; delete n.y; delete n.vx; delete n.vy; delete n.fx; delete n.fy; });
     setGraphData(allNodes, allLinks, true);
     setTimeout(() => svg.transition().duration(250).call(zoom.transform, d3.zoomIdentity), 300);
@@ -2934,6 +3040,8 @@ console.log('Document ready state:', document.readyState);
       selectedNode = null;
       showLVMHDetails();
     }
+
+    resize();
 
     allNodes.forEach(n => { delete n.x; delete n.y; delete n.vx; delete n.vy; delete n.fx; delete n.fy; });
     setGraphData(allNodes, allLinks, true);
@@ -3002,14 +3110,14 @@ console.log('Document ready state:', document.readyState);
     sortedCats.forEach(cat => {
       const items = grouped[cat];
       const section = document.createElement('div');
-      section.innerHTML = '<div class="linear-view__category"><span class="linear-view__category-label">' + cat + '</span><span class="linear-view__category-count">' + items.length + '</span><div class="linear-view__category-line"></div></div>';
+      section.innerHTML = '<div class="linear-view__category"><span class="linear-view__category-label">' + escapeHtml(cat) + '</span><span class="linear-view__category-count">' + items.length + '</span><div class="linear-view__category-line"></div></div>';
       items.forEach(n => {
         const color = groupColors[n.group] || groupColors[1];
         const count = getConnectedNodeIds(n).size - 1;
         const el = document.createElement('div');
         el.className = 'linear-view__item';
         el.dataset.id = n.id;
-        el.innerHTML = '<div class="linear-view__item-indicator" style="background:' + color.gradient + '"></div><div class="linear-view__item-info"><span class="linear-view__item-name">' + n.id + '</span><span class="linear-view__item-meta">' + count + ' connections</span></div><svg class="linear-view__item-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+        el.innerHTML = '<div class="linear-view__item-indicator" style="background:' + color.gradient + '"></div><div class="linear-view__item-info"><span class="linear-view__item-name">' + escapeHtml(n.id) + '</span><span class="linear-view__item-meta">' + count + ' connections</span></div><svg class="linear-view__item-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
         el.addEventListener('click', function() {
           var target = allNodes.find(function(nd) { return nd.id === n.id; });
           if (target) {
@@ -3019,7 +3127,7 @@ console.log('Document ready state:', document.readyState);
             if (body) {
               var conns = getConnectedNodeIds(target);
               var connNodes = allNodes.filter(function(nd) { return conns.has(nd.id) && nd.id !== target.id; });
-              body.innerHTML = '<div class="sidebar-stat"><span class="sidebar-stat-value">' + connNodes.length + '</span><span class="sidebar-stat-label">connections</span></div><div class="sidebar-connections"><h3>Connected Keywords</h3>' + connNodes.map(function(c) { return '<span class="sidebar-connection-tag">' + c.id + '</span>'; }).join('') + '</div><div class="sidebar-articles"><h3>Related Articles</h3>' + generateArticlesHTML(target.id) + '</div>';
+              body.innerHTML = '<div class="sidebar-stat"><span class="sidebar-stat-value">' + connNodes.length + '</span><span class="sidebar-stat-label">connections</span></div><div class="sidebar-connections"><h3>Connected Keywords</h3>' + connNodes.map(function(c) { return '<span class="sidebar-connection-tag">' + escapeHtml(c.id) + '</span>'; }).join('') + '</div><div class="sidebar-articles"><h3>Related Articles</h3>' + generateArticlesHTML(target.id) + '</div>';
             }
           }
         });
@@ -3066,71 +3174,46 @@ console.log('Document ready state:', document.readyState);
     }
   });
 
-  // Neo4j integration
-  const neo4jUriEl = document.getElementById('neo4jUri');
-  const neo4jUserEl = document.getElementById('neo4jUser');
-  const neo4jPassEl = document.getElementById('neo4jPass');
+  // Neo4j integration is backend-owned; the browser only calls same-origin APIs.
   const neo4jConnectBtn = document.getElementById('neo4jConnect');
   const neo4jLoadBtn = document.getElementById('neo4jLoad');
   const neo4jSeedBtn = document.getElementById('neo4jSeed');
   const neo4jStatusEl = document.getElementById('neo4jStatus');
+  const keywordGraphApi = window.ShopThatKeywordGraphApi;
 
-  let driver = null;
   function setStatus(msg, ok){
     if(neo4jStatusEl){ neo4jStatusEl.textContent = msg; neo4jStatusEl.style.color = ok ? '#065f46' : '#6b7280'; }
-  }
-  async function ensureDriver(){
-    if(driver){ return driver; }
-    const uri = (neo4jUriEl && neo4jUriEl.value) || 'bolt://localhost:7687';
-    const user = (neo4jUserEl && neo4jUserEl.value) || 'neo4j';
-    const pass = (neo4jPassEl && neo4jPassEl.value) || 'neo4j';
-    driver = neo4j.driver(uri, neo4j.auth.basic(user, pass));
-    await driver.verifyConnectivity();
-    return driver;
   }
 
   neo4jConnectBtn && neo4jConnectBtn.addEventListener('click', async () => {
     try {
-      if(driver){ await driver.close(); driver = null; }
-      await ensureDriver();
-      setStatus('Connected', true);
+      if (!keywordGraphApi) throw new Error('Graph API client unavailable');
+      await keywordGraphApi.check();
+      setStatus('Backend graph API ready', true);
       neo4jLoadBtn && (neo4jLoadBtn.disabled = false);
     } catch(err){
       console.error(err);
-      setStatus('Connection failed');
+      setStatus(err.message || 'Graph API unavailable');
     }
   });
 
   neo4jSeedBtn && neo4jSeedBtn.addEventListener('click', async () => {
     try {
-      const drv = await ensureDriver();
-      const session = drv.session({ defaultAccessMode: neo4j.session.WRITE });
-      try {
-        await session.executeWrite(async tx => {
-          await tx.run('CREATE CONSTRAINT keyword_name IF NOT EXISTS FOR (k:Keyword) REQUIRE k.name IS UNIQUE');
-          await tx.run('UNWIND $data AS row MERGE (k:Keyword {name: row.name}) SET k.volume = row.value, k.group = row.group', { data: graphNodes });
-          await tx.run('UNWIND $rels AS r MATCH (a:Keyword {name:r.source}),(b:Keyword {name:r.target}) MERGE (a)-[:RELATED_TO]->(b)', { rels: graphLinks.length?graphLinks:defaultLinks });
-        });
-        setStatus('Seeded sample graph', true);
-        neo4jLoadBtn && (neo4jLoadBtn.disabled = false);
-      } finally { await session.close(); }
-    } catch(err){ console.error(err); setStatus('Seed failed'); }
+      if (!keywordGraphApi) throw new Error('Graph API client unavailable');
+      await keywordGraphApi.seed(graphNodes, graphLinks.length ? graphLinks : defaultLinks);
+      setStatus('Seeded sample graph', true);
+      neo4jLoadBtn && (neo4jLoadBtn.disabled = false);
+    } catch(err){ console.error(err); setStatus(err.message || 'Seed failed'); }
   });
 
   neo4jLoadBtn && neo4jLoadBtn.addEventListener('click', async () => {
     try {
-      const drv = await ensureDriver();
-      const session = drv.session({ defaultAccessMode: neo4j.session.READ });
-      try {
-        const resNodes = await session.run('MATCH (k:Keyword) RETURN k.name AS id, coalesce(k.volume, 20) AS value, coalesce(k.group, 1) AS group');
-        const resLinks = await session.run('MATCH (a:Keyword)-[:RELATED_TO]->(b:Keyword) RETURN a.name AS source, b.name AS target');
-        const n = resNodes.records.map(r => ({ id: r.get('id'), value: r.get('value'), group: r.get('group') }));
-        const l = resLinks.records.map(r => ({ source: r.get('source'), target: r.get('target') }));
-        if(n.length === 0){ setStatus('No data found. Try Seed.', false); return; }
-        setGraphData(n, l);
-        setStatus(`Loaded ${n.length} nodes / ${l.length} links`, true);
-      } finally { await session.close(); }
-    } catch(err){ console.error(err); setStatus('Load failed'); }
+      if (!keywordGraphApi) throw new Error('Graph API client unavailable');
+      const graph = await keywordGraphApi.load();
+      if(graph.nodes.length === 0){ setStatus('No data found. Try Seed.', false); return; }
+      setGraphData(graph.nodes, graph.links);
+      setStatus(`Loaded ${graph.nodes.length} nodes / ${graph.links.length} links`, true);
+    } catch(err){ console.error(err); setStatus(err.message || 'Load failed'); }
   });
 
   // Real-time synchronization with shared data system — DISABLED for the
@@ -3261,153 +3344,6 @@ console.log('Document ready state:', document.readyState);
     }
   }
 
-  // AI Side Panel functionality
-  function initAISidePanel() {
-    const askAiBtn = document.getElementById('askAiBtn');
-    const aiSidePanel = document.getElementById('aiSidePanel');
-    const aiPanelClose = document.getElementById('aiPanelClose');
-    const aiPanelOverlay = document.getElementById('aiPanelOverlay');
-    const aiInput = document.getElementById('aiInput');
-    const aiSendBtn = document.getElementById('aiSendBtn');
-    const aiMessages = document.getElementById('aiMessages');
-
-    if (!askAiBtn || !aiSidePanel) {
-      console.log('AI panel elements not found');
-      return;
-    }
-
-    // Open panel
-    askAiBtn.addEventListener('click', () => {
-      aiSidePanel.classList.add('active');
-      aiPanelOverlay.classList.add('active');
-      aiSidePanel.setAttribute('aria-hidden', 'false');
-      setTimeout(() => aiInput.focus(), 300);
-    });
-
-    // Close panel
-    function closePanel() {
-      aiSidePanel.classList.remove('active');
-      aiPanelOverlay.classList.remove('active');
-      aiSidePanel.setAttribute('aria-hidden', 'true');
-    }
-
-    aiPanelClose.addEventListener('click', closePanel);
-    aiPanelOverlay.addEventListener('click', closePanel);
-
-    // Handle Escape key
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && aiSidePanel.classList.contains('active')) {
-        closePanel();
-      }
-    });
-
-    function escapeHtml(s) {
-      return String(s)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;');
-    }
-
-    function renderAiAnswer(container, payload) {
-      const answer = payload && payload.answer ? payload.answer : 'No response available.';
-      if (window.LuxuryIntelligence && window.LuxuryIntelligence.markdownToHtml) {
-        container.innerHTML = window.LuxuryIntelligence.markdownToHtml(answer);
-      } else {
-        container.innerHTML = '<p>' + escapeHtml(answer) + '</p>';
-      }
-
-      if (payload && payload.domain) {
-        const domainEl = document.createElement('div');
-        domainEl.className = 'ai-message-domain';
-        domainEl.style.marginTop = '8px';
-        domainEl.style.opacity = '0.75';
-        domainEl.style.fontSize = '12px';
-        domainEl.textContent = 'Domain: ' + payload.domain;
-        container.appendChild(domainEl);
-      }
-
-      if (payload && Array.isArray(payload.images) && payload.images.length) {
-        const imageWrap = document.createElement('div');
-        imageWrap.className = 'ai-message-images';
-        imageWrap.style.display = 'grid';
-        imageWrap.style.gridTemplateColumns = 'repeat(3, minmax(0, 1fr))';
-        imageWrap.style.gap = '8px';
-        imageWrap.style.marginTop = '10px';
-        payload.images.slice(0, 3).forEach((url) => {
-          const img = document.createElement('img');
-          img.src = url;
-          img.alt = 'Luxury intelligence result';
-          img.loading = 'lazy';
-          img.style.width = '100%';
-          img.style.height = '84px';
-          img.style.objectFit = 'cover';
-          img.style.borderRadius = '8px';
-          imageWrap.appendChild(img);
-        });
-        container.appendChild(imageWrap);
-      }
-    }
-
-    // Send message functionality
-    async function sendMessage() {
-      const message = aiInput.value.trim();
-      if (!message) return;
-
-      // Remove welcome message if present
-      const welcomeMsg = aiMessages.querySelector('.ai-welcome-message');
-      if (welcomeMsg) welcomeMsg.remove();
-
-      // Add user message
-      const userMsg = document.createElement('div');
-      userMsg.className = 'ai-message user';
-      userMsg.textContent = message;
-      aiMessages.appendChild(userMsg);
-
-      // Clear input
-      aiInput.value = '';
-
-      const thinkingMsg = document.createElement('div');
-      thinkingMsg.className = 'ai-message ai';
-      thinkingMsg.textContent = 'Thinking...';
-      aiMessages.appendChild(thinkingMsg);
-      aiMessages.scrollTop = aiMessages.scrollHeight;
-
-      aiSendBtn.disabled = true;
-
-      try {
-        let payload = null;
-        if (window.LuxuryIntelligence && typeof window.LuxuryIntelligence.ask === 'function') {
-          payload = await window.LuxuryIntelligence.ask(message);
-        } else {
-          payload = { answer: 'Luxury Intelligence client is not available on this page yet.', images: [] };
-        }
-
-        thinkingMsg.remove();
-
-        const aiResponse = document.createElement('div');
-        aiResponse.className = 'ai-message ai';
-        renderAiAnswer(aiResponse, payload);
-        aiMessages.appendChild(aiResponse);
-      } catch (error) {
-        thinkingMsg.remove();
-        const failMsg = document.createElement('div');
-        failMsg.className = 'ai-message ai';
-        failMsg.textContent = 'Sorry, the AI request failed. Please try again.';
-        aiMessages.appendChild(failMsg);
-        console.error('Keywords AI panel error:', error);
-      } finally {
-        aiSendBtn.disabled = false;
-        aiMessages.scrollTop = aiMessages.scrollHeight;
-      }
-    }
-
-    aiSendBtn.addEventListener('click', sendMessage);
-    aiInput.addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') sendMessage();
-    });
-  }
-
   // Initialize dark mode
   initDarkMode();
 
@@ -3418,8 +3354,6 @@ console.log('Document ready state:', document.readyState);
   // setTimeout(bootstrapAiKeywordGraph, 180);
   void bootstrapAiKeywordGraph; // keep symbol referenced so linters stay quiet
 
-  // Initialize AI Side Panel
-  initAISidePanel();
 })();
 
 

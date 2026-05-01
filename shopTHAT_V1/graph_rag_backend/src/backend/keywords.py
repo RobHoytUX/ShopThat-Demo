@@ -4,29 +4,12 @@ Keywords router for Neo4j operations
 """
 
 from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel
-from typing import List, Optional
+from typing import List
+from .contracts import KeywordDescendants, KeywordHierarchy, KeywordNode, KeywordStatus
 from .graphdb import Neo4jGraphClient
 import os
 
 router = APIRouter()
-
-# Pydantic models
-class KeywordNode(BaseModel):
-    id: str
-    name: str
-    level: Optional[int] = None
-    parent: Optional[str] = None
-
-class KeywordHierarchy(BaseModel):
-    keywords: List[KeywordNode]
-    relationships: List[dict]
-
-class KeywordStatus(BaseModel):
-    enabled: bool
-
-class KeywordDescendants(BaseModel):
-    descendants: List[KeywordNode]
 
 # Initialize Neo4j client
 def get_neo4j_client():

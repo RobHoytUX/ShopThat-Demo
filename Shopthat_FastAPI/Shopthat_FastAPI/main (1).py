@@ -31,16 +31,29 @@ app.add_middleware(
 # ----------------------------- 
 # Configuration
 # -----------------------------
-OPENSEARCH_HOST = "https://search-shopthat-dev-ec6a22ktl674bj5excnzjpck4e.us-east-1.es.amazonaws.com"
-OPENSEARCH_USER = "sai"
-OPENSEARCH_PASS = "Saiprudvi_09$1234"
-INDEX_NAME = "articles_updated"
+OPENSEARCH_HOST = os.getenv("OPENSEARCH_HOST")
+OPENSEARCH_USER = os.getenv("OPENSEARCH_USER")
+OPENSEARCH_PASS = os.getenv("OPENSEARCH_PASS")
+GROQ_API_KEY = os.getenv("GROQ_API_KEY")
+INDEX_NAME = os.getenv("OPENSEARCH_INDEX", "articles_updated")
 
 EMBED_MODEL_NAME = "sentence-transformers/all-MiniLM-L6-v2"
 
+required_settings = {
+    "OPENSEARCH_HOST": OPENSEARCH_HOST,
+    "OPENSEARCH_USER": OPENSEARCH_USER,
+    "OPENSEARCH_PASS": OPENSEARCH_PASS,
+    "GROQ_API_KEY": GROQ_API_KEY,
+}
+missing_settings = [name for name, value in required_settings.items() if not value]
+if missing_settings:
+    raise RuntimeError(
+        "Missing required environment settings: " + ", ".join(missing_settings)
+    )
+
 # Initialize components
 embedder = HuggingFaceEmbeddings(model_name=EMBED_MODEL_NAME)
-llm_client = Groq(api_key="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")
+llm_client = Groq(api_key=GROQ_API_KEY)
 
 client = OpenSearch(
     hosts=[OPENSEARCH_HOST],

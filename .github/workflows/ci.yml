@@ -1,0 +1,67 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+      - master
+
+jobs:
+  static-checks:
+    name: Static Checks
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Check JavaScript syntax
+        run: |
+          set -euo pipefail
+          while IFS= read -r file; do
+            node --check "$file"
+          done < <(git ls-files 'WebDemo/scripts/*.js' 'api/**/*.js')
+
+      - name: Check Python syntax
+        run: |
+          python3 -m py_compile 'Shopthat_FastAPI/Shopthat_FastAPI/main (1).py'
+          python3 -m compileall -q shopTHAT_V1/graph_rag_backend/src/backend
+
+      - name: Smoke check HTML script references
+        run: |
+          python3 - <<'PY'
+          from html.parser import HTMLParser
+          from pathlib import Path
+
+          root = Path('WebDemo')
+          missing = []
+
+          class ScriptParser(HTMLParser):
+              def __init__(self):
+                  super().__init__()
+                  self.scripts = []
+
+              def handle_starttag(self, tag, attrs):
+                  if tag != 'script':
+                      return
+                  attr = dict(attrs)
+                  src = attr.get('src')
+                  if src and not src.startswith(('http://', 'https://', '//')):
+                      self.scripts.append(src.split('?', 1)[0])
+
+          for html_file in root.glob('*.html'):
+              parser = ScriptParser()
+              parser.feed(html_file.read_text(encoding='utf-8'))
+              for src in parser.scripts:
+                  target = (html_file.parent / src).resolve()
+                  if not target.exists():
+                      missing.append(f'{html_file}: missing {src}')
+
+          if missing:
+              raise SystemExit('\n'.join(missing))
+          PY

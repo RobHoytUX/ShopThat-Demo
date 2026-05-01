@@ -4,6 +4,17 @@
   const burger = document.querySelector('.lv-burger');
   const searchLink = document.querySelector('.lv-search-link');
   const nav = document.getElementById('nav');
+
+  function readStoredArray(key) {
+    if (window.ShopThatStorage) return window.ShopThatStorage.readArray(key);
+    try {
+      const value = JSON.parse(localStorage.getItem(key) || '[]');
+      return Array.isArray(value) ? value : [];
+    } catch (error) {
+      localStorage.removeItem(key);
+      return [];
+    }
+  }
   
   // Keep header fixed at top - removed auto-hide behavior
   // Header will remain visible and fixed at the top at all times
@@ -849,10 +860,8 @@
     // Function to initialize Leaflet map
     function initializeMap() {
       if (leafletMap) return; // Already initialized
-      
-      // Wait a bit for the container to be visible
-      setTimeout(() => {
-        if (typeof L !== 'undefined') {
+
+      if (typeof L !== 'undefined') {
           // Initialize map centered between both stores, zoomed out to show both
           leafletMap = L.map('chatbot-map').setView([40.7438, -73.9853], 12);
           
@@ -986,8 +995,7 @@
             });
           };
           
-          // Add nearby locations after a short delay
-          setTimeout(addNearbyLocations, 200);
+          addNearbyLocations();
           
           // Add map legend
           const mapLegend = createEl('div', { class: 'chatbot-map-legend' });
@@ -1018,14 +1026,13 @@
           `;
           document.getElementById('chatbot-map').appendChild(mapLegend);
           
-          // Fix map display issues
-          setTimeout(() => {
+          // Fix map display after the container has had a layout frame.
+          requestAnimationFrame(() => {
             if (leafletMap) {
               leafletMap.invalidateSize();
             }
-          }, 100);
-        }
-      }, 100);
+          });
+      }
     }
     
     // Helper to clear map view specific classes
@@ -2443,7 +2450,7 @@
       messages.replaceChildren();
 
       // Always reload from localStorage to get latest products
-      const savedProducts = JSON.parse(localStorage.getItem('droppedProducts') || '[]');
+      const savedProducts = readStoredArray('droppedProducts');
 
       if (savedProducts.length === 0) {
         const emptyMsg = createEl('div', {
@@ -2511,7 +2518,7 @@
       messages.replaceChildren();
 
       // Always reload from localStorage to get latest favorites
-      const savedWishlist = JSON.parse(localStorage.getItem('wishlistProducts') || '[]');
+      const savedWishlist = readStoredArray('wishlistProducts');
 
       if (savedWishlist.length === 0) {
         const emptyMsg = createEl('div', {
@@ -2590,7 +2597,7 @@
       productGallery.replaceChildren();
       
       // Always reload from localStorage to get latest products
-      const savedProducts = JSON.parse(localStorage.getItem('droppedProducts') || '[]');
+      const savedProducts = readStoredArray('droppedProducts');
       
       // NYC LV store locations for product assignment
       const storeLocations = [
@@ -3120,318 +3127,4 @@
       }
     });
   });
-  
-// Global variable to store dragged product data (more reliable than dataTransfer)
-window.currentDraggedProduct = null;
-
-// Enable drag and drop from product cards to chatbot and gallery
-// Wait for DOM to be fully ready
-setTimeout(() => {
-  const productImages = document.querySelectorAll('.product-card__image');
-  console.log('Found product images:', productImages.length);
-
-// Create success toast element
-  const successToast = document.createElement('div');
-  successToast.className = 'drop-success-toast';
-  successToast.innerHTML = `
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-      <path d="M9 12l2 2 4-4" stroke-linecap="round" stroke-linejoin="round"/>
-      <circle cx="12" cy="12" r="10"/>
-    </svg>
-    <span>Product added successfully!</span>
-  `;
-  document.body.appendChild(successToast);
-  
-  function showSuccessToast(message) {
-    successToast.querySelector('span').textContent = message;
-    successToast.classList.add('is-visible');
-    setTimeout(() => {
-      successToast.classList.remove('is-visible');
-    }, 2500);
-  }
-  
-  // Save product to localStorage for dashboard, map, and bookmarks
-  function saveProductToCollections(productData) {
-    // Generate unique ID for product
-    const productId = 'prod_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-    
-    // Normalize the image property (use 'image' key for consistency with rendering)
-    const imageSrc = productData.src || productData.image;
-    
-    // Save to droppedProducts (for product dashboard Gallery and Map)
-    const droppedProducts = JSON.parse(localStorage.getItem('droppedProducts') || '[]');
-    if (!droppedProducts.find(p => p.title === productData.title)) {
-      // Random NYC area coordinates for map
-      const nycLat = 40.7128 + (Math.random() - 0.5) * 0.05;
-      const nycLng = -74.0060 + (Math.random() - 0.5) * 0.05;
-      droppedProducts.push({
-        id: productId,
-        image: imageSrc,  // Use 'image' key for consistency
-        src: imageSrc,    // Keep 'src' for backward compatibility
-        title: productData.title,
-        model: productData.model || '',
-        price: productData.price || '',
-        lat: nycLat,
-        lng: nycLng,
-        addedAt: new Date().toISOString()
-      });
-      localStorage.setItem('droppedProducts', JSON.stringify(droppedProducts));
-    }
-    
-    // Save to galleryImages (for media view)
-    const galleryImages = JSON.parse(localStorage.getItem('galleryImages') || '[]');
-    if (!galleryImages.find(g => g.src === imageSrc)) {
-      galleryImages.push({
-        src: imageSrc,
-        image: imageSrc,  // Also add 'image' key
-        title: productData.title,
-        productData: {
-          title: productData.title,
-          model: productData.model,
-          price: productData.price
-        },
-        addedAt: new Date().toISOString()
-      });
-      localStorage.setItem('galleryImages', JSON.stringify(galleryImages));
-    }
-    
-    // Save to wishlistProducts (for favorites/bookmarks)
-    const wishlistProducts = JSON.parse(localStorage.getItem('wishlistProducts') || '[]');
-    if (!wishlistProducts.find(w => w.id === productId || w.title === productData.title)) {
-      wishlistProducts.push({
-        id: productId,
-        image: imageSrc,  // Use 'image' key for consistency
-        src: imageSrc,    // Keep 'src' for backward compatibility
-        title: productData.title,
-        model: productData.model || '',
-        price: productData.price || '',
-        addedAt: new Date().toISOString()
-      });
-      localStorage.setItem('wishlistProducts', JSON.stringify(wishlistProducts));
-    }
-  }
-  
-  // Make saveProductToCollections globally available
-  window.saveProductToCollections = saveProductToCollections;
-  
-  // Select ARTICLE elements (the whole product card)
-  const productCards = document.querySelectorAll('.product-card');
-  console.log('Found product cards for drag:', productCards.length);
-  
-  productCards.forEach(productCard => {
-    const img = productCard.querySelector('.product-card__image img');
-    if (!img) {
-      console.log('No img found in card');
-      return;
-    }
-    
-    // Disable dragging on the anchor to prevent interference
-    const link = productCard.querySelector('a');
-    if (link) {
-      link.setAttribute('draggable', 'false');
-    }
-    
-    // Make the whole card draggable
-    productCard.setAttribute('draggable', 'true');
-    
-    productCard.addEventListener('dragstart', (e) => {
-      // Get product info from the card
-      const titleEl = productCard.querySelector('.product-card__title');
-      const priceEl = productCard.querySelector('.product-card__price');
-      
-      const productTitle = titleEl?.textContent?.trim() || img.alt || 'Product';
-      const productPrice = priceEl?.textContent?.trim() || '';
-      const imageSrc = img.src;
-      
-      console.log('=== DRAG START (from article) ===');
-      console.log('Image src:', imageSrc);
-      console.log('Title:', productTitle);
-      console.log('Price:', productPrice);
-      
-      // Store in global variable
-      window.currentDraggedProduct = {
-        src: imageSrc,
-        title: productTitle,
-        model: '',
-        price: productPrice
-      };
-      
-      console.log('Stored product:', window.currentDraggedProduct);
-      
-      // Set drag data
-      e.dataTransfer.effectAllowed = 'copy';
-      e.dataTransfer.setData('text/plain', imageSrc);
-      e.dataTransfer.setData('application/json', JSON.stringify(window.currentDraggedProduct));
-      
-      // Set custom drag image
-      e.dataTransfer.setDragImage(img, 50, 50);
-      
-      // Visual feedback
-      productCard.classList.add('is-dragging');
-      
-      // Show drop zone in chatbot
-      const dropZone = document.querySelector('.chatbot-drop-zone');
-      if (dropZone) {
-        dropZone.classList.add('is-active');
-      }
-    });
-    
-    productCard.addEventListener('dragend', (e) => {
-      productCard.classList.remove('is-dragging');
-      
-      // Clear global variable if drop didn't happen
-      setTimeout(() => {
-        window.currentDraggedProduct = null;
-      }, 100);
-      
-      // Hide drop zone
-      const dropZone = document.querySelector('.chatbot-drop-zone');
-      if (dropZone) {
-        dropZone.classList.remove('is-active', 'is-over');
-      }
-    });
-  });
-}, 100); // End of product drag setup setTimeout
-  
-  // Set up chatbot drop zone event listeners
-  setTimeout(() => {
-    const dropZone = document.querySelector('.chatbot-drop-zone');
-    const chatbotBox = document.querySelector('.chatbot-box');
-    
-    if (!chatbotBox) return;
-    
-    // Prevent default drag behavior on chatbot
-    chatbotBox.addEventListener('dragover', (e) => {
-      e.preventDefault();
-      e.dataTransfer.dropEffect = 'copy';
-    });
-    
-    chatbotBox.addEventListener('dragenter', (e) => {
-      e.preventDefault();
-      if (dropZone) {
-        dropZone.classList.add('is-active', 'is-over');
-      }
-    });
-    
-    chatbotBox.addEventListener('dragleave', (e) => {
-      // Only hide if leaving the chatbot entirely
-      if (!chatbotBox.contains(e.relatedTarget)) {
-        if (dropZone) {
-          dropZone.classList.remove('is-over');
-        }
-      }
-    });
-    
-    chatbotBox.addEventListener('drop', (e) => {
-      e.preventDefault();
-      
-      if (dropZone) {
-        dropZone.classList.remove('is-active', 'is-over');
-      }
-      
-      // Get product data - prefer global variable, fallback to dataTransfer
-      let productData = window.currentDraggedProduct;
-      
-      if (!productData || !productData.src) {
-        // Fallback to dataTransfer
-        const productDataStr = e.dataTransfer.getData('application/json');
-        const imageSrc = e.dataTransfer.getData('text/plain');
-        
-        if (productDataStr) {
-          try {
-            productData = JSON.parse(productDataStr);
-          } catch {
-            productData = { src: imageSrc, title: 'Product' };
-          }
-        } else if (imageSrc) {
-          productData = { src: imageSrc, title: 'Product' };
-        }
-      }
-      
-      console.log('Product dropped:', productData);
-      
-      // Clear the global variable
-      window.currentDraggedProduct = null;
-      
-      if (productData && productData.src) {
-        
-        // Save to all collections
-        if (window.saveProductToCollections) {
-          window.saveProductToCollections(productData);
-        }
-        
-        // Add to gallery (My Media)
-        if (typeof window.addProductToGallery === 'function') {
-          window.addProductToGallery(productData.src, productData);
-        }
-        
-        // Product cards in the message list are reserved for non-chat views (see data-chatbot-view=chat)
-        const chatMode = document.querySelector('.chatbot-wrapper')?.getAttribute('data-chatbot-view') === 'chat';
-        if (!chatMode) {
-          const productCard = document.createElement('div');
-          productCard.className = 'chatbot-product-card';
-          productCard.innerHTML = `
-          <img class="chatbot-product-card-image" src="${productData.src}" alt="${productData.title || 'Product'}" />
-          <div class="chatbot-product-card-info">
-            <div class="chatbot-product-card-title">${productData.title || 'Product'}</div>
-            ${productData.model ? `<div class="chatbot-product-card-model">${productData.model}</div>` : ''}
-            ${productData.price ? `<div class="chatbot-product-card-price">${productData.price}</div>` : ''}
-            <a class="chatbot-product-card-link" href="https://us.louisvuitton.com/eng-us/search/${encodeURIComponent(productData.title || 'LV')}" target="_blank" rel="noopener noreferrer">
-              View on LV Store
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
-                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14 21 3" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-            </a>
-          </div>
-        `;
-          const messagesContainer = document.querySelector('.chatbot-messages');
-          if (messagesContainer) {
-            messagesContainer.appendChild(productCard);
-            messagesContainer.scrollTop = messagesContainer.scrollHeight;
-          }
-        }
-        
-        // Show success toast
-        showSuccessToast(`${productData.title || 'Product'} added to collections!`);
-        
-        // Trigger storage event for other tabs/windows (product dashboard)
-        window.dispatchEvent(new StorageEvent('storage', {
-          key: 'galleryImages',
-          newValue: localStorage.getItem('galleryImages')
-        }));
-      }
-    });
-  }, 500);
-  
-  // Add drop zone to gallery wrapper
-  setTimeout(() => {
-    const galleryWrapper = document.querySelector('.image-gallery-wrapper');
-    if (!galleryWrapper) return;
-    
-    galleryWrapper.addEventListener('dragover', (e) => {
-      e.preventDefault();
-      e.dataTransfer.dropEffect = 'copy';
-      galleryWrapper.style.transform = 'translateY(-4px) scale(1.02)';
-      galleryWrapper.style.boxShadow = '0 12px 40px rgba(0,0,0,0.18)';
-    });
-    
-    galleryWrapper.addEventListener('dragleave', (e) => {
-      galleryWrapper.style.transform = '';
-      galleryWrapper.style.boxShadow = '';
-    });
-    
-    galleryWrapper.addEventListener('drop', (e) => {
-      e.preventDefault();
-      galleryWrapper.style.transform = '';
-      galleryWrapper.style.boxShadow = '';
-      
-      const imageSrc = e.dataTransfer.getData('text/plain');
-      const productDataStr = e.dataTransfer.getData('application/json');
-      
-      if (imageSrc && typeof window.addProductToGallery === 'function') {
-        const productData = productDataStr ? JSON.parse(productDataStr) : { title: 'Product' };
-        window.addProductToGallery(imageSrc, productData);
-      }
-    });
-  }, 1000);
 })();

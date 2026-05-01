@@ -513,6 +513,12 @@ html, body {
   margin-top: -40px;
 }
 
+/* Favorites: tabs + active underline need clear space; grid must not use catalog pull-up */
+#favoritesView .dashboard-products-grid {
+  margin-top: 0;
+  padding-top: 8px;
+}
+
 .dashboard-product-card {
   background: #fff;
   border-radius: 16px;

@@ -1,30 +1,54 @@
 // Authentication utilities for shopThat application
 
 // Check if user is authenticated
-function checkAuth() {
-  if (localStorage.getItem('shopThatLoggedIn') !== 'true') {
+async function checkAuth() {
+  try {
+    const response = await fetch('/api/auth/session', {
+      credentials: 'same-origin',
+      cache: 'no-store'
+    });
+
+    if (!response.ok) {
+      throw new Error('Unauthenticated');
+    }
+
+    const session = await response.json();
+    if (!session.authenticated) {
+      throw new Error('Unauthenticated');
+    }
+
+    sessionStorage.setItem('shopThatUser', session.user || 'Authenticated User');
+    return true;
+  } catch (error) {
+    sessionStorage.removeItem('shopThatUser');
     window.location.href = 'login.html';
     return false;
   }
-  return true;
 }
 
 // Sign out functionality
-function signOut() {
-  localStorage.removeItem('shopThatLoggedIn');
-  localStorage.removeItem('shopThatUser');
-  window.location.href = 'login.html';
+async function signOut() {
+  try {
+    await fetch('/api/auth/logout', {
+      method: 'POST',
+      credentials: 'same-origin'
+    });
+  } finally {
+    sessionStorage.removeItem('shopThatUser');
+    window.location.href = 'login.html';
+  }
 }
 
 // Get current user
 function getCurrentUser() {
-  return localStorage.getItem('shopThatUser') || 'Unknown User';
+  return sessionStorage.getItem('shopThatUser') || 'Unknown User';
 }
 
 // Initialize authentication for protected pages
-function initAuth() {
+async function initAuth() {
   // Check authentication
-  checkAuth();
+  const authenticated = await checkAuth();
+  if (!authenticated) return;
   
   // Add sign out handler to all sign out links
   const signOutLinks = document.querySelectorAll('#signOutLink, [data-action="signout"]');

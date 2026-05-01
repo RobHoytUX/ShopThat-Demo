@@ -2,17 +2,25 @@
 
 from __future__ import annotations
 import logging
+import time
+import uuid
 from pathlib import Path
 from typing import List, Optional, Union
 
 import uvicorn
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
 from dotenv import load_dotenv
 
 # Routers & retrieval
 from .campaigns import router as campaigns_router
+from .contracts import (
+    CampaignConfig,
+    CampaignListItem,
+    ChatRequest,
+    ChatResponse,
+    ToggleItem,
+)
 from .keywords import router as keywords_router
 # NOTE: Avoid importing retrieval (heavy model load) at startup; import lazily in the handler
 
@@ -38,6 +46,35 @@ for p in (Path.cwd() / ".env", ROOT / ".env"):
 # -----------------------------------------------------------------------------
 app = FastAPI(title="shopTHAT AI Chatbot")
 
+
+@app.middleware("http")
+async def add_request_context(request: Request, call_next):
+    request_id = request.headers.get("x-request-id") or str(uuid.uuid4())
+    start = time.perf_counter()
+
+    try:
+        response = await call_next(request)
+    except Exception:
+        logger.exception(
+            "request_failed request_id=%s method=%s path=%s",
+            request_id,
+            request.method,
+            request.url.path,
+        )
+        raise
+
+    duration_ms = round((time.perf_counter() - start) * 1000, 2)
+    response.headers["x-request-id"] = request_id
+    logger.info(
+        "request_complete request_id=%s method=%s path=%s status=%s duration_ms=%s",
+        request_id,
+        request.method,
+        request.url.path,
+        response.status_code,
+        duration_ms,
+    )
+    return response
+
 # CORS (dev-friendly; tighten for prod)
 app.add_middleware(
     CORSMiddleware,
@@ -57,35 +94,6 @@ app.add_middleware(
 # Routers
 app.include_router(campaigns_router, prefix="/api/campaigns", tags=["campaigns"])
 app.include_router(keywords_router,  prefix="/api/keywords",  tags=["keywords"])
-
-# -----------------------------------------------------------------------------
-# Models
-# -----------------------------------------------------------------------------
-class ChatRequest(BaseModel):
-    message: str
-    top_k: int = 5
-    enabled: Optional[Union[List[str], str]] = None
-    disabled: Optional[Union[List[str], str]] = None
-    # Identify which keyword was clicked so backend can lock sources
-    keyword_id: Optional[str] = None
-    keyword_name: Optional[str] = None
-
-class ChatResponse(BaseModel):
-    answer: str
-    sources: List[str]
-
-class ToggleItem(BaseModel):
-    name: str
-    enabled: bool
-
-class CampaignConfig(BaseModel):
-    keywords: List[ToggleItem]
-    internal_sources: List[ToggleItem]
-    external_sources: List[ToggleItem]
-
-class CampaignListItem(BaseModel):
-    key: str
-    display_name: str
 
 # -----------------------------------------------------------------------------
 # Helpers
@@ -130,7 +138,12 @@ def chat(req: ChatRequest):
     try:
         # Lazy import to avoid model/downloads at startup
         from .retrieval import retrieve_and_answer  # type: ignore
-        logger.info(f"[chat] q='{req.message[:80]}', kw_id={req.keyword_id}, kw_name={req.keyword_name}")
+        logger.info(
+            "[chat] message_preview=%r keyword_id=%s keyword_name=%s",
+            req.message[:80],
+            req.keyword_id,
+            req.keyword_name,
+        )
         enabled_csv  = _to_csv(req.enabled,  "all")
         disabled_csv = _to_csv(req.disabled, "none")
 

@@ -14,10 +14,7 @@ The Keywords system is a knowledge graph visualization and management feature th
 - WebDemo/scripts/keywords.js
 - WebDemo/scripts/keywords-manage.js
 - WebDemo/scripts/shared-data.js
-
-### Root Scripts
-- scripts/keywords.js
-- scripts/keywords-manage.js
+- api/keywords/graph.js
 
 ### Backend (Python)
 - shopTHAT_V1/graph_rag_backend/src/backend/keywords.py
@@ -38,7 +35,11 @@ The Keywords system is a knowledge graph visualization and management feature th
 
 ### 1. Data Storage (Frontend - localStorage)
 
-Currently, all keyword data is stored in the browser's localStorage using these keys:
+Keyword data is still exposed through synchronous browser APIs, but `WebDemo/scripts/shared-data.js`
+now validates the localStorage shape and mirrors the same records into IndexedDB as an interim sync
+boundary. The long-term target is backend-owned keyword storage through API routes.
+
+Current browser storage keys:
 
 - `st_keywords_v1` - Array of keyword objects
 - `st_connections_v1` - Array of relationship objects (source/target pairs)
@@ -88,7 +89,7 @@ Currently, all keyword data is stored in the browser's localStorage using these 
 - **D3.js force-directed graph** visualization
 - Displays keywords as bubbles with connections
 - Interactive: click to expand, filter, zoom
-- Neo4j integration panel (optional external database)
+- Backend-owned graph integration through `api/keywords/graph.js`
 - Real-time sync via `shared-data.js` event system
 
 ### keywords-manage.html / keywords-manage.js

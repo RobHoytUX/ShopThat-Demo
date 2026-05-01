@@ -8,20 +8,164 @@
     keywordUsage: 'st_keyword_usage_v1',
     sessions: 'st_chat_sessions_v1'
   };
+  const DB_NAME = 'shopthat-client-store';
+  const DB_VERSION = 1;
+  const STORE_NAME = 'records';
+
+  let dbPromise = null;
+
+  function openDatabase() {
+    if (!('indexedDB' in window)) return Promise.resolve(null);
+    if (dbPromise) return dbPromise;
+
+    dbPromise = new Promise((resolve) => {
+      const request = indexedDB.open(DB_NAME, DB_VERSION);
+      request.onupgradeneeded = () => {
+        const db = request.result;
+        if (!db.objectStoreNames.contains(STORE_NAME)) {
+          db.createObjectStore(STORE_NAME, { keyPath: 'key' });
+        }
+      };
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => {
+        console.warn('IndexedDB unavailable for ShopThat storage sync', request.error);
+        resolve(null);
+      };
+    });
+
+    return dbPromise;
+  }
+
+  async function syncToIndexedDb(key, value) {
+    const db = await openDatabase();
+    if (!db) return;
+
+    await new Promise((resolve) => {
+      const tx = db.transaction(STORE_NAME, 'readwrite');
+      tx.objectStore(STORE_NAME).put({ key, value, updatedAt: new Date().toISOString() });
+      tx.oncomplete = resolve;
+      tx.onerror = () => {
+        console.warn('Unable to sync value to IndexedDB', key, tx.error);
+        resolve();
+      };
+    });
+  }
+
+  async function removeFromIndexedDb(key) {
+    const db = await openDatabase();
+    if (!db) return;
+
+    await new Promise((resolve) => {
+      const tx = db.transaction(STORE_NAME, 'readwrite');
+      tx.objectStore(STORE_NAME).delete(key);
+      tx.oncomplete = resolve;
+      tx.onerror = () => {
+        console.warn('Unable to remove value from IndexedDB', key, tx.error);
+        resolve();
+      };
+    });
+  }
+
+  async function readFromIndexedDb(key) {
+    const db = await openDatabase();
+    if (!db) return undefined;
+
+    return new Promise((resolve) => {
+      const tx = db.transaction(STORE_NAME, 'readonly');
+      const request = tx.objectStore(STORE_NAME).get(key);
+      request.onsuccess = () => resolve(request.result ? request.result.value : undefined);
+      request.onerror = () => {
+        console.warn('Unable to read value from IndexedDB', key, request.error);
+        resolve(undefined);
+      };
+    });
+  }
+
+  async function bootstrapStorageSync() {
+    await Promise.all(Object.values(STORAGE_KEYS).map(async (key) => {
+      const raw = localStorage.getItem(key);
+      if (raw) {
+        try {
+          await syncToIndexedDb(key, JSON.parse(raw));
+        } catch (error) {
+          console.warn('Skipping invalid localStorage value during storage sync', key, error);
+        }
+        return;
+      }
+
+      const indexedValue = await readFromIndexedDb(key);
+      if (indexedValue !== undefined) {
+        try {
+          localStorage.setItem(key, JSON.stringify(indexedValue));
+        } catch (error) {
+          console.warn('Unable to hydrate localStorage from IndexedDB', key, error);
+        }
+      }
+    }));
+  }
+
+  function safeRead(key, fallback, validator) {
+    try {
+      const raw = localStorage.getItem(key);
+      if (!raw) return fallback();
+
+      const parsed = JSON.parse(raw);
+      if (validator && !validator(parsed)) {
+        throw new Error('Stored value failed validation');
+      }
+      syncToIndexedDb(key, parsed);
+      return parsed;
+    } catch (error) {
+      console.warn('Resetting invalid localStorage value for', key, error);
+      localStorage.removeItem(key);
+      removeFromIndexedDb(key);
+      return fallback();
+    }
+  }
+
+  function safeWrite(key, value) {
+    try {
+      localStorage.setItem(key, JSON.stringify(value));
+      syncToIndexedDb(key, value);
+      return true;
+    } catch (error) {
+      console.warn('Unable to save localStorage value for', key, error);
+      return false;
+    }
+  }
+
+  function safeRemove(key) {
+    try {
+      localStorage.removeItem(key);
+      removeFromIndexedDb(key);
+    } catch (error) {
+      console.warn('Unable to remove localStorage value for', key, error);
+    }
+  }
+
+  const asArray = value => Array.isArray(value);
+  const asObject = value => value && typeof value === 'object' && !Array.isArray(value);
+
+  window.ShopThatStorage = {
+    readArray(key) {
+      return safeRead(key, () => [], asArray);
+    },
+    readObject(key) {
+      return safeRead(key, () => ({}), asObject);
+    },
+    write: safeWrite,
+    remove: safeRemove
+  };
 
   // Shared data management
   window.ShopThatData = {
     // Keywords management
     getKeywords() {
-      try {
-        return JSON.parse(localStorage.getItem(STORAGE_KEYS.keywords) || '[]');
-      } catch {
-        return [];
-      }
+      return window.ShopThatStorage.readArray(STORAGE_KEYS.keywords);
     },
 
     saveKeywords(keywords) {
-      localStorage.setItem(STORAGE_KEYS.keywords, JSON.stringify(keywords));
+      window.ShopThatStorage.write(STORAGE_KEYS.keywords, keywords);
       this.notifyChange('keywords', keywords);
     },
 
@@ -64,15 +208,11 @@
 
     // Connections management
     getConnections() {
-      try {
-        return JSON.parse(localStorage.getItem(STORAGE_KEYS.connections) || '[]');
-      } catch {
-        return [];
-      }
+      return window.ShopThatStorage.readArray(STORAGE_KEYS.connections);
     },
 
     saveConnections(connections) {
-      localStorage.setItem(STORAGE_KEYS.connections, JSON.stringify(connections));
+      window.ShopThatStorage.write(STORAGE_KEYS.connections, connections);
       this.notifyChange('connections', connections);
     },
 
@@ -93,15 +233,11 @@
 
     // Chat analytics management
     getChatAnalytics() {
-      try {
-        return JSON.parse(localStorage.getItem(STORAGE_KEYS.chatAnalytics) || '{}');
-      } catch {
-        return {};
-      }
+      return window.ShopThatStorage.readObject(STORAGE_KEYS.chatAnalytics);
     },
 
     saveChatAnalytics(analytics) {
-      localStorage.setItem(STORAGE_KEYS.chatAnalytics, JSON.stringify(analytics));
+      window.ShopThatStorage.write(STORAGE_KEYS.chatAnalytics, analytics);
       this.notifyChange('chatAnalytics', analytics);
     },
 
@@ -130,16 +266,12 @@
         cost: 0.25
       });
       
-      localStorage.setItem(STORAGE_KEYS.keywordUsage, JSON.stringify(usage));
+      window.ShopThatStorage.write(STORAGE_KEYS.keywordUsage, usage);
       this.updateChatAnalytics();
     },
 
     getKeywordUsage() {
-      try {
-        return JSON.parse(localStorage.getItem(STORAGE_KEYS.keywordUsage) || '{}');
-      } catch {
-        return {};
-      }
+      return window.ShopThatStorage.readObject(STORAGE_KEYS.keywordUsage);
     },
 
     // Chat session tracking
@@ -192,15 +324,11 @@
     },
 
     getChatSessions() {
-      try {
-        return JSON.parse(localStorage.getItem(STORAGE_KEYS.sessions) || '[]');
-      } catch {
-        return [];
-      }
+      return window.ShopThatStorage.readArray(STORAGE_KEYS.sessions);
     },
 
     saveChatSessions(sessions) {
-      localStorage.setItem(STORAGE_KEYS.sessions, JSON.stringify(sessions));
+      window.ShopThatStorage.write(STORAGE_KEYS.sessions, sessions);
     },
 
     // Analytics calculations
@@ -285,11 +413,7 @@
 
     // Clear existing data and reinitialize
     clearData() {
-      localStorage.removeItem(STORAGE_KEYS.keywords);
-      localStorage.removeItem(STORAGE_KEYS.connections);
-      localStorage.removeItem(STORAGE_KEYS.chatAnalytics);
-      localStorage.removeItem(STORAGE_KEYS.keywordUsage);
-      localStorage.removeItem(STORAGE_KEYS.sessions);
+      Object.values(STORAGE_KEYS).forEach(window.ShopThatStorage.remove);
     },
 
     // Initialize with default data if empty
@@ -735,10 +859,14 @@
     }
   };
 
+  function initializeAfterStorageSync() {
+    bootstrapStorageSync().finally(() => window.ShopThatData.initialize());
+  }
+
   // Initialize on load
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => window.ShopThatData.initialize());
+    document.addEventListener('DOMContentLoaded', initializeAfterStorageSync);
   } else {
-    window.ShopThatData.initialize();
+    initializeAfterStorageSync();
   }
 })();
