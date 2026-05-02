@@ -103,6 +103,7 @@
     { lat: 40.7632, lng: -73.9732, name: 'Louis Vuitton 57th Street', address: '6 E 57th St, New York, NY 10022' },
     { lat: 40.7245, lng: -73.9975, name: 'Louis Vuitton SoHo', address: '116 Greene St, New York, NY 10012' }
   ];
+  locationData.stores = Array.isArray(locationData.stores) ? locationData.stores : storeLocations;
 
   // View switching
   function switchView(viewName) {

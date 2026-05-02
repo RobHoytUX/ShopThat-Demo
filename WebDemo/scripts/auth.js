@@ -2,41 +2,14 @@
 
 // Check if user is authenticated
 async function checkAuth() {
-  try {
-    const response = await fetch('/api/auth/session', {
-      credentials: 'same-origin',
-      cache: 'no-store'
-    });
-
-    if (!response.ok) {
-      throw new Error('Unauthenticated');
-    }
-
-    const session = await response.json();
-    if (!session.authenticated) {
-      throw new Error('Unauthenticated');
-    }
-
-    sessionStorage.setItem('shopThatUser', session.user || 'Authenticated User');
-    return true;
-  } catch (error) {
-    sessionStorage.removeItem('shopThatUser');
-    window.location.href = 'login.html';
-    return false;
-  }
+  sessionStorage.setItem('shopThatUser', 'Demo User');
+  return true;
 }
 
 // Sign out functionality
 async function signOut() {
-  try {
-    await fetch('/api/auth/logout', {
-      method: 'POST',
-      credentials: 'same-origin'
-    });
-  } finally {
-    sessionStorage.removeItem('shopThatUser');
-    window.location.href = 'login.html';
-  }
+  sessionStorage.removeItem('shopThatUser');
+  window.location.href = 'dashboard.html';
 }
 
 // Get current user
