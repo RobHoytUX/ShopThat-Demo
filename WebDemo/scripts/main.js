@@ -317,23 +317,23 @@
   .gallery-nav-btn--next{right:4px}
   .gallery-nav-btn svg{width:16px;height:16px}
   .chatbot-input.drag-over{background:rgba(74,144,226,0.1);border-color:#4A90E2}
-  .chatbot-map-container{display:none;width:100%;height:350px;border-radius:8px;overflow:hidden;margin:40px 0 16px 0;position:relative;z-index:1;flex-shrink:0}
+  .chatbot-map-container{display:none;width:100%;height:260px;border-radius:8px;overflow:hidden;margin:12px 0 12px 0;position:relative;z-index:1;flex-shrink:0}
   .chatbot-map-container.is-visible{display:block}
-  .chatbot-product-gallery{display:none !important;width:100%;margin-top:12px;margin-bottom:0;overflow-x:auto;overflow-y:visible;white-space:nowrap;scrollbar-width:thin;padding:0;gap:12px;flex-shrink:0;min-height:168px}
+  .chatbot-product-gallery{display:none !important;width:100%;margin-top:8px;margin-bottom:0;overflow-x:auto;overflow-y:visible;white-space:nowrap;scrollbar-width:thin;padding:0 0 4px 0;gap:10px;flex-shrink:0;min-height:124px}
   .chatbot-product-gallery.is-visible{display:flex !important}
   .chatbot-header[hidden],.chatbot-messages[hidden],.chatbot-input[hidden]{display:none !important}
   .chatbot-product-gallery::-webkit-scrollbar{height:6px}
   .chatbot-product-gallery::-webkit-scrollbar-track{background:rgba(0,0,0,0.06);border-radius:3px}
   .chatbot-product-gallery::-webkit-scrollbar-thumb{background:rgba(0,0,0,0.25);border-radius:3px}
   .chatbot-map-empty{padding:20px;text-align:center;color:#666;font-size:14px;width:100%}
-  .chatbot-map-product-card{flex:0 0 auto;width:340px;background:#fff;border-radius:16px;padding:16px;box-shadow:0 2px 12px rgba(0,0,0,0.08);display:flex;gap:14px;align-items:center;transition:all 0.2s ease;cursor:pointer;overflow:hidden;height:140px}
+  .chatbot-map-product-card{flex:0 0 auto;width:248px;background:#fff;border-radius:14px;padding:12px;box-shadow:0 2px 12px rgba(0,0,0,0.08);display:flex;gap:10px;align-items:center;transition:all 0.2s ease;cursor:pointer;overflow:hidden;height:112px}
   .chatbot-map-product-card:hover{transform:translateY(-2px);box-shadow:0 4px 20px rgba(0,0,0,0.15)}
-  .chatbot-map-product-image{width:100px;height:100px;border-radius:12px;object-fit:cover;flex-shrink:0;background:#f5f5f5}
-  .chatbot-map-product-info{flex:1;display:flex;flex-direction:column;gap:4px;min-width:0;overflow:hidden;justify-content:center}
-  .chatbot-map-product-title{font-size:13px;font-weight:600;color:#111;margin:0;line-height:1.3;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;word-wrap:break-word}
-  .chatbot-map-product-model{font-size:12px;color:#888;margin:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .chatbot-map-product-price{font-size:15px;font-weight:700;color:#111;margin:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .chatbot-map-product-link{display:inline-flex;align-items:center;gap:4px;font-size:12px;color:#4A90E2;text-decoration:none;margin-top:0;transition:color 0.2s ease;flex-shrink:0}
+  .chatbot-map-product-image{width:78px;height:88px;border-radius:10px;object-fit:cover;flex-shrink:0;background:#f5f5f5}
+  .chatbot-map-product-info{flex:1;display:flex;flex-direction:column;gap:2px;min-width:0;overflow:hidden;justify-content:center}
+  .chatbot-map-product-title{font-size:12px;font-weight:600;color:#111;margin:0;line-height:1.25;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;word-wrap:break-word}
+  .chatbot-map-product-model{font-size:11px;color:#888;margin:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .chatbot-map-product-price{font-size:13px;font-weight:700;color:#111;margin:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .chatbot-map-product-link{display:inline-flex;align-items:center;gap:4px;font-size:11px;color:#4A90E2;text-decoration:none;margin-top:0;transition:color 0.2s ease;flex-shrink:0}
   .chatbot-map-product-link:hover{color:#357ABD}
   .chatbot-map-product-link svg{width:13px;height:13px;flex-shrink:0}
   .chatbot-location-explorer{display:none !important;background:rgba(255,255,255,0.98);border-radius:12px;padding:16px;padding-bottom:24px;margin:0;box-shadow:0 2px 12px rgba(0,0,0,0.08);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);flex-direction:column;flex-shrink:0;min-height:250px}
