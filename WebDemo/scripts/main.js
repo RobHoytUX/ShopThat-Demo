@@ -139,11 +139,33 @@
   // Hero video ready state hides fallback if video playable
   const video = document.querySelector('.hero__video');
   if (video) {
+    const hero = document.querySelector('.hero');
+    let readyHandled = false;
     const onReady = () => {
-      const hero = document.querySelector('.hero');
+      if (readyHandled) return;
+      readyHandled = true;
       if (hero) hero.classList.add('hero--video-ready');
     };
-    video.addEventListener('canplay', onReady, { once: true });
+    // If the video has already buffered enough by the time this script runs
+    // (common on fast CDNs), the canplay event has already fired and a fresh
+    // listener would never run. Check readyState first, then listen to several
+    // events so we don't get stuck behind the white fallback overlay.
+    if (video.readyState >= 2 /* HAVE_CURRENT_DATA */) {
+      onReady();
+    }
+    video.addEventListener('loadeddata', onReady);
+    video.addEventListener('canplay', onReady);
+    video.addEventListener('playing', onReady);
+    // Fallback: if for any reason the video never reports ready (autoplay blocked,
+    // codec not negotiated, etc.) reveal the underlying area after a short delay
+    // so the page doesn't sit behind the white overlay.
+    setTimeout(onReady, 2500);
+    // Best-effort autoplay kick — some browsers need an explicit play() after load
+    const tryPlay = () => {
+      const p = video.play && video.play();
+      if (p && typeof p.catch === 'function') p.catch(() => {});
+    };
+    tryPlay();
 
     // Make video area clickable to skip to end
     const heroMedia = document.querySelector('.hero__media');
@@ -2583,7 +2605,9 @@
       
       // Always reload from localStorage to get latest products
       const storedProducts = readStoredArray('droppedProducts');
-      const savedProducts = getCompactMapProducts(storedProducts);
+      // Match the product-dashboard map: show at most 3 products,
+      // preferring stored ones and filling the rest from defaults.
+      const savedProducts = getMapProductsWithFallback(storedProducts).slice(0, MIN_MAP_PRODUCTS);
       
       // NYC LV store locations for product assignment
       const storeLocations = [
