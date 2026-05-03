@@ -104,6 +104,31 @@
     { lat: 40.7245, lng: -73.9975, name: 'Louis Vuitton SoHo', address: '116 Greene St, New York, NY 10012' }
   ];
   locationData.stores = Array.isArray(locationData.stores) ? locationData.stores : storeLocations;
+  const MIN_MAP_PRODUCTS = 3;
+  const defaultMapProducts = [
+    { id: 'default-map-capucines-bb', title: 'LV X YK CAPUCINES BB', model: 'M46401', price: '$6,400.00', image: 'assets/Products/0047_LV X YK Capucines BB.jpg' },
+    { id: 'default-map-capucines-white', title: 'LV X YK CAPUCINES BB WHITE', model: 'M46402', price: '$6,400.00', image: 'assets/Products/0048_LV X YK Capucines BB-white.jpg' },
+    { id: 'default-map-twist-mm', title: 'LV X YK TWIST MM RED WHITE', model: 'M46403', price: '$4,200.00', image: 'assets/Products/0049_Louis-Vuitton-x-Yayoi-Kusama-Twist-MM-Red-White.jpg' }
+  ];
+
+  function getProductKey(product) {
+    return String(product?.id || product?.model || product?.title || product?.image || product?.src || '').toLowerCase();
+  }
+
+  function getMapProductsWithFallback(products) {
+    const mapProducts = (Array.isArray(products) ? products : []).filter(Boolean).map(product => ({ ...product }));
+    const existingKeys = new Set(mapProducts.map(getProductKey));
+
+    defaultMapProducts.forEach(product => {
+      if (mapProducts.length >= MIN_MAP_PRODUCTS) return;
+      if (existingKeys.has(getProductKey(product))) return;
+
+      mapProducts.push({ ...product, isDefaultMapProduct: true });
+      existingKeys.add(getProductKey(product));
+    });
+
+    return mapProducts;
+  }
 
   // View switching
   function switchView(viewName) {
@@ -1919,8 +1944,9 @@
     productsEl.replaceChildren();
     const productsJson = localStorage.getItem('droppedProducts');
     console.log('Map view - Raw products from localStorage:', productsJson);
-    const products = readStoredArray('droppedProducts');
-    console.log('Map view - Parsed products:', products);
+    const storedProducts = readStoredArray('droppedProducts');
+    const products = getMapProductsWithFallback(storedProducts);
+    console.log('Map view - Parsed products:', storedProducts);
     
     // Assign products to alternate between the two store locations
     products.forEach((product, index) => {
@@ -1931,8 +1957,17 @@
       };
     });
     
-    // Save updated locations back to localStorage
-    localStorage.setItem('droppedProducts', JSON.stringify(products));
+    // Keep saved products updated without writing default map placeholders into the library.
+    if (storedProducts.length > 0) {
+      storedProducts.forEach((product, index) => {
+        const storeIndex = index % 2;
+        product.location = {
+          lat: storeLocations[storeIndex].lat,
+          lng: storeLocations[storeIndex].lng
+        };
+      });
+      localStorage.setItem('droppedProducts', JSON.stringify(storedProducts));
+    }
     
     const productsWithLocation = products.filter(p => p.location);
     console.log('Products with locations:', productsWithLocation);
@@ -1963,7 +1998,7 @@
         // View on LV Store link
         const link = createEl('a', { 
           class: 'dashboard-map-product-link',
-          href: `https://us.louisvuitton.com/eng-us/search/${encodeURIComponent(product.model)}`,
+          href: `https://us.louisvuitton.com/eng-us/search/${encodeURIComponent(product.model || product.title || 'Louis Vuitton')}`,
           target: '_blank',
           rel: 'noopener noreferrer',
           text: 'View on LV Store '

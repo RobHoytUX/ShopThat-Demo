@@ -1362,9 +1362,34 @@
     // Product storage - declare early
     const droppedProducts = [];
     const wishlistProducts = [];
+    const MIN_MAP_PRODUCTS = 3;
+    const defaultMapProducts = [
+      { id: 'default-map-capucines-bb', title: 'LV X YK CAPUCINES BB', model: 'M46401', price: '$6,400.00', image: 'assets/Products/0047_LV X YK Capucines BB.jpg' },
+      { id: 'default-map-capucines-white', title: 'LV X YK CAPUCINES BB WHITE', model: 'M46402', price: '$6,400.00', image: 'assets/Products/0048_LV X YK Capucines BB-white.jpg' },
+      { id: 'default-map-twist-mm', title: 'LV X YK TWIST MM RED WHITE', model: 'M46403', price: '$4,200.00', image: 'assets/Products/0049_Louis-Vuitton-x-Yayoi-Kusama-Twist-MM-Red-White.jpg' }
+    ];
     
     // Gallery images - declare early
     const galleryImages = [];
+
+    function getProductKey(product) {
+      return String(product?.id || product?.model || product?.title || product?.image || product?.src || '').toLowerCase();
+    }
+
+    function getMapProductsWithFallback(products) {
+      const mapProducts = (Array.isArray(products) ? products : []).filter(Boolean).map(product => ({ ...product }));
+      const existingKeys = new Set(mapProducts.map(getProductKey));
+
+      defaultMapProducts.forEach(product => {
+        if (mapProducts.length >= MIN_MAP_PRODUCTS) return;
+        if (existingKeys.has(getProductKey(product))) return;
+
+        mapProducts.push({ ...product, isDefaultMapProduct: true });
+        existingKeys.add(getProductKey(product));
+      });
+
+      return mapProducts;
+    }
 
     // Use ShopThatData system for keywords instead of API
     function loadKeywordsFromSharedData() {
@@ -2523,7 +2548,8 @@
       productGallery.replaceChildren();
       
       // Always reload from localStorage to get latest products
-      const savedProducts = readStoredArray('droppedProducts');
+      const storedProducts = readStoredArray('droppedProducts');
+      const savedProducts = getMapProductsWithFallback(storedProducts);
       
       // NYC LV store locations for product assignment
       const storeLocations = [
@@ -2566,7 +2592,7 @@
           // View on LV Store link
           const link = createEl('a', { 
             class: 'chatbot-map-product-link',
-            href: `https://us.louisvuitton.com/eng-us/search/${encodeURIComponent(product.model)}`,
+            href: `https://us.louisvuitton.com/eng-us/search/${encodeURIComponent(product.model || product.title || 'Louis Vuitton')}`,
             target: '_blank',
             rel: 'noopener noreferrer',
             text: 'View on LV Store '
@@ -2623,8 +2649,17 @@
           }
         });
         
-        // Save updated product locations to localStorage
-        saveProducts();
+        // Keep saved products updated without writing default map placeholders into the library.
+        if (storedProducts.length > 0) {
+          storedProducts.forEach((product, index) => {
+            const storeIndex = index % 2;
+            product.location = {
+              lat: storeLocations[storeIndex].lat,
+              lng: storeLocations[storeIndex].lng
+            };
+          });
+          localStorage.setItem('droppedProducts', JSON.stringify(storedProducts));
+        }
       }
     }
     
