@@ -317,13 +317,13 @@
   .gallery-nav-btn--next{right:4px}
   .gallery-nav-btn svg{width:16px;height:16px}
   .chatbot-input.drag-over{background:rgba(74,144,226,0.1);border-color:#4A90E2}
-  .chatbot-map-container{display:none;width:100%;height:260px;border-radius:8px;overflow:hidden;margin:12px 0 12px 0;position:relative;z-index:1;flex-shrink:0}
+  .chatbot-map-container{display:none;width:100%;height:220px;border-radius:8px;overflow:hidden;margin:10px 0 10px 0;position:relative;z-index:1;flex-shrink:0}
   .chatbot-map-container.is-visible{display:block}
   .chatbot-wrapper.map-view-active .chatbot-box{overflow:hidden}
-  .chatbot-wrapper.map-view-active .chatbot-map-container{height:260px;margin:12px 0 12px 0}
-  .chatbot-product-gallery{display:none !important;width:100%;margin-top:8px;margin-bottom:0;overflow-x:auto;overflow-y:visible;white-space:nowrap;scrollbar-width:thin;padding:0 0 4px 0;gap:10px;flex-shrink:0;min-height:124px}
+  .chatbot-wrapper.map-view-active .chatbot-map-container{height:180px;margin:10px 0 10px 0}
+  .chatbot-product-gallery{display:none !important;width:100%;margin-top:6px;margin-bottom:0;overflow-x:auto;overflow-y:visible;white-space:nowrap;scrollbar-width:thin;padding:0 0 4px 0;gap:10px;flex-shrink:0;min-height:108px}
   .chatbot-product-gallery.is-visible{display:flex !important}
-  .chatbot-wrapper.map-view-active .chatbot-product-gallery.is-visible{position:relative;left:auto;right:auto;bottom:auto;width:100%;display:grid !important;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;min-height:118px;overflow:visible;white-space:normal;padding:0}
+  .chatbot-wrapper.map-view-active .chatbot-product-gallery.is-visible{position:relative;left:auto;right:auto;bottom:auto;width:100%;display:grid !important;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;min-height:104px;overflow:visible;white-space:normal;padding:0}
   .chatbot-header[hidden],.chatbot-messages[hidden],.chatbot-input[hidden]{display:none !important}
   .chatbot-product-gallery::-webkit-scrollbar{height:6px}
   .chatbot-product-gallery::-webkit-scrollbar-track{background:rgba(0,0,0,0.06);border-radius:3px}
@@ -339,8 +339,8 @@
   .chatbot-map-product-link{display:inline-flex;align-items:center;gap:4px;font-size:11px;color:#4A90E2;text-decoration:none;margin-top:0;transition:color 0.2s ease;flex-shrink:0}
   .chatbot-map-product-link:hover{color:#357ABD}
   .chatbot-map-product-link svg{width:13px;height:13px;flex-shrink:0}
-  .chatbot-wrapper.map-view-active .chatbot-map-product-card{width:auto;height:118px;padding:8px;flex-direction:column;align-items:stretch;gap:5px}
-  .chatbot-wrapper.map-view-active .chatbot-map-product-image{width:100%;height:62px;object-fit:contain;border-radius:8px}
+  .chatbot-wrapper.map-view-active .chatbot-map-product-card{width:auto;height:104px;padding:8px;flex-direction:column;align-items:stretch;gap:4px}
+  .chatbot-wrapper.map-view-active .chatbot-map-product-image{width:100%;height:52px;object-fit:contain;border-radius:8px}
   .chatbot-wrapper.map-view-active .chatbot-map-product-info{gap:1px;text-align:left}
   .chatbot-wrapper.map-view-active .chatbot-map-product-title{font-size:9px;line-height:1.15;-webkit-line-clamp:2}
   .chatbot-wrapper.map-view-active .chatbot-map-product-price{font-size:10px}
