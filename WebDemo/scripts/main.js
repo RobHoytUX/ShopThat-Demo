@@ -320,7 +320,8 @@
   .chatbot-map-container{display:none;width:100%;height:220px;border-radius:8px;overflow:hidden;margin:10px 0 10px 0;position:relative;z-index:1;flex-shrink:0}
   .chatbot-map-container.is-visible{display:block}
   .chatbot-wrapper.map-view-active .chatbot-box{overflow:hidden}
-  .chatbot-wrapper.map-view-active .chatbot-map-container{height:180px;margin:10px 0 10px 0}
+  .chatbot-wrapper.map-view-active .chatbot-map-container{height:280px;margin:32px 0 10px 0}
+  .chatbot-wrapper.map-view-active .chatbot-location-explorer{margin-top:12px}
   .chatbot-product-gallery{display:none !important;width:100%;margin-top:6px;margin-bottom:0;overflow-x:auto;overflow-y:visible;white-space:nowrap;scrollbar-width:thin;padding:0 0 4px 0;gap:10px;flex-shrink:0;min-height:108px}
   .chatbot-product-gallery.is-visible{display:flex !important}
   .chatbot-wrapper.map-view-active .chatbot-product-gallery.is-visible{position:relative;left:auto;right:auto;bottom:auto;width:100%;display:grid !important;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;min-height:104px;overflow:visible;white-space:normal;padding:0}
@@ -340,7 +341,7 @@
   .chatbot-map-product-link:hover{color:#357ABD}
   .chatbot-map-product-link svg{width:13px;height:13px;flex-shrink:0}
   .chatbot-wrapper.map-view-active .chatbot-map-product-card{width:auto;height:104px;padding:8px;flex-direction:column;align-items:stretch;gap:4px}
-  .chatbot-wrapper.map-view-active .chatbot-map-product-image{width:100%;height:52px;object-fit:contain;border-radius:8px}
+  .chatbot-wrapper.map-view-active .chatbot-map-product-image{width:100%;height:52px;object-fit:contain;border-radius:8px;background:transparent}
   .chatbot-wrapper.map-view-active .chatbot-map-product-info{gap:1px;text-align:left}
   .chatbot-wrapper.map-view-active .chatbot-map-product-title{font-size:9px;line-height:1.15;-webkit-line-clamp:2}
   .chatbot-wrapper.map-view-active .chatbot-map-product-price{font-size:10px}
@@ -507,6 +508,17 @@
 
   function titleCase(s){
     return String(s||'').split(' ').map(w=>w.charAt(0).toUpperCase()+w.slice(1).toLowerCase()).join(' ');
+  }
+
+  function readStoredArray(key){
+    if (window.ShopThatStorage) return window.ShopThatStorage.readArray(key);
+    try {
+      const value = JSON.parse(localStorage.getItem(key) || '[]');
+      return Array.isArray(value) ? value : [];
+    } catch (error) {
+      try { localStorage.removeItem(key); } catch (_) {}
+      return [];
+    }
   }
 
   function markdownToText(md){
@@ -1077,8 +1089,8 @@
         }
 
         // Set appropriate height for map view with product cards (no explorer)
-        // Use a height that works with the compact gallery
-        const mapViewHeight = Math.min(600, getMaxChatbotHeight());
+        // Tightly fit: top padding (28) + map top margin (32) + map (280) + gap (10) + products (~104) + bottom padding (20)
+        const mapViewHeight = Math.min(495, getMaxChatbotHeight());
         setBoxSize(FULL_W, mapViewHeight);
 
         // Initialize map and render products
@@ -2695,13 +2707,13 @@
       wrapper.classList.add('expanded');
       
       // Calculate height to fit all content without scrolling:
-      // Map (~350px) + Products (~170px) + Explorer header/tabs (~80px) + Gallery images+names (~160px) + padding (~90px)
-      // Total: ~850px, but constrain to viewport
+      // top padding (28) + map top margin (32) + map (280) + gap (10) + products (~104) + gap (12) + explorer (~285) + bottom padding (20)
+      // Total: ~770-790px, but constrain to viewport
       const viewportHeight = window.innerHeight;
       const wrapperBottomPosition = 104;
       const topMargin = 20;
       const maxAvailableHeight = viewportHeight - wrapperBottomPosition - topMargin;
-      const contentHeight = 900; // map + products + explorer with full gallery + padding
+      const contentHeight = 795; // map + products + explorer with full gallery + padding
       const expandedHeight = Math.min(contentHeight, maxAvailableHeight);
       
       setBoxSize(FULL_W, expandedHeight, true);
@@ -2726,7 +2738,7 @@
       // (other view switches handle their own sizing)
       if (mapContainer.classList.contains('is-visible')) {
         // Return to compact map view height (map + products only)
-        const normalHeight = Math.min(700, getMaxChatbotHeight());
+        const normalHeight = Math.min(495, getMaxChatbotHeight());
         setBoxSize(FULL_W, normalHeight);
         
         // Ensure map resizes properly
