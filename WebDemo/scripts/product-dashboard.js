@@ -111,6 +111,347 @@
     { id: 'default-map-twist-mm', title: 'LV X YK TWIST MM RED WHITE', model: 'M46403', price: '$4,200.00', image: 'assets/Products/0049_Louis-Vuitton-x-Yayoi-Kusama-Twist-MM-Red-White.jpg' }
   ];
 
+  // Default favorites that always appear in each Favorites tab.
+  // Persistent across page loads and Clear All; cannot be removed by the user.
+  const defaultFavoritesByTab = {
+    // Products tab
+    tab1: [
+      {
+        id: 'default-fav-keepall-50',
+        title: 'LV X YK KEEPALL 50',
+        src: 'assets/Products/0034_LV_X_YK_KEEPALL50.png',
+        addedAt: '2026-05-06T00:00:00.000Z',
+        isDefaultFavorite: true
+      },
+      {
+        id: 'default-fav-metal-studs-jacket',
+        title: 'LV X YK METAL STUDS JACKET',
+        src: 'assets/Products/0102_LV_X_YK_METAL_STUDS_METAL_JACKET.png',
+        addedAt: '2026-05-06T00:00:00.000Z',
+        isDefaultFavorite: true
+      },
+      {
+        id: 'default-fav-capucines-bb-silver',
+        title: 'LV X YK CAPUCINES BB SILVER',
+        src: 'assets/Products/0055_Louis-Vuitton-x-Yayoi-Kusama-Capucines-BB-Silver.png',
+        addedAt: '2026-05-06T00:00:00.000Z',
+        isDefaultFavorite: true
+      },
+      {
+        id: 'default-fav-gabardine-midi-skirt',
+        title: 'LV X YK TECHNICAL GABARDINE MIDI SKIRT',
+        src: 'assets/Products/0095_LV_X_YK_TECHNICAL_GABARDINE_MIDI_SKIRT.png',
+        addedAt: '2026-05-06T00:00:00.000Z',
+        isDefaultFavorite: true
+      },
+      {
+        id: 'default-fav-shirt-dress-rouge',
+        title: 'LV X YK INFINITY DOTS SHIRT DRESS',
+        src: 'assets/Products/0093_Louis-Vuitton-x-Yayoi-Kusama-Infinity-Dots-Monogram-Shirt-Dress-Rouge-Vif-Red-White.png',
+        addedAt: '2026-05-06T00:00:00.000Z',
+        isDefaultFavorite: true
+      }
+    ],
+    // Campaign Images tab
+    tab2: [
+      {
+        id: 'default-fav-campaign-he-cong',
+        title: 'He Cong - LV Speedy Bandouliere - Kusama 2023',
+        src: 'assets/Campaigns/He_Cong_LV_Speedy_Bandouliere_Kusama_2023.png',
+        addedAt: '2026-05-06T00:00:00.000Z',
+        isDefaultFavorite: true
+      },
+      {
+        id: 'default-fav-campaign-yayoi-omotesando',
+        title: 'Yayoi Kusama at LV Store, Omotesando Tokyo 2023',
+        src: 'assets/Campaigns/Yayoi_Kusama_LV_Store_Omotesando_Tokyo_2023.png',
+        addedAt: '2026-05-06T00:00:00.000Z',
+        isDefaultFavorite: true
+      },
+      {
+        id: 'default-fav-campaign-gisele',
+        title: 'Gisele Bundchen - LV x Kusama Alma Pumpkin Bag',
+        src: 'assets/Campaigns/Gisele_Bundchen_LV_Kusama_Alma_Pumpkin_Yellow.png',
+        addedAt: '2026-05-06T00:00:00.000Z',
+        isDefaultFavorite: true
+      },
+      {
+        id: 'default-fav-campaign-zhou-dangyu',
+        title: 'Zhou Dangyu - LV x Kusama Pumpkin 2023',
+        src: 'assets/Campaigns/Zhou_Dangyu_LV_Pumpkin_Kusama_2023.png',
+        addedAt: '2026-05-06T00:00:00.000Z',
+        isDefaultFavorite: true
+      }
+    ],
+    // Art tab
+    tab3: [
+      {
+        id: 'default-fav-art-camille-henrot',
+        title: 'Camille Henrot - Wet Job, 2020',
+        src: 'assets/Art/Camille_Henrot_Wet_Job_2020.png',
+        addedAt: '2026-05-06T00:00:00.000Z',
+        isDefaultFavorite: true
+      },
+      {
+        id: 'default-fav-art-richard-serra',
+        title: 'Richard Serra - Transmitter, 2020',
+        src: 'assets/Art/Richard_Serra_Transmitter_2020.png',
+        addedAt: '2026-05-06T00:00:00.000Z',
+        isDefaultFavorite: true
+      },
+      {
+        id: 'default-fav-art-christina-quarles',
+        title: 'Christina Quarles - Is This The Return to Oz?, 2025',
+        src: 'assets/Art/Christina_Quarles_Is_This_The_Return_to_Oz_2025.png',
+        addedAt: '2026-05-06T00:00:00.000Z',
+        isDefaultFavorite: true
+      },
+      {
+        id: 'default-fav-art-tom-wesselmann',
+        title: 'Tom Wesselmann - Still Life #44, 1964',
+        src: 'assets/Art/Tom_Wesselmann_Still_Life_44_1964.png',
+        addedAt: '2026-05-06T00:00:00.000Z',
+        isDefaultFavorite: true
+      },
+      {
+        id: 'default-fav-art-lynette-yiadom-boakye',
+        title: 'Lynette Yiadom-Boakye - Willow Strip, 2017',
+        src: 'assets/Art/Lynette_Yiadom-Boakye_Willow_Strip_2017.png',
+        addedAt: '2026-05-06T00:00:00.000Z',
+        isDefaultFavorite: true
+      },
+      {
+        id: 'default-fav-art-larry-bell',
+        title: 'Larry Bell - Pacific Red, 2016 (Whitney Museum)',
+        src: 'assets/Art/Larry_Bell_Pacific_Red_2016_Whitney_Museum.png',
+        addedAt: '2026-05-06T00:00:00.000Z',
+        isDefaultFavorite: true
+      },
+      {
+        id: 'default-fav-art-roberto-cuoghi',
+        title: 'Roberto Cuoghi - SS XCP (c), 2018',
+        src: 'assets/Art/Roberto_Cuoghi_SS_XCP_c_2018.png',
+        addedAt: '2026-05-06T00:00:00.000Z',
+        isDefaultFavorite: true
+      },
+      {
+        id: 'default-fav-art-albert-oehlen-baum-84',
+        title: 'Albert Oehlen - Baum 84 / Untitled, 2016',
+        src: 'assets/Art/Albert_Oehlen_Baum_84_Untitled_2016.png',
+        addedAt: '2026-05-06T00:00:00.000Z',
+        isDefaultFavorite: true
+      },
+      {
+        id: 'default-fav-art-anselm-kiefer-san-loreto',
+        title: 'Anselm Kiefer - San Loreto, 2009-2010',
+        src: 'assets/Art/Anselm_Kiefer_San_Loreto_2009_2010.png',
+        addedAt: '2026-05-06T00:00:00.000Z',
+        isDefaultFavorite: true
+      },
+      {
+        id: 'default-fav-art-lauren-halsey-main-discount',
+        title: 'Lauren Halsey - Main Discount, 2023',
+        src: 'assets/Art/Lauren_Halsey_Main_Discount_2023.png',
+        addedAt: '2026-05-06T00:00:00.000Z',
+        isDefaultFavorite: true
+      },
+      {
+        id: 'default-fav-art-giuseppe-penone-anatomia',
+        title: 'Giuseppe Penone - Anatomia (Anatomy), 2011',
+        src: 'assets/Art/Giuseppe_Penone_Anatomia_Anatomy_2011.png',
+        addedAt: '2026-05-06T00:00:00.000Z',
+        isDefaultFavorite: true
+      },
+      {
+        id: 'default-fav-art-richard-serra-transmitter-side-alt',
+        title: 'Richard Serra - Transmitter, 2020 (side view)',
+        src: 'assets/Art/Richard_Serra_Transmitter_2020_Side_View_Alt.png',
+        addedAt: '2026-05-06T00:00:00.000Z',
+        isDefaultFavorite: true
+      },
+      {
+        id: 'default-fav-art-mary-weatherford-coney-island',
+        title: 'Mary Weatherford - Coney Island II, 2012',
+        src: 'assets/Art/Mary_Weatherford_Coney_Island_II_2012.png',
+        addedAt: '2026-05-06T00:00:00.000Z',
+        isDefaultFavorite: true
+      },
+      {
+        id: 'default-fav-art-ashley-bickerton-orange-shark',
+        title: 'Ashley Bickerton - Orange Shark, 2008',
+        src: 'assets/Art/Ashley_Bickerton_Orange_Shark_2008.png',
+        addedAt: '2026-05-06T00:00:00.000Z',
+        isDefaultFavorite: true
+      },
+      {
+        id: 'default-fav-art-takashi-murakami-white-lv-monogram',
+        title: 'Takashi Murakami - White LV Multicolored Monogram, 2025',
+        src: 'assets/Art/Takashi_Murakami_White_LV_Multicolored_Monogram_2025.png',
+        addedAt: '2026-05-06T00:00:00.000Z',
+        isDefaultFavorite: true
+      },
+      {
+        id: 'default-fav-art-takashi-murakami-exhibit-view',
+        title: 'Takashi Murakami - Exhibit View, LV Monogram Flowers, 2025',
+        src: 'assets/Art/Takashi_Murakami_Exhibit_View_LV_Monogram_Flowers_2025.png',
+        addedAt: '2026-05-06T00:00:00.000Z',
+        isDefaultFavorite: true
+      },
+      {
+        id: 'default-fav-art-titus-kaphar-novel-iconographies',
+        title: 'Titus Kaphar - Novel Iconographies III, 2025',
+        src: 'assets/Art/Titus_Kaphar_Novel_Iconographies_III_2025.png',
+        addedAt: '2026-05-06T00:00:00.000Z',
+        isDefaultFavorite: true
+      },
+      {
+        id: 'default-fav-art-anselm-kiefer-exodus',
+        title: 'Anselm Kiefer - Exodus, 2022',
+        src: 'assets/Art/Anselm_Kiefer_Exodus_2022.png',
+        addedAt: '2026-05-06T00:00:00.000Z',
+        isDefaultFavorite: true
+      },
+      {
+        id: 'default-fav-art-anselm-kiefer-transition-book-cover',
+        title: 'Anselm Kiefer - Transition from Cool to Warm (Book Cover)',
+        src: 'assets/Art/Anselm_Kiefer_Transition_from_Cool_to_Warm_Book_Cover.png',
+        addedAt: '2026-05-06T00:00:00.000Z',
+        isDefaultFavorite: true
+      },
+      {
+        id: 'default-fav-art-ashley-bickerton-seascape',
+        title: 'Ashley Bickerton - Seascape / Ocean Chunk, 2017',
+        src: 'assets/Art/Ashley_Bickerton_Seascape_Ocean_Chunk_2017.png',
+        addedAt: '2026-05-06T00:00:00.000Z',
+        isDefaultFavorite: true
+      },
+      {
+        id: 'default-fav-art-giuseppe-penone-sigillo',
+        title: 'Giuseppe Penone - Sigillo (Seal), 2012',
+        src: 'assets/Art/Giuseppe_Penone_Versailles_Sigillo_2012_Seal_White_Marble.png',
+        addedAt: '2026-05-06T00:00:00.000Z',
+        isDefaultFavorite: true
+      },
+      {
+        id: 'default-fav-art-john-currin-maenads',
+        title: 'John Currin - Maenads, 2015',
+        src: 'assets/Art/John_Currin_Maenads_2015.png',
+        addedAt: '2026-05-06T00:00:00.000Z',
+        isDefaultFavorite: true
+      },
+      {
+        id: 'default-fav-art-albert-oehlen-i-11',
+        title: 'Albert Oehlen - I 11, 2009',
+        src: 'assets/Art/Albert_Oehlen_I_11_2009.png',
+        addedAt: '2026-05-06T00:00:00.000Z',
+        isDefaultFavorite: true
+      },
+      {
+        id: 'default-fav-art-urs-fischer-foamcore',
+        title: 'Urs Fischer - Foamcore, 2017',
+        src: 'assets/Art/Urs_Fischer_Foamcore_2017.png',
+        addedAt: '2026-05-06T00:00:00.000Z',
+        isDefaultFavorite: true
+      },
+      {
+        id: 'default-fav-art-helen-frankenthaler-reef',
+        title: 'Helen Frankenthaler - Reef, 1991',
+        src: 'assets/Art/Helen_Frankenthaler_Reef_1991.png',
+        addedAt: '2026-05-06T00:00:00.000Z',
+        isDefaultFavorite: true
+      },
+      {
+        id: 'default-fav-art-lauren-halsey-loro-plaza',
+        title: 'Lauren Halsey - Loro Plaza II, 2025',
+        src: 'assets/Art/Lauren_Halsey_Loro_Plaza_II_2025.png',
+        addedAt: '2026-05-06T00:00:00.000Z',
+        isDefaultFavorite: true
+      },
+      {
+        id: 'default-fav-art-marc-newson-magnolia-chair',
+        title: 'Marc Newson - Cloisonne Magnolia Chair, 2017',
+        src: 'assets/Art/Marc_Newson_Cloisonne_Magnolia_Chair_2017.png',
+        addedAt: '2026-05-06T00:00:00.000Z',
+        isDefaultFavorite: true
+      },
+      {
+        id: 'default-fav-art-marc-newson-surfboards',
+        title: 'Marc Newson - Installation View, Surfboards, 2019',
+        src: 'assets/Art/Marc_Newson_Installation_View_Surfboards_2019.png',
+        addedAt: '2026-05-06T00:00:00.000Z',
+        isDefaultFavorite: true
+      },
+      {
+        id: 'default-fav-art-sterling-ruby-turbine',
+        title: 'Sterling Ruby - TURBINE. SHAKING HAND WITH BOMBS (RIGHT), 2022',
+        src: 'assets/Art/Sterling_Ruby_Turbine_Shaking_Hand_With_Bombs_Right_2022.png',
+        addedAt: '2026-05-06T00:00:00.000Z',
+        isDefaultFavorite: true
+      },
+      {
+        id: 'default-fav-art-takashi-murakami-hiroshige',
+        title: 'Takashi Murakami - Hiroshige 100 Famous Views of Edo, 2025',
+        src: 'assets/Art/Takashi_Murakami_Hiroshige_100_Famous_Views_of_Edo_2025.png',
+        addedAt: '2026-05-06T00:00:00.000Z',
+        isDefaultFavorite: true
+      },
+      {
+        id: 'default-fav-art-tom-wesselmann-still-life-alt',
+        title: 'Tom Wesselmann - Still Life #44, 1964',
+        src: 'assets/Art/Tom_Wesselmann_Still_Life_44_1964_Alt.png',
+        addedAt: '2026-05-06T00:00:00.000Z',
+        isDefaultFavorite: true
+      },
+      {
+        id: 'default-fav-art-helen-frankenthaler-santa-fe',
+        title: 'Helen Frankenthaler - Santa Fe XIII, 1990 (detail)',
+        src: 'assets/Art/Helen_Frankenthaler_Santa_Fe_XIII_1990_Detail.png',
+        addedAt: '2026-05-06T00:00:00.000Z',
+        isDefaultFavorite: true
+      },
+      {
+        id: 'default-fav-art-jade-fadojutimi-generosity',
+        title: 'Jade Fadojutimi - The Generosity of Trauma, 2024',
+        src: 'assets/Art/Jade_Fadojutimi_The_Generosity_of_Trauma_2024.png',
+        addedAt: '2026-05-06T00:00:00.000Z',
+        isDefaultFavorite: true
+      },
+      {
+        id: 'default-fav-art-titus-kaphar-heard-you',
+        title: 'Titus Kaphar - I heard you in my head, 2023',
+        src: 'assets/Art/Titus_Kaphar_I_Heard_You_in_My_Head_2023.png',
+        addedAt: '2026-05-06T00:00:00.000Z',
+        isDefaultFavorite: true
+      },
+      {
+        id: 'default-fav-art-richard-serra-transmitter-alt',
+        title: 'Richard Serra - Transmitter, 2020',
+        src: 'assets/Art/Richard_Serra_Transmitter_2020_Alt.png',
+        addedAt: '2026-05-06T00:00:00.000Z',
+        isDefaultFavorite: true
+      },
+      {
+        id: 'default-fav-art-titus-kaphar-douglas-street',
+        title: 'Titus Kaphar - Do You Remember Douglas Street, 2023-24',
+        src: 'assets/Art/Titus_Kaphar_Do_You_Remember_Douglas_Street_2023_24.png',
+        addedAt: '2026-05-06T00:00:00.000Z',
+        isDefaultFavorite: true
+      }
+    ]
+  };
+
+  // Backward-compatible alias used by older code paths
+  const defaultFavoriteProducts = defaultFavoritesByTab.tab1;
+
+  // Total count of all persistent default favorites across tabs
+  const defaultFavoritesTotalCount = Object.values(defaultFavoritesByTab)
+    .reduce((sum, arr) => sum + arr.length, 0);
+
+  // Map of tab => Set of default srcs, used to dedupe when rendering
+  const defaultFavoriteSrcsByTab = Object.fromEntries(
+    Object.entries(defaultFavoritesByTab).map(([tab, items]) => [tab, new Set(items.map(i => i.src))])
+  );
+
   function getProductKey(product) {
     return String(product?.id || product?.model || product?.title || product?.image || product?.src || '').toLowerCase();
   }
@@ -740,6 +1081,235 @@
     ]
   };
 
+  // ===== Smooth Drag & Drop Coordination =====
+  // Shared controllers so renderMedia (canvas) and setupMyMediaDrawer can talk
+  // to each other for incremental, animated updates (no full re-render on drop).
+  const mediaController = {
+    addCardFromDrop: null,    // (src, dropX, dropY) => HTMLElement
+    removeCardBySrc: null,    // (src) => boolean
+    getGridEl: null,          // () => HTMLElement
+  };
+
+  const drawerController = {
+    prependImageSmoothly: null, // (src) => void
+    removeImageSmoothly: null,  // (src) => void
+    hasImage: null,             // (src) => boolean
+  };
+
+  // Sources of images the user has dragged into My Media. Persisted for the
+  // session so they survive focus/unfocus and switching between cards (which
+  // overwrite the curated drawer set).
+  const userDroppedSrcs = new Set();
+
+  // Build a drawer-image element with a bookmark button + smooth pointer
+  // drag. Used both by the curated drawer (with click-to-focus) and the
+  // initial / reset drawer (no focus callback). Defined at module level so
+  // setupMyMediaDrawer and renderMedia share the exact same markup.
+  function buildDrawerImageWithBookmark(src, index, onFocusClick) {
+    const wrapper = createEl('div', { class: 'my-media-image-wrapper' });
+
+    const img = createEl('img', {
+      class: 'my-media-image',
+      src: src,
+      alt: `Media ${index + 1}`
+    });
+
+    const bookmarkBtn = createEl('button', { class: 'my-media-bookmark-btn' });
+    bookmarkBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0 1 11.186 0Z" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+    const favorites = readStoredObject('categorizedFavorites');
+    const isBookmarked = Object.values(favorites).some(arr => arr.some(item => item.src === src));
+    if (isBookmarked) bookmarkBtn.classList.add('is-bookmarked');
+
+    bookmarkBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const nowBookmarked = bookmarkBtn.classList.toggle('is-bookmarked');
+      if (nowBookmarked && window.addToFavorites) window.addToFavorites(src, 'tab1');
+      else removeFromFavorites(src, 'tab1');
+    });
+
+    // Smooth floating-clone drag (replaces native HTML5 drag preview)
+    attachDrawerImageDrag(img, wrapper, src);
+
+    if (typeof onFocusClick === 'function') {
+      img.addEventListener('click', (e) => {
+        e.stopPropagation();
+        onFocusClick(src);
+      });
+    }
+    img.style.cursor = 'pointer';
+
+    wrapper.appendChild(img);
+    wrapper.appendChild(bookmarkBtn);
+    return wrapper;
+  }
+
+  // Tracks the currently-active drawer-image drag (only one at a time)
+  let activeDrawerDrag = null;
+
+  // Attach unified pointer-drag handlers to a drawer image. Replaces the
+  // jerky native HTML5 drag preview with a smooth floating clone that follows
+  // the cursor and morphs into a card when dropped on the canvas.
+  function attachDrawerImageDrag(img, wrapper, src) {
+    img.draggable = false;
+    img.addEventListener('dragstart', (e) => e.preventDefault());
+
+    function onPointerDown(clientX, clientY, originalEvent) {
+      if (activeDrawerDrag) return; // Only one drag at a time
+      if (originalEvent && originalEvent.target && originalEvent.target.closest && originalEvent.target.closest('.my-media-bookmark-btn')) return;
+
+      const rect = img.getBoundingClientRect();
+      activeDrawerDrag = {
+        img,
+        wrapper,
+        src,
+        startX: clientX,
+        startY: clientY,
+        originRect: rect,
+        clone: null,
+        dragStarted: false,
+        lastClientX: clientX,
+        lastClientY: clientY,
+        downAt: Date.now(),
+      };
+
+      if (originalEvent && typeof originalEvent.preventDefault === 'function') {
+        originalEvent.preventDefault();
+      }
+    }
+
+    img.addEventListener('mousedown', (e) => {
+      if (e.button !== 0) return;
+      onPointerDown(e.clientX, e.clientY, e);
+    });
+
+    img.addEventListener('touchstart', (e) => {
+      if (!e.touches || e.touches.length === 0) return;
+      const t = e.touches[0];
+      onPointerDown(t.clientX, t.clientY, e);
+    }, { passive: false });
+  }
+
+  // Convert a touch event into a pointer-like move/up
+  function _readClient(e) {
+    if (e.touches && e.touches.length) return { x: e.touches[0].clientX, y: e.touches[0].clientY };
+    if (e.changedTouches && e.changedTouches.length) return { x: e.changedTouches[0].clientX, y: e.changedTouches[0].clientY };
+    return { x: e.clientX, y: e.clientY };
+  }
+
+  // Global pointer-move/up handlers for drawer drag (always installed once)
+  function _drawerDragMove(e) {
+    if (!activeDrawerDrag) return;
+    const { x, y } = _readClient(e);
+    const drag = activeDrawerDrag;
+    drag.lastClientX = x;
+    drag.lastClientY = y;
+
+    const dx = x - drag.startX;
+    const dy = y - drag.startY;
+
+    // Start the drag once we exceed a 6px threshold (so taps still register)
+    if (!drag.dragStarted && Math.hypot(dx, dy) > 6) {
+      drag.dragStarted = true;
+
+      // Cache the click offset relative to the image's top-left so the clone
+      // tracks under the cursor at exactly the point where it was grabbed.
+      drag.offsetX = drag.startX - drag.originRect.left;
+      drag.offsetY = drag.startY - drag.originRect.top;
+
+      const clone = document.createElement('img');
+      clone.src = drag.src;
+      clone.className = 'media-drag-clone';
+      clone.style.width = drag.originRect.width + 'px';
+      clone.style.height = drag.originRect.height + 'px';
+      // Start at the image's exact origin (visually identical to the source)
+      clone.style.transform = `translate(${drag.originRect.left}px, ${drag.originRect.top}px) scale(1)`;
+      document.body.appendChild(clone);
+      drag.clone = clone;
+
+      drag.img.classList.add('is-dragging-source');
+
+      // Next frame: enable smooth scale-up morph and snap under the cursor.
+      // The .is-morphing class enables the transform transition for this pop.
+      requestAnimationFrame(() => {
+        if (!drag.clone) return;
+        drag.clone.classList.add('is-morphing');
+        const tx = x - drag.offsetX;
+        const ty = y - drag.offsetY;
+        drag.clone.style.transform = `translate(${tx}px, ${ty}px) scale(1.16)`;
+        // After the morph completes, drop the transition so subsequent moves
+        // are perfectly responsive (no lag).
+        setTimeout(() => {
+          if (drag.clone) drag.clone.classList.remove('is-morphing');
+        }, 280);
+      });
+    }
+
+    if (drag.dragStarted && drag.clone) {
+      const tx = x - drag.offsetX;
+      const ty = y - drag.offsetY;
+      // Direct transform update — no transition while following the cursor.
+      drag.clone.style.transform = `translate(${tx}px, ${ty}px) scale(1.16)`;
+
+      // Highlight the canvas grid as a drop target when the cursor is over it
+      const grid = mediaController.getGridEl ? mediaController.getGridEl() : document.getElementById('mediaGrid');
+      if (grid) {
+        const gr = grid.getBoundingClientRect();
+        const isOver = x >= gr.left && x <= gr.right && y >= gr.top && y <= gr.bottom;
+        grid.classList.toggle('drag-target-active', isOver);
+      }
+    }
+
+    if (e.cancelable && drag.dragStarted) e.preventDefault();
+  }
+
+  function _drawerDragEnd(e) {
+    if (!activeDrawerDrag) return;
+    const drag = activeDrawerDrag;
+    activeDrawerDrag = null;
+
+    const { x, y } = _readClient(e);
+    const grid = mediaController.getGridEl ? mediaController.getGridEl() : document.getElementById('mediaGrid');
+    if (grid) grid.classList.remove('drag-target-active');
+
+    // Was just a tap → treat as a click on the image (don't preventDefault)
+    if (!drag.dragStarted) return;
+
+    let isOverCanvas = false;
+    if (grid) {
+      const gr = grid.getBoundingClientRect();
+      isOverCanvas = x >= gr.left && x <= gr.right && y >= gr.top && y <= gr.bottom;
+    }
+
+    if (isOverCanvas && mediaController.addCardFromDrop) {
+      // Hand off to renderMedia: the new card will animate in from the drop point
+      mediaController.addCardFromDrop(drag.src, x, y, drag.clone);
+      // Remove the source thumbnail from the drawer (transfer, not copy)
+      if (drawerController.removeImageSmoothly) {
+        drawerController.removeImageSmoothly(drag.src);
+      }
+    } else {
+      // Animate the clone back to its origin then dispose
+      if (drag.clone) {
+        const c = drag.clone;
+        c.classList.add('is-morphing');
+        c.style.transform = `translate(${drag.originRect.left}px, ${drag.originRect.top}px) scale(1)`;
+        c.style.opacity = '0.4';
+        setTimeout(() => {
+          if (c && c.parentNode) c.parentNode.removeChild(c);
+        }, 300);
+      }
+      // Restore the source thumbnail
+      drag.img.classList.remove('is-dragging-source');
+    }
+  }
+
+  document.addEventListener('mousemove', _drawerDragMove, { passive: false });
+  document.addEventListener('mouseup', _drawerDragEnd);
+  document.addEventListener('touchmove', _drawerDragMove, { passive: false });
+  document.addEventListener('touchend', _drawerDragEnd);
+  document.addEventListener('touchcancel', _drawerDragEnd);
+
   // Setup My Media Drawer
   function setupMyMediaDrawer() {
     const drawerImages = document.getElementById('drawerImages');
@@ -747,142 +1317,117 @@
     const leftBtn = document.getElementById('scrollLeft');
     const rightBtn = document.getElementById('scrollRight');
     const drawer = document.querySelector('.my-media-drawer');
-    
-    // Get drawer images from localStorage or initialize with empty
-    let drawerImagesList = readStoredArray('drawerImages');
-    
-    // Start with empty drawer - will be populated when a card is clicked
+
+    // Start with the persistent user-dropped images visible (placeholder if none).
+    // Curated images are only loaded when a card is focused.
     if (currentLoadedCardIndex === -1) {
-      drawerImagesList = [];
-      localStorage.setItem('drawerImages', JSON.stringify(drawerImagesList));
+      localStorage.setItem('drawerImages', JSON.stringify(Array.from(userDroppedSrcs)));
     }
-    
-    // Populate drawer with draggable images
-    function populateDrawer() {
+
+    function showPlaceholder() {
       drawerImages.replaceChildren();
-      
-      // Show placeholder if drawer is empty
-      if (drawerImagesList.length === 0) {
-        const placeholder = createEl('div', { 
-          class: 'drawer-placeholder',
-          text: 'Click an image card to load curated media'
-        });
-        placeholder.style.cssText = 'display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; color: rgba(0,0,0,0.4); font-size: 14px; font-style: italic; padding: 20px; text-align: center;';
-        drawerImages.appendChild(placeholder);
-        return;
-      }
-      
-      drawerImagesList.forEach((src, index) => {
-        const img = createEl('img', {
-          class: 'my-media-image',
-          src: src,
-          alt: `Media ${index + 1}`,
-          draggable: 'true'
-        });
-        
-        // Drag start
-        img.addEventListener('dragstart', (e) => {
-          e.dataTransfer.setData('image/src', src);
-          e.dataTransfer.setData('source', 'drawer');
-          img.style.opacity = '0.5';
-        });
-        
-        img.addEventListener('dragend', () => {
-          img.style.opacity = '1';
-        });
-        
-        drawerImages.appendChild(img);
+      const placeholder = createEl('div', {
+        class: 'drawer-placeholder',
+        text: 'Click an image card to load curated media'
+      });
+      placeholder.style.cssText = 'display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; color: rgba(0,0,0,0.4); font-size: 14px; font-style: italic; padding: 20px; text-align: center;';
+      drawerImages.appendChild(placeholder);
+    }
+
+    // Render the drawer from current localStorage state. Uses the same
+    // wrapper+bookmark structure everywhere so user-dropped and curated
+    // images look identical.
+    function populateDrawer() {
+      const list = readStoredArray('drawerImages');
+      if (list.length === 0) { showPlaceholder(); return; }
+      drawerImages.replaceChildren();
+      list.forEach((src, idx) => {
+        drawerImages.appendChild(buildDrawerImageWithBookmark(src, idx));
       });
     }
-    
+
     populateDrawer();
-    
+
+    // Wire up the drawer controller so renderMedia can incrementally update us
+    drawerController.hasImage = function(src) {
+      return readStoredArray('drawerImages').includes(src);
+    };
+
+    drawerController.prependImageSmoothly = function(src) {
+      // Track in the persistent session set so this image survives focus
+      // changes (which overwrite the curated drawer set).
+      userDroppedSrcs.add(src);
+
+      const list = readStoredArray('drawerImages');
+      if (list.includes(src)) return;
+      list.unshift(src);
+      localStorage.setItem('drawerImages', JSON.stringify(list));
+
+      // Remove any placeholder
+      const placeholder = drawerImages.querySelector('.drawer-placeholder');
+      if (placeholder) placeholder.remove();
+
+      const wrapper = buildDrawerImageWithBookmark(src, 0);
+      wrapper.classList.add('is-entering');
+      drawerImages.insertBefore(wrapper, drawerImages.firstChild);
+      setTimeout(() => wrapper.classList.remove('is-entering'), 450);
+    };
+
+    drawerController.removeImageSmoothly = function(src) {
+      // Remove from the persistent session set too — the user explicitly
+      // moved this image off the drawer (back to canvas).
+      userDroppedSrcs.delete(src);
+
+      const list = readStoredArray('drawerImages');
+      const idx = list.indexOf(src);
+      if (idx > -1) {
+        list.splice(idx, 1);
+        localStorage.setItem('drawerImages', JSON.stringify(list));
+      }
+
+      // Find the matching DOM nodes (could be the bare img or a wrapper)
+      // and animate the outermost match out.
+      const imgs = Array.from(drawerImages.querySelectorAll('img.my-media-image'))
+        .filter(el => el.getAttribute('src') === src);
+      const targets = new Set();
+      imgs.forEach(img => {
+        const wrap = img.closest('.my-media-image-wrapper');
+        targets.add(wrap || img);
+      });
+      targets.forEach(el => {
+        el.style.transition = 'opacity 0.18s ease, transform 0.18s ease';
+        el.style.opacity = '0';
+        el.style.transform = 'scale(0.5)';
+        setTimeout(() => {
+          if (el.parentNode) el.parentNode.removeChild(el);
+          // Show placeholder if drawer is now empty (only when there was no curated set)
+          if (drawerImages.children.length === 0) {
+            const stillHas = readStoredArray('drawerImages').length > 0;
+            if (!stillHas) showPlaceholder();
+          }
+        }, 200);
+      });
+    };
+
     // Fade in drawer after a short delay
     setTimeout(() => {
       drawer.classList.add('loaded');
     }, 200);
-    
+
     // Scroll functionality
     let scrollPosition = 0;
-    const scrollAmount = 224; // Image width + gap
-    
-    leftBtn.addEventListener('click', () => {
+    const scrollAmount = 224;
+
+    leftBtn.onclick = () => {
       scrollPosition = Math.max(0, scrollPosition - scrollAmount);
       drawerImages.style.transform = `translateX(-${scrollPosition}px)`;
-    });
-    
-    rightBtn.addEventListener('click', () => {
+    };
+
+    rightBtn.onclick = () => {
       const maxScroll = drawerImages.scrollWidth - scrollContainer.clientWidth;
       scrollPosition = Math.min(maxScroll, scrollPosition + scrollAmount);
       drawerImages.style.transform = `translateX(-${scrollPosition}px)`;
-    });
-    
-    // Drop zone on canvas - add images from drawer
-    const mediaGrid = document.getElementById('mediaGrid');
-    
-    mediaGrid.addEventListener('dragover', (e) => {
-      e.preventDefault();
-    });
-    
-    mediaGrid.addEventListener('drop', (e) => {
-      e.preventDefault();
-      const imageSrc = e.dataTransfer.getData('image/src');
-      const source = e.dataTransfer.getData('source');
-      
-      if (imageSrc && source === 'drawer') {
-        // Add new image to gallery
-        const currentMedia = readStoredArray('galleryImages');
-        currentMedia.push({
-          src: imageSrc,
-          productData: { title: 'Dropped Image' }
-        });
-        localStorage.setItem('galleryImages', JSON.stringify(currentMedia));
-        
-        // Re-render media view
-        renderMedia();
-      }
-    });
-    
-    // Drop zone on drawer - remove cards from canvas
-    drawer.addEventListener('dragover', (e) => {
-      e.preventDefault();
-      drawer.style.background = 'rgba(255, 255, 255, 0.5)';
-      drawer.style.borderColor = 'rgba(0, 0, 0, 0.3)';
-    });
-    
-    drawer.addEventListener('dragleave', () => {
-      drawer.style.background = 'rgba(255, 255, 255, 0.3)';
-      drawer.style.borderColor = 'rgba(255, 255, 255, 0.3)';
-    });
-    
-    drawer.addEventListener('drop', (e) => {
-      e.preventDefault();
-      drawer.style.background = 'rgba(255, 255, 255, 0.3)';
-      drawer.style.borderColor = 'rgba(255, 255, 255, 0.3)';
-      
-      const imageSrc = e.dataTransfer.getData('card/src');
-      
-      if (imageSrc) {
-        // Remove from gallery
-        let currentMedia = readStoredArray('galleryImages');
-        const indexToRemove = currentMedia.findIndex(item => item.src === imageSrc);
-        
-        if (indexToRemove > -1) {
-          currentMedia.splice(indexToRemove, 1);
-          localStorage.setItem('galleryImages', JSON.stringify(currentMedia));
-          
-          // Add to drawer if not already there
-          if (!drawerImagesList.includes(imageSrc)) {
-            drawerImagesList.push(imageSrc);
-            localStorage.setItem('drawerImages', JSON.stringify(drawerImagesList));
-            populateDrawer();
-          }
-          
-          // Re-render media view
-          renderMedia();
-        }
-      }
-    });
+    };
   }
 
   // Render Media Gallery
@@ -914,23 +1459,48 @@
     let originalCanvasCard = null; // Track the original canvas card before media selection
     const cards = [];
 
-    // Generate stacked card positions
-    const positions = generateStackedPositions(media.length);
+    // Ensure every media item has a stable position (persisted, so re-renders
+    // don't reshuffle and so newly-dropped cards stay where the user put them).
+    let positionsChanged = false;
+    media.forEach((item, idx) => {
+      if (!item.position || typeof item.position.x !== 'number') {
+        item.position = generateStackedPositions(idx + 1)[idx];
+        positionsChanged = true;
+      }
+    });
+    if (positionsChanged) {
+      localStorage.setItem('galleryImages', JSON.stringify(media));
+    }
 
-    media.forEach((item, index) => {
-      console.log('Creating media card for:', item);
-      
-      // Create glass container
+    // Persist a card's current position back to its underlying media item
+    function persistCardPosition(card) {
+      if (!card._mediaItem) return;
+      card._mediaItem.position = {
+        x: parseFloat(card.dataset.originalX),
+        y: parseFloat(card.dataset.originalY),
+        rotation: parseFloat(card.dataset.originalRotation)
+      };
+      const list = readStoredArray('galleryImages');
+      const i = list.findIndex(m => m.src === card._mediaItem.src);
+      if (i > -1) {
+        list[i] = card._mediaItem;
+        localStorage.setItem('galleryImages', JSON.stringify(list));
+      }
+    }
+
+    // Build a single media-card element with all behaviors. Reusable so we
+    // can incrementally insert cards on a drop without re-rendering everything.
+    function createMediaCardElement(item, index) {
       const glassContainer = createEl('div', { class: 'dashboard-media-container' });
-      
-      // Create inner card
+      glassContainer._mediaItem = item;
+
       const mediaCard = createEl('div', { class: 'dashboard-media-item' });
       const img = createEl('img', {
         class: 'dashboard-media-image',
         src: item.src,
         alt: item.productData?.title || 'Media item'
       });
-      
+
       // Bookmark button
       const bookmarkBtn = createEl('button', { class: 'media-action-btn bookmark-btn' });
       const bookmarkSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
@@ -944,68 +1514,36 @@
       bookmarkPath.setAttribute('stroke-linejoin', 'round');
       bookmarkSvg.appendChild(bookmarkPath);
       bookmarkBtn.appendChild(bookmarkSvg);
-      
+
       bookmarkBtn.addEventListener('click', (e) => {
         e.stopPropagation();
         const isBookmarked = bookmarkBtn.classList.toggle('active');
         if (isBookmarked) {
           bookmarkSvg.setAttribute('fill', 'currentColor');
-          // Add to favorites
-          if (window.addToFavorites) {
-            window.addToFavorites(item.src, 'tab1');
-          }
+          if (window.addToFavorites) window.addToFavorites(item.src, 'tab1');
         } else {
           bookmarkSvg.setAttribute('fill', 'none');
-          // Remove from favorites
           removeFromFavorites(item.src, 'tab1');
         }
       });
-      
+
       mediaCard.appendChild(img);
-      
-      // Append bookmark button to glass container (outside the inner card)
       glassContainer.appendChild(bookmarkBtn);
       glassContainer.appendChild(mediaCard);
 
-      // Set initial stacked position on glass container
-      const pos = positions[index];
+      const pos = item.position;
       glassContainer.style.left = pos.x + 'px';
       glassContainer.style.top = pos.y + 'px';
       glassContainer.style.transform = `rotate(${pos.rotation}deg) scale(0.95)`;
       glassContainer.style.zIndex = index + 1;
       glassContainer.style.opacity = '0';
 
-      // Store original position
       glassContainer.dataset.originalX = pos.x;
       glassContainer.dataset.originalY = pos.y;
       glassContainer.dataset.originalRotation = pos.rotation;
       glassContainer.dataset.originalZIndex = index + 1;
-      
-      // Click to focus/unfocus - use regular click event
-      glassContainer.addEventListener('click', (e) => {
-        // Don't trigger if clicking action buttons
-        if (e.target.closest('.media-action-btn')) return;
-        
-        e.stopPropagation();
-        
-        console.log('Card clicked for focus, isDragging:', isDragging, 'dragStarted:', dragStarted);
-        
-        // Only focus if we didn't just drag
-        if (!dragStarted) {
-          if (focusedCard === glassContainer) {
-            console.log('Unfocusing card');
-            unfocusAllCards();
-          } else {
-            console.log('Focusing card');
-            focusCard(glassContainer);
-          }
-        }
-      });
-      
-      cards.push(glassContainer);
-      grid.appendChild(glassContainer);
 
-      // Make card draggable with mouse
+      // Per-card drag state (closure)
       let isDragging = false;
       let currentX = 0;
       let currentY = 0;
@@ -1019,19 +1557,22 @@
       let activeCard = null;
       let lastMouseX = 0;
       let lastMouseY = 0;
-      
-      function dragStart(e) {
-        // Don't start drag if focused/unfocused
-        if (glassContainer.classList.contains('focused') || glassContainer.classList.contains('unfocused')) return;
-        
-        // Don't drag bookmark button
+
+      glassContainer.addEventListener('click', (e) => {
         if (e.target.closest('.media-action-btn')) return;
-        
+        e.stopPropagation();
+        if (!dragStarted) {
+          if (focusedCard === glassContainer) unfocusAllCards();
+          else focusCard(glassContainer);
+        }
+      });
+
+      function dragStart(e) {
+        if (glassContainer.classList.contains('focused') || glassContainer.classList.contains('unfocused')) return;
+        if (e.target.closest('.media-action-btn')) return;
         if (e.target === glassContainer || glassContainer.contains(e.target)) {
           activeCard = glassContainer;
           dragStarted = false;
-          
-          // Store initial mouse position but don't start dragging yet
           if (e.type === 'touchstart') {
             initialX = e.touches[0].clientX;
             initialY = e.touches[0].clientY;
@@ -1041,19 +1582,10 @@
           }
         }
       }
-      
-      // Store handlers on the element for global access
-      glassContainer._dragHandler = drag;
-      glassContainer._dragEndHandler = dragEnd;
-      
-      glassContainer.addEventListener('mousedown', dragStart);
-      glassContainer.addEventListener('touchstart', dragStart);
 
       function drag(e) {
         if (activeCard !== glassContainer) return;
-        
         let mouseX, mouseY;
-        
         if (e.type === 'touchmove') {
           mouseX = e.touches[0].clientX;
           mouseY = e.touches[0].clientY;
@@ -1061,24 +1593,17 @@
           mouseX = e.clientX;
           mouseY = e.clientY;
         }
-        
-        // Store last known mouse position for use in dragEnd
         lastMouseX = mouseX;
         lastMouseY = mouseY;
-
         currentX = mouseX - initialX;
         currentY = mouseY - initialY;
-        
-        // Only start dragging if moved more than 5px
+
         if (activeCard && !dragStarted && (Math.abs(currentX) > 5 || Math.abs(currentY) > 5)) {
           dragStarted = true;
           isDragging = true;
-          
-          // Get current position before switching to fixed
           const rect = glassContainer.getBoundingClientRect();
           fixedStartLeft = rect.left;
           fixedStartTop = rect.top;
-          
           glassContainer.style.cursor = 'grabbing';
           glassContainer.style.zIndex = '99999';
           glassContainer.style.position = 'fixed';
@@ -1086,223 +1611,240 @@
           glassContainer.style.top = fixedStartTop + 'px';
           glassContainer.style.transition = 'none';
           glassContainer.style.pointerEvents = 'none';
-          
           xOffset = 0;
           yOffset = 0;
-          
-          console.log('Drag started at:', fixedStartLeft, fixedStartTop);
         }
-        
+
         if (isDragging && activeCard === glassContainer) {
           e.preventDefault();
-          
           xOffset = currentX;
           yOffset = currentY;
-
           const rotation = glassContainer.dataset.originalRotation;
-          
-          // Update position based on mouse movement from start
           glassContainer.style.left = (fixedStartLeft + currentX) + 'px';
           glassContainer.style.top = (fixedStartTop + currentY) + 'px';
           glassContainer.style.transform = `rotate(${rotation}deg) scale(1)`;
-          
-          // Check if over drawer and show add indicator
+
           const drawer = document.querySelector('.my-media-drawer');
           const dropIndicator = document.getElementById('dropIndicator');
           const chatPrompt = document.querySelector('.ai-chat-prompt');
-          
           const currentMouseX = e.clientX || (e.touches && e.touches[0] ? e.touches[0].clientX : 0);
           const currentMouseY = e.clientY || (e.touches && e.touches[0] ? e.touches[0].clientY : 0);
-          
-          // Check if over AI Chat
+
           if (chatPrompt) {
             const chatRect = chatPrompt.getBoundingClientRect();
-            const isOverChat = (
-              currentMouseX >= chatRect.left &&
-              currentMouseX <= chatRect.right &&
-              currentMouseY >= chatRect.top &&
-              currentMouseY <= chatRect.bottom
-            );
-            
-            if (isOverChat) {
-              chatPrompt.classList.add('drag-over');
-            } else {
-              chatPrompt.classList.remove('drag-over');
-            }
+            const isOverChat = currentMouseX >= chatRect.left && currentMouseX <= chatRect.right
+                            && currentMouseY >= chatRect.top && currentMouseY <= chatRect.bottom;
+            chatPrompt.classList.toggle('drag-over', isOverChat);
           }
-          
-          if (drawer && dropIndicator) {
+
+          if (drawer) {
             const drawerRect = drawer.getBoundingClientRect();
-            
-            const isOverDrawer = (
-              currentMouseX >= drawerRect.left &&
-              currentMouseX <= drawerRect.right &&
-              currentMouseY >= drawerRect.top &&
-              currentMouseY <= drawerRect.bottom
-            );
-            
-            if (isOverDrawer) {
-              drawer.style.background = 'rgba(255, 255, 255, 0.6)';
-              drawer.style.borderColor = 'rgba(100, 180, 100, 0.6)';
-              drawer.style.transform = 'scale(1.02)';
-              dropIndicator.classList.add('show');
-            } else {
-              drawer.style.background = 'rgba(255, 255, 255, 0.3)';
-              drawer.style.borderColor = 'rgba(255, 255, 255, 0.3)';
-              drawer.style.transform = 'scale(1)';
-              dropIndicator.classList.remove('show');
-            }
+            const isOverDrawer = currentMouseX >= drawerRect.left && currentMouseX <= drawerRect.right
+                              && currentMouseY >= drawerRect.top && currentMouseY <= drawerRect.bottom;
+            drawer.classList.toggle('drag-target-active', isOverDrawer);
+            if (dropIndicator) dropIndicator.classList.toggle('show', isOverDrawer);
           }
         }
       }
 
       function dragEnd(e) {
         if (activeCard !== glassContainer) return;
-        
-        // Reset drag state regardless
         const wasDragging = isDragging;
         isDragging = false;
         dragStarted = false;
         activeCard = null;
-        
-        if (wasDragging) {
-          glassContainer.style.cursor = 'grab';
-          glassContainer.style.transition = 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
-          glassContainer.style.pointerEvents = 'auto';
-          
-          console.log('Drag ended');
-          
-          // Use last known mouse position (more reliable than mouseup event coordinates)
-          const mouseX = lastMouseX || e.clientX || 0;
-          const mouseY = lastMouseY || e.clientY || 0;
-          
-          console.log('Drop position:', mouseX, mouseY);
-          
-          // Check if dropped over AI Chat component
-          const chatPrompt = document.querySelector('.ai-chat-prompt');
-          if (chatPrompt) {
-            // Always remove drag-over class on drag end
-            chatPrompt.classList.remove('drag-over');
-            
-            const chatRect = chatPrompt.getBoundingClientRect();
-            console.log('Chat bounds:', chatRect.left, chatRect.top, chatRect.right, chatRect.bottom);
-            console.log('Mouse position:', mouseX, mouseY);
-            
-            const isOverChat = (
-              mouseX >= chatRect.left &&
-              mouseX <= chatRect.right &&
-              mouseY >= chatRect.top &&
-              mouseY <= chatRect.bottom
-            );
-            
-            console.log('Is over chat:', isOverChat);
-            
-            if (isOverChat) {
-              console.log('✓ Card dropped on AI Chat! Analyzing...');
-              
-              // Analyze the image and add to favorites
-              if (window.handleDroppedImageFromCard) {
-                window.handleDroppedImageFromCard(item.src);
-              }
-              
-              // Return card to original position with animation
-              glassContainer.style.position = 'absolute';
-              glassContainer.style.left = glassContainer.dataset.originalX + 'px';
-              glassContainer.style.top = glassContainer.dataset.originalY + 'px';
-              glassContainer.style.transform = `rotate(${glassContainer.dataset.originalRotation}deg) scale(0.95)`;
-              glassContainer.style.zIndex = glassContainer.dataset.originalZIndex;
-              
-              xOffset = 0;
-              yOffset = 0;
-              
-              return;
-            }
+        if (!wasDragging) return;
+
+        glassContainer.style.cursor = 'grab';
+        glassContainer.style.transition = 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
+        glassContainer.style.pointerEvents = 'auto';
+
+        const mouseX = lastMouseX || e.clientX || 0;
+        const mouseY = lastMouseY || e.clientY || 0;
+
+        // Drop on AI Chat
+        const chatPrompt = document.querySelector('.ai-chat-prompt');
+        if (chatPrompt) {
+          chatPrompt.classList.remove('drag-over');
+          const chatRect = chatPrompt.getBoundingClientRect();
+          const isOverChat = mouseX >= chatRect.left && mouseX <= chatRect.right
+                          && mouseY >= chatRect.top && mouseY <= chatRect.bottom;
+          if (isOverChat) {
+            if (window.handleDroppedImageFromCard) window.handleDroppedImageFromCard(item.src);
+            glassContainer.style.position = 'absolute';
+            glassContainer.style.left = glassContainer.dataset.originalX + 'px';
+            glassContainer.style.top = glassContainer.dataset.originalY + 'px';
+            glassContainer.style.transform = `rotate(${glassContainer.dataset.originalRotation}deg) scale(0.95)`;
+            glassContainer.style.zIndex = glassContainer.dataset.originalZIndex;
+            xOffset = 0; yOffset = 0;
+            return;
           }
-          
-          // Check if dropped over My Media drawer using mouse position
-          const drawer = document.querySelector('.my-media-drawer');
-          if (drawer) {
-            const drawerRect = drawer.getBoundingClientRect();
-            
-            // Check if mouse is over drawer
-            const isOverDrawer = (
-              mouseX >= drawerRect.left &&
-              mouseX <= drawerRect.right &&
-              mouseY >= drawerRect.top &&
-              mouseY <= drawerRect.bottom
-            );
-            
-            if (isOverDrawer) {
-              console.log('✓ Card dropped on drawer! Removing from canvas...');
-              
-              // Animate card to drawer and remove
-              glassContainer.style.position = 'absolute';
-              glassContainer.style.opacity = '0';
-              glassContainer.style.transform = 'scale(0.3)';
-              
-              setTimeout(() => {
-                // Remove from gallery
-                let currentMedia = readStoredArray('galleryImages');
-                const indexToRemove = currentMedia.findIndex(mediaItem => mediaItem.src === item.src);
-                
-                console.log('Removing card at index:', indexToRemove);
-                
-                if (indexToRemove > -1) {
-                  currentMedia.splice(indexToRemove, 1);
-                  localStorage.setItem('galleryImages', JSON.stringify(currentMedia));
-                  
-                  // Add to drawer at the BEGINNING
-                  let drawerImagesList = readStoredArray('drawerImages');
-                  if (!drawerImagesList.includes(item.src)) {
-                    drawerImagesList.unshift(item.src); // Add to beginning
-                    localStorage.setItem('drawerImages', JSON.stringify(drawerImagesList));
-                    console.log('✓ Added to drawer gallery');
-                  }
-                  
-                  // Re-render
-                  renderMedia();
-                }
-              }, 300);
-              
-              // Hide drop indicator
-              const dropIndicator = document.getElementById('dropIndicator');
-              if (dropIndicator) {
-                dropIndicator.classList.remove('show');
-              }
-              
-              // Reset drawer style
-              drawer.style.background = 'rgba(255, 255, 255, 0.3)';
-              drawer.style.borderColor = 'rgba(255, 255, 255, 0.3)';
-              drawer.style.transform = 'scale(1)';
-              
-              return;
-            }
-          }
-          
-          // Normal drag end - convert back to absolute positioning
-          glassContainer.style.position = 'absolute';
-          glassContainer.style.zIndex = glassContainer.dataset.originalZIndex;
-          
-          // Calculate new absolute position
-          const newAbsoluteX = parseFloat(glassContainer.dataset.originalX) + xOffset;
-          const newAbsoluteY = parseFloat(glassContainer.dataset.originalY) + yOffset;
-          
-          glassContainer.dataset.originalX = newAbsoluteX;
-          glassContainer.dataset.originalY = newAbsoluteY;
-          glassContainer.style.left = newAbsoluteX + 'px';
-          glassContainer.style.top = newAbsoluteY + 'px';
-          
-          xOffset = 0;
-          yOffset = 0;
-          
-          console.log('Drag ended at:', newAbsoluteX, newAbsoluteY);
         }
+
+        // Drop on My Media drawer → smooth transfer
+        const drawer = document.querySelector('.my-media-drawer');
+        if (drawer) {
+          const drawerRect = drawer.getBoundingClientRect();
+          const isOverDrawer = mouseX >= drawerRect.left && mouseX <= drawerRect.right
+                            && mouseY >= drawerRect.top && mouseY <= drawerRect.bottom;
+          if (isOverDrawer) {
+            transferCardToDrawer(glassContainer, item);
+            return;
+          }
+        }
+
+        // Normal drag-and-release on the canvas — keep card at new spot
+        glassContainer.style.position = 'absolute';
+        glassContainer.style.zIndex = glassContainer.dataset.originalZIndex;
+        const newAbsoluteX = parseFloat(glassContainer.dataset.originalX) + xOffset;
+        const newAbsoluteY = parseFloat(glassContainer.dataset.originalY) + yOffset;
+        glassContainer.dataset.originalX = newAbsoluteX;
+        glassContainer.dataset.originalY = newAbsoluteY;
+        glassContainer.style.left = newAbsoluteX + 'px';
+        glassContainer.style.top = newAbsoluteY + 'px';
+        xOffset = 0; yOffset = 0;
+        persistCardPosition(glassContainer);
       }
 
-      // Fast and smooth fade-in animation
+      glassContainer._dragHandler = drag;
+      glassContainer._dragEndHandler = dragEnd;
+      glassContainer.addEventListener('mousedown', dragStart);
+      glassContainer.addEventListener('touchstart', dragStart);
+
+      return glassContainer;
+    }
+
+    // Smoothly transfer a card on the canvas → into the My Media drawer.
+    // Animates the card flying to the drawer's first slot, then disposes it
+    // and inserts a thumbnail with a pop-in animation. No full re-render.
+    function transferCardToDrawer(glassContainer, item) {
+      const drawer = document.querySelector('.my-media-drawer');
+      const drawerImages = document.getElementById('drawerImages');
+      const dropIndicator = document.getElementById('dropIndicator');
+
+      const cardRect = glassContainer.getBoundingClientRect();
+      // Target = first slot of the drawer (or just inside the drawer if empty)
+      let targetX, targetY;
+      const firstSlot = drawerImages && drawerImages.firstElementChild;
+      if (firstSlot && !firstSlot.classList.contains('drawer-placeholder')) {
+        const slotRect = firstSlot.getBoundingClientRect();
+        targetX = slotRect.left;
+        targetY = slotRect.top;
+      } else {
+        const dr = drawerImages.getBoundingClientRect();
+        targetX = dr.left + 12;
+        targetY = dr.top + 12;
+      }
+
+      glassContainer.style.transition = 'transform 0.42s cubic-bezier(0.65, 0, 0.35, 1), left 0.42s cubic-bezier(0.65, 0, 0.35, 1), top 0.42s cubic-bezier(0.65, 0, 0.35, 1), opacity 0.42s ease';
+      glassContainer.style.position = 'fixed';
+      glassContainer.style.left = targetX + 'px';
+      glassContainer.style.top = targetY + 'px';
+      // Card is roughly 290px wide; drawer thumb is 90px → scale ~0.31
+      const scaleTarget = 90 / Math.max(cardRect.width, 1);
+      glassContainer.style.transform = `rotate(0deg) scale(${scaleTarget.toFixed(3)})`;
+      glassContainer.style.transformOrigin = 'top left';
+      glassContainer.style.opacity = '0.55';
+      glassContainer.style.zIndex = '99999';
+
+      if (dropIndicator) dropIndicator.classList.remove('show');
+      if (drawer) drawer.classList.remove('drag-target-active');
+
       setTimeout(() => {
-        glassContainer.style.animation = `cardArrange 0.3s ease-out forwards`;
-        glassContainer.style.animationDelay = `${index * 0.05}s`;
+        // Update gallery storage
+        const list = readStoredArray('galleryImages');
+        const idx = list.findIndex(m => m.src === item.src);
+        if (idx > -1) {
+          list.splice(idx, 1);
+          localStorage.setItem('galleryImages', JSON.stringify(list));
+        }
+
+        // Remove from canvas
+        const cIdx = cards.indexOf(glassContainer);
+        if (cIdx > -1) cards.splice(cIdx, 1);
+        if (glassContainer.parentNode) glassContainer.parentNode.removeChild(glassContainer);
+
+        // Add to drawer (smooth pop-in)
+        if (drawerController.prependImageSmoothly) {
+          drawerController.prependImageSmoothly(item.src);
+        }
+
+        updateBadge('mediaCount', list.length);
+      }, 420);
+    }
+
+    // Smoothly add a brand new card from a drawer-image drop. The floating
+    // clone (if provided) is faded out as the real card animates into place.
+    function addCardFromDrop(src, dropX, dropY, sourceClone) {
+      const gridRect = grid.getBoundingClientRect();
+      // Card is ~290px wide, ~370px tall (with padding); center on cursor
+      const cardW = 290;
+      const cardH = 370;
+      const cardX = dropX - gridRect.left - cardW / 2;
+      const cardY = dropY - gridRect.top - cardH / 2;
+      const rotation = (_seedRand(Date.now() * 0.001) - 0.5) * 6;
+
+      const item = {
+        src,
+        productData: { title: 'Dropped Image' },
+        position: { x: cardX, y: cardY, rotation }
+      };
+      const list = readStoredArray('galleryImages');
+      list.push(item);
+      localStorage.setItem('galleryImages', JSON.stringify(list));
+
+      const card = createMediaCardElement(item, list.length - 1);
+      // Clear the inline opacity/transform set by createMediaCardElement so
+      // the cardDropIn keyframes can animate cleanly from 0.5 → 1 scale.
+      card.style.opacity = '';
+      card.style.transform = '';
+      card.style.setProperty('--drop-rotation', `rotate(${rotation}deg)`);
+      grid.appendChild(card);
+      cards.push(card);
+
+      card.classList.add('is-dropping-in');
+      setTimeout(() => {
+        card.classList.remove('is-dropping-in');
+        // After the keyframe animation finishes, restore the steady-state
+        // transform so future hover/drag transforms work consistently.
+        card.style.transform = `rotate(${rotation}deg) scale(1)`;
+        card.style.opacity = '1';
+      }, 440);
+
+      // Fade out the source clone smoothly while the card animates in
+      if (sourceClone) {
+        sourceClone.style.transition = 'opacity 0.22s ease, transform 0.22s ease';
+        sourceClone.style.opacity = '0';
+        sourceClone.style.transform = 'scale(0.6)';
+        setTimeout(() => {
+          if (sourceClone.parentNode) sourceClone.parentNode.removeChild(sourceClone);
+        }, 240);
+      }
+
+      updateBadge('mediaCount', list.length);
+      return card;
+    }
+
+    // Wire up the controller so the drawer-image pointer-drag can call into
+    // renderMedia's closure to add new cards.
+    mediaController.getGridEl = () => grid;
+    mediaController.addCardFromDrop = addCardFromDrop;
+    mediaController.removeCardBySrc = (src) => {
+      const card = cards.find(c => c._mediaItem && c._mediaItem.src === src);
+      if (card) { transferCardToDrawer(card, card._mediaItem); return true; }
+      return false;
+    };
+
+    // Build initial cards
+    media.forEach((item, index) => {
+      const card = createMediaCardElement(item, index);
+      cards.push(card);
+      grid.appendChild(card);
+
+      // Staggered fade-in for the initial render only
+      setTimeout(() => {
+        card.style.animation = `cardArrange 0.3s ease-out forwards`;
+        card.style.animationDelay = `${index * 0.04}s`;
       }, 50);
     });
 
@@ -1386,92 +1928,70 @@
       });
     }
     
-    // Load curated images into the My Media drawer based on card index
+    // Load curated images into the My Media drawer based on card index.
+    // User-dropped images always appear first so they persist visually across
+    // focus changes (and across the unfocus/refocus cycle).
     function loadCuratedDrawerImages(cardIndex) {
       currentLoadedCardIndex = cardIndex;
-      
-      // Get the image set for this card (default to first set if not found)
-      const imageSet = drawerImageSets[cardIndex] || drawerImageSets[0];
-      
-      // Set the curated images in localStorage
+
+      const curated = drawerImageSets[cardIndex] || drawerImageSets[0];
+      const userList = Array.from(userDroppedSrcs);
+      // Compose: user-dropped images first, then curated (deduped)
+      const imageSet = [...userList, ...curated.filter(s => !userDroppedSrcs.has(s))];
       localStorage.setItem('drawerImages', JSON.stringify(imageSet));
-      
-      // Re-populate the drawer
+
       const drawerImagesEl = document.getElementById('drawerImages');
-      if (drawerImagesEl) {
-        drawerImagesEl.replaceChildren();
-        
-        imageSet.forEach((src, index) => {
-          // Create wrapper for image + bookmark
-          const wrapper = createEl('div', { class: 'my-media-image-wrapper' });
-          
-          const img = createEl('img', {
-            class: 'my-media-image',
-            src: src,
-            alt: `Media ${index + 1}`,
-            draggable: 'true'
-          });
-          
-          // Create bookmark button
-          const bookmarkBtn = createEl('button', { class: 'my-media-bookmark-btn' });
-          bookmarkBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0 1 11.186 0Z" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-          
-          // Check if already bookmarked
-          const favorites = readStoredObject('categorizedFavorites');
-          const isBookmarked = Object.values(favorites).some(arr => arr.some(item => item.src === src));
-          if (isBookmarked) {
-            bookmarkBtn.classList.add('is-bookmarked');
-          }
-          
-          bookmarkBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            const nowBookmarked = bookmarkBtn.classList.toggle('is-bookmarked');
-            if (nowBookmarked && window.addToFavorites) {
-              window.addToFavorites(src, 'tab1');
-            } else {
-              removeFromFavorites(src, 'tab1');
-            }
-          });
-          
-          // Drag start
-          img.addEventListener('dragstart', (e) => {
-            e.dataTransfer.setData('image/src', src);
-            e.dataTransfer.setData('source', 'drawer');
-            img.style.opacity = '0.5';
-          });
-          
-          img.addEventListener('dragend', () => {
-            img.style.opacity = '1';
-          });
-          
-          // Click to focus this image as a card
-          img.addEventListener('click', (e) => {
-            console.log('My Media image clicked:', src);
-            e.stopPropagation();
-            focusMediaImage(src, `Media ${index + 1}`);
-          });
-          
-          // Add cursor pointer for clickable
-          img.style.cursor = 'pointer';
-          
-          wrapper.appendChild(img);
-          wrapper.appendChild(bookmarkBtn);
-          
-          // Add with fade-in animation
+      if (!drawerImagesEl) return;
+
+      // Reuse existing DOM nodes for sources that are already present so the
+      // user-dropped images stay put (and don't re-animate) when switching
+      // between cards. Only newly-added curated entries get the staggered
+      // fade-in.
+      const existing = new Map();
+      Array.from(drawerImagesEl.children).forEach(child => {
+        if (!child.classList || !child.classList.contains('my-media-image-wrapper')) return;
+        const innerImg = child.querySelector('img.my-media-image');
+        if (innerImg) existing.set(innerImg.getAttribute('src'), child);
+      });
+
+      // Build the new ordered list, reusing or creating elements as needed.
+      const newChildren = [];
+      let newCount = 0;
+      imageSet.forEach((src, index) => {
+        let wrapper = existing.get(src);
+        if (wrapper) {
+          // Reuse — leave it visible, no entry animation
+          existing.delete(src);
+          // Make sure click handler points to the latest focusMediaImage
+          // (closures from previous renderMedia calls are fine because the
+          // function body is identical; we keep the existing handler).
+        } else {
+          wrapper = buildDrawerImageWithBookmark(src, index, focusMediaImage);
+          // Stagger entry animation for newly-introduced images only
           wrapper.style.opacity = '0';
           wrapper.style.transform = 'translateY(10px)';
-          drawerImagesEl.appendChild(wrapper);
-          
-          // Staggered fade-in
+          const delay = newCount * 80;
+          newCount++;
           setTimeout(() => {
             wrapper.style.transition = 'all 0.3s ease-out';
             wrapper.style.opacity = '1';
             wrapper.style.transform = 'translateY(0)';
-          }, index * 80);
-        });
-        
-        console.log('Curated drawer images loaded');
-      }
+          }, delay);
+        }
+        newChildren.push(wrapper);
+      });
+
+      // Remove any leftover elements that aren't in the new set
+      existing.forEach(el => {
+        if (el.parentNode) el.parentNode.removeChild(el);
+      });
+
+      // Reorder DOM to match imageSet
+      newChildren.forEach((el, i) => {
+        if (drawerImagesEl.children[i] !== el) {
+          drawerImagesEl.insertBefore(el, drawerImagesEl.children[i] || null);
+        }
+      });
     }
     
     // Focus a media image from the drawer as a new card
@@ -1655,22 +2175,62 @@
       hideProductsDrawer();
     }
     
-    // Reset the My Media drawer to its initial empty state
+    // Reset the drawer when no card is focused. Crucially, this preserves
+    // user-dropped images — only the curated set goes away. If the user has
+    // no drops, we fall back to the placeholder.
     function resetDrawerToEmpty() {
       currentLoadedCardIndex = -1;
-      localStorage.setItem('drawerImages', JSON.stringify([]));
-      
+      const userList = Array.from(userDroppedSrcs);
+      localStorage.setItem('drawerImages', JSON.stringify(userList));
+
       const drawerImagesEl = document.getElementById('drawerImages');
-      if (drawerImagesEl) {
+      if (!drawerImagesEl) return;
+
+      // Diff against existing DOM so user-dropped images that are already
+      // visible don't flicker / re-animate.
+      const existing = new Map();
+      Array.from(drawerImagesEl.children).forEach(child => {
+        if (!child.classList || !child.classList.contains('my-media-image-wrapper')) return;
+        const innerImg = child.querySelector('img.my-media-image');
+        if (innerImg) existing.set(innerImg.getAttribute('src'), child);
+      });
+
+      // Empty state → show placeholder
+      if (userList.length === 0) {
         drawerImagesEl.replaceChildren();
-        
-        const placeholder = createEl('div', { 
+        const placeholder = createEl('div', {
           class: 'drawer-placeholder',
           text: 'Click an image card to load curated media'
         });
         placeholder.style.cssText = 'display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; color: rgba(0,0,0,0.4); font-size: 14px; font-style: italic; padding: 20px; text-align: center;';
         drawerImagesEl.appendChild(placeholder);
+        return;
       }
+
+      // Build/keep wrappers for the user-dropped images
+      const newChildren = [];
+      userList.forEach((src, index) => {
+        let wrapper = existing.get(src);
+        if (wrapper) {
+          existing.delete(src);
+        } else {
+          wrapper = buildDrawerImageWithBookmark(src, index);
+        }
+        newChildren.push(wrapper);
+      });
+
+      // Remove anything else (curated images that were in the drawer)
+      existing.forEach(el => { if (el.parentNode) el.parentNode.removeChild(el); });
+      // Also clear any placeholder that might be lingering
+      const placeholder = drawerImagesEl.querySelector('.drawer-placeholder');
+      if (placeholder) placeholder.remove();
+
+      // Reorder the kept/new wrappers to match userList
+      newChildren.forEach((el, i) => {
+        if (drawerImagesEl.children[i] !== el) {
+          drawerImagesEl.insertBefore(el, drawerImagesEl.children[i] || null);
+        }
+      });
     }
     
     // Show the My Products drawer with product images
@@ -1784,7 +2344,13 @@
     });
   }
 
-  // Generate stacked card positions
+  // Deterministic pseudo-random in [0, 1) — keeps card positions stable across re-renders
+  function _seedRand(seed) {
+    const x = Math.sin(seed * 9301 + 49297) * 233280;
+    return x - Math.floor(x);
+  }
+
+  // Generate stacked card positions (deterministic — same input = same output)
   function generateStackedPositions(count) {
     const positions = [];
     const baseX = 80;
@@ -1794,19 +2360,28 @@
     const rotationRange = 6;
 
     for (let i = 0; i < count; i++) {
-      // Arrange horizontally with vertical staggering and overlap
-      const x = baseX + (i * horizontalSpacing) + (Math.random() - 0.5) * 40;
-      
-      // Stagger vertically with alternating pattern
+      const r1 = _seedRand(i * 1.7 + 0.3);
+      const r2 = _seedRand(i * 2.3 + 1.1);
+      const r3 = _seedRand(i * 3.1 + 2.7);
+
+      const x = baseX + (i * horizontalSpacing) + (r1 - 0.5) * 40;
       const staggerOffset = (i % 2 === 0) ? 0 : verticalStagger;
-      const y = baseY + staggerOffset + (Math.random() - 0.5) * 60;
-      
-      const rotation = (Math.random() - 0.5) * rotationRange;
+      const y = baseY + staggerOffset + (r2 - 0.5) * 60;
+      const rotation = (r3 - 0.5) * rotationRange;
 
       positions.push({ x, y, rotation });
     }
 
     return positions;
+  }
+
+  // Compute a stable position for an item at a given index. If the item already
+  // has a saved position, reuse it (so dropped cards stay where the user put them).
+  function getPositionForItem(item, index) {
+    if (item && item.position && typeof item.position.x === 'number') {
+      return item.position;
+    }
+    return generateStackedPositions(index + 1)[index];
   }
 
   // Render Map View
@@ -2182,28 +2757,47 @@
     // Also get legacy wishlist products
     const legacyFavorites = readStoredArray('wishlistProducts');
     
-    // Combine for badge count
-    const allFavoritesCount = Object.values(categorizedFavorites).reduce((sum, arr) => sum + arr.length, 0) + legacyFavorites.length;
+    // Combine for badge count (includes all persistent default favorites)
+    const allFavoritesCount = Object.values(categorizedFavorites).reduce((sum, arr) => sum + arr.length, 0)
+      + legacyFavorites.length
+      + defaultFavoritesTotalCount;
     updateBadge('favoritesCount', allFavoritesCount);
 
-    if (currentTabFavorites.length === 0 && (currentFavoritesTab !== 'tab1' || legacyFavorites.length === 0)) {
+    const isProductsTab = currentFavoritesTab === 'tab1';
+    const tabDefaults = defaultFavoritesByTab[currentFavoritesTab] || [];
+    const tabDefaultSrcs = defaultFavoriteSrcsByTab[currentFavoritesTab] || new Set();
+    const hasContent = currentTabFavorites.length > 0
+      || tabDefaults.length > 0
+      || (isProductsTab && legacyFavorites.length > 0);
+
+    if (!hasContent) {
       grid.classList.remove('favorites-grid-glass');
       showEmptyState(grid, 'No favorites in this category', 'Drag images to the chat or click bookmark icons to add favorites');
       return;
     }
 
+    // Always render persistent default favorites at the top of the current tab
+    tabDefaults.forEach(item => {
+      const card = createFavoriteCard(item);
+      grid.appendChild(card);
+    });
+
     // Render current tab favorites (new categorized system)
+    // Skip any items whose src matches a default to avoid duplicates
     currentTabFavorites.forEach(item => {
+      if (tabDefaultSrcs.has(item.src)) return;
       const card = createFavoriteCard(item);
       grid.appendChild(card);
     });
     
     // Also show legacy favorites in tab1 (convert to glass card style)
-    if (currentFavoritesTab === 'tab1') {
+    if (isProductsTab) {
       legacyFavorites.forEach(product => {
+        const src = product.image || product.src;
+        if (tabDefaultSrcs.has(src)) return;
         // Convert legacy product to new format (handle both 'image' and 'src' keys)
         const item = {
-          src: product.image || product.src,
+          src,
           title: product.title,
           id: product.id,
           addedAt: product.addedAt || new Date().toISOString(),
@@ -2245,24 +2839,81 @@
       text: item.addedAt ? new Date(item.addedAt).toLocaleDateString() : '' 
     });
     
-    // Remove button
-    const removeBtn = createEl('button', { class: 'favorite-glass-card-remove' });
-    removeBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 18L18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-    removeBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      // Remove from all collections
-      removeFromAllCollections(item);
-    });
-    
     info.appendChild(title);
     info.appendChild(date);
-    
-    card.appendChild(removeBtn);
+
+    // Default favorites are persistent and cannot be removed
+    if (!item.isDefaultFavorite) {
+      const removeBtn = createEl('button', { class: 'favorite-glass-card-remove' });
+      removeBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 18L18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+      removeBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        // Remove from all collections
+        removeFromAllCollections(item);
+      });
+      card.appendChild(removeBtn);
+    }
+
     card.appendChild(inner);
     card.appendChild(info);
-    
+
+    // Open lightbox when the card is clicked (remove button stops propagation above)
+    card.addEventListener('click', () => {
+      openFavoritesLightbox(imageSrc, item.title || 'Favorite');
+    });
+
     return card;
   }
+
+  // ─── Favorites Lightbox ───────────────────────────────────────────────
+  function openFavoritesLightbox(src, caption) {
+    const lightbox = document.getElementById('favoritesLightbox');
+    const image = document.getElementById('favoritesLightboxImage');
+    const captionEl = document.getElementById('favoritesLightboxCaption');
+    if (!lightbox || !image) return;
+    image.src = src;
+    image.alt = caption || '';
+    if (captionEl) captionEl.textContent = caption || '';
+    lightbox.removeAttribute('hidden');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeFavoritesLightbox() {
+    const lightbox = document.getElementById('favoritesLightbox');
+    const image = document.getElementById('favoritesLightboxImage');
+    if (!lightbox) return;
+    lightbox.setAttribute('hidden', '');
+    if (image) image.src = '';
+    document.body.style.overflow = '';
+  }
+
+  (function setupFavoritesLightbox() {
+    const lightbox = document.getElementById('favoritesLightbox');
+    if (!lightbox) return;
+    const closeBtn = document.getElementById('favoritesLightboxClose');
+    const content = document.getElementById('favoritesLightboxContent');
+
+    // Close when clicking the backdrop
+    lightbox.addEventListener('click', (e) => {
+      if (e.target === lightbox) closeFavoritesLightbox();
+    });
+    // Don't close when clicking inside the image/content
+    if (content) {
+      content.addEventListener('click', (e) => e.stopPropagation());
+    }
+    if (closeBtn) {
+      closeBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        closeFavoritesLightbox();
+      });
+    }
+    // Close on Escape
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && !lightbox.hasAttribute('hidden')) {
+        closeFavoritesLightbox();
+      }
+    });
+  })();
   
   // Remove from favorites
   function removeFromFavorites(src, tab) {
@@ -2329,7 +2980,9 @@
   function updateFavoritesBadge() {
     const categorizedFavorites = readStoredObject('categorizedFavorites');
     const legacyFavorites = readStoredArray('wishlistProducts');
-    const allFavoritesCount = Object.values(categorizedFavorites).reduce((sum, arr) => sum + arr.length, 0) + legacyFavorites.length;
+    const allFavoritesCount = Object.values(categorizedFavorites).reduce((sum, arr) => sum + arr.length, 0)
+      + legacyFavorites.length
+      + defaultFavoritesTotalCount;
     updateBadge('favoritesCount', allFavoritesCount);
   }
   
@@ -2591,10 +3244,15 @@
   function updateAllBadges() {
     const products = readStoredArray('droppedProducts');
     const media = readStoredArray('galleryImages');
-    const favorites = readStoredArray('wishlistProducts');
+    const categorizedFavorites = readStoredObject('categorizedFavorites');
+    const legacyFavorites = readStoredArray('wishlistProducts');
     updateBadge('libraryCount', products.length);
     updateBadge('mediaCount', media.length);
-    updateBadge('favoritesCount', favorites.length);
+    updateBadge('favoritesCount',
+      Object.values(categorizedFavorites).reduce((sum, arr) => sum + arr.length, 0)
+        + legacyFavorites.length
+        + defaultFavoritesTotalCount
+    );
   }
 
   // Initialize demo data - only if no existing user data
@@ -2648,7 +3306,8 @@
   
   updateBadge('libraryCount', products.length);
   updateBadge('mediaCount', media.length);
-  updateBadge('favoritesCount', favorites.length);
+  // Include persistent default favorites (across all tabs) in the initial count
+  updateBadge('favoritesCount', favorites.length + defaultFavoritesTotalCount);
 
   // Initialize the default view
   switchView(currentView);

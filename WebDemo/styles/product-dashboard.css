@@ -17,8 +17,10 @@ html, body {
   position: sticky;
   top: 0;
   z-index: 100;
-  background: transparent;
-  border-bottom: none;
+  background: rgba(248, 248, 248, 0.92);
+  backdrop-filter: saturate(180%) blur(10px);
+  -webkit-backdrop-filter: saturate(180%) blur(10px);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
   box-shadow: none;
 }
 
@@ -77,16 +79,18 @@ html, body {
 }
 
 .dashboard-btn--admin {
-  background: transparent;
-  color: #111;
-  border: 1px solid #ccc;
+  background: #2563eb;
+  color: #fff;
+  border: 1px solid #2563eb;
   text-decoration: none;
   margin-left: 16px;
+  box-shadow: 0 1px 2px rgba(37, 99, 235, 0.25);
 }
 
 .dashboard-btn--admin:hover {
-  background: #f5f5f5;
-  border-color: #999;
+  background: #1d4ed8;
+  border-color: #1d4ed8;
+  box-shadow: 0 2px 6px rgba(37, 99, 235, 0.35);
 }
 
 /* Main Layout */
@@ -502,6 +506,96 @@ html, body {
   width: 14px;
   height: 14px;
   color: #666;
+}
+
+/* ─── Favorites Lightbox ─── */
+.favorites-lightbox {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.92);
+  z-index: 4000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px;
+  cursor: zoom-out;
+  animation: favoritesLightboxFadeIn 0.18s ease-out;
+}
+
+.favorites-lightbox[hidden] {
+  display: none;
+}
+
+@keyframes favoritesLightboxFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.favorites-lightbox-close {
+  position: absolute;
+  top: 20px;
+  right: 24px;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(8px);
+  border: none;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  color: #fff;
+  transition: background 0.15s ease, transform 0.15s ease;
+  z-index: 4001;
+}
+
+.favorites-lightbox-close:hover {
+  background: rgba(255, 255, 255, 0.22);
+  transform: scale(1.05);
+}
+
+.favorites-lightbox-close svg {
+  width: 22px;
+  height: 22px;
+}
+
+.favorites-lightbox-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  max-width: 92vw;
+  max-height: 92vh;
+  cursor: default;
+}
+
+.favorites-lightbox-image {
+  max-width: 92vw;
+  max-height: 82vh;
+  object-fit: contain;
+  border-radius: 8px;
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.5);
+  display: block;
+  animation: favoritesLightboxZoomIn 0.22s ease-out;
+}
+
+@keyframes favoritesLightboxZoomIn {
+  from { opacity: 0; transform: scale(0.96); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.favorites-lightbox-caption {
+  color: #f5f5f5;
+  font-size: 14px;
+  font-weight: 500;
+  text-align: center;
+  max-width: 80vw;
+  letter-spacing: 0.02em;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+}
+
+.favorites-lightbox-caption:empty {
+  display: none;
 }
 
 /* Product Grids */
@@ -1806,7 +1900,7 @@ html, body {
 /* My Products Floating Drawer - positioned above My Media */
 .my-products-drawer {
   position: fixed;
-  bottom: 220px; /* 32px (My Media bottom) + ~164px (My Media height) + 24px margin */
+  bottom: 292px; /* Clears the taller My Media drawer plus a visible gap */
   left: 32px;
   background: rgba(255, 255, 255, 0.3);
   backdrop-filter: blur(12px);
@@ -1833,6 +1927,12 @@ html, body {
 .my-products-drawer.loaded {
   opacity: 1;
   transform: translateY(0);
+}
+
+@media (max-height: 720px) {
+  .my-products-drawer {
+    bottom: 260px;
+  }
 }
 
 .my-media-header {
@@ -1953,25 +2053,128 @@ html, body {
   position: absolute;
   top: 50%;
   left: 50%;
-  transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%) scale(0.6);
   width: 60px;
   height: 60px;
   background: rgba(0, 0, 0, 0.8);
   border-radius: 50%;
-  display: none;
+  display: grid;
   place-items: center;
   z-index: 100000;
   pointer-events: none;
+  opacity: 0;
+  transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.18s ease;
 }
 
 .drawer-drop-indicator.show {
-  display: grid;
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
 }
 
 .drawer-drop-indicator svg {
   width: 32px;
   height: 32px;
   color: #fff;
+}
+
+/* Floating drag clone (for drawer image -> canvas drag) */
+.media-drag-clone {
+  position: fixed;
+  left: 0;
+  top: 0;
+  border-radius: 16px;
+  object-fit: cover;
+  z-index: 100000;
+  pointer-events: none;
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.32);
+  /* No transition on transform during follow → cursor tracking is instant.
+     The .is-morphing class enables transitions for the initial pop-up and
+     the return-to-origin animations. */
+  transition: box-shadow 0.18s ease, opacity 0.2s ease;
+  will-change: transform;
+}
+
+.media-drag-clone.is-morphing {
+  transition: transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1),
+              box-shadow 0.18s ease,
+              opacity 0.2s ease;
+}
+
+.my-media-image.is-dragging-source {
+  opacity: 0.25;
+  transform: scale(0.92);
+  transition: opacity 0.18s ease, transform 0.18s ease;
+}
+
+/* Canvas drop-target highlight while dragging from drawer */
+.dashboard-media-grid.drag-target-active::before {
+  content: '';
+  position: absolute;
+  inset: 8px;
+  border: 2px dashed rgba(99, 102, 241, 0.55);
+  border-radius: 24px;
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.08), rgba(99, 102, 241, 0.04));
+  pointer-events: none;
+  z-index: 0;
+  animation: dragTargetPulse 1.6s ease-in-out infinite;
+}
+
+@keyframes dragTargetPulse {
+  0%, 100% { opacity: 0.85; }
+  50% { opacity: 0.45; }
+}
+
+/* Drawer drop-target highlight while dragging a card */
+.my-media-drawer.drag-target-active {
+  background: rgba(255, 255, 255, 0.55) !important;
+  border-color: rgba(99, 102, 241, 0.55) !important;
+  transform: translateY(0) scale(1.025);
+  box-shadow: 0 18px 48px rgba(31, 38, 135, 0.28);
+  transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1),
+              box-shadow 0.18s ease,
+              background 0.18s ease,
+              border-color 0.18s ease;
+}
+
+/* Smooth entry animation for newly-dropped drawer images */
+@keyframes drawerImagePopIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.4) translateY(8px);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(1.08) translateY(0);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.my-media-image-wrapper.is-entering,
+.my-media-image.is-entering {
+  animation: drawerImagePopIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+/* Card morphs in from a drop */
+@keyframes cardDropIn {
+  0% {
+    opacity: 0.6;
+    transform: var(--drop-rotation, rotate(0deg)) scale(0.5);
+  }
+  60% {
+    opacity: 1;
+    transform: var(--drop-rotation, rotate(0deg)) scale(1.06);
+  }
+  100% {
+    opacity: 1;
+    transform: var(--drop-rotation, rotate(0deg)) scale(1);
+  }
+}
+
+.dashboard-media-container.is-dropping-in {
+  animation: cardDropIn 0.42s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
 }
 
 /* Map View */
@@ -2259,14 +2462,14 @@ html, body {
 }
 
 .location-item.selected {
-  outline: 3px solid #6366F1;
-  outline-offset: 2px;
   transform: translateY(-4px);
-  box-shadow: 0 4px 16px rgba(99, 102, 241, 0.3);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
 }
 
 /* Map Keywords Container (above the map) */
 .map-keywords-container {
+  position: relative;
+  z-index: 1;
   background: linear-gradient(135deg, #fafafa 0%, #f5f5f5 100%);
   border-radius: 12px;
   padding: 0;
