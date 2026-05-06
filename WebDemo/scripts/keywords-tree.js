@@ -23,6 +23,15 @@
   var nodeIdCounter = 0;
   /** When set, fitToView zooms to these graph ids only (search neighbourhood). */
   var treeSearchFocusIds = null;
+  /**
+   * Snapshot of every node's expand/collapse state and child layout taken just
+   * before the user starts a search. Used to restore the tree to its pre-search
+   * state when the search box is cleared, including whichever branches the user
+   * had manually expanded/collapsed.
+   *
+   * Shape: { [nodeKey]: { isExpanded: boolean, childKeys: string[] } }
+   */
+  var preSearchState = null;
 
   var groupColorMap = {
     0: '#1e3a8a',
@@ -31,6 +40,39 @@
     3: '#f59e0b',
     4: '#10b981'
   };
+
+  // ─── Location keyword overlay ────────────────────────────────────────────
+  // Build a lookup of "leaf" location names (restaurants/hotels/museums/
+  // galleries on the product-dashboard map) → their tag keyword arrays. These
+  // are the same keywords rendered above the map when a marker/card is
+  // clicked, so we surface them as nested tree children for parity.
+  function buildLocationKeywordLookup() {
+    var lookup = {};
+    var data = (window.ShopThatDashboardMapData && window.ShopThatDashboardMapData.locationData) || {};
+    ['restaurants', 'museums', 'galleries', 'others', 'stores'].forEach(function (cat) {
+      var items = data[cat] || [];
+      items.forEach(function (item) {
+        if (item && item.name && Array.isArray(item.keywords) && item.keywords.length) {
+          lookup[item.name] = item.keywords;
+        }
+      });
+    });
+    // Aliases for tree node display names that don't match the map data name
+    // verbatim (the tree uses shorter labels in some places).
+    var aliases = {
+      'The Mark': 'The Mark Restaurant by Jean-Georges',
+      'ST Regis': 'The St. Regis',
+      'The St. Regis': 'The St. Regis',
+      'The Carlyle': 'The Carlyle Hotel',
+      'The Baccarat': 'The Baccarat Hotel',
+      'MoMA Museum': 'The Museum of Modern Art'
+    };
+    Object.keys(aliases).forEach(function (alias) {
+      var target = aliases[alias];
+      if (lookup[target] && !lookup[alias]) lookup[alias] = lookup[target];
+    });
+    return lookup;
+  }
 
   function buildHierarchy() {
     var nodes = window.kwGetNodes ? window.kwGetNodes() : [];
@@ -45,6 +87,8 @@
       byId['LVMH'] ||
       nodes[0];
     if (!rootNode) return null;
+
+    var locationKeywordsByName = buildLocationKeywordLookup();
 
     var hasParents = nodes.some(function (n) {
       return n.parent && n.id !== rootNode.id;
@@ -106,6 +150,20 @@
       };
       if (rawKids.length) {
         built.children = rawKids.map(build);
+      } else if (locationKeywordsByName[node.id]) {
+        // Leaf location (e.g. The Modern, Le Bernardin, The Plaza) — surface
+        // the same tag keywords that the product-dashboard map shows when
+        // this location is clicked. Drop self-references (the location's
+        // own name is usually the first keyword in the array).
+        var ownName = (node.id || '').toLowerCase();
+        var keywords = locationKeywordsByName[node.id].filter(function (kw) {
+          return kw && kw.toLowerCase() !== ownName;
+        });
+        if (keywords.length) {
+          built.children = keywords.map(function (kw) {
+            return { name: kw, group: 4, value: 30, isLocationTag: true };
+          });
+        }
       }
       return built;
     }
@@ -603,80 +661,153 @@
     attachTreeChipClickHandlers();
   }
 
-  // Search: expand to matches, then show only the keyword(s) matching the query and their graph neighbors
+  // ─── Search snapshot helpers ───────────────────────────────────────────────
+  // A stable identity for a hierarchy node — built from its path back to root
+  // so duplicate names under different parents don't collide (e.g. "Restaurant"
+  // can appear under multiple locations).
+  function nodePathKey(d) {
+    var parts = [];
+    var n = d;
+    while (n) { parts.unshift(n.data.name); n = n.parent; }
+    return parts.join('\u0001');
+  }
+
+  // Walk the tree and record each node's expanded/collapsed state plus the
+  // ordered list of all its children (visible + hidden). This is used so we can
+  // perfectly restore the user's pre-search view when the query is cleared.
+  function captureTreeState(d, out) {
+    var children = d.children || [];
+    var hidden = d._children || [];
+    var all = children.concat(hidden);
+    out[nodePathKey(d)] = {
+      isExpanded: !!d.children,
+      childKeys: all.map(nodePathKey)
+    };
+    all.forEach(function (c) { captureTreeState(c, out); });
+  }
+
+  // Inverse of captureTreeState — re-merges visible/hidden children, re-orders
+  // them per the snapshot, and re-applies the saved expanded/collapsed flag.
+  function restoreTreeState(d, snapshot) {
+    var snap = snapshot[nodePathKey(d)];
+    if (!snap) return;
+    var children = d.children || [];
+    var hidden = d._children || [];
+    var all = children.concat(hidden);
+    if (all.length === 0) {
+      d.children = null;
+      d._children = null;
+      return;
+    }
+    // Re-order so the original sibling order is preserved on restore.
+    var byKey = {};
+    all.forEach(function (c) { byKey[nodePathKey(c)] = c; });
+    var ordered = snap.childKeys.map(function (k) { return byKey[k]; }).filter(Boolean);
+    if (snap.isExpanded) {
+      d.children = ordered;
+      d._children = null;
+    } else {
+      d._children = ordered;
+      d.children = null;
+    }
+    ordered.forEach(function (c) { restoreTreeState(c, snapshot); });
+  }
+
+  // Reset any leftover styling left by a previous search highlight.
+  function clearSearchHighlights() {
+    if (!treeG) return;
+    treeG.selectAll('g.node').style('opacity', null).style('pointer-events', null);
+    treeG.selectAll('path.link').style('opacity', null);
+    treeG.selectAll('g.node text:not(.toggle-icon)').each(function (d) {
+      d3.select(this).style('fill', null).style('font-weight', d.depth < 2 ? '600' : '400');
+    });
+  }
+
+  // ─── Search ───────────────────────────────────────────────────────────────
+  // Behavior:
+  //   • Filters the visible tree to ONLY the keywords whose name matches the
+  //     query plus their ancestor path back to the root (their "connections"
+  //     in tree terms). Everything else is hidden, not just dimmed.
+  //   • Auto-fits the zoom to the matching keywords so all hits are easy to see
+  //     at a glance.
+  //   • Highlights matched node labels.
+  //   • When the query is cleared, restores the exact tree state (expanded /
+  //     collapsed branches) the user had before searching.
   function searchTree(query) {
     if (!root) return;
     var q = (query || '').trim();
-    var ids = window.kwNeighborhoodIdsForSearch ? window.kwNeighborhoodIdsForSearch(q) : null;
 
     if (!q) {
-      treeSearchFocusIds = null;
-      if (treeG) {
-        treeG.selectAll('g.node').style('opacity', null).style('pointer-events', null);
-        treeG.selectAll('path.link').style('opacity', null);
-        treeG.selectAll('g.node text:not(.toggle-icon)').each(function (d) {
-          d3.select(this).style('fill', null).style('font-weight', d.depth < 2 ? '600' : '400');
-        });
+      if (preSearchState) {
+        restoreTreeState(root, preSearchState);
+        preSearchState = null;
       }
+      treeSearchFocusIds = null;
+      clearSearchHighlights();
       update(root);
       updateTreeNodeDisabledVisuals();
       return;
     }
 
-    treeSearchFocusIds = (ids && ids.size > 0) ? ids : null;
+    // First keystroke of a new search session — snapshot the current tree
+    // state. For each subsequent keystroke, restore the snapshot first so the
+    // filter is applied to the original tree, not on top of the previous
+    // filtered view.
+    if (!preSearchState) {
+      preSearchState = {};
+      captureTreeState(root, preSearchState);
+    } else {
+      restoreTreeState(root, preSearchState);
+    }
 
     var lower = q.toLowerCase();
 
-    function expandToMatch(d) {
-      var match = d.data.name.toLowerCase().includes(lower);
-      var childMatch = false;
-
-      var kids = d.children || d._children;
-      if (kids) {
-        kids.forEach(function (c) {
-          if (expandToMatch(c)) childMatch = true;
-        });
+    // Walk the tree, partitioning each node's children into the ones that
+    // contain matches (kept visible) and the ones that don't (moved to
+    // _children so they're hidden from the layout but still reachable for
+    // the snapshot/restore on clear).
+    function applyFilter(d) {
+      var selfMatch = d.data.name.toLowerCase().includes(lower);
+      var allChildren = (d.children || []).concat(d._children || []);
+      var keep = [];
+      var hide = [];
+      allChildren.forEach(function (c) {
+        if (applyFilter(c)) keep.push(c); else hide.push(c);
+      });
+      if (keep.length > 0) {
+        d.children = keep;
+        d._children = hide.length ? hide : null;
+      } else {
+        // Either this node is itself a match (we keep its descendants
+        // collapsed — the user can drill in if desired) or it's irrelevant.
+        d.children = null;
+        d._children = allChildren.length ? allChildren : null;
       }
-
-      if (childMatch && d._children) {
-        d.children = d._children;
-        d._children = null;
-      }
-
-      return match || childMatch;
+      return selfMatch || keep.length > 0;
     }
 
-    expandToMatch(root);
+    applyFilter(root);
+    // The visible tree is now strictly { matches ∪ ancestors of matches }, so
+    // letting fitToView zoom to ALL visible nodes naturally frames every match
+    // alongside its connection path. (Setting focusIds to the matches alone
+    // would over-zoom to the leaves and crop their context.)
+    treeSearchFocusIds = null;
     update(root);
 
-    if (treeG && ids) {
-      var active = ids.size > 0;
-      treeG.selectAll('g.node')
-        .style('opacity', function (d) {
-          var gid = graphIdFromTreeDisplayName(d.data.name);
-          return active && ids.has(gid) ? 1 : (active ? 0.06 : 1);
-        })
-        .style('pointer-events', function (d) {
-          var gid = graphIdFromTreeDisplayName(d.data.name);
-          return active && ids.has(gid) ? 'auto' : (active ? 'none' : 'auto');
-        });
-      treeG.selectAll('path.link')
-        .style('opacity', function (d) {
-          var s = graphIdFromTreeDisplayName(d.source.data.name);
-          var t = graphIdFromTreeDisplayName(d.target.data.name);
-          if (!active) return null;
-          return ids.has(s) && ids.has(t) ? 1 : 0.05;
-        });
+    // Style: full opacity for everything still visible, orange highlight on
+    // the matched labels themselves.
+    if (treeG) {
+      treeG.selectAll('g.node').style('opacity', null).style('pointer-events', null);
+      treeG.selectAll('path.link').style('opacity', null);
+      treeG.selectAll('g.node text:not(.toggle-icon)').each(function (d) {
+        var el = d3.select(this);
+        if (d.data.name.toLowerCase().includes(lower)) {
+          el.style('fill', '#f59e0b').style('font-weight', '700');
+        } else {
+          el.style('fill', null).style('font-weight', d.depth < 2 ? '600' : '400');
+        }
+      });
     }
-
-    treeG.selectAll('g.node text:not(.toggle-icon)').each(function (d) {
-      var el = d3.select(this);
-      if (d.data.name.toLowerCase().includes(lower)) {
-        el.style('fill', '#f59e0b').style('font-weight', '700');
-      } else {
-        el.style('fill', null).style('font-weight', d.depth < 2 ? '600' : '400');
-      }
-    });
     updateTreeNodeDisabledVisuals();
   }
 
