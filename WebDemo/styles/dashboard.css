@@ -917,6 +917,19 @@
   overflow: hidden;
 }
 
+.sidebar-article-excerpt {
+  margin: 0;
+  padding: 0;
+  font-size: 11px;
+  line-height: 1.45;
+  color: #6b7280;
+  font-weight: 400;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
 .sidebar-article-meta {
   display: flex;
   align-items: center;

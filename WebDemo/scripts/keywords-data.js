@@ -83,6 +83,7 @@ function buildSidebarArticlesHTML(articles) {
       </div>
       <div class="sidebar-article-info">
         <div class="sidebar-article-title">${escapeHtml(article.title || '')}</div>
+        ${article.excerpt ? `<p class="sidebar-article-excerpt">${escapeHtml(article.excerpt)}</p>` : ''}
         <div class="sidebar-article-meta">
           <span class="sidebar-article-publisher">${escapeHtml(article.publisher || '')}</span>
           <span class="sidebar-article-views">${escapeHtml(viewsLine)}</span>
@@ -128,7 +129,8 @@ function hydrateRelatedArticles(keywordId, rootEl) {
       var mapped = list.map(function (a) {
         return {
           title: a.title,
-          publisher: a.source || 'Discovery',
+          excerpt: a.excerpt || '',
+          publisher: a.source || 'Indexed content',
           image: a.image,
           url: a.url,
           viewsLabel: a.views
