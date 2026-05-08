@@ -850,6 +850,18 @@
     // Leaflet map instance
     let leafletMap = null;
     let chatbotLocationMarkers = []; // Store location markers for cleanup
+    let chatbotDiscoveryMarkers = []; // Keyword Discovery product markers
+
+    function clearChatbotDiscoveryMarkers() {
+      chatbotDiscoveryMarkers.forEach(marker => {
+        if (leafletMap) leafletMap.removeLayer(marker);
+      });
+      chatbotDiscoveryMarkers = [];
+    }
+
+    /** When switching to chatbot Map view, load thumbnails for last selected keyword (default Louis Vuitton). */
+    let lastChatbotMapDiscoveryKeyword = 'Louis Vuitton';
+
     
     const chatbotLocationData = window.ShopThatMainMapData || {
       restaurants: [],
@@ -1347,6 +1359,8 @@
       input.value = label;
       input.focus();
 
+      lastChatbotMapDiscoveryKeyword = label;
+
       addMessage('user', label);
 
       if (window.ShopThatData) {
@@ -1357,6 +1371,10 @@
       }
 
       void runLuxuryQueryForKeyword(label);
+
+      if (currentView === 'map' && window.ShopThatKeywordDiscovery) {
+        void hydrateChatbotMapFromDiscovery(label);
+      }
     }
 
     // Remove hardcoded mock keywords - now using ShopThatData system above
@@ -2599,92 +2617,167 @@
       }
     }
     
-    // Render map view with products
-    function renderMapView() {
+    function renderChatbotMapProductsSync() {
+      clearChatbotDiscoveryMarkers();
       productGallery.replaceChildren();
-      
-      // Always reload from localStorage to get latest products
+
       const storedProducts = readStoredArray('droppedProducts');
-      // Match the product-dashboard map: show at most 3 products,
-      // preferring stored ones and filling the rest from defaults.
       const savedProducts = getMapProductsWithFallback(storedProducts).slice(0, MIN_MAP_PRODUCTS);
-      
-      // NYC LV store locations for product assignment
+
       const storeLocations = [
         { lat: 40.7632, lng: -73.9732, name: 'Louis Vuitton 57th Street', address: '6 E 57th St, New York, NY 10022' },
         { lat: 40.7245, lng: -73.9975, name: 'Louis Vuitton SoHo', address: '116 Greene St, New York, NY 10012' }
       ];
-      
+
       if (savedProducts.length === 0) {
-        // Show empty message
-        const emptyMsg = createEl('div', { 
+        const emptyMsg = createEl('div', {
           class: 'chatbot-map-empty',
-          text: 'No products yet. Drop product images from the homepage to see them here!' 
+          text: 'No products yet. Drop product images from the homepage to see them here!'
         });
         productGallery.appendChild(emptyMsg);
-      } else {
-        // Show actual product cards
-        savedProducts.forEach((product, index) => {
-          // Assign location alternately between the two stores
+        return;
+      }
+
+      savedProducts.forEach((product, index) => {
+        const storeIndex = index % 2;
+        product.location = {
+          lat: storeLocations[storeIndex].lat,
+          lng: storeLocations[storeIndex].lng
+        };
+
+        const card = createEl('div', { class: 'chatbot-map-product-card' });
+
+        const img = createEl('img', {
+          class: 'chatbot-map-product-image',
+          src: product.image || product.src,
+          alt: product.title
+        });
+
+        const info = createEl('div', { class: 'chatbot-map-product-info' });
+        const title = createEl('h3', { class: 'chatbot-map-product-title', text: product.title });
+        const model = createEl('p', { class: 'chatbot-map-product-model', text: product.model });
+        const price = createEl('p', { class: 'chatbot-map-product-price', text: product.price });
+
+        const link = createEl('a', {
+          class: 'chatbot-map-product-link',
+          href: `https://us.louisvuitton.com/eng-us/search/${encodeURIComponent(product.model || product.title || 'Louis Vuitton')}`,
+          target: '_blank',
+          rel: 'noopener noreferrer',
+          text: 'View on LV Store '
+        });
+
+        const linkIcon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        linkIcon.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+        linkIcon.setAttribute('viewBox', '0 0 24 24');
+        linkIcon.setAttribute('fill', 'none');
+        linkIcon.setAttribute('stroke', 'currentColor');
+        linkIcon.setAttribute('stroke-width', '2');
+        linkIcon.setAttribute('width', '16');
+        linkIcon.setAttribute('height', '16');
+        const linkPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        linkPath.setAttribute('d', 'M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25');
+        linkPath.setAttribute('stroke-linecap', 'round');
+        linkPath.setAttribute('stroke-linejoin', 'round');
+        linkIcon.appendChild(linkPath);
+        link.appendChild(linkIcon);
+
+        info.appendChild(title);
+        info.appendChild(model);
+        info.appendChild(price);
+        info.appendChild(link);
+
+        card.appendChild(img);
+        card.appendChild(info);
+
+        card.addEventListener('click', (e) => {
+          if (e.target.tagName === 'A' || e.target.closest('a')) return;
+
+          if (leafletMap && product.location) {
+            leafletMap.invalidateSize();
+            leafletMap.flyTo([product.location.lat, product.location.lng], 15, {
+              animate: true,
+              duration: 0.5
+            });
+          }
+
+          openChatbotLocationExplorer();
+        });
+
+        productGallery.appendChild(card);
+
+        if (leafletMap && product.location) {
+          const marker = L.marker([product.location.lat, product.location.lng])
+            .bindPopup(`<b>${product.title}</b><br>${product.price}`)
+            .addTo(leafletMap);
+          chatbotDiscoveryMarkers.push(marker);
+        }
+      });
+
+      if (storedProducts.length > 0) {
+        storedProducts.forEach((product, index) => {
           const storeIndex = index % 2;
           product.location = {
             lat: storeLocations[storeIndex].lat,
             lng: storeLocations[storeIndex].lng
           };
-          
-          const card = createEl('div', { class: 'chatbot-map-product-card' });
-          
-          // Product image
-          const img = createEl('img', { 
-            class: 'chatbot-map-product-image',
-            src: product.image || product.src,
-            alt: product.title
+        });
+        localStorage.setItem('droppedProducts', JSON.stringify(storedProducts));
+      }
+    }
+
+    async function hydrateChatbotMapFromDiscovery(keyword) {
+      const kd = keyword != null ? String(keyword).trim() : '';
+      const storeLocations = [
+        { lat: 40.7632, lng: -73.9732 },
+        { lat: 40.7245, lng: -73.9975 }
+      ];
+
+      productGallery.replaceChildren();
+      const loadingEl = createEl('div', {
+        class: 'chatbot-map-discovery-loading',
+        style: 'text-align:center;padding:14px;color:#666;font-size:13px;',
+        text: 'Loading discovery images…'
+      });
+      productGallery.appendChild(loadingEl);
+
+      try {
+        if (!window.ShopThatKeywordDiscovery) throw new Error('no-discovery');
+
+        const data = await window.ShopThatKeywordDiscovery.fetchKeywordDetails(kd || 'Louis Vuitton');
+        const discoveryList = window.ShopThatKeywordDiscovery.relatedArticlesToMapProducts(data, 12);
+
+        const storedProducts = readStoredArray('droppedProducts');
+        const merged = [];
+
+        storedProducts.slice(0, 4).forEach(p => {
+          merged.push({
+            id: p.id,
+            title: p.title || 'Product',
+            image: p.image || p.src,
+            src: p.image || p.src,
+            model: p.model || '',
+            price: p.price || '',
+            discoveryUrl:
+              'https://us.louisvuitton.com/eng-us/search/' +
+              encodeURIComponent(p.model || p.title || 'Louis Vuitton')
           });
-          
-          // Product info
-          const info = createEl('div', { class: 'chatbot-map-product-info' });
-          const title = createEl('h3', { class: 'chatbot-map-product-title', text: product.title });
-          const model = createEl('p', { class: 'chatbot-map-product-model', text: product.model });
-          const price = createEl('p', { class: 'chatbot-map-product-price', text: product.price });
-          
-          // View on LV Store link
-          const link = createEl('a', { 
-            class: 'chatbot-map-product-link',
-            href: `https://us.louisvuitton.com/eng-us/search/${encodeURIComponent(product.model || product.title || 'Louis Vuitton')}`,
-            target: '_blank',
-            rel: 'noopener noreferrer',
-            text: 'View on LV Store '
-          });
-          
-          // Add external link icon
-          const linkIcon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-          linkIcon.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
-          linkIcon.setAttribute('viewBox', '0 0 24 24');
-          linkIcon.setAttribute('fill', 'none');
-          linkIcon.setAttribute('stroke', 'currentColor');
-          linkIcon.setAttribute('stroke-width', '2');
-          linkIcon.setAttribute('width', '16');
-          linkIcon.setAttribute('height', '16');
-          const linkPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-          linkPath.setAttribute('d', 'M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25');
-          linkPath.setAttribute('stroke-linecap', 'round');
-          linkPath.setAttribute('stroke-linejoin', 'round');
-          linkIcon.appendChild(linkPath);
-          link.appendChild(linkIcon);
-          
-          info.appendChild(title);
-          info.appendChild(model);
-          info.appendChild(price);
-          info.appendChild(link);
-          
-          card.appendChild(img);
-          card.appendChild(info);
-          
-          // Add click handler to zoom to product location and open explorer
-          card.addEventListener('click', (e) => {
-            // Don't zoom or open explorer if clicking the link
-            if (e.target.tagName === 'A' || e.target.closest('a')) return;
-            
+        });
+        merged.push(...discoveryList.slice(0, Math.max(0, 16 - merged.length)));
+
+        loadingEl.remove();
+        clearChatbotDiscoveryMarkers();
+
+        if (merged.length === 0) {
+          renderChatbotMapProductsSync();
+          return;
+        }
+
+        window.ShopThatKeywordDiscovery.renderMapProductStrip(productGallery, merged, {
+          variant: 'chatbot',
+          leafletMap,
+          storeLocations,
+          markerRef: chatbotDiscoveryMarkers,
+          onCardClick(product) {
             if (leafletMap && product.location) {
               leafletMap.invalidateSize();
               leafletMap.flyTo([product.location.lat, product.location.lng], 15, {
@@ -2692,22 +2785,10 @@
                 duration: 0.5
               });
             }
-            
-            // Open location explorer
             openChatbotLocationExplorer();
-          });
-          
-          productGallery.appendChild(card);
-          
-          // Add marker to map if available
-          if (leafletMap && product.location) {
-            const marker = L.marker([product.location.lat, product.location.lng])
-              .bindPopup(`<b>${product.title}</b><br>${product.price}`)
-              .addTo(leafletMap);
           }
         });
-        
-        // Keep saved products updated without writing default map placeholders into the library.
+
         if (storedProducts.length > 0) {
           storedProducts.forEach((product, index) => {
             const storeIndex = index % 2;
@@ -2718,7 +2799,20 @@
           });
           localStorage.setItem('droppedProducts', JSON.stringify(storedProducts));
         }
+
+        setTimeout(() => {
+          if (leafletMap) leafletMap.invalidateSize();
+        }, 100);
+      } catch (err) {
+        console.warn('Chatbot keyword discovery map failed:', err);
+        loadingEl.remove();
+        renderChatbotMapProductsSync();
       }
+    }
+
+    // Render map view with products (Discovery API thumbnails + drops; fallback unchanged)
+    function renderMapView() {
+      void hydrateChatbotMapFromDiscovery(lastChatbotMapDiscoveryKeyword);
     }
     
     // Chatbot Location Explorer Functions

@@ -471,6 +471,178 @@
     return mapProducts;
   }
 
+  /** Leaflet markers for Keyword Discovery thumbnails (removed on refresh). */
+  let dashboardDiscoveryMarkers = [];
+
+  function clearDashboardDiscoveryMarkers() {
+    dashboardDiscoveryMarkers.forEach(function (m) {
+      if (leafletMap && m) leafletMap.removeLayer(m);
+    });
+    dashboardDiscoveryMarkers = [];
+  }
+
+  function renderDashboardMapProductsSync(productsEl) {
+    if (!productsEl) return;
+    productsEl.replaceChildren();
+    const productsJson = localStorage.getItem('droppedProducts');
+    console.log('Map view - Raw products from localStorage:', productsJson);
+    const storedProducts = readStoredArray('droppedProducts');
+    const products = getMapProductsWithFallback(storedProducts);
+    console.log('Map view - Parsed products:', storedProducts);
+
+    products.forEach((product, index) => {
+      const storeIndex = index % 2;
+      product.location = {
+        lat: storeLocations[storeIndex].lat,
+        lng: storeLocations[storeIndex].lng
+      };
+    });
+
+    if (storedProducts.length > 0) {
+      storedProducts.forEach((product, index) => {
+        const storeIndex = index % 2;
+        product.location = {
+          lat: storeLocations[storeIndex].lat,
+          lng: storeLocations[storeIndex].lng
+        };
+      });
+      localStorage.setItem('droppedProducts', JSON.stringify(storedProducts));
+    }
+
+    const productsWithLocation = products.filter(p => p.location);
+    console.log('Products with locations:', productsWithLocation);
+
+    if (productsWithLocation.length === 0) {
+      const emptyMsg = createEl('p', {
+        style: 'text-align: center; color: #666; padding: 20px;',
+        text: 'No products with locations yet'
+      });
+      productsEl.appendChild(emptyMsg);
+      return;
+    }
+
+    productsWithLocation.forEach(product => {
+      const card = createEl('div', { class: 'dashboard-map-product' });
+
+      const img = createEl('img', {
+        class: 'dashboard-map-product-image',
+        src: product.image || product.src,
+        alt: product.title
+      });
+
+      const info = createEl('div', { class: 'dashboard-map-product-info' });
+      const title = createEl('h3', { class: 'dashboard-map-product-title', text: product.title });
+      const model = createEl('p', { class: 'dashboard-map-product-model', text: product.model });
+      const price = createEl('p', { class: 'dashboard-map-product-price', text: product.price });
+
+      const link = createEl('a', {
+        class: 'dashboard-map-product-link',
+        href: `https://us.louisvuitton.com/eng-us/search/${encodeURIComponent(product.model || product.title || 'Louis Vuitton')}`,
+        target: '_blank',
+        rel: 'noopener noreferrer',
+        text: 'View on LV Store '
+      });
+
+      const linkIcon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      linkIcon.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+      linkIcon.setAttribute('viewBox', '0 0 24 24');
+      linkIcon.setAttribute('fill', 'none');
+      linkIcon.setAttribute('stroke', 'currentColor');
+      linkIcon.setAttribute('stroke-width', '2');
+      linkIcon.setAttribute('width', '16');
+      linkIcon.setAttribute('height', '16');
+      const linkPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      linkPath.setAttribute('d', 'M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25');
+      linkPath.setAttribute('stroke-linecap', 'round');
+      linkPath.setAttribute('stroke-linejoin', 'round');
+      linkIcon.appendChild(linkPath);
+      link.appendChild(linkIcon);
+
+      info.appendChild(title);
+      info.appendChild(model);
+      info.appendChild(price);
+      info.appendChild(link);
+
+      card.appendChild(img);
+      card.appendChild(info);
+
+      card.addEventListener('click', (e) => {
+        if (e.target.tagName === 'A' || e.target.closest('a')) return;
+        if (leafletMap && product.location) {
+          leafletMap.setView([product.location.lat, product.location.lng], 15);
+        }
+        openLocationExplorer();
+      });
+
+      productsEl.appendChild(card);
+    });
+  }
+
+  async function hydrateDashboardMapFromDiscovery(keyword) {
+    const kd = keyword != null ? String(keyword).trim() : '';
+    const productsEl = document.getElementById('mapProducts');
+    if (!productsEl) return;
+    productsEl.replaceChildren();
+    const loadingEl = createEl('p', {
+      class: 'map-products-discovery-loading',
+      style: 'text-align:center;color:#666;padding:16px;margin:0;',
+      text: 'Loading map images…'
+    });
+    productsEl.appendChild(loadingEl);
+
+    try {
+      if (!window.ShopThatKeywordDiscovery) throw new Error('no-discovery-module');
+      const data = await window.ShopThatKeywordDiscovery.fetchKeywordDetails(kd || 'Louis Vuitton');
+      const discoveryList = window.ShopThatKeywordDiscovery.relatedArticlesToMapProducts(data, 12);
+      const storedProducts = readStoredArray('droppedProducts');
+      const merged = [];
+
+      storedProducts.slice(0, 6).forEach(p => {
+        merged.push({
+          id: p.id,
+          title: p.title || 'Product',
+          image: p.image || p.src,
+          src: p.image || p.src,
+          model: p.model || '',
+          price: p.price || '',
+          discoveryUrl:
+            'https://us.louisvuitton.com/eng-us/search/' +
+            encodeURIComponent(p.model || p.title || 'Louis Vuitton')
+        });
+      });
+      merged.push(...discoveryList.slice(0, Math.max(0, 16 - merged.length)));
+
+      loadingEl.remove();
+      clearDashboardDiscoveryMarkers();
+
+      if (merged.length === 0) {
+        renderDashboardMapProductsSync(productsEl);
+        return;
+      }
+
+      window.ShopThatKeywordDiscovery.renderMapProductStrip(productsEl, merged, {
+        variant: 'dashboard',
+        leafletMap,
+        storeLocations,
+        markerRef: dashboardDiscoveryMarkers,
+        onCardClick(product) {
+          if (leafletMap && product.location) {
+            leafletMap.setView([product.location.lat, product.location.lng], 15);
+          }
+          openLocationExplorer();
+        }
+      });
+
+      requestAnimationFrame(() => {
+        if (leafletMap) leafletMap.invalidateSize();
+      });
+    } catch (err) {
+      console.warn('Keyword discovery map hydrate failed:', err);
+      loadingEl.remove();
+      renderDashboardMapProductsSync(productsEl);
+    }
+  }
+
   // View switching
   function switchView(viewName) {
     if (!views[viewName]) return;
@@ -2515,110 +2687,8 @@
       });
     }
 
-    // Render products with locations
-    productsEl.replaceChildren();
-    const productsJson = localStorage.getItem('droppedProducts');
-    console.log('Map view - Raw products from localStorage:', productsJson);
-    const storedProducts = readStoredArray('droppedProducts');
-    const products = getMapProductsWithFallback(storedProducts);
-    console.log('Map view - Parsed products:', storedProducts);
-    
-    // Assign products to alternate between the two store locations
-    products.forEach((product, index) => {
-      const storeIndex = index % 2;
-      product.location = {
-        lat: storeLocations[storeIndex].lat,
-        lng: storeLocations[storeIndex].lng
-      };
-    });
-    
-    // Keep saved products updated without writing default map placeholders into the library.
-    if (storedProducts.length > 0) {
-      storedProducts.forEach((product, index) => {
-        const storeIndex = index % 2;
-        product.location = {
-          lat: storeLocations[storeIndex].lat,
-          lng: storeLocations[storeIndex].lng
-        };
-      });
-      localStorage.setItem('droppedProducts', JSON.stringify(storedProducts));
-    }
-    
-    const productsWithLocation = products.filter(p => p.location);
-    console.log('Products with locations:', productsWithLocation);
-
-    if (productsWithLocation.length === 0) {
-      const emptyMsg = createEl('p', {
-        style: 'text-align: center; color: #666; padding: 20px;',
-        text: 'No products with locations yet'
-      });
-      productsEl.appendChild(emptyMsg);
-    } else {
-      productsWithLocation.forEach(product => {
-        const card = createEl('div', { class: 'dashboard-map-product' });
-        
-        // Product image
-        const img = createEl('img', { 
-          class: 'dashboard-map-product-image',
-          src: product.image || product.src,
-          alt: product.title
-        });
-        
-        // Product info container
-        const info = createEl('div', { class: 'dashboard-map-product-info' });
-        const title = createEl('h3', { class: 'dashboard-map-product-title', text: product.title });
-        const model = createEl('p', { class: 'dashboard-map-product-model', text: product.model });
-        const price = createEl('p', { class: 'dashboard-map-product-price', text: product.price });
-        
-        // View on LV Store link
-        const link = createEl('a', { 
-          class: 'dashboard-map-product-link',
-          href: `https://us.louisvuitton.com/eng-us/search/${encodeURIComponent(product.model || product.title || 'Louis Vuitton')}`,
-          target: '_blank',
-          rel: 'noopener noreferrer',
-          text: 'View on LV Store '
-        });
-        
-        // Add external link icon
-        const linkIcon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-        linkIcon.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
-        linkIcon.setAttribute('viewBox', '0 0 24 24');
-        linkIcon.setAttribute('fill', 'none');
-        linkIcon.setAttribute('stroke', 'currentColor');
-        linkIcon.setAttribute('stroke-width', '2');
-        linkIcon.setAttribute('width', '16');
-        linkIcon.setAttribute('height', '16');
-        const linkPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-        linkPath.setAttribute('d', 'M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25');
-        linkPath.setAttribute('stroke-linecap', 'round');
-        linkPath.setAttribute('stroke-linejoin', 'round');
-        linkIcon.appendChild(linkPath);
-        link.appendChild(linkIcon);
-        
-        info.appendChild(title);
-        info.appendChild(model);
-        info.appendChild(price);
-        info.appendChild(link);
-        
-        card.appendChild(img);
-        card.appendChild(info);
-        
-        card.addEventListener('click', (e) => {
-          // Don't zoom or open explorer if clicking the link
-          if (e.target.tagName === 'A' || e.target.closest('a')) return;
-          
-          // Zoom to product's assigned store location
-          if (leafletMap && product.location) {
-            leafletMap.setView([product.location.lat, product.location.lng], 15);
-          }
-          
-          // Open location explorer
-          openLocationExplorer();
-        });
-        
-        productsEl.appendChild(card);
-      });
-    }
+    // Map strip: Keyword Discovery API (S3 images) merged with dropped products; fallback keeps prior sync behavior.
+    void hydrateDashboardMapFromDiscovery('Louis Vuitton');
   }
   
   // Location Explorer Functions
@@ -2729,7 +2799,17 @@
     const badgesWrapper = createEl('div', { class: 'keywords-badges' });
     
     keywords.forEach(keyword => {
-      const badge = createEl('span', { class: 'keyword-badge', text: keyword });
+      const badge = createEl('span', {
+        class: 'keyword-badge keyword-badge--discovery',
+        text: keyword,
+        title: 'Load related Discovery images'
+      });
+      badge.style.cursor = 'pointer';
+      badge.addEventListener('click', (ev) => {
+        ev.preventDefault();
+        ev.stopPropagation();
+        void hydrateDashboardMapFromDiscovery(String(keyword));
+      });
       badgesWrapper.appendChild(badge);
     });
     

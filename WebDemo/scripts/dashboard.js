@@ -105,11 +105,16 @@
 
     filteredKeywords.forEach(keyword => {
       const tr = document.createElement('tr');
+      tr.style.cursor = 'pointer';
+      tr.title = 'Load Discovery articles for this keyword';
       tr.innerHTML = `
         <td>${keyword.name}</td>
         <td>$${keyword.cost.toLocaleString()}</td>
         <td>${keyword.engagement}%</td>
       `;
+      tr.addEventListener('click', () => {
+        void loadDiscoveryArticlesForKeyword(keyword.name);
+      });
       body.appendChild(tr);
     });
 
@@ -161,8 +166,8 @@
     // Initialize tab functionality
     initDocumentAccessTabs();
     
-    // Populate articles
-    populateArticles();
+    // Populate articles via Keyword Discovery API (fallback to demo list on error)
+    populateArticlesFromDiscovery();
   }
 
   function initDocumentAccessTabs() {
@@ -189,7 +194,104 @@
     });
   }
 
-  function populateArticles() {
+  function activateDocumentTab(which) {
+    const tabBtns = $all('.tab-btn');
+    const tabContents = $all('.tab-content');
+    const id = which === 'new-content' ? 'new-content-articles' : 'trending-articles';
+    tabBtns.forEach(b => {
+      b.classList.toggle('active', b.dataset.tab === (which === 'new-content' ? 'new-content' : 'trending'));
+    });
+    tabContents.forEach(content => {
+      content.classList.toggle('active', content.id === id);
+    });
+  }
+
+  async function loadDiscoveryArticlesForKeyword(name) {
+    const trendingContainer = $('#trending-articles .articles-list');
+    if (!window.ShopThatKeywordDiscovery || !trendingContainer) return;
+    activateDocumentTab('trending');
+    trendingContainer.replaceChildren();
+    const loading = document.createElement('div');
+    loading.style.cssText = 'padding:20px;text-align:center;color:#6b7280;';
+    loading.textContent = 'Loading Discovery…';
+    trendingContainer.appendChild(loading);
+    try {
+      const data = await window.ShopThatKeywordDiscovery.fetchKeywordDetails(name);
+      loading.remove();
+      fillArticlesContainerFromDiscovery(trendingContainer, data);
+    } catch (e) {
+      console.warn('Discovery keyword fetch failed', e);
+      loading.textContent = 'Could not load articles. Try again.';
+    }
+  }
+
+  function renderArticleCard(article) {
+    const a = document.createElement('a');
+    a.className = 'article-card';
+    a.href = article.url;
+    a.target = '_blank';
+    a.rel = 'noopener noreferrer';
+    a.innerHTML =
+      '<div class="article-card__thumb">' +
+        '<img src="' + article.image + '" alt="" loading="lazy">' +
+      '</div>' +
+      '<div class="article-card__body">' +
+        '<div class="article-card__title">' + article.title + '</div>' +
+        '<div class="article-card__meta">' +
+          '<span class="article-card__source">' + article.source + '</span>' +
+          '<span class="article-card__dot">&middot;</span>' +
+          '<span class="article-card__views">' + article.views + '</span>' +
+        '</div>' +
+      '</div>';
+    return a;
+  }
+
+  function fillArticlesContainerFromDiscovery(container, data) {
+    if (!container) return;
+    container.replaceChildren();
+    if (!window.ShopThatKeywordDiscovery) return;
+    const list = window.ShopThatKeywordDiscovery.normalizeDashboardArticles(data, 12);
+    if (list.length === 0) {
+      const empty = document.createElement('div');
+      empty.style.cssText = 'padding:20px;text-align:center;color:#9ca3af;';
+      empty.textContent = 'No Discovery results.';
+      container.appendChild(empty);
+      return;
+    }
+    list.forEach(item => container.appendChild(renderArticleCard(item)));
+  }
+
+  async function populateArticlesFromDiscovery() {
+    const trendingContainer = $('#trending-articles .articles-list');
+    const newContentContainer = $('#new-content-articles .articles-list');
+    if (!window.ShopThatKeywordDiscovery) {
+      populateArticlesStaticFallback();
+      return;
+    }
+    function spin(c) {
+      if (!c) return;
+      c.replaceChildren();
+      const d = document.createElement('div');
+      d.style.cssText = 'padding:20px;text-align:center;color:#6b7280;';
+      d.textContent = 'Loading Discovery…';
+      c.appendChild(d);
+    }
+    spin(trendingContainer);
+    spin(newContentContainer);
+    try {
+      const [resTrending, resNew] = await Promise.all([
+        window.ShopThatKeywordDiscovery.fetchKeywordDetails('louis vuitton'),
+        window.ShopThatKeywordDiscovery.fetchKeywordDetails('kusama')
+      ]);
+      fillArticlesContainerFromDiscovery(trendingContainer, resTrending);
+      fillArticlesContainerFromDiscovery(newContentContainer, resNew);
+    } catch (e) {
+      console.warn('Dashboard discovery lists failed', e);
+      populateArticlesStaticFallback();
+    }
+  }
+
+  function populateArticlesStaticFallback() {
     const trendingArticles = [
       {
         title: 'Luxury Market Analysis 2024',
@@ -252,37 +354,16 @@
       }
     ];
 
-    function renderArticleCard(article) {
-      var a = document.createElement('a');
-      a.className = 'article-card';
-      a.href = article.url;
-      a.target = '_blank';
-      a.rel = 'noopener noreferrer';
-      a.innerHTML =
-        '<div class="article-card__thumb">' +
-          '<img src="' + article.image + '" alt="" loading="lazy">' +
-        '</div>' +
-        '<div class="article-card__body">' +
-          '<div class="article-card__title">' + article.title + '</div>' +
-          '<div class="article-card__meta">' +
-            '<span class="article-card__source">' + article.source + '</span>' +
-            '<span class="article-card__dot">&middot;</span>' +
-            '<span class="article-card__views">' + article.views + '</span>' +
-          '</div>' +
-        '</div>';
-      return a;
-    }
-
-    var trendingContainer = $('#trending-articles .articles-list');
+    const trendingContainer = $('#trending-articles .articles-list');
     if (trendingContainer) {
       trendingContainer.replaceChildren();
-      trendingArticles.forEach(function (a) { trendingContainer.appendChild(renderArticleCard(a)); });
+      trendingArticles.forEach(a => trendingContainer.appendChild(renderArticleCard(a)));
     }
 
-    var newContentContainer = $('#new-content-articles .articles-list');
+    const newContentContainer = $('#new-content-articles .articles-list');
     if (newContentContainer) {
       newContentContainer.replaceChildren();
-      newContentArticles.forEach(function (a) { newContentContainer.appendChild(renderArticleCard(a)); });
+      newContentArticles.forEach(a => newContentContainer.appendChild(renderArticleCard(a)));
     }
   }
 
