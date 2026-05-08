@@ -11,6 +11,7 @@
   var ASK_URL = global.location && global.location.protocol === 'https:'
     ? PROXY_ASK_URL
     : DIRECT_ASK_URL;
+  var askUrlOverride = null;
   var ANALYZING_TEXT = 'Analyzing Luxury Catalogs';
 
   /** Prompt tuned so dashboard can parse a bullet list of keyword phrases */
@@ -54,6 +55,36 @@
   }
 
   function ask(query) {
+    var payload = JSON.stringify({ query: String(query) });
+
+    function post(url) {
+      return fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: url === PROXY_ASK_URL ? 'same-origin' : 'omit',
+        body: payload
+      }).then(function (res) {
+        if (!res.ok) {
+          var err = new Error('HTTP ' + res.status);
+          err.status = res.status;
+          throw err;
+        }
+        return res.json();
+      });
+    }
+
+    if (askUrlOverride) return post(askUrlOverride);
+
+    return post(ASK_URL).catch(function (err) {
+      if (ASK_URL === PROXY_ASK_URL && (err.status === 404 || err.status === 405 || err.status === 500 || err.status === 502)) {
+        askUrlOverride = DIRECT_ASK_URL;
+        return post(DIRECT_ASK_URL);
+      }
+      throw err;
+    });
+  }
+
+  function askLegacy(query) {
     return fetch(ASK_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
