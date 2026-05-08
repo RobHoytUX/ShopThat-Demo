@@ -346,9 +346,11 @@
   .chatbot-wrapper.map-view-active .chatbot-location-explorer{margin-top:12px}
   .chatbot-product-gallery{display:none !important;width:100%;margin-top:6px;margin-bottom:0;overflow-x:auto;overflow-y:visible;white-space:nowrap;scrollbar-width:thin;padding:0 0 4px 0;gap:10px;flex-shrink:0;min-height:108px}
   .chatbot-product-gallery.is-visible{display:flex !important}
-  .chatbot-wrapper.map-view-active .chatbot-product-gallery.is-visible{position:relative;left:auto;right:auto;bottom:auto;width:100%;display:grid !important;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;min-height:104px;overflow:visible;white-space:normal;padding:0}
+  .chatbot-wrapper.map-view-active .chatbot-product-gallery.is-visible{position:relative;left:auto;right:auto;bottom:auto;width:100%;display:grid !important;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;min-height:104px;max-height:min(280px,38vh);overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;white-space:normal;padding:4px 2px 4px 0;align-content:start;scrollbar-width:thin}
+
   .chatbot-header[hidden],.chatbot-messages[hidden],.chatbot-input[hidden]{display:none !important}
   .chatbot-product-gallery::-webkit-scrollbar{height:6px}
+  .chatbot-wrapper.map-view-active .chatbot-product-gallery.is-visible::-webkit-scrollbar{width:6px;height:6px}
   .chatbot-product-gallery::-webkit-scrollbar-track{background:rgba(0,0,0,0.06);border-radius:3px}
   .chatbot-product-gallery::-webkit-scrollbar-thumb{background:rgba(0,0,0,0.25);border-radius:3px}
   .chatbot-map-empty{padding:20px;text-align:center;color:#666;font-size:14px;width:100%}
@@ -850,6 +852,7 @@
     // Leaflet map instance
     let leafletMap = null;
     let chatbotLocationMarkers = []; // Store location markers for cleanup
+
     
     const chatbotLocationData = window.ShopThatMainMapData || {
       restaurants: [],
@@ -1314,8 +1317,28 @@
       return 'Tell me about "' + label + '" in the context of Louis Vuitton luxury fashion, campaigns, and retail.';
     }
 
+    function disabledKeywordInText(text) {
+      if (!window.ShopThatData || !window.ShopThatData.findDisabledKeywordInText) return '';
+      return window.ShopThatData.findDisabledKeywordInText(text);
+    }
+
+    function addDisabledKeywordMessage(keyword) {
+      const label = keyword || 'that keyword';
+      addMessage(
+        'bot',
+        `I can’t answer about **${label}** right now because that keyword is disabled on the Keywords page. Re-enable it there, then ask again.`,
+        { renderMarkdown: true }
+      );
+      finalizeAssistantTurnScroll();
+    }
+
     async function runLuxuryQueryForKeyword(label) {
       if (!window.LuxuryIntelligence) return;
+      const disabledKeyword = disabledKeywordInText(label);
+      if (disabledKeyword) {
+        addDisabledKeywordMessage(disabledKeyword);
+        return;
+      }
       showThinking();
       try {
         const data = await window.LuxuryIntelligence.ask(keywordToLuxuryQuery(label));
@@ -1348,6 +1371,12 @@
       input.focus();
 
       addMessage('user', label);
+
+      const disabledKeyword = disabledKeywordInText(label);
+      if (disabledKeyword) {
+        addDisabledKeywordMessage(disabledKeyword);
+        return;
+      }
 
       if (window.ShopThatData) {
         window.ShopThatData.trackKeywordUsage(label, 'chatbot-selection');
@@ -1815,6 +1844,12 @@
       if (!hasSelectedKeyword) setInputsEnabled(true);
       
       // Show thinking indicator
+      const disabledKeyword = disabledKeywordInText(txt);
+      if (disabledKeyword) {
+        addDisabledKeywordMessage(disabledKeyword);
+        return;
+      }
+
       showThinking();
       
       try {
@@ -2603,7 +2638,6 @@
     function renderMapView() {
       productGallery.replaceChildren();
       
-      // Always reload from localStorage to get latest products
       const storedProducts = readStoredArray('droppedProducts');
       // Match the product-dashboard map: show at most 3 products,
       // preferring stored ones and filling the rest from defaults.
@@ -2617,9 +2651,9 @@
       
       if (savedProducts.length === 0) {
         // Show empty message
-        const emptyMsg = createEl('div', { 
+        const emptyMsg = createEl('div', {
           class: 'chatbot-map-empty',
-          text: 'No products yet. Drop product images from the homepage to see them here!' 
+          text: 'No products yet. Drop product images from the homepage to see them here!'
         });
         productGallery.appendChild(emptyMsg);
       } else {
@@ -2635,7 +2669,7 @@
           const card = createEl('div', { class: 'chatbot-map-product-card' });
           
           // Product image
-          const img = createEl('img', { 
+          const img = createEl('img', {
             class: 'chatbot-map-product-image',
             src: product.image || product.src,
             alt: product.title
@@ -2648,7 +2682,7 @@
           const price = createEl('p', { class: 'chatbot-map-product-price', text: product.price });
           
           // View on LV Store link
-          const link = createEl('a', { 
+          const link = createEl('a', {
             class: 'chatbot-map-product-link',
             href: `https://us.louisvuitton.com/eng-us/search/${encodeURIComponent(product.model || product.title || 'Louis Vuitton')}`,
             target: '_blank',
@@ -2701,7 +2735,7 @@
           
           // Add marker to map if available
           if (leafletMap && product.location) {
-            const marker = L.marker([product.location.lat, product.location.lng])
+            L.marker([product.location.lat, product.location.lng])
               .bindPopup(`<b>${product.title}</b><br>${product.price}`)
               .addTo(leafletMap);
           }

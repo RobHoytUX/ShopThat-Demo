@@ -1,11 +1,11 @@
 /**
  * LV Luxury Intelligence API (v2.2) — shared client for WebDemo.
- * POST /api/luxury-intelligence/ask through the authenticated backend proxy.
+ * POST /ask on the EC2 Luxury Intelligence service.
  */
 (function (global) {
   'use strict';
 
-  var ASK_URL = '/api/luxury-intelligence/ask';
+  var ASK_URL = 'http://18.221.156.51/ask';
   var ANALYZING_TEXT = 'Analyzing Luxury Catalogs';
 
   /** Prompt tuned so dashboard can parse a bullet list of keyword phrases */
@@ -52,7 +52,7 @@
     return fetch(ASK_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      credentials: 'same-origin',
+      credentials: 'omit',
       body: JSON.stringify({ query: String(query) })
     }).then(function (res) {
       if (!res.ok) throw new Error('HTTP ' + res.status);

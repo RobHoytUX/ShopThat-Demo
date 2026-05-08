@@ -4,6 +4,7 @@
   const STORAGE_KEYS = {
     keywords: 'st_keywords_v1',
     connections: 'st_connections_v1',
+    disabledKeywords: 'st_disabled_keywords_v1',
     chatAnalytics: 'st_chat_analytics_v1',
     keywordUsage: 'st_keyword_usage_v1',
     sessions: 'st_chat_sessions_v1'
@@ -159,6 +160,13 @@
 
   // Shared data management
   window.ShopThatData = {
+    normalizeKeywordName(name) {
+      return String(name || '')
+        .replace(/\s+/g, ' ')
+        .trim()
+        .toLowerCase();
+    },
+
     // Keywords management
     getKeywords() {
       return window.ShopThatStorage.readArray(STORAGE_KEYS.keywords);
@@ -204,6 +212,64 @@
       
       this.saveKeywords(updatedKeywords);
       this.saveConnections(updatedConnections);
+    },
+
+    getDisabledKeywords() {
+      return window.ShopThatStorage.readArray(STORAGE_KEYS.disabledKeywords)
+        .map(k => String(k || '').trim())
+        .filter(Boolean);
+    },
+
+    saveDisabledKeywords(keywords) {
+      const seen = new Set();
+      const normalized = (Array.isArray(keywords) ? keywords : [])
+        .map(k => String(k || '').trim())
+        .filter(Boolean)
+        .filter(k => {
+          const key = this.normalizeKeywordName(k);
+          if (seen.has(key)) return false;
+          seen.add(key);
+          return true;
+        });
+      window.ShopThatStorage.write(STORAGE_KEYS.disabledKeywords, normalized);
+      this.notifyChange('disabledKeywords', normalized);
+      window.dispatchEvent(new CustomEvent('shopthat-disabled-keywords-changed', {
+        detail: normalized
+      }));
+    },
+
+    setKeywordDisabled(keywordName, disabled) {
+      const list = this.getDisabledKeywords();
+      const target = this.normalizeKeywordName(keywordName);
+      if (!target) return;
+      const next = list.filter(k => this.normalizeKeywordName(k) !== target);
+      if (disabled) next.push(String(keywordName).trim());
+      this.saveDisabledKeywords(next);
+    },
+
+    isKeywordDisabled(keywordName) {
+      const target = this.normalizeKeywordName(keywordName);
+      if (!target) return false;
+      return this.getDisabledKeywords()
+        .some(k => this.normalizeKeywordName(k) === target);
+    },
+
+    findDisabledKeywordInText(text) {
+      const raw = String(text || '');
+      const normalizedText = this.normalizeKeywordName(raw);
+      if (!normalizedText) return '';
+      const disabled = this.getDisabledKeywords();
+      return disabled.find(keyword => {
+        const normalizedKeyword = this.normalizeKeywordName(keyword);
+        if (!normalizedKeyword || normalizedKeyword.length < 2) return false;
+        const escaped = normalizedKeyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const phraseRegex = new RegExp('(^|[^a-z0-9])' + escaped + '([^a-z0-9]|$)', 'i');
+        return phraseRegex.test(normalizedText);
+      }) || '';
+    },
+
+    isTextBlockedByDisabledKeyword(text) {
+      return !!this.findDisabledKeywordInText(text);
     },
 
     // Connections management
