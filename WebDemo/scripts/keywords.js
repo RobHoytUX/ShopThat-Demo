@@ -155,7 +155,11 @@ console.log('Document ready state:', document.readyState);
   
   // Track hidden groups (will be defined later but declared here for state management)
   let hiddenGroups = new Set();
-  let disabledNodes = new Set(); // Track individually disabled nodes
+  let disabledNodes = new Set(
+    window.ShopThatData && window.ShopThatData.getDisabledKeywords
+      ? window.ShopThatData.getDisabledKeywords()
+      : []
+  ); // Track individually disabled nodes
   let filterState = {
     topLevel: true,
     connected: true,
@@ -1487,16 +1491,15 @@ console.log('Document ready state:', document.readyState);
           </div>
           <div class="sidebar-section">
             <div class="sidebar-section-label">Related Articles</div>
-            <div class="sidebar-articles kw-related-articles-mount"></div>
+            <div class="sidebar-articles">
+              ${generateArticlesHTML('LVMH')}
+            </div>
           </div>
         </div>
       `;
       
       // Add click handlers to chips
       attachChipClickHandlers();
-      if (window.kwHydrateRelatedArticles) {
-        window.kwHydrateRelatedArticles('LVMH', drawerBody);
-      }
     }
   }
   
@@ -1526,6 +1529,9 @@ console.log('Document ready state:', document.readyState);
       resetBtn.addEventListener('click', () => {
         // Clear all disabled nodes
         disabledNodes.clear();
+        if (window.ShopThatData && window.ShopThatData.saveDisabledKeywords) {
+          window.ShopThatData.saveDisabledKeywords([]);
+        }
         
         // Update all chips to enabled state
         chips.forEach(chip => {
@@ -1548,13 +1554,31 @@ console.log('Document ready state:', document.readyState);
     } else {
       disabledNodes.add(nodeId);
     }
+    if (window.ShopThatData && window.ShopThatData.saveDisabledKeywords) {
+      window.ShopThatData.saveDisabledKeywords(Array.from(disabledNodes));
+    }
     
     // Update node appearance
     updateNodeDisabledStates();
   }
+
+  function syncDisabledNodesFromShared() {
+    if (!window.ShopThatData || !window.ShopThatData.getDisabledKeywords) return;
+    disabledNodes = new Set(window.ShopThatData.getDisabledKeywords());
+    updateNodeDisabledStates();
+    if (drawerBody) {
+      drawerBody.querySelectorAll('.sidebar-chip--toggle').forEach(chip => {
+        const keyword = chip.dataset.keyword;
+        chip.classList.toggle('sidebar-chip--disabled', disabledNodes.has(keyword));
+      });
+      const resetBtn = drawerBody.querySelector('#resetChipsBtn');
+      if (resetBtn) resetBtn.disabled = disabledNodes.size === 0;
+    }
+  }
   
   // Update the visual state of disabled nodes
   function updateNodeDisabledStates() {
+    if (!node || !node.each) return;
     node.each(function(d) {
       const nodeEl = d3.select(this);
       const isDisabled = disabledNodes.has(d.id);
@@ -1734,16 +1758,15 @@ console.log('Document ready state:', document.readyState);
         </div>
         <div class="sidebar-section">
           <div class="sidebar-section-label">Related Articles</div>
-          <div class="sidebar-articles kw-related-articles-mount"></div>
+          <div class="sidebar-articles">
+            ${generateArticlesHTML(d.id)}
+          </div>
         </div>
       </div>
     `;
     
     // Add click handlers to chips
     attachChipClickHandlers();
-    if (window.kwHydrateRelatedArticles) {
-      window.kwHydrateRelatedArticles(d.id, drawerBody);
-    }
   }
   
   function closeDrawer(){
@@ -2173,6 +2196,7 @@ console.log('Document ready state:', document.readyState);
 
   // Expose tab switching for external tab navigation
   window.kwShowBubblesTab = function() {
+    syncDisabledNodesFromShared();
     hideLinearView();
     showBubbleView();
   };
@@ -2206,10 +2230,7 @@ console.log('Document ready state:', document.readyState);
             if (body) {
               var conns = getConnectedNodeIds(target);
               var connNodes = allNodes.filter(function(nd) { return conns.has(nd.id) && nd.id !== target.id; });
-              body.innerHTML = '<div class="sidebar-stat"><span class="sidebar-stat-value">' + connNodes.length + '</span><span class="sidebar-stat-label">connections</span></div><div class="sidebar-connections"><h3>Connected Keywords</h3>' + connNodes.map(function(c) { return '<span class="sidebar-connection-tag">' + escapeHtml(c.id) + '</span>'; }).join('') + '</div><div class="sidebar-articles"><h3>Related Articles</h3><div class="kw-related-articles-mount"></div></div>';
-              if (window.kwHydrateRelatedArticles) {
-                window.kwHydrateRelatedArticles(target.id, body);
-              }
+              body.innerHTML = '<div class="sidebar-stat"><span class="sidebar-stat-value">' + connNodes.length + '</span><span class="sidebar-stat-label">connections</span></div><div class="sidebar-connections"><h3>Connected Keywords</h3>' + connNodes.map(function(c) { return '<span class="sidebar-connection-tag">' + escapeHtml(c.id) + '</span>'; }).join('') + '</div><div class="sidebar-articles"><h3>Related Articles</h3>' + generateArticlesHTML(target.id) + '</div>';
             }
           }
         });
@@ -2224,6 +2245,8 @@ console.log('Document ready state:', document.readyState);
   window.kwGetConnected = getConnectedNodeIds;
   window.kwNeighborhoodIdsForSearch = neighborhoodIdsForSearchQuery;
   window.kwGetArticlesHTML = generateArticlesHTML;
+
+  window.addEventListener('shopthat-disabled-keywords-changed', syncDisabledNodesFromShared);
 
   // Fullscreen toggle
   const fullscreenToggle = document.getElementById('fullscreenToggle');

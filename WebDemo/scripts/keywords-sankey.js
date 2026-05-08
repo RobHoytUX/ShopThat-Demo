@@ -283,6 +283,8 @@
     var outgoing = sourceLinks.map(function (l) { return l.target.name; });
     var incoming = targetLinks.map(function (l) { return l.source.name; });
 
+    var articlesHTML = window.kwGetArticlesHTML ? window.kwGetArticlesHTML(d.name) : '';
+
     var html = '<div class="sidebar-stat"><span class="sidebar-stat-value">' + (groupLabels[d.group] || 'Other') + '</span><span class="sidebar-stat-label">group</span></div>';
     html += '<div class="sidebar-stat"><span class="sidebar-stat-value">' + (outgoing.length + incoming.length) + '</span><span class="sidebar-stat-label">connections</span></div>';
 
@@ -293,11 +295,8 @@
       html += '<div class="sidebar-connections"><h3>Flows From</h3>' + incoming.map(function (n) { return '<span class="sidebar-connection-tag">' + n + '</span>'; }).join('') + '</div>';
     }
 
-    html += '<div class="sidebar-articles"><h3>Related Articles</h3><div class="kw-related-articles-mount"></div></div>';
+    html += '<div class="sidebar-articles"><h3>Related Articles</h3>' + articlesHTML + '</div>';
     drawerBody.innerHTML = html;
-    if (window.kwHydrateRelatedArticles) {
-      window.kwHydrateRelatedArticles(d.name, drawerBody);
-    }
   }
 
   function showFlowDetails(d) {

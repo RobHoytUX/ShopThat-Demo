@@ -9,7 +9,24 @@
   var drawerBodyEl = document.getElementById('treeDrawerBody');
 
   /** Graph keyword ids dimmed via the side panel (same behaviour as bubbles). */
-  var treeDisabledNodes = new Set();
+  var treeDisabledNodes = new Set(
+    window.ShopThatData && window.ShopThatData.getDisabledKeywords
+      ? window.ShopThatData.getDisabledKeywords()
+      : []
+  );
+
+  function persistTreeDisabledNodes() {
+    if (window.ShopThatData && window.ShopThatData.saveDisabledKeywords) {
+      window.ShopThatData.saveDisabledKeywords(Array.from(treeDisabledNodes));
+    }
+  }
+
+  function syncTreeDisabledNodesFromShared() {
+    if (!window.ShopThatData || !window.ShopThatData.getDisabledKeywords) return;
+    treeDisabledNodes = new Set(window.ShopThatData.getDisabledKeywords());
+    syncTreeDrawerChipClasses();
+    updateTreeNodeDisabledVisuals();
+  }
   // Currently-focused node in the tree (the one whose details are shown in
   // the side panel). Clicking it again collapses children and closes the panel.
   var selectedTreeNode = null;
@@ -327,6 +344,7 @@
         } else {
           treeDisabledNodes.add(keyword);
         }
+        persistTreeDisabledNodes();
         syncTreeDrawerChipClasses();
         updateTreeNodeDisabledVisuals();
         updateResetBtnState();
@@ -336,6 +354,7 @@
     if (resetBtn) {
       resetBtn.addEventListener('click', function () {
         treeDisabledNodes.clear();
+        persistTreeDisabledNodes();
         chips.forEach(function (c) { c.classList.remove('sidebar-chip--disabled'); });
         updateTreeNodeDisabledVisuals();
         resetBtn.disabled = true;
@@ -650,15 +669,12 @@
 
     html += '<div class="sidebar-section">';
     html += '<div class="sidebar-section-label">Related Articles</div>';
-    html += '<div class="sidebar-articles kw-related-articles-mount"></div>';
+    html += '<div class="sidebar-articles">' + (window.kwGetArticlesHTML ? window.kwGetArticlesHTML(realId) : '') + '</div>';
     html += '</div>';
 
     html += '</div>';
     drawerBodyEl.innerHTML = html;
     attachTreeChipClickHandlers();
-    if (window.kwHydrateRelatedArticles) {
-      window.kwHydrateRelatedArticles(realId, drawerBodyEl);
-    }
   }
 
   // ─── Search snapshot helpers ───────────────────────────────────────────────
@@ -828,6 +844,7 @@
   });
 
   window.kwShowTreeTab = function () {
+    syncTreeDisabledNodesFromShared();
     if (!initialized) {
       setTimeout(initTree, 50);
     } else {
@@ -841,10 +858,12 @@
 
   window.addEventListener('kw-data-updated', function () {
     initialized = false;
-    treeDisabledNodes.clear();
+    syncTreeDisabledNodesFromShared();
     var tab = document.getElementById('kw-tree-tab');
     if (tab && tab.style.display !== 'none') {
       setTimeout(initTree, 50);
     }
   });
+
+  window.addEventListener('shopthat-disabled-keywords-changed', syncTreeDisabledNodesFromShared);
 })();
