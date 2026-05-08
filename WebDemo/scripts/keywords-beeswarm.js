@@ -233,7 +233,6 @@
 
     var nodes = window.kwGetNodes ? window.kwGetNodes() : [];
     var getConnected = window.kwGetConnected;
-    var articlesHTML = window.kwGetArticlesHTML ? window.kwGetArticlesHTML(d.id) : '';
     var connNodes = [];
 
     if (getConnected) {
@@ -249,7 +248,10 @@
       '<div class="sidebar-stat"><span class="sidebar-stat-value">' + d.connections + '</span><span class="sidebar-stat-label">connections</span></div>' +
       '<div class="sidebar-stat"><span class="sidebar-stat-value">' + (groupLabels[d.group] || 'Other') + '</span><span class="sidebar-stat-label">group</span></div>' +
       '<div class="sidebar-connections"><h3>Connected Keywords</h3>' + connNodes.map(function (c) { return '<span class="sidebar-connection-tag">' + c.id + '</span>'; }).join('') + '</div>' +
-      '<div class="sidebar-articles"><h3>Related Articles</h3>' + articlesHTML + '</div>';
+      '<div class="sidebar-articles"><h3>Related Articles</h3><div class="kw-related-articles-mount"></div></div>';
+    if (window.kwHydrateRelatedArticles) {
+      window.kwHydrateRelatedArticles(d.id, drawerBody);
+    }
   }
 
   window.kwShowBeeswarmTab = function () {

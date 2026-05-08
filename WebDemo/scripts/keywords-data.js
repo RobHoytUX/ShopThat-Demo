@@ -1,6 +1,14 @@
 (function (global) {
   'use strict';
 
+  function escapeHtml(s) {
+    return String(s)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
 // Article data - maps keywords to related articles
 const keywordArticles = {
   'LVMH': [
@@ -44,29 +52,96 @@ const keywordArticles = {
   ]
 };
 
-// Get articles for a keyword
+// Get articles for a keyword (fallback when Discovery API empty / fails)
 function getArticlesForKeyword(keyword) {
   return keywordArticles[keyword] || keywordArticles['default'];
 }
 
-// Generate articles HTML for sidebar
-function generateArticlesHTML(keyword) {
-  const articles = getArticlesForKeyword(keyword);
-  return articles.map(article => `
-    <a class="sidebar-article" href="${article.url || '#'}" target="_blank" rel="noopener noreferrer" style="text-decoration:none;color:inherit;cursor:pointer;">
+/** Map graph node id to API keyword string */
+function keywordDiscoveryQuery(nodeId) {
+  if (!nodeId || nodeId === 'LVMH') return 'louis vuitton';
+  return String(nodeId).trim();
+}
+
+function buildSidebarArticlesHTML(articles) {
+  if (!articles || !articles.length) {
+    return '<p class="sidebar-articles-empty" style="color:#9ca3af;font-size:13px;margin:8px 0;">No articles found.</p>';
+  }
+  return articles
+    .map(function (article) {
+      var href = article.url || '#';
+      var viewsLine =
+        article.viewsLabel != null
+          ? String(article.viewsLabel)
+          : article.views != null
+            ? String(article.views) + ' views'
+            : '';
+      return `
+    <a class="sidebar-article" href="${escapeHtml(href)}" target="_blank" rel="noopener noreferrer" style="text-decoration:none;color:inherit;cursor:pointer;">
       <div class="sidebar-article-image">
-        <img src="${article.image}" alt="${article.title}" onerror="this.style.display='none'">
+        <img src="${escapeHtml(article.image || '')}" alt="${escapeHtml(article.title || '')}" onerror="this.style.display='none'">
       </div>
       <div class="sidebar-article-info">
-        <div class="sidebar-article-title">${article.title}</div>
+        <div class="sidebar-article-title">${escapeHtml(article.title || '')}</div>
         <div class="sidebar-article-meta">
-          <span class="sidebar-article-publisher">${article.publisher}</span>
-          <span class="sidebar-article-views">${article.views} views</span>
+          <span class="sidebar-article-publisher">${escapeHtml(article.publisher || '')}</span>
+          <span class="sidebar-article-views">${escapeHtml(viewsLine)}</span>
         </div>
       </div>
     </a>
-  `).join('');
+  `;
+    })
+    .join('');
 }
+
+function generateArticlesHTML(keyword) {
+  return buildSidebarArticlesHTML(getArticlesForKeyword(keyword));
+}
+
+/** Load Keyword Discovery API articles into `.kw-related-articles-mount` inside rootEl */
+function hydrateRelatedArticles(keywordId, rootEl) {
+  if (!rootEl || !keywordId) return;
+  var mount = rootEl.querySelector('.kw-related-articles-mount');
+  if (!mount) return;
+
+  mount.innerHTML =
+    '<p class="sidebar-articles-loading" style="color:#6b7280;font-size:13px;margin:8px 0;">Loading articles…</p>';
+
+  var q = keywordDiscoveryQuery(keywordId);
+  var fallback = function () {
+    mount.innerHTML = buildSidebarArticlesHTML(getArticlesForKeyword(keywordId));
+  };
+
+  if (!global.ShopThatKeywordDiscovery || !global.ShopThatKeywordDiscovery.fetchKeywordDetails) {
+    fallback();
+    return;
+  }
+
+  global.ShopThatKeywordDiscovery
+    .fetchKeywordDetails(q)
+    .then(function (data) {
+      var list = global.ShopThatKeywordDiscovery.normalizeDashboardArticles(data, 12);
+      if (!list.length) {
+        fallback();
+        return;
+      }
+      var mapped = list.map(function (a) {
+        return {
+          title: a.title,
+          publisher: a.source || 'Discovery',
+          image: a.image,
+          url: a.url,
+          viewsLabel: a.views
+        };
+      });
+      mount.innerHTML = buildSidebarArticlesHTML(mapped);
+    })
+    .catch(function (err) {
+      console.warn('Keyword Discovery (sidebar):', err);
+      fallback();
+    });
+}
+
 
 
 // ──────────────────────────────────────────────────────────────────────────
@@ -359,7 +434,13 @@ global.ShopThatKeywordsData = {
   defaultLinks,
   defaultNodes,
   generateArticlesHTML,
+  buildSidebarArticlesHTML,
+  hydrateRelatedArticles,
+  keywordDiscoveryQuery,
   groupColors,
   keywordCategories
 };
+
+global.kwHydrateRelatedArticles = hydrateRelatedArticles;
+
 })(typeof window !== 'undefined' ? window : this);

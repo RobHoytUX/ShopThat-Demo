@@ -1487,15 +1487,16 @@ console.log('Document ready state:', document.readyState);
           </div>
           <div class="sidebar-section">
             <div class="sidebar-section-label">Related Articles</div>
-            <div class="sidebar-articles">
-              ${generateArticlesHTML('LVMH')}
-            </div>
+            <div class="sidebar-articles kw-related-articles-mount"></div>
           </div>
         </div>
       `;
       
       // Add click handlers to chips
       attachChipClickHandlers();
+      if (window.kwHydrateRelatedArticles) {
+        window.kwHydrateRelatedArticles('LVMH', drawerBody);
+      }
     }
   }
   
@@ -1733,15 +1734,16 @@ console.log('Document ready state:', document.readyState);
         </div>
         <div class="sidebar-section">
           <div class="sidebar-section-label">Related Articles</div>
-          <div class="sidebar-articles">
-            ${generateArticlesHTML(d.id)}
-          </div>
+          <div class="sidebar-articles kw-related-articles-mount"></div>
         </div>
       </div>
     `;
     
     // Add click handlers to chips
     attachChipClickHandlers();
+    if (window.kwHydrateRelatedArticles) {
+      window.kwHydrateRelatedArticles(d.id, drawerBody);
+    }
   }
   
   function closeDrawer(){
@@ -2204,7 +2206,10 @@ console.log('Document ready state:', document.readyState);
             if (body) {
               var conns = getConnectedNodeIds(target);
               var connNodes = allNodes.filter(function(nd) { return conns.has(nd.id) && nd.id !== target.id; });
-              body.innerHTML = '<div class="sidebar-stat"><span class="sidebar-stat-value">' + connNodes.length + '</span><span class="sidebar-stat-label">connections</span></div><div class="sidebar-connections"><h3>Connected Keywords</h3>' + connNodes.map(function(c) { return '<span class="sidebar-connection-tag">' + escapeHtml(c.id) + '</span>'; }).join('') + '</div><div class="sidebar-articles"><h3>Related Articles</h3>' + generateArticlesHTML(target.id) + '</div>';
+              body.innerHTML = '<div class="sidebar-stat"><span class="sidebar-stat-value">' + connNodes.length + '</span><span class="sidebar-stat-label">connections</span></div><div class="sidebar-connections"><h3>Connected Keywords</h3>' + connNodes.map(function(c) { return '<span class="sidebar-connection-tag">' + escapeHtml(c.id) + '</span>'; }).join('') + '</div><div class="sidebar-articles"><h3>Related Articles</h3><div class="kw-related-articles-mount"></div></div>';
+              if (window.kwHydrateRelatedArticles) {
+                window.kwHydrateRelatedArticles(target.id, body);
+              }
             }
           }
         });

@@ -610,7 +610,6 @@
 
     var nodes = window.kwGetNodes ? window.kwGetNodes() : [];
     var getConnected = window.kwGetConnected;
-    var articlesHTML = window.kwGetArticlesHTML ? window.kwGetArticlesHTML(realId) : '';
 
     var nodeObj = nodes.find(function (n) { return n.id === realId; });
     var value = nodeObj ? nodeObj.value : (d.data.value || 0);
@@ -649,16 +648,17 @@
       html += '</div>';
     }
 
-    if (articlesHTML) {
-      html += '<div class="sidebar-section">';
-      html += '<div class="sidebar-section-label">Related Articles</div>';
-      html += '<div class="sidebar-articles">' + articlesHTML + '</div>';
-      html += '</div>';
-    }
+    html += '<div class="sidebar-section">';
+    html += '<div class="sidebar-section-label">Related Articles</div>';
+    html += '<div class="sidebar-articles kw-related-articles-mount"></div>';
+    html += '</div>';
 
     html += '</div>';
     drawerBodyEl.innerHTML = html;
     attachTreeChipClickHandlers();
+    if (window.kwHydrateRelatedArticles) {
+      window.kwHydrateRelatedArticles(realId, drawerBodyEl);
+    }
   }
 
   // ─── Search snapshot helpers ───────────────────────────────────────────────
