@@ -1,15 +1,9 @@
-const { getSession, readJsonBody } = require('../auth/_auth');
+const { readJsonBody } = require('../auth/_auth');
 
 module.exports = async function askLuxuryIntelligence(req, res) {
   if (req.method !== 'POST') {
     res.setHeader('Allow', 'POST');
     return res.status(405).json({ error: 'Method not allowed' });
-  }
-
-  const session = getSession(req);
-  const allowLocalDev = process.env.NODE_ENV !== 'production';
-  if (!session && !allowLocalDev) {
-    return res.status(401).json({ error: 'Authentication required' });
   }
 
   const upstreamUrl = process.env.LUXURY_INTELLIGENCE_ASK_URL;
