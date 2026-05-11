@@ -1,11 +1,13 @@
 /**
  * LV Luxury Intelligence API (v2.2) — shared client for WebDemo.
- * POST /ask on the EC2 Luxury Intelligence service.
+ * POST to the same-origin Vercel API proxy. The serverless route forwards to
+ * the EC2 Luxury Intelligence service so production avoids mixed-content/CSP
+ * failures and keeps the upstream URL server-side.
  */
 (function (global) {
   'use strict';
 
-  var ASK_URL = 'http://18.221.156.51/ask';
+  var ASK_URL = '/api/luxury-intelligence/ask';
   var ANALYZING_TEXT = 'Analyzing Luxury Catalogs';
 
   /** Prompt tuned so dashboard can parse a bullet list of keyword phrases */
