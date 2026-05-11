@@ -325,266 +325,137 @@
     <!-- Rewards Calculator View (Hidden by default) -->
     <div id="calculatorView" class="calculator-view">
       <div class="calculator-content">
-        <!-- Quick Scenario Bar -->
+        <!-- Scenario tabs (Bearish / Steady / Growth / High Growth) -->
         <div class="calc-scenario-bar">
-          <div class="pill-group" id="scenarioPresets">
-            <button type="button" class="pill-btn" data-preset="conservative">Conservative</button>
-            <button type="button" class="pill-btn active" data-preset="expected">Expected</button>
-            <button type="button" class="pill-btn" data-preset="optimistic">Optimistic</button>
+          <div class="pill-group calc-scenarios" id="scenarioPresets">
+            <button type="button" class="pill-btn pill-btn--bearish active" data-preset="bearish">
+              <span class="scenario-dot" style="background:#ef4444"></span> Bearish
+            </button>
+            <button type="button" class="pill-btn pill-btn--steady" data-preset="steady">
+              <span class="scenario-dot" style="background:#f59e0b"></span> Steady
+            </button>
+            <button type="button" class="pill-btn pill-btn--growth" data-preset="growth">
+              <span class="scenario-dot" style="background:#3b82f6"></span> Growth
+            </button>
+            <button type="button" class="pill-btn pill-btn--high-growth" data-preset="high-growth">
+              <span class="scenario-dot" style="background:#10b981"></span> High Growth
+            </button>
           </div>
-          <button class="btn btn--primary" id="exportData" style="margin-left:auto; padding:8px 12px; font-size:13px; flex:none;">Export Data (CSV)</button>
         </div>
 
-        <div class="calc-grid">
-          <!-- Left Column: Parameters -->
-          <div class="calc-params">
-            <!-- Retailer Profile -->
-            <div class="calc-section">
-              <h3>Retailer Profile <span class="tooltip" title="Configure your retailer's monthly volume and growth assumptions.">?</span></h3>
-              <div class="param-group">
-                <label>Monthly GMV <span class="range-val" id="gmvVal">$20,000,000</span></label>
-                <input type="range" id="monthlyGMV" min="5" max="8" step="0.01" value="7.301">
-                <div class="range-ticks"><span>$100K</span><span>$1M</span><span>$10M</span><span>$100M</span></div>
-                <label class="precise-toggle"><input type="checkbox" id="gmvPrecise"> <span>Precise entry ($)</span></label>
-                <input type="number" id="gmvPreciseInput" class="precise-input" style="display:none;" value="20000000" min="100000" step="100000">
-              </div>
-              <div class="param-group">
-                <label>Annual GMV Growth Rate <span class="range-val" id="growthVal">25%</span></label>
-                <input type="range" id="annualGrowth" min="0" max="100" step="1" value="25">
-                <div class="range-ticks"><span>0%</span><span>25%</span><span>50%</span><span>75%</span><span>100%</span></div>
-              </div>
-              <div class="param-group">
-                <label>Projection Horizon</label>
-                <div class="pill-group" data-bind="horizon">
-                  <button type="button" class="pill-btn" data-value="1">1 Year</button>
-                  <button type="button" class="pill-btn active" data-value="3">3 Years</button>
-                  <button type="button" class="pill-btn" data-value="5">5 Years</button>
-                </div>
-              </div>
+        <div class="calc-grid calc-grid--two-col">
+          <!-- Market Variables -->
+          <div class="calc-section">
+            <h3>Market Variables</h3>
+
+            <div class="param-group">
+              <label>
+                Total Sales Per Month
+                <button type="button" class="info-icon" data-info="totalSales" aria-label="Info: Total Sales Per Month">i</button>
+              </label>
+              <input type="number" id="totalSales" value="200000000" min="0" step="100000">
             </div>
 
-            <!-- Token Price -->
-            <div class="calc-section">
-              <h3>Token Price <span class="tooltip" title="Set the current token price and expected price trajectory.">?</span></h3>
-              <div class="param-group">
-                <label>Current TQT Price (USD) <span class="range-val" id="tqtPriceVal">$0.25</span></label>
-                <input type="range" id="tqtPrice" min="-2" max="1" step="0.01" value="-0.602">
-                <div class="range-ticks"><span>$0.01</span><span>$0.25</span><span>$1.00</span><span>$5.00</span><span>$10</span></div>
-              </div>
-              <div class="param-group">
-                <label>Price Scenario</label>
-                <div class="pill-group" data-bind="priceScenario">
-                  <button type="button" class="pill-btn" data-value="-0.40">Bearish −40%/yr</button>
-                  <button type="button" class="pill-btn active" data-value="0">Neutral 0%</button>
-                  <button type="button" class="pill-btn" data-value="0.20">Bullish +20%/yr</button>
-                </div>
-              </div>
+            <div class="param-group">
+              <label>
+                Reward Amount (%)
+                <button type="button" class="info-icon" data-info="rewardAmount" aria-label="Info: Reward Amount">i</button>
+                <span class="range-val" id="rewardAmountValue">1.0%</span>
+              </label>
+              <input type="range" id="rewardAmount" min="0" max="5" step="0.1" value="1">
+              <div class="range-ticks"><span>0%</span><span>1.25%</span><span>2.5%</span><span>3.75%</span><span>5%</span></div>
             </div>
 
-            <!-- Staking -->
-            <div class="calc-section">
-              <h3>Staking <span class="tooltip" title="Configure how many earned tokens are staked and for how long.">?</span></h3>
-              <div class="param-group">
-                <label>% of Earned Tokens to Stake <span class="range-val" id="stakeVal">50%</span></label>
-                <input type="range" id="stakePct" min="0" max="100" step="1" value="50">
-                <div class="range-ticks"><span>0%</span><span>25%</span><span>50%</span><span>75%</span><span>100%</span></div>
-              </div>
-              <div class="param-group">
-                <label>Lock Period</label>
-                <div class="pill-group" data-bind="lockPeriod">
-                  <button type="button" class="pill-btn" data-value="3">3 mo</button>
-                  <button type="button" class="pill-btn active" data-value="6">6 mo</button>
-                  <button type="button" class="pill-btn" data-value="12">12 mo</button>
-                </div>
-              </div>
-              <div class="param-group">
-                <label class="precise-toggle"><input type="checkbox" id="compoundToggle" checked> <span>Compound staking rewards monthly</span></label>
-              </div>
+            <div class="param-group">
+              <label>
+                Token Launch Price ($)
+                <button type="button" class="info-icon" data-info="launchPrice" aria-label="Info: Token Launch Price">i</button>
+            </label>
+              <input type="number" id="launchPrice" step="0.01" min="0.01" value="1.00">
             </div>
 
-            <!-- Advanced Settings -->
-            <div class="calc-section">
-              <h3 class="advanced-toggle" id="advancedToggle">
-                <span class="advanced-toggle__title">Advanced Settings</span>
-                <span class="toggle-arrow" aria-hidden="true">
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <polyline points="9 18 15 12 9 6"></polyline>
-                  </svg>
-                </span>
-              </h3>
-              <div id="advancedBody" style="display:none;">
-                <div class="param-group">
-                  <label>Cashback Tier Override <span class="tooltip" title="Auto-selects based on avg. transaction size. Override here to model a specific tier.">?</span></label>
-                  <div class="pill-group" data-bind="cashbackTier">
-                    <button type="button" class="pill-btn" data-value="0.0075">Tier 1 — 0.75%</button>
-                    <button type="button" class="pill-btn active" data-value="0.0125">Tier 2 — 1.25%</button>
-                    <button type="button" class="pill-btn" data-value="0.015">Tier 3 — 1.50%</button>
-                  </div>
-                  <span class="param-hint">Auto-selects based on avg. transaction size. Override here to model a specific tier.</span>
-                </div>
-                <div class="param-group">
-                  <label>Staking APY <span class="range-val" id="apyVal">12%</span></label>
-                  <input type="range" id="stakingAPY" min="0" max="50" step="0.5" value="12">
-                  <div class="range-ticks"><span>0%</span><span>12.5%</span><span>25%</span><span>37.5%</span><span>50%</span></div>
-                </div>
-                <div class="param-group">
-                  <label>BTC Annual Return (benchmarks) <span class="range-val" id="btcReturnVal">30%</span></label>
-                  <input type="range" id="btcReturn" min="-50" max="200" step="1" value="30">
-                  <div class="range-ticks"><span>−50%</span><span>0%</span><span>75%</span><span>150%</span><span>200%</span></div>
-                </div>
-                <div class="param-group">
-                  <label class="precise-toggle"><input type="checkbox" id="independentBTC"> <span>Independent BTC Return per Card</span></label>
-                </div>
-                <div id="independentBTCGroup" style="display:none;">
-                  <div class="param-group">
-                    <label>Gemini BTC Return <span class="range-val" id="geminiBtcVal">30%</span></label>
-                    <input type="range" id="geminiBtcReturn" min="-50" max="200" step="1" value="30">
-                  </div>
-                  <div class="param-group">
-                    <label>Coinbase BTC Return <span class="range-val" id="coinbaseBtcVal">30%</span></label>
-                    <input type="range" id="coinbaseBtcReturn" min="-50" max="200" step="1" value="30">
-                  </div>
-                </div>
-                <div class="param-group">
-                  <label>Avg Transaction Size ($) <span class="range-val" id="avgTxVal">$650</span></label>
-                  <input type="range" id="avgTxSize" min="100" max="10000" step="50" value="650">
-                  <div class="range-ticks"><span>$100</span><span>$2.5K</span><span>$5K</span><span>$7.5K</span><span>$10K</span></div>
-                </div>
-                <div class="param-group">
-                  <label>Credit Card Benchmarks to Display</label>
-                  <div class="benchmark-checks" id="benchmarkChecks">
-                    <label><input type="checkbox" data-cc="chase_preferred" checked> Chase Sapphire Preferred (~1%)</label>
-                    <label><input type="checkbox" data-cc="chase_reserve" checked> Chase Sapphire Reserve (~1%)</label>
-                    <label><input type="checkbox" data-cc="amex_gold" checked> Amex Gold Card (~1%)</label>
-                    <label><input type="checkbox" data-cc="amex_plat" checked> Amex Platinum Card (~1%)</label>
-                    <label><input type="checkbox" data-cc="citi_double" checked> Citi Double Cash (2%)</label>
-                    <label><input type="checkbox" data-cc="venture_x" checked> Capital One Venture X (2%)</label>
-                    <label><input type="checkbox" data-cc="gemini" checked> Gemini Credit Card (1% BTC)</label>
-                    <label><input type="checkbox" data-cc="coinbase_base" checked> Coinbase One Card — Base 2% BTC</label>
-                    <label><input type="checkbox" data-cc="coinbase_top" checked> Coinbase One Card — Top 4% BTC</label>
-                  </div>
-                </div>
-                <div class="param-group">
-                  <label class="precise-toggle"><input type="checkbox" id="customRateToggle"> <span>Enable custom card rate</span></label>
-                </div>
-                <div id="customRateGroup" style="display:none;">
-                  <div class="param-group">
-                    <label>Custom Rate (%) <span class="range-val" id="customRateVal">1.50%</span></label>
-                    <input type="range" id="customRate" min="0" max="10" step="0.1" value="1.5">
-                  </div>
-                </div>
-                <div class="param-group">
-                  <label class="precise-toggle"><input type="checkbox" id="customPricePathToggle"> <span>Override with manual year-by-year prices</span></label>
-                  <span class="param-hint">Enter the TQT price (USD) at the start of each year. Overrides the scenario price path.</span>
-                </div>
-                <div id="customPricePathGroup" style="display:none;"></div>
-              </div>
+            <div class="param-group">
+              <label>
+                Token Price at 1 Year ($)
+                <button type="button" class="info-icon" data-info="priceAt1Year" aria-label="Info: Token Price at 1 Year">i</button>
+              </label>
+              <input type="number" id="priceAt1Year" step="0.01" min="0.01" value="1.00">
             </div>
-
           </div>
 
-          <!-- Right Column: Results -->
-          <div class="calc-results">
+          <!-- Growth & Risk Factors -->
+          <div class="calc-section">
+            <h3>Growth &amp; Risk Factors</h3>
+
+            <div class="param-group">
+              <label>
+                Fair Issuance Price ($)
+                <button type="button" class="info-icon" data-info="fairPrice" aria-label="Info: Fair Issuance Price">i</button>
+              </label>
+              <input type="number" id="fairPrice" step="0.01" min="0.01" value="1.00">
+            </div>
+
+            <div class="param-group">
+              <label>
+                Trade Headwinds / Revenue Drag (%)
+                <button type="button" class="info-icon" data-info="headwinds" aria-label="Info: Trade Headwinds">i</button>
+                <span class="range-val" id="headwindsValue">0.0%</span>
+              </label>
+              <input type="range" id="headwinds" min="0" max="20" step="0.5" value="0">
+              <div class="range-ticks"><span>0%</span><span>5%</span><span>10%</span><span>15%</span><span>20%</span></div>
+            </div>
+
+            <div class="param-group">
+              <label>
+                Sales Growth (%)
+                <button type="button" class="info-icon" data-info="salesGrowth" aria-label="Info: Sales Growth">i</button>
+                <span class="range-val" id="salesGrowthValue">5%</span>
+              </label>
+              <input type="range" id="salesGrowth" min="0" max="50" step="1" value="5">
+              <div class="range-ticks"><span>0%</span><span>12.5%</span><span>25%</span><span>37.5%</span><span>50%</span></div>
+            </div>
+
+            <div class="param-group">
+              <label>
+                Total Headwinds ($)
+                <button type="button" class="info-icon" data-info="totalHeadwinds" aria-label="Info: Total Headwinds">i</button>
+              </label>
+              <input type="number" id="totalHeadwinds" value="53000" min="0" step="1000">
+            </div>
+          </div>
+
+          <!-- Financial Projections (full width) -->
+          <div class="calc-section calc-section--results">
+            <h3>Financial Projections</h3>
             <div class="results-grid results-grid--hero">
+              <div class="result-card">
+                <span class="result-label">Tokens Earned</span>
+                <span class="result-value" id="tokensEarned">$2.1M</span>
+              </div>
               <div class="result-card highlight">
-                <span class="result-label">Total Annual Benefit</span>
-                <span class="result-value" id="resBenefitUSD">$0</span>
-                <span class="result-sub" id="resBenefitSub">—</span>
+                <span class="result-label">Total Rewards Earned</span>
+                <span class="result-value" id="totalRewards">$2.1M</span>
               </div>
               <div class="result-card">
-                <span class="result-label">Annual Cashback</span>
-                <span class="result-value" id="resCashbackUSD">$0</span>
-                <span class="result-sub" id="resCashbackTQT">— TQT</span>
+                <span class="result-label">Monthly Reward Value</span>
+                <span class="result-value" id="monthlyReward">$2.0M</span>
               </div>
               <div class="result-card">
-                <span class="result-label">Annual Staking Yield</span>
-                <span class="result-value" id="resStakingUSD">$0</span>
-                <span class="result-sub" id="resStakingTQT">— TQT</span>
-              </div>
-              <div class="result-card">
-                <span class="result-label">Year-End Portfolio Value</span>
-                <span class="result-value" id="resPortfolioUSD">$0</span>
-                <span class="result-sub" id="resPortfolioTQT">— TQT accumulated</span>
-              </div>
-            </div>
-
-            <!-- Results tabs -->
-            <div class="calc-results-tabs">
-              <button type="button" class="pill-btn active" data-restab="breakdown">Breakdown</button>
-              <button type="button" class="pill-btn" data-restab="benchmark">Benchmark</button>
-              <button type="button" class="pill-btn" data-restab="charts">Charts</button>
-              <button type="button" class="pill-btn" data-restab="matrix">Scenario Matrix</button>
-            </div>
-
-            <!-- Breakdown tab -->
-            <div class="calc-restab-pane" id="pane-breakdown">
-              <div class="breakdown-section">
-                <div class="table-container">
-                  <table class="breakdown-table" id="breakdownTable">
-                    <tbody id="breakdownBody"></tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
-
-            <!-- Benchmark tab -->
-            <div class="calc-restab-pane" id="pane-benchmark" style="display:none;">
-              <div class="results-grid" style="margin-bottom:20px;">
-                <div class="result-card">
-                  <span class="result-label">Breakeven vs 2% Flat-Rate Card</span>
-                  <span class="result-value" id="breakeven2pct">$—</span>
-                  <span class="result-sub">TQT price needed for Tier 1 to match Citi Double Cash / Venture X</span>
-                </div>
-                <div class="result-card">
-                  <span class="result-label">Breakeven vs 1% BTC Card</span>
-                  <span class="result-value" id="breakeven1btc">$—</span>
-                  <span class="result-sub">TQT price needed for Tier 1 to match Gemini Card (1% BTC)</span>
-                </div>
-              </div>
-              <div class="param-group" style="margin-bottom:16px;">
-                <label>TQT Price Sensitivity <span class="range-val" id="sensitivityPriceVal">$0.25</span></label>
-                <input type="range" id="sensitivityPrice" min="-2" max="1" step="0.01" value="-0.602">
-              </div>
-              <div class="table-container">
-                <table class="breakdown-table" id="benchmarkTable">
-                  <thead><tr><th>Program</th><th>Rate</th><th>Annual USD Value</th><th>vs Annual GMV</th></tr></thead>
-                  <tbody id="benchmarkBody"></tbody>
-                </table>
-              </div>
-              <p class="param-hint" style="margin-top:12px;font-size:11px;">† Chase Sapphire & Amex cards earn 5x/4x/3x only on travel & dining. Luxury retail earns ~1pt/$ ≈ 1¢ cash-equivalent.<br>‡ Gemini Credit Card: 1% on all other purchases incl. luxury retail.<br>§ Coinbase One Card: flat BTC reward on all purchases (2% base tier; 4% at $200K+ assets on Coinbase).</p>
-            </div>
-
-            <!-- Charts tab -->
-            <div class="calc-restab-pane" id="pane-charts" style="display:none;">
-              <div class="chart-section">
-                <h4>Multi-Year Benefit Projection — Cashback · Staking · Price Appreciation</h4>
-                <canvas id="benefitChart"></canvas>
-              </div>
-              <div class="chart-section">
-                <h4>Effective Reward Rate Comparison (%)</h4>
-                <canvas id="rateCompChart"></canvas>
-              </div>
-              <div class="chart-section">
-                <h4>Token Accumulation Curve</h4>
-                <canvas id="accumChart"></canvas>
-              </div>
-            </div>
-
-            <!-- Scenario Matrix tab -->
-            <div class="calc-restab-pane" id="pane-matrix" style="display:none;">
-              <div class="breakdown-section">
-                <h4>3-Year Total Benefit — GMV Scenario × Token Price Scenario</h4>
-                <p class="param-hint">Each cell shows total 3-year benefit (cashback + staking + price appreciation). The currently selected combination is highlighted. Colour scale: red = lowest, green = highest benefit.</p>
-                <div class="table-container">
-                  <table class="breakdown-table scenario-matrix" id="scenarioMatrix">
-                    <thead><tr><th></th><th>Bearish −40%/yr</th><th>Neutral 0%</th><th>Bullish +20%/yr</th></tr></thead>
-                    <tbody id="matrixBody"></tbody>
-                  </table>
-                </div>
+                <span class="result-label">Token Appreciation</span>
+                <span class="result-value" id="tokenAppreciation">0.0%</span>
               </div>
             </div>
           </div>
         </div>
+      </div>
+    </div>
+
+    <!-- Info Modal for calculator i icons -->
+    <div class="calc-info-modal" id="calcInfoModal" aria-hidden="true">
+      <div class="calc-info-modal__content" role="dialog" aria-modal="true" aria-labelledby="calcInfoModalTitle">
+        <button type="button" class="calc-info-modal__close" id="calcInfoModalClose" aria-label="Close">&times;</button>
+        <h3 class="calc-info-modal__title" id="calcInfoModalTitle"></h3>
+        <p class="calc-info-modal__body" id="calcInfoModalBody"></p>
       </div>
     </div>
 
@@ -704,8 +575,15 @@
         gap: 24px;
         margin-top: 16px;
       }
+      .calc-grid--two-col {
+        grid-template-columns: 1fr 1fr;
+      }
+      .calc-grid--two-col .calc-section--results {
+        grid-column: 1 / -1;
+      }
       @media (max-width: 1100px) {
-        .calc-grid { grid-template-columns: 1fr; }
+        .calc-grid,
+        .calc-grid--two-col { grid-template-columns: 1fr; }
       }
       .calc-section {
         background: #fff;
@@ -1051,6 +929,74 @@
       .scenario-matrix td { text-align: center; font-weight: 600; font-size: 13px; min-width: 120px; }
       .scenario-matrix td.cell-current { outline: 2px solid #6366f1; outline-offset: -2px; }
       .scenario-matrix th:first-child { min-width: 100px; }
+
+      /* Scenario tab pills (Bearish / Steady / Growth / High Growth) */
+      .calc-scenarios { gap: 8px; flex-wrap: wrap; }
+      .calc-scenarios .pill-btn {
+        display: inline-flex; align-items: center; gap: 8px;
+        padding: 10px 18px; font-weight: 600;
+      }
+      .scenario-dot {
+        display: inline-block; width: 8px; height: 8px; border-radius: 50%;
+        box-shadow: 0 0 0 2px rgba(255,255,255,0.4);
+      }
+      .pill-btn--bearish.active { background: #ef4444; border-color: #ef4444; }
+      .pill-btn--steady.active { background: #f59e0b; border-color: #f59e0b; }
+      .pill-btn--growth.active { background: #3b82f6; border-color: #3b82f6; }
+      .pill-btn--high-growth.active { background: #10b981; border-color: #10b981; }
+
+      /* Info icons (i bubble) on calculator labels */
+      .info-icon {
+        display: inline-flex; align-items: center; justify-content: center;
+        width: 18px; height: 18px; border-radius: 50%;
+        background: #6366f1; color: #fff; border: none; cursor: pointer;
+        font-size: 11px; font-weight: 700; line-height: 1; padding: 0;
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
+      }
+      .info-icon:hover { transform: scale(1.1); box-shadow: 0 0 0 3px rgba(99,102,241,0.2); }
+      .info-icon:focus-visible { outline: 2px solid #6366f1; outline-offset: 2px; }
+      .param-group label .range-val { margin-left: auto; }
+      .param-group label { gap: 8px; }
+
+      /* Calculator info modal */
+      .calc-info-modal {
+        position: fixed; inset: 0;
+        background: rgba(15, 23, 42, 0.55);
+        backdrop-filter: blur(4px);
+        display: none;
+        align-items: center; justify-content: center;
+        z-index: 1000;
+        padding: 16px;
+      }
+      .calc-info-modal.is-open { display: flex; }
+      .calc-info-modal__content {
+        background: #fff; color: #1a1a2e;
+        border-radius: 16px;
+        padding: 24px 24px 20px;
+        max-width: 480px; width: 100%;
+        position: relative;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+        border-top: 3px solid #6366f1;
+      }
+      .dark-mode .calc-info-modal__content {
+        background: #16213e; color: #fff; border-top-color: #818cf8;
+      }
+      .calc-info-modal__close {
+        position: absolute; top: 10px; right: 12px;
+        width: 32px; height: 32px; border-radius: 50%;
+        background: transparent; border: none; cursor: pointer;
+        font-size: 22px; line-height: 1; color: #6a6a8a;
+      }
+      .calc-info-modal__close:hover { background: #f6f7fb; color: #1a1a2e; }
+      .dark-mode .calc-info-modal__close:hover { background: #1a1a2e; color: #fff; }
+      .calc-info-modal__title {
+        margin: 0 0 12px; font-size: 18px; font-weight: 700; color: #6366f1;
+      }
+      .dark-mode .calc-info-modal__title { color: #818cf8; }
+      .calc-info-modal__body {
+        margin: 0; font-size: 14px; line-height: 1.55; color: #4a4a6a;
+      }
+      .dark-mode .calc-info-modal__body { color: #d0d0e0; }
     </style>
     
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
