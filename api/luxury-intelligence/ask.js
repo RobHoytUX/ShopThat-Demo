@@ -12,7 +12,8 @@ const ALLOWED_KEYWORDS = {
   restaurants: {
     '57th St.': [
       'The Mark', 'Gabriel Kreuther', 'THE GRILL', 'KANG HO DONG',
-      'Le Pavillon', 'Marea', 'The Modern', 'Le Bernardin', 'Cafe Carlyle'
+      'Le Pavillon', 'Marea', 'The Modern', 'Le Bernardin', 'Cafe Carlyle',
+      'DANIEL', 'Le Bilboquet'
     ],
     'SoHo': [
       'BAR PITTI', 'MINETTA TAVERN', 'SHUKO', 'IL BUCO ALIMENTARI',
@@ -25,8 +26,7 @@ const ALLOWED_KEYWORDS = {
   hotels: {
     '57th St.': [
       'Ace Hotel', 'The Baccarat Hotel', 'The Plaza', 'CIVILIAN Hotel',
-      'ST Regis', 'Times Square Edition', 'DANIEL', 'Le Bilboquet',
-      'The Mark Hotel'
+      'ST Regis', 'Times Square Edition', 'The Mark Hotel'
     ],
     'SoHo': [
       'CROSBY STREET HOTEL', 'THE BOWERY HOTEL',
@@ -70,6 +70,7 @@ const VENUE_IMAGES = {
   'Marea':                { url: 'assets/restaurants/marea.jpg',              area: '57th St.', category: 'restaurants' },
   'The Mark':             { url: 'assets/restaurants/the-mark-restaurant.jpg', area: '57th St.', category: 'restaurants' },
   'Le Bilboquet':         { url: 'assets/restaurants/le-bilboquet.jpg',       area: '57th St.', category: 'restaurants' },
+  'DANIEL':               { area: '57th St.', category: 'restaurants' },
   'The Plaza':            { url: 'assets/restaurants/the-plaza.jpg',          area: '57th St.', category: 'hotels' },
   'The Mark Hotel':       { url: 'assets/restaurants/mark-hotel.jpg',         area: '57th St.', category: 'hotels' },
   'The Baccarat Hotel':   { url: 'assets/restaurants/baccarat.jpg',           area: '57th St.', category: 'hotels' },

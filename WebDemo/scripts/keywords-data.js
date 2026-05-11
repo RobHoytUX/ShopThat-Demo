@@ -129,6 +129,8 @@ const defaultNodes = [
   { id: 'The Modern',       group: 4, value: 75, parent: '57th St. Restaurants' },
   { id: 'Le Bernardin',     group: 4, value: 80, parent: '57th St. Restaurants' },
   { id: 'Cafe Carlyle',     group: 4, value: 70, parent: '57th St. Restaurants' },
+  { id: 'DANIEL',           group: 4, value: 70, parent: '57th St. Restaurants' },
+  { id: 'Le Bilboquet',     group: 4, value: 65, parent: '57th St. Restaurants' },
 
   // 57th St. hotels
   { id: 'Ace Hotel',            group: 4, value: 65, parent: '57th St. Hotels' },
@@ -137,8 +139,6 @@ const defaultNodes = [
   { id: 'CIVILIAN Hotel',       group: 4, value: 60, parent: '57th St. Hotels' },
   { id: 'ST Regis',             group: 4, value: 78, parent: '57th St. Hotels' },
   { id: 'Times Square Edition', group: 4, value: 65, parent: '57th St. Hotels' },
-  { id: 'DANIEL',               group: 4, value: 70, parent: '57th St. Hotels' },
-  { id: 'Le Bilboquet',         group: 4, value: 65, parent: '57th St. Hotels' },
   { id: 'The Mark Hotel',       group: 4, value: 75, parent: '57th St. Hotels' },
 
   // SoHo categories

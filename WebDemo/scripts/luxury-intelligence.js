@@ -23,7 +23,8 @@
     restaurants: {
       '57th St.': [
         'The Mark', 'Gabriel Kreuther', 'THE GRILL', 'KANG HO DONG',
-        'Le Pavillon', 'Marea', 'The Modern', 'Le Bernardin', 'Cafe Carlyle'
+        'Le Pavillon', 'Marea', 'The Modern', 'Le Bernardin', 'Cafe Carlyle',
+        'DANIEL', 'Le Bilboquet'
       ],
       'SoHo': [
         'BAR PITTI', 'MINETTA TAVERN', 'SHUKO', 'IL BUCO ALIMENTARI',
@@ -36,8 +37,7 @@
     hotels: {
       '57th St.': [
         'Ace Hotel', 'The Baccarat Hotel', 'The Plaza', 'CIVILIAN Hotel',
-        'ST Regis', 'Times Square Edition', 'DANIEL', 'Le Bilboquet',
-        'The Mark Hotel'
+        'ST Regis', 'Times Square Edition', 'The Mark Hotel'
       ],
       'SoHo': [
         'CROSBY STREET HOTEL', 'THE BOWERY HOTEL',
@@ -103,6 +103,7 @@
     'Marea':                { url: 'assets/restaurants/marea.jpg',              area: '57th St.', category: 'restaurants', lat: 40.7670, lng: -73.9800, address: '240 Central Park South' },
     'The Mark':             { url: 'assets/restaurants/the-mark-restaurant.jpg', area: '57th St.', category: 'restaurants', lat: 40.7754, lng: -73.9625, address: '25 E 77th St' },
     'Le Bilboquet':         { url: 'assets/restaurants/le-bilboquet.jpg',       area: '57th St.', category: 'restaurants', lat: 40.7643, lng: -73.9683, address: '20 E 60th St' },
+    'DANIEL':               { area: '57th St.', category: 'restaurants', lat: 40.7668, lng: -73.9676, address: '60 E 65th St' },
 
     // 57th St. hotels
     'The Plaza':            { url: 'assets/restaurants/the-plaza.jpg',          area: '57th St.', category: 'hotels', lat: 40.7644, lng: -73.9747, address: '768 5th Ave' },
