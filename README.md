@@ -15,6 +15,17 @@ This repository contains several historical prototypes, but the active static de
 
 - Netlify publishes `WebDemo` via `netlify.toml`.
 - Vercel serves `WebDemo` and same-origin API routes via `vercel.json`.
+- Pushes to `main` run `.github/workflows/vercel-production.yml`, which deploys with
+  `vercel deploy --prod` and then re-applies any custom domain aliases listed in the
+  `VERCEL_DOMAINS` GitHub secret.
+
+Required GitHub Actions secrets for Vercel production deploys:
+
+- `VERCEL_TOKEN`
+- `VERCEL_ORG_ID`
+- `VERCEL_PROJECT_ID`
+- `VERCEL_DOMAINS` - optional comma/space/newline separated domain list to alias after
+  deploy, for example `example.com,www.example.com`.
 
 Required runtime environment variables:
 

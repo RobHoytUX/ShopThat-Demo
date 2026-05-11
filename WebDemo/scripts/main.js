@@ -461,7 +461,6 @@
   .chatbot-msg-bot{align-self:flex-start;background:#f2f2f2;color:#111;border-radius:30px 30px 30px 6px}
   .chatbot-images{align-self:stretch;width:100%;max-width:100%;background:transparent;padding:8px;border-radius:12px;display:flex;flex-wrap:nowrap;gap:8px;justify-content:flex-start;box-sizing:border-box;overflow:visible}
   .chatbot-image-wrap{position:relative;display:inline-block;flex:1 1 0;min-width:0}
-  .chatbot-rank-badge{position:absolute;top:8px;left:8px;border-radius:999px;background:rgba(17,17,17,0.82);color:#fff;font-size:10px;font-weight:600;line-height:1;padding:5px 7px;pointer-events:none;box-shadow:0 2px 8px rgba(0,0,0,0.22)}
   .chatbot-images img{border-radius:8px;transition:transform 0.2s ease}
   .chatbot-images img:hover{transform:scale(1.05)}
   .chatbot-thinking{align-self:flex-start;background:#f2f2f2;color:#111;border-radius:30px 30px 30px 6px;padding:10px 16px;display:flex;align-items:center;gap:8px}
@@ -794,12 +793,13 @@
       return svg;
     }
     
-    // Create nav items
+    // Create nav items. Nothing here auto-closes the side nav — it stays
+    // open until the user toggles it with the hamburger button (sortBtn).
     const navItems = [
-      { icon: 'user', id: 'nav-user', title: 'Chat', view: 'chat', active: true, closeNav: true },
+      { icon: 'user', id: 'nav-user', title: 'Chat', view: 'chat', active: true, closeNav: false },
       { icon: 'book', id: 'nav-library', title: 'Library', view: 'library', closeNav: false },
       { icon: 'map', id: 'nav-map', title: 'Map', view: 'map', closeNav: false },
-      { icon: 'grid', id: 'nav-grid', title: 'Grid View', view: 'grid', closeNav: true }
+      { icon: 'grid', id: 'nav-grid', title: 'Grid View', view: 'grid', closeNav: false }
     ];
     
     let currentView = 'chat'; // Default view
@@ -821,25 +821,24 @@
       
       // Add click handler directly to the nav item
       navItem.addEventListener('click', () => {
-        // Special handling for grid icon - open new tab
+        // Special handling for grid icon - open new tab. We deliberately
+        // keep the side nav open afterwards so it only closes via the
+        // hamburger toggle button.
         if (item.view === 'grid') {
           window.open('product-dashboard.html', '_blank');
-          // Close nav after opening new tab
-          navVisible = false;
-          chatbotNav.classList.remove('is-visible');
           return;
         }
-        
+
         // Remove active class from all items in the nav
         chatbotNav.querySelectorAll('.chatbot-nav-item').forEach(i => i.classList.remove('is-active'));
         // Add active class to clicked item
         navItem.classList.add('is-active');
-        
+
         // Switch view
         currentView = item.view;
         switchChatbotView(currentView);
-        
-        // Close nav if specified
+
+        // Side nav stays open until the user toggles the hamburger.
         if (item.closeNav) {
           navVisible = false;
           chatbotNav.classList.remove('is-visible');
@@ -852,6 +851,12 @@
     // Leaflet map instance
     let leafletMap = null;
     let chatbotLocationMarkers = []; // Store location markers for cleanup
+    // Permanent markers added in addNearbyLocations(), keyed by lower-cased
+    // venue name so focusVenueOnMap() can openPopup() programmatically.
+    const venueMarkersByName = new Map();
+    // Ad-hoc markers added on-the-fly for venues that aren't in the
+    // map data but ARE in the LuxuryIntelligence venue catalog.
+    const adhocVenueMarkers = new Map();
 
     
     const chatbotLocationData = window.ShopThatMainMapData || {
@@ -958,45 +963,23 @@
               iconAnchor: [6, 6]
             });
             
-            // Add restaurants
-            chatbotLocationData.restaurants.forEach(location => {
-              const popupContent = location.address 
+            function addLocationMarker(location, icon) {
+              const popupContent = location.address
                 ? `<b>${location.name}</b><br><small>${location.address}</small>`
                 : `<b>${location.name}</b>`;
-              L.marker([location.lat, location.lng], { icon: restaurantIcon })
+              const marker = L.marker([location.lat, location.lng], { icon })
                 .bindPopup(popupContent)
                 .addTo(leafletMap);
-            });
-            
-            // Add museums
-            chatbotLocationData.museums.forEach(location => {
-              const popupContent = location.address 
-                ? `<b>${location.name}</b><br><small>${location.address}</small>`
-                : `<b>${location.name}</b>`;
-              L.marker([location.lat, location.lng], { icon: museumIcon })
-                .bindPopup(popupContent)
-                .addTo(leafletMap);
-            });
-            
-            // Add galleries
-            chatbotLocationData.galleries.forEach(location => {
-              const popupContent = location.address 
-                ? `<b>${location.name}</b><br><small>${location.address}</small>`
-                : `<b>${location.name}</b>`;
-              L.marker([location.lat, location.lng], { icon: galleryIcon })
-                .bindPopup(popupContent)
-                .addTo(leafletMap);
-            });
-            
-            // Add others
-            chatbotLocationData.others.forEach(location => {
-              const popupContent = location.address 
-                ? `<b>${location.name}</b><br><small>${location.address}</small>`
-                : `<b>${location.name}</b>`;
-              L.marker([location.lat, location.lng], { icon: otherIcon })
-                .bindPopup(popupContent)
-                .addTo(leafletMap);
-            });
+              if (location.name) {
+                venueMarkersByName.set(String(location.name).toLowerCase(), marker);
+              }
+              return marker;
+            }
+
+            chatbotLocationData.restaurants.forEach((l) => addLocationMarker(l, restaurantIcon));
+            chatbotLocationData.museums.forEach((l) => addLocationMarker(l, museumIcon));
+            chatbotLocationData.galleries.forEach((l) => addLocationMarker(l, galleryIcon));
+            chatbotLocationData.others.forEach((l) => addLocationMarker(l, otherIcon));
           };
           
           addNearbyLocations();
@@ -1039,6 +1022,70 @@
       }
     }
     
+    /**
+     * Open the chatbot map view and pan to a curated venue. Returns true
+     * if the venue is known (lat/lng available via LuxuryIntelligence
+     * catalog) and the navigation was initiated, false otherwise.
+     */
+    function focusVenueOnMap(venueName) {
+      if (!venueName) return false;
+      const catalog = window.LuxuryIntelligence;
+      const loc = catalog && typeof catalog.getVenueLocation === 'function'
+        ? catalog.getVenueLocation(venueName)
+        : null;
+      if (!loc) return false;
+
+      const activate = () => {
+        const navMapBtn = document.getElementById('nav-map');
+        if (currentView !== 'map') {
+          if (navMapBtn) {
+            chatbotNav.querySelectorAll('.chatbot-nav-item').forEach((i) => i.classList.remove('is-active'));
+            navMapBtn.classList.add('is-active');
+          }
+          currentView = 'map';
+          switchChatbotView('map');
+        }
+      };
+
+      const flyAndOpen = () => {
+        if (!leafletMap) return;
+        leafletMap.invalidateSize();
+        leafletMap.flyTo([loc.lat, loc.lng], 16, { animate: true, duration: 0.6 });
+
+        const key = String(venueName).toLowerCase();
+        let marker = venueMarkersByName.get(key) || adhocVenueMarkers.get(key);
+
+        // If the venue has no pre-built marker on the map, drop one now
+        // so the popup gives the user context after the flyTo settles.
+        if (!marker && typeof L !== 'undefined') {
+          const adhocIcon = L.divIcon({
+            className: 'custom-luxury-marker',
+            html: '<div style="width:14px;height:14px;background:#000;border-radius:50%;border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,0.45);"></div>',
+            iconSize: [14, 14],
+            iconAnchor: [7, 7]
+          });
+          const popup = loc.address
+            ? `<b>${venueName}</b><br><small>${loc.address}</small>`
+            : `<b>${venueName}</b>`;
+          marker = L.marker([loc.lat, loc.lng], { icon: adhocIcon })
+            .bindPopup(popup)
+            .addTo(leafletMap);
+          adhocVenueMarkers.set(key, marker);
+        }
+
+        if (marker) {
+          setTimeout(() => { try { marker.openPopup(); } catch (_e) {} }, 650);
+        }
+      };
+
+      activate();
+      // Give the map view a tick to mount before flying. initializeMap()
+      // is invoked inside switchChatbotView('map'), so leafletMap should
+      // exist by the next frame.
+      setTimeout(flyAndOpen, 180);
+      return true;
+    }
+
     // Helper to clear map view specific classes
     function clearMapViewClasses() {
       wrapper.classList.remove('map-view-active');
@@ -1192,6 +1239,27 @@
     
     const options = createEl('div', { class: 'chatbot-options', hidden: '' }); // Hide options - only use presets
     const messages= createEl('div', { class: 'chatbot-messages' });
+    // Delegated handler — clicks on linkified venue mentions in any
+    // bot message route to the chatbot map.
+    messages.addEventListener('click', (e) => {
+      const link = e.target.closest && e.target.closest('.chatbot-venue-link');
+      if (!link) return;
+      const venue = link.getAttribute('data-venue');
+      if (venue && typeof focusVenueOnMap === 'function') {
+        e.preventDefault();
+        focusVenueOnMap(venue);
+      }
+    });
+    messages.addEventListener('keydown', (e) => {
+      if (e.key !== 'Enter' && e.key !== ' ') return;
+      const link = e.target.closest && e.target.closest('.chatbot-venue-link');
+      if (!link) return;
+      const venue = link.getAttribute('data-venue');
+      if (venue && typeof focusVenueOnMap === 'function') {
+        e.preventDefault();
+        focusVenueOnMap(venue);
+      }
+    });
     const inputW  = createEl('div', { class: 'chatbot-input' });
     const input   = createEl('input', { type: 'text', placeholder: 'Select a keyword to begin', 'aria-label': 'Message', disabled: '' });
     const sendBtn = createEl('button', { type: 'button', 'aria-label': 'Send message', disabled: '' });
@@ -1345,10 +1413,11 @@
         hideThinking();
         addMessage('bot', String(data.answer || ''), {
           renderMarkdown: true,
-          domain: data.domain
+          domain: data.domain,
+          mentionedVenues: data.mentionedVenues || []
         });
         if (data.images && Array.isArray(data.images) && data.images.length > 0) {
-          displayImages(data.images, data.rank_data);
+          displayImages(data.images, data.rank_data, data.imageVenues);
         } else {
           finalizeAssistantTurnScroll();
         }
@@ -1648,6 +1717,68 @@
       });
     }
 
+    function escapeRegExpForVenue(s) {
+      return String(s).replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&');
+    }
+
+    /**
+     * Walk an element's text nodes and wrap any mention of a curated
+     * venue name in a clickable span that routes to focusVenueOnMap().
+     * Skips text inside anchors and code blocks.
+     */
+    function linkifyVenueMentions(root, venueNames) {
+      if (!root || !Array.isArray(venueNames) || !venueNames.length) return;
+      const catalog = window.LuxuryIntelligence;
+      const navigable = (catalog && typeof catalog.getVenueLocation === 'function')
+        ? venueNames.filter((n) => catalog.getVenueLocation(n))
+        : [];
+      if (!navigable.length) return;
+      // Sort longest-first so e.g. "The Mark Hotel" wins over "The Mark".
+      const sorted = navigable.slice().sort((a, b) => b.length - a.length);
+      const pattern = new RegExp('\\b(' + sorted.map(escapeRegExpForVenue).join('|') + ')\\b', 'i');
+      const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+        acceptNode: (n) => {
+          const p = n.parentNode;
+          if (!p) return NodeFilter.FILTER_REJECT;
+          const tag = p.nodeName;
+          if (tag === 'A' || tag === 'CODE' || tag === 'PRE' || tag === 'SCRIPT' || tag === 'STYLE') return NodeFilter.FILTER_REJECT;
+          if (p.classList && p.classList.contains('chatbot-venue-link')) return NodeFilter.FILTER_REJECT;
+          return NodeFilter.FILTER_ACCEPT;
+        }
+      });
+      const targets = [];
+      let node;
+      while ((node = walker.nextNode())) targets.push(node);
+      const canonical = {};
+      navigable.forEach((v) => { canonical[v.toLowerCase()] = v; });
+
+      targets.forEach((textNode) => {
+        const text = textNode.nodeValue;
+        if (!pattern.test(text)) return;
+        const frag = document.createDocumentFragment();
+        let remaining = text;
+        let m;
+        const re = new RegExp(pattern.source, 'gi');
+        let lastIdx = 0;
+        while ((m = re.exec(remaining)) !== null) {
+          if (m.index > lastIdx) frag.appendChild(document.createTextNode(remaining.slice(lastIdx, m.index)));
+          const matchedRaw = m[0];
+          const canonicalName = canonical[matchedRaw.toLowerCase()] || matchedRaw;
+          const link = createEl('span', { class: 'chatbot-venue-link' });
+          link.textContent = matchedRaw;
+          link.setAttribute('data-venue', canonicalName);
+          link.setAttribute('role', 'button');
+          link.setAttribute('tabindex', '0');
+          link.style.cssText = 'color:#1a1a1a;font-weight:600;text-decoration:underline;text-decoration-color:rgba(0,0,0,0.35);text-underline-offset:2px;cursor:pointer;';
+          link.title = 'View ' + canonicalName + ' on the map';
+          frag.appendChild(link);
+          lastIdx = m.index + matchedRaw.length;
+        }
+        if (lastIdx < remaining.length) frag.appendChild(document.createTextNode(remaining.slice(lastIdx)));
+        textNode.parentNode.replaceChild(frag, textNode);
+      });
+    }
+
     function addMessage(sender, text, opts){
       const klass = sender === 'user' ? 'chatbot-msg chatbot-msg-user' : 'chatbot-msg chatbot-msg-bot';
       const div = createEl('div', { class: klass });
@@ -1656,6 +1787,9 @@
       } else if (opts && opts.renderMarkdown && window.LuxuryIntelligence) {
         div.classList.add('chatbot-msg-markdown');
         div.innerHTML = window.LuxuryIntelligence.markdownToHtml(text);
+        if (opts && Array.isArray(opts.mentionedVenues) && opts.mentionedVenues.length) {
+          linkifyVenueMentions(div, opts.mentionedVenues);
+        }
         if (opts.domain) {
           const dom = createEl('div', { class: 'chatbot-msg-domain', text: String(opts.domain) });
           div.appendChild(dom);
@@ -1672,49 +1806,69 @@
       ensureSizeForContent();
     }
 
-    function displayImages(imageUrls, rankData) {
+    function displayImages(imageUrls, rankData, imageVenues) {
       if (!imageUrls || !Array.isArray(imageUrls) || imageUrls.length === 0) return;
-      
+
+      const venuesByUrl = {};
+      if (Array.isArray(imageVenues)) {
+        imageVenues.forEach(v => { if (v && v.url) venuesByUrl[v.url] = v; });
+      }
+
       const imageContainer = createEl('div', { class: 'chatbot-msg chatbot-msg-bot chatbot-images' });
       imageUrls.forEach(imageUrl => {
         const imgWrapper = createEl('div', {
           class: 'chatbot-image-wrap'
         });
         imgWrapper.setAttribute('draggable', 'true');
-        
+
+        const venue = venuesByUrl[imageUrl];
+        const altText = venue && venue.name ? venue.name : 'Related image';
         const img = createEl('img', {
           src: imageUrl,
-          alt: 'Related image',
+          alt: altText,
           style: 'width: 100%; height: 112px; object-fit: cover; border-radius: 8px; cursor: pointer; display: block;'
         });
         img.setAttribute('draggable', 'false'); // Prevent default image drag
-        
+
+        if (venue && venue.name) {
+          imgWrapper.title = 'Click to view ' + venue.name + ' on the map';
+        }
+
         // Make wrapper draggable to gallery
         imgWrapper.addEventListener('dragstart', (e) => {
           e.dataTransfer.effectAllowed = 'copy';
           e.dataTransfer.setData('text/plain', imageUrl);
           e.dataTransfer.setData('application/json', JSON.stringify({
             src: imageUrl,
-            title: 'Yayoi Kusama'
+            title: venue && venue.name ? venue.name : 'Yayoi Kusama'
           }));
           imgWrapper.style.opacity = '0.5';
         });
-        
+
         imgWrapper.addEventListener('dragend', (e) => {
           imgWrapper.style.opacity = '1';
         });
-        
-        img.addEventListener('click', () => openImagePreview(imageUrl));
+
+        img.addEventListener('click', () => {
+          if (venue && venue.name && focusVenueOnMap(venue.name)) return;
+          openImagePreview(imageUrl);
+        });
         img.addEventListener('error', () => {
           imgWrapper.style.display = 'none';
         });
-        
+
         imgWrapper.appendChild(img);
-        if (window.LuxuryIntelligence && window.LuxuryIntelligence.getImageRank) {
-          const rank = window.LuxuryIntelligence.getImageRank(rankData, imageUrl);
-          const label = window.LuxuryIntelligence.getRankBadgeLabel(rank);
-          if (label) {
-            imgWrapper.appendChild(createEl('span', { class: 'chatbot-rank-badge', text: label }));
+        if (venue && venue.name) {
+          const caption = createEl('div', { class: 'chatbot-image-caption' });
+          caption.style.cssText = 'font-size:11px;font-weight:600;color:#1a1a1a;padding:4px 6px 0;line-height:1.2;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;';
+          caption.textContent = venue.name;
+          caption.addEventListener('click', () => { focusVenueOnMap(venue.name); });
+          imgWrapper.appendChild(caption);
+          if (venue.area) {
+            const sub = createEl('div', { class: 'chatbot-image-subcaption' });
+            sub.style.cssText = 'font-size:10px;color:#666;padding:0 6px 4px;text-align:center;';
+            sub.textContent = venue.area;
+            imgWrapper.appendChild(sub);
           }
         }
         imageContainer.appendChild(imgWrapper);
@@ -1858,10 +2012,10 @@
         hideThinking();
 
         const botResponse = String(d.answer || 'No response');
-        addMessage('bot', botResponse, { renderMarkdown: true, domain: d.domain });
+        addMessage('bot', botResponse, { renderMarkdown: true, domain: d.domain, mentionedVenues: d.mentionedVenues || [] });
 
         if (d.images && Array.isArray(d.images) && d.images.length > 0) {
-          displayImages(d.images, d.rank_data);
+          displayImages(d.images, d.rank_data, d.imageVenues);
         } else {
           finalizeAssistantTurnScroll();
         }
@@ -2941,9 +3095,9 @@
 
         displayProductCard(productInfo);
 
-        addMessage('bot', botResponse, { renderMarkdown: true, domain: data.domain });
+        addMessage('bot', botResponse, { renderMarkdown: true, domain: data.domain, mentionedVenues: data.mentionedVenues || [] });
         if (data.images && Array.isArray(data.images) && data.images.length > 0) {
-          displayImages(data.images, data.rank_data);
+          displayImages(data.images, data.rank_data, data.imageVenues);
         } else {
           finalizeAssistantTurnScroll();
         }

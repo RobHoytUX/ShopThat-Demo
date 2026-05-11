@@ -28,6 +28,10 @@
     }
 
     if (payload && Array.isArray(payload.images) && payload.images.length) {
+      const venuesByUrl = {};
+      if (Array.isArray(payload.imageVenues)) {
+        payload.imageVenues.forEach((v) => { if (v && v.url) venuesByUrl[v.url] = v; });
+      }
       const imageWrap = document.createElement('div');
       imageWrap.className = 'ai-message-images';
       imageWrap.style.display = 'grid';
@@ -35,15 +39,33 @@
       imageWrap.style.gap = '8px';
       imageWrap.style.marginTop = '10px';
       payload.images.slice(0, 3).forEach((url) => {
+        const tile = document.createElement('div');
+        tile.style.display = 'flex';
+        tile.style.flexDirection = 'column';
+        tile.style.gap = '4px';
+        const venue = venuesByUrl[url];
         const img = document.createElement('img');
         img.src = url;
-        img.alt = 'Luxury intelligence result';
+        img.alt = venue && venue.name ? venue.name : 'Luxury intelligence result';
         img.loading = 'lazy';
         img.style.width = '100%';
         img.style.height = '84px';
         img.style.objectFit = 'cover';
         img.style.borderRadius = '8px';
-        imageWrap.appendChild(img);
+        tile.appendChild(img);
+        if (venue && venue.name) {
+          const cap = document.createElement('div');
+          cap.textContent = venue.name;
+          cap.style.cssText = 'font-size:11px;font-weight:600;color:inherit;text-align:center;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;';
+          tile.appendChild(cap);
+          if (venue.area) {
+            const sub = document.createElement('div');
+            sub.textContent = venue.area;
+            sub.style.cssText = 'font-size:10px;opacity:0.7;text-align:center;';
+            tile.appendChild(sub);
+          }
+        }
+        imageWrap.appendChild(tile);
       });
       container.appendChild(imageWrap);
     }

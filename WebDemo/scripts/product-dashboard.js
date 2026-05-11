@@ -45,6 +45,110 @@
     return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
   }
 
+  function escapeRegExpForVenue(s) {
+    return String(s).replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&');
+  }
+
+  /**
+   * Switch to the dashboard map view and pan to a curated venue's
+   * coordinates. Returns true if the venue is known.
+   */
+  function focusVenueOnDashboardMap(venueName) {
+    if (!venueName) return false;
+    const catalog = window.LuxuryIntelligence;
+    const loc = catalog && typeof catalog.getVenueLocation === 'function'
+      ? catalog.getVenueLocation(venueName)
+      : null;
+    if (!loc) return false;
+
+    if (currentView !== 'map') switchView('map');
+
+    const fly = () => {
+      if (!leafletMap) return;
+      leafletMap.invalidateSize();
+      leafletMap.flyTo([loc.lat, loc.lng], 16, { animate: true, duration: 0.6 });
+
+      const key = String(venueName).toLowerCase();
+      let marker = dashboardMarkersByName.get(key) || dashboardAdhocMarkers.get(key);
+      if (!marker && typeof L !== 'undefined') {
+        const adhocIcon = L.divIcon({
+          className: 'custom-luxury-marker',
+          html: '<div style="width:14px;height:14px;background:#000;border-radius:50%;border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,0.45);"></div>',
+          iconSize: [14, 14],
+          iconAnchor: [7, 7]
+        });
+        const popup = loc.address
+          ? `<b>${venueName}</b><br><small>${loc.address}</small>`
+          : `<b>${venueName}</b>`;
+        marker = L.marker([loc.lat, loc.lng], { icon: adhocIcon })
+          .bindPopup(popup)
+          .addTo(leafletMap);
+        dashboardAdhocMarkers.set(key, marker);
+      }
+      if (marker) setTimeout(() => { try { marker.openPopup(); } catch (_e) {} }, 650);
+    };
+    setTimeout(fly, 180);
+    return true;
+  }
+
+  function linkifyVenueMentionsInDashboard(root, venueNames) {
+    if (!root || !Array.isArray(venueNames) || !venueNames.length) return;
+    const catalog = window.LuxuryIntelligence;
+    const navigable = (catalog && typeof catalog.getVenueLocation === 'function')
+      ? venueNames.filter((n) => catalog.getVenueLocation(n))
+      : [];
+    if (!navigable.length) return;
+    const sorted = navigable.slice().sort((a, b) => b.length - a.length);
+    const pattern = new RegExp('\\b(' + sorted.map(escapeRegExpForVenue).join('|') + ')\\b', 'i');
+    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+      acceptNode: (n) => {
+        const p = n.parentNode;
+        if (!p) return NodeFilter.FILTER_REJECT;
+        const tag = p.nodeName;
+        if (tag === 'A' || tag === 'CODE' || tag === 'PRE' || tag === 'SCRIPT' || tag === 'STYLE') return NodeFilter.FILTER_REJECT;
+        if (p.classList && p.classList.contains('ai-chat-venue-link')) return NodeFilter.FILTER_REJECT;
+        return NodeFilter.FILTER_ACCEPT;
+      }
+    });
+    const targets = [];
+    let node;
+    while ((node = walker.nextNode())) targets.push(node);
+    const canonical = {};
+    navigable.forEach((v) => { canonical[v.toLowerCase()] = v; });
+
+    targets.forEach((textNode) => {
+      const text = textNode.nodeValue;
+      if (!pattern.test(text)) return;
+      const frag = document.createDocumentFragment();
+      const re = new RegExp(pattern.source, 'gi');
+      let lastIdx = 0;
+      let m;
+      while ((m = re.exec(text)) !== null) {
+        if (m.index > lastIdx) frag.appendChild(document.createTextNode(text.slice(lastIdx, m.index)));
+        const matchedRaw = m[0];
+        const canonicalName = canonical[matchedRaw.toLowerCase()] || matchedRaw;
+        const link = createEl('span', { class: 'ai-chat-venue-link' });
+        link.textContent = matchedRaw;
+        link.setAttribute('data-venue', canonicalName);
+        link.setAttribute('role', 'button');
+        link.setAttribute('tabindex', '0');
+        link.style.cssText = 'color:#1a1a1a;font-weight:600;text-decoration:underline;text-decoration-color:rgba(0,0,0,0.35);text-underline-offset:2px;cursor:pointer;';
+        link.title = 'View ' + canonicalName + ' on the map';
+        link.addEventListener('click', (e) => { e.preventDefault(); focusVenueOnDashboardMap(canonicalName); });
+        link.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            focusVenueOnDashboardMap(canonicalName);
+          }
+        });
+        frag.appendChild(link);
+        lastIdx = m.index + matchedRaw.length;
+      }
+      if (lastIdx < text.length) frag.appendChild(document.createTextNode(text.slice(lastIdx)));
+      textNode.parentNode.replaceChild(frag, textNode);
+    });
+  }
+
   /** Render Luxury Intelligence API response (markdown + domain + ranked images) */
   function appendLuxuryIntelligenceToChat(chatMessages, data) {
     if (!chatMessages || !data) return;
@@ -55,6 +159,9 @@
     } else {
       md.textContent = data.answer || '';
     }
+    if (Array.isArray(data.mentionedVenues) && data.mentionedVenues.length) {
+      linkifyVenueMentionsInDashboard(md, data.mentionedVenues);
+    }
     wrap.appendChild(md);
     if (data.domain) {
       wrap.appendChild(createEl('div', { class: 'ai-chat-domain', text: String(data.domain) }));
@@ -62,16 +169,33 @@
     chatMessages.appendChild(wrap);
 
     if (data.images && data.images.length) {
+      const venuesByUrl = {};
+      if (Array.isArray(data.imageVenues)) {
+        data.imageVenues.forEach(function (v) { if (v && v.url) venuesByUrl[v.url] = v; });
+      }
       const imageMessage = createEl('div', { class: 'ai-chat-message ai ai-chat-images-message' });
       const row = createEl('div', { class: 'ai-chat-images' });
       data.images.forEach(function (url) {
         const imageWrap = createEl('div', { class: 'ai-chat-image' });
-        imageWrap.appendChild(createEl('img', { src: url, alt: '', loading: 'lazy' }));
-        if (window.LuxuryIntelligence && window.LuxuryIntelligence.getImageRank) {
-          const rank = window.LuxuryIntelligence.getImageRank(data.rank_data, url);
-          const label = window.LuxuryIntelligence.getRankBadgeLabel(rank);
-          if (label) {
-            imageWrap.appendChild(createEl('span', { class: 'ai-chat-rank-badge', text: label }));
+        const venue = venuesByUrl[url];
+        const img = createEl('img', { src: url, alt: venue && venue.name ? venue.name : '', loading: 'lazy' });
+        if (venue && venue.name) {
+          img.style.cursor = 'pointer';
+          imageWrap.title = 'Click to view ' + venue.name + ' on the map';
+          img.addEventListener('click', function () { focusVenueOnDashboardMap(venue.name); });
+        }
+        imageWrap.appendChild(img);
+        if (venue && venue.name) {
+          const cap = createEl('div', { class: 'ai-chat-image-caption' });
+          cap.style.cssText = 'font-size:11px;font-weight:600;color:#1a1a1a;padding:4px 6px 0;line-height:1.2;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;';
+          cap.textContent = venue.name;
+          cap.addEventListener('click', function () { focusVenueOnDashboardMap(venue.name); });
+          imageWrap.appendChild(cap);
+          if (venue.area) {
+            const sub = createEl('div', { class: 'ai-chat-image-subcaption' });
+            sub.style.cssText = 'font-size:10px;color:#666;padding:0 6px 4px;text-align:center;';
+            sub.textContent = venue.area;
+            imageWrap.appendChild(sub);
           }
         }
         row.appendChild(imageWrap);
@@ -95,6 +219,10 @@
 
   let currentView = 'media';
   let leafletMap = null;
+  // Markers added in renderMap()'s addNearbyLocations, keyed by lower-
+  // cased venue name so focusVenueOnDashboardMap() can openPopup().
+  const dashboardMarkersByName = new Map();
+  const dashboardAdhocMarkers = new Map();
   let locationMarkers = []; // Store location markers for cleanup
   
   const dashboardMapData = window.ShopThatDashboardMapData || {};
@@ -2477,35 +2605,22 @@
           iconAnchor: [6, 6]
         });
         
-        // Add stores
-        locationData.stores.forEach(location => {
-          const popupContent = location.address 
+        function addDashboardMarker(location, icon) {
+          const popupContent = location.address
             ? `<b>${location.name}</b><br><small>${location.address}</small>`
             : `<b>${location.name}</b>`;
-          L.marker([location.lat, location.lng], { icon: storeIcon })
+          const marker = L.marker([location.lat, location.lng], { icon })
             .bindPopup(popupContent)
             .addTo(leafletMap);
-        });
-        
-        // Add museums
-        locationData.museums.forEach(location => {
-          const popupContent = location.address 
-            ? `<b>${location.name}</b><br><small>${location.address}</small>`
-            : `<b>${location.name}</b>`;
-          L.marker([location.lat, location.lng], { icon: museumIcon })
-            .bindPopup(popupContent)
-            .addTo(leafletMap);
-        });
-        
-        // Add restaurants
-        locationData.restaurants.forEach(location => {
-          const popupContent = location.address 
-            ? `<b>${location.name}</b><br><small>${location.address}</small>`
-            : `<b>${location.name}</b>`;
-          L.marker([location.lat, location.lng], { icon: restaurantIcon })
-            .bindPopup(popupContent)
-            .addTo(leafletMap);
-        });
+          if (location.name) {
+            dashboardMarkersByName.set(String(location.name).toLowerCase(), marker);
+          }
+          return marker;
+        }
+
+        locationData.stores.forEach((l) => addDashboardMarker(l, storeIcon));
+        locationData.museums.forEach((l) => addDashboardMarker(l, museumIcon));
+        locationData.restaurants.forEach((l) => addDashboardMarker(l, restaurantIcon));
       };
       
       addNearbyLocations();

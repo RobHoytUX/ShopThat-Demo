@@ -1,5 +1,189 @@
 const { getSession, readJsonBody } = require('../auth/_auth');
 
+// ────────────────────────────────────────────────────────────────────────
+// Curated allow-list mirroring WebDemo/scripts/keywords-data.js, broken
+// down by NY area so a question about "57th St. restaurants" only
+// surfaces venues nested under that node (same for SoHo). Queries that
+// mention restaurants, hotels, or galleries/museums get an explicit
+// constraint appended so the upstream Luxury Intelligence model can
+// only recommend venues that exist in our curated keyword graph.
+// ────────────────────────────────────────────────────────────────────────
+const ALLOWED_KEYWORDS = {
+  restaurants: {
+    '57th St.': [
+      'The Mark', 'Gabriel Kreuther', 'THE GRILL', 'KANG HO DONG',
+      'Le Pavillon', 'Marea', 'The Modern', 'Le Bernardin', 'Cafe Carlyle'
+    ],
+    'SoHo': [
+      'BAR PITTI', 'MINETTA TAVERN', 'SHUKO', 'IL BUCO ALIMENTARI',
+      'BALTHAZAR', 'JOSEPH LEONARD', 'ESTELLA', "JACK'S WIFE FRIEDA",
+      'FRENCHETTE', "L'ABEILLE", 'LOCANDA VERDE', 'DIRTY FRENCH',
+      '63 CLINTON', 'ST AMBROEUS', 'OMEN', "THE BUTCHER'S DAUGHTER",
+      'INDOCHINE', 'LA MERCERIE', 'LE COUCOU'
+    ]
+  },
+  hotels: {
+    '57th St.': [
+      'Ace Hotel', 'The Baccarat Hotel', 'The Plaza', 'CIVILIAN Hotel',
+      'ST Regis', 'Times Square Edition', 'DANIEL', 'Le Bilboquet',
+      'The Mark Hotel'
+    ],
+    'SoHo': [
+      'CROSBY STREET HOTEL', 'THE BOWERY HOTEL',
+      'THE STANDARD EAST VILLAGE', 'THE MERCER', 'THE GREENWICH',
+      'HOTEL BARRIERE FOUQUET', 'PUBLIC'
+    ]
+  },
+  galleries: {
+    'Kusama': [
+      'Victoria Miro', 'David Zwirner', 'Fondation LV', 'Kusama Museum'
+    ]
+  }
+};
+
+const CATEGORY_TRIGGERS = {
+  restaurants: {
+    re: /\b(restaurant|restaurants|dining|dine|diner|dinner|lunch|brunch|supper|cafe|caf[eé]s?|bistro|bistros|eatery|eateries|brasserie|brasseries|food|eat|where\s+to\s+eat)\b/i,
+    label: 'restaurants'
+  },
+  hotels: {
+    re: /\b(hotel|hotels|stay|stays|accommodation|accommodations|lodging|resort|resorts|suite|suites)\b/i,
+    label: 'hotels'
+  },
+  galleries: {
+    re: /\b(gallery|galleries|museum|museums|exhibition|exhibitions|art\s+space)\b/i,
+    label: 'galleries & museums'
+  }
+};
+
+const AREA_TRIGGERS = {
+  '57th St.': /\b(57\s*th(?:\s|-)?(?:st\.?|street)?|fifty[-\s]?seventh\s+street|midtown)\b/i,
+  'SoHo':     /\b(soho|so-?ho)\b/i
+};
+
+// Venue → image catalog (mirrors WebDemo/scripts/luxury-intelligence.js).
+// Paths are resolved by the WebDemo frontend that consumes the response.
+const VENUE_IMAGES = {
+  'The Modern':           { url: 'assets/restaurants/the-modern.jpg',         area: '57th St.', category: 'restaurants' },
+  'Le Bernardin':         { url: 'assets/restaurants/le-bernardin.jpg',       area: '57th St.', category: 'restaurants' },
+  'Cafe Carlyle':         { url: 'assets/restaurants/cafe-carlyle.jpg',       area: '57th St.', category: 'restaurants' },
+  'Marea':                { url: 'assets/restaurants/marea.jpg',              area: '57th St.', category: 'restaurants' },
+  'The Mark':             { url: 'assets/restaurants/the-mark-restaurant.jpg', area: '57th St.', category: 'restaurants' },
+  'Le Bilboquet':         { url: 'assets/restaurants/le-bilboquet.jpg',       area: '57th St.', category: 'restaurants' },
+  'The Plaza':            { url: 'assets/restaurants/the-plaza.jpg',          area: '57th St.', category: 'hotels' },
+  'The Mark Hotel':       { url: 'assets/restaurants/mark-hotel.jpg',         area: '57th St.', category: 'hotels' },
+  'The Baccarat Hotel':   { url: 'assets/restaurants/baccarat.jpg',           area: '57th St.', category: 'hotels' },
+  'The Baccarat':         { url: 'assets/restaurants/baccarat.jpg',           area: '57th St.', category: 'hotels' },
+  'ST Regis':             { url: 'assets/restaurants/st-regis.jpg',           area: '57th St.', category: 'hotels' },
+  'The St. Regis':        { url: 'assets/restaurants/st-regis.jpg',           area: '57th St.', category: 'hotels' },
+  'The Carlyle':          { url: 'assets/restaurants/carlyle-hotel.jpg',      area: '57th St.', category: 'hotels' },
+  'MoMA Museum':                 { url: 'assets/museums/moma.jpg',         area: 'Kusama', category: 'galleries' },
+  'Metropolitan Museum of Art':  { url: 'assets/museums/met-museum.jpg',   area: 'Kusama', category: 'galleries' },
+  'Fondation LV':                { url: 'assets/foundation-lv-png.png',    area: 'Kusama', category: 'galleries' }
+};
+
+function escapeRegExp(s) {
+  return String(s).replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&');
+}
+
+function findMentionedVenues(answer, venues) {
+  const text = String(answer || '');
+  if (!text || !Array.isArray(venues) || !venues.length) return [];
+  const positioned = [];
+  venues.forEach((name) => {
+    const re = new RegExp(`\\b${escapeRegExp(name)}\\b`, 'i');
+    const idx = text.search(re);
+    if (idx !== -1) positioned.push({ name, idx });
+  });
+  positioned.sort((a, b) => a.idx - b.idx);
+  const out = [];
+  positioned.forEach((p) => { if (out.indexOf(p.name) === -1) out.push(p.name); });
+  return out;
+}
+
+function getAreaScopedPool(cats, areas) {
+  const pool = [];
+  cats.forEach((cat) => {
+    const map = ALLOWED_KEYWORDS[cat] || {};
+    const scoped = areas.filter((a) => Array.isArray(map[a]) && map[a].length);
+    const keys = scoped.length ? scoped : Object.keys(map);
+    keys.forEach((a) => {
+      (map[a] || []).forEach((v) => { if (pool.indexOf(v) === -1) pool.push(v); });
+    });
+  });
+  return pool;
+}
+
+/**
+ * In constrained mode, replace the upstream `images` with venue-correct
+ * local images for any mentioned venues. If we have no local image for a
+ * mentioned venue, drop it rather than risk a mismatch.
+ */
+function alignImagesToVenues(data, query) {
+  if (!data || typeof data !== 'object') return data;
+  const cats = Object.keys(CATEGORY_TRIGGERS).filter((cat) => CATEGORY_TRIGGERS[cat].re.test(String(query || '')));
+  if (!cats.length) return data;
+  const areas = detectAreas(query);
+  const pool = getAreaScopedPool(cats, areas);
+  const mentioned = findMentionedVenues(data.answer, pool);
+
+  const images = [];
+  const rankData = [];
+  const imageVenues = [];
+  let rank = 1;
+  mentioned.forEach((name) => {
+    const entry = VENUE_IMAGES[name];
+    if (!entry || !entry.url) return;
+    images.push(entry.url);
+    rankData.push({ url: entry.url, priority_rank: rank });
+    imageVenues.push({ name, url: entry.url, area: entry.area || '', category: entry.category || '' });
+    rank += 1;
+  });
+
+  data.images = images;
+  data.rank_data = rankData;
+  data.imageVenues = imageVenues;
+  data.mentionedVenues = mentioned;
+  return data;
+}
+
+function detectAreas(query) {
+  const q = String(query || '');
+  return Object.keys(AREA_TRIGGERS).filter((area) => AREA_TRIGGERS[area].test(q));
+}
+
+function applyKeywordConstraints(query) {
+  const q = String(query || '');
+  const cats = Object.keys(CATEGORY_TRIGGERS).filter((cat) => CATEGORY_TRIGGERS[cat].re.test(q));
+  if (!cats.length) return q;
+  const areas = detectAreas(q);
+
+  const sections = [];
+  cats.forEach((cat) => {
+    const map = ALLOWED_KEYWORDS[cat] || {};
+    const scoped = areas.filter((a) => Array.isArray(map[a]) && map[a].length);
+    const keys = scoped.length ? scoped : Object.keys(map);
+    keys.forEach((area) => {
+      const list = map[area];
+      if (!list || !list.length) return;
+      const quoted = list.map((x) => `"${x}"`).join(', ');
+      sections.push(`Approved ${area} ${CATEGORY_TRIGGERS[cat].label}: ${quoted}.`);
+    });
+  });
+  if (!sections.length) return q;
+
+  const header = [
+    '',
+    'STRICT CONSTRAINT — Louis Vuitton curated allow-list:',
+    'When recommending or mentioning specific restaurants, hotels, galleries, or museums, you may ONLY use venues from the lists below. ' +
+      (areas.length
+        ? `The user asked about ${areas.join(' and ')}, so recommend ONLY venues from the matching area list.`
+        : 'Stay strictly within these curated lists.') +
+      ' Do not introduce any venue that is not on these lists. If no listed venue fits the request, say so explicitly rather than suggesting an unlisted one.'
+  ];
+  return `${q}\n${header.concat(sections).join('\n')}`;
+}
+
 module.exports = async function askLuxuryIntelligence(req, res) {
   if (req.method !== 'POST') {
     res.setHeader('Allow', 'POST');
@@ -19,17 +203,38 @@ module.exports = async function askLuxuryIntelligence(req, res) {
 
   try {
     const body = await readJsonBody(req);
+    const originalQuery = String(body.query || '');
+    const constrainedQuery = applyKeywordConstraints(originalQuery);
     const upstreamResponse = await fetch(upstreamUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ query: String(body.query || '') })
+      body: JSON.stringify({ query: constrainedQuery })
     });
     const responseBody = await upstreamResponse.text();
+    const contentType = upstreamResponse.headers.get('content-type') || 'application/json';
 
     res.status(upstreamResponse.status);
-    res.setHeader('Content-Type', upstreamResponse.headers.get('content-type') || 'application/json');
+    res.setHeader('Content-Type', contentType);
+
+    // Only post-process if the upstream succeeded and returned JSON we
+    // can safely parse. Anything else gets passed through verbatim.
+    if (upstreamResponse.ok && /application\/json/i.test(contentType)) {
+      try {
+        const parsed = JSON.parse(responseBody);
+        const aligned = alignImagesToVenues(parsed, originalQuery);
+        return res.send(JSON.stringify(aligned));
+      } catch (_e) {
+        return res.send(responseBody);
+      }
+    }
     return res.send(responseBody);
   } catch (error) {
     return res.status(502).json({ error: 'Luxury Intelligence API request failed' });
   }
 };
+
+module.exports.applyKeywordConstraints = applyKeywordConstraints;
+module.exports.alignImagesToVenues = alignImagesToVenues;
+module.exports.findMentionedVenues = findMentionedVenues;
+module.exports.VENUE_IMAGES = VENUE_IMAGES;
+module.exports.ALLOWED_KEYWORDS = ALLOWED_KEYWORDS;
