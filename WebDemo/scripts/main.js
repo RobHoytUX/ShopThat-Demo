@@ -459,8 +459,8 @@
   .chatbot-msg-domain{font-size:11px;color:#666;margin-top:6px;font-weight:500}
   .chatbot-msg-user{align-self:flex-end;background:rgba(0,0,0,0.78);color:#fff;border-radius:30px 30px 6px 30px;margin-right:8px}
   .chatbot-msg-bot{align-self:flex-start;background:#f2f2f2;color:#111;border-radius:30px 30px 30px 6px}
-  .chatbot-images{align-self:stretch;width:100%;max-width:100%;background:transparent;padding:8px;border-radius:12px;display:flex;flex-wrap:nowrap;gap:8px;justify-content:flex-start;box-sizing:border-box;overflow:visible}
-  .chatbot-image-wrap{position:relative;display:inline-block;flex:1 1 0;min-width:0}
+  .chatbot-images{align-self:stretch;width:100%;max-width:100%;background:transparent;padding:8px;border-radius:12px;display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-start;box-sizing:border-box;overflow:visible}
+  .chatbot-image-wrap{position:relative;display:block;flex:0 0 calc((100% - 16px)/3);max-width:calc((100% - 16px)/3);min-width:0}
   .chatbot-images img{border-radius:8px;transition:transform 0.2s ease}
   .chatbot-images img:hover{transform:scale(1.05)}
   .chatbot-thinking{align-self:flex-start;background:#f2f2f2;color:#111;border-radius:30px 30px 30px 6px;padding:10px 16px;display:flex;align-items:center;gap:8px}
@@ -1860,7 +1860,7 @@
         imgWrapper.appendChild(img);
         if (venue && venue.name) {
           const caption = createEl('div', { class: 'chatbot-image-caption' });
-          caption.style.cssText = 'font-size:11px;font-weight:600;color:#1a1a1a;padding:4px 6px 0;line-height:1.2;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;';
+          caption.style.cssText = 'font-size:11px;font-weight:600;color:#1a1a1a;padding:4px 4px 0;line-height:1.2;text-align:center;white-space:normal;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;cursor:pointer;';
           caption.textContent = venue.name;
           caption.addEventListener('click', () => { focusVenueOnMap(venue.name); });
           imgWrapper.appendChild(caption);

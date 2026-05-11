@@ -22,10 +22,13 @@ This repository contains several historical prototypes, but the active static de
 Required GitHub Actions secrets for Vercel production deploys:
 
 - `VERCEL_TOKEN`
-- `VERCEL_ORG_ID`
-- `VERCEL_PROJECT_ID`
-- `VERCEL_DOMAINS` - optional comma/space/newline separated domain list to alias after
-  deploy, for example `example.com,www.example.com`.
+
+The workflow pins the Vercel org/project IDs from `.vercel/project.json` and
+promotes each production deploy to:
+
+- `agallery.ai`
+- `www.agallery.ai`
+- `shop-that-demo.vercel.app`
 
 Required runtime environment variables:
 

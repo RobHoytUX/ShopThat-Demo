@@ -15,36 +15,55 @@ jobs:
     runs-on: ubuntu-latest
     environment: production
     env:
-      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+      # These match .vercel/project.json and keep the workflow deployable even
+      # when GitHub environment secrets only contain the token.
+      VERCEL_ORG_ID: team_9nIi1LWx539yMKdzPYVWUFr2
+      VERCEL_PROJECT_ID: prj_RhBfUox5aoYn5eLk0pwLf35ZzHP4
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-      # Optional comma/space/newline separated list, for example:
-      # shopthatdemo.com,www.shopthatdemo.com
-      VERCEL_DOMAINS: ${{ secrets.VERCEL_DOMAINS }}
+      VERCEL_SCOPE: hoytdesigndevs-projects
+      # Comma/space/newline separated aliases to keep on the promoted deploy.
+      VERCEL_DOMAINS: agallery.ai,www.agallery.ai,shop-that-demo.vercel.app
 
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
 
+      - name: Validate Vercel token
+        run: |
+          set -euo pipefail
+          if [ -z "${VERCEL_TOKEN:-}" ]; then
+            echo "Missing GitHub secret: VERCEL_TOKEN"
+            echo "Create one from a Vercel account/team token with access to shop-that-demo."
+            exit 1
+          fi
+
       - name: Install Vercel CLI
         run: npm install --global vercel@latest
 
       - name: Pull Vercel project settings
-        run: vercel pull --yes --environment=production --token="$VERCEL_TOKEN"
+        run: vercel pull --yes --environment=production --scope="$VERCEL_SCOPE" --token="$VERCEL_TOKEN"
 
       - name: Build production deployment
-        run: vercel build --prod --token="$VERCEL_TOKEN"
+        run: vercel build --prod --scope="$VERCEL_SCOPE" --token="$VERCEL_TOKEN"
 
       - name: Deploy production build
         id: deploy
         run: |
           set -euo pipefail
-          deployment_url="$(vercel deploy --prebuilt --prod --token="$VERCEL_TOKEN")"
+          deployment_url="$(vercel deploy --prebuilt --prod --scope="$VERCEL_SCOPE" --token="$VERCEL_TOKEN")"
           echo "deployment_url=$deployment_url" >> "$GITHUB_OUTPUT"
           echo "Deployed to $deployment_url"
 
+      - name: Promote production deployment
+        run: |
+          set -euo pipefail
+          vercel promote "${{ steps.deploy.outputs.deployment_url }}" \
+            --yes \
+            --timeout 3m \
+            --scope="$VERCEL_SCOPE" \
+            --token="$VERCEL_TOKEN"
+
       - name: Re-apply production domain aliases
-        if: ${{ env.VERCEL_DOMAINS != '' }}
         run: |
           set -euo pipefail
           deployment_url="${{ steps.deploy.outputs.deployment_url }}"
