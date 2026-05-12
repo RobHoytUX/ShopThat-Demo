@@ -48,14 +48,19 @@
       ]
     },
     galleries: {
-      // Galleries / museums aren't split by NY area in the curated graph;
-      // they hang off the Kusama branch.
       'Kusama': [
         'Victoria Miro', 'David Zwirner', 'Fondation LV', 'Kusama Museum'
       ],
+      '57th St.': [
+        'MoMA Museum', 'Metropolitan Museum of Art', 'The Guggenheim',
+        'The Frick Collection', 'Pace Gallery', 'David Zwirner Chelsea',
+        'Gagosian Chelsea', 'Hauser & Wirth Chelsea'
+      ],
       'SoHo': [
         'David Zwirner Gallery', 'Jack Shainman Gallery', 'Hauser & Wirth',
-        'Gladstone Gallery', 'Gagosian Gallery', 'Lehmann Maupin'
+        'Gladstone Gallery', 'Gagosian Gallery', 'Lehmann Maupin',
+        'New Museum', 'The Drawing Center', 'Museum of Ice Cream',
+        'Leslie-Lohman Museum of Art'
       ]
     }
   };
@@ -84,7 +89,8 @@
       trigger: /\b(gallery|galleries|museum|museums|exhibition|exhibitions|art\s+space)\b/i,
       graphParents: {
         'Kusama': ['Galleries', 'Museums'],
-        'SoHo': ['SoHo Galleries']
+        '57th St.': ['57th St. Galleries', '57th St. Museums'],
+        'SoHo': ['SoHo Galleries', 'SoHo Museums']
       },
       label: 'galleries & museums'
     }
@@ -124,8 +130,14 @@
     // Galleries / Museums
     'MoMA Museum':                 { url: 'assets/museums/moma.jpg',         area: 'Kusama', category: 'galleries', lat: 40.7614, lng: -73.9776, address: '11 W 53rd St' },
     'Metropolitan Museum of Art':  { url: 'assets/museums/met-museum.jpg',   area: 'Kusama', category: 'galleries', lat: 40.7794, lng: -73.9632, address: '1000 5th Ave' },
+    'The Guggenheim':              { url: 'assets/museums/guggenheim.jpg',   area: '57th St.', category: 'galleries', lat: 40.7829, lng: -73.9589, address: '1071 5th Ave' },
+    'The Frick Collection':        { url: 'assets/museums/frick.jpg',        area: '57th St.', category: 'galleries', lat: 40.7711, lng: -73.9673, address: '1 E 70th St' },
     'Fondation LV':                { url: 'assets/foundation-lv-png.png',    area: 'Kusama', category: 'galleries', lat: 48.8763, lng: 2.2633,   address: '8 Av. du Mahatma Gandhi, Paris' },
     'David Zwirner':               { url: 'assets/kusama-gal2.png',          area: 'Kusama', category: 'galleries', lat: 40.7605, lng: -73.9700, address: '533 W 19th St' },
+    'Pace Gallery':                { url: 'assets/kusama-gal1.png',          area: '57th St.', category: 'galleries', lat: 40.7571, lng: -73.9714, address: '540 W 25th St' },
+    'David Zwirner Chelsea':       { url: 'assets/kusama-gal2.png',          area: '57th St.', category: 'galleries', lat: 40.7465, lng: -74.0070, address: '525 W 19th St' },
+    'Gagosian Chelsea':            { url: 'assets/kusama-gal3.png',          area: '57th St.', category: 'galleries', lat: 40.7481, lng: -74.0055, address: '555 W 24th St' },
+    'Hauser & Wirth Chelsea':      { url: 'assets/kusama-gal4.png',          area: '57th St.', category: 'galleries', lat: 40.7469, lng: -74.0064, address: '443 W 18th St' },
 
     // SoHo restaurants
     'BALTHAZAR':                   { url: 'assets/soho/restaurants/balthazar.png',           area: 'SoHo', category: 'restaurants', lat: 40.7232, lng: -73.9978, address: '80 Spring St' },
@@ -159,7 +171,11 @@
     'Hauser & Wirth':              { url: 'assets/soho/galleries/hauser-wirth.png',          area: 'SoHo', category: 'galleries', lat: 40.7469, lng: -74.0064, address: '443 W 18th St' },
     'Gladstone Gallery':           { url: 'assets/soho/galleries/gladstone-gallery.png',     area: 'SoHo', category: 'galleries', lat: 40.7489, lng: -74.0041, address: '515 W 24th St' },
     'Gagosian Gallery':            { url: 'assets/soho/galleries/gagosian-gallery.png',      area: 'SoHo', category: 'galleries', lat: 40.7481, lng: -74.0055, address: '555 W 24th St' },
-    'Lehmann Maupin':              { url: 'assets/soho/galleries/lehmann-maupin.png',        area: 'SoHo', category: 'galleries', lat: 40.7490, lng: -74.0036, address: '501 W 24th St' }
+    'Lehmann Maupin':              { url: 'assets/soho/galleries/lehmann-maupin.png',        area: 'SoHo', category: 'galleries', lat: 40.7490, lng: -74.0036, address: '501 W 24th St' },
+    'New Museum':                  { area: 'SoHo', category: 'galleries', lat: 40.7224, lng: -73.9928, address: '235 Bowery' },
+    'The Drawing Center':          { area: 'SoHo', category: 'galleries', lat: 40.7223, lng: -74.0020, address: '35 Wooster St' },
+    'Museum of Ice Cream':         { area: 'SoHo', category: 'galleries', lat: 40.7239, lng: -74.0027, address: '558 Broadway' },
+    'Leslie-Lohman Museum of Art': { area: 'SoHo', category: 'galleries', lat: 40.7216, lng: -74.0030, address: '26 Wooster St' }
   };
 
   /** Return { lat, lng, ...meta } for a venue, or null if unknown. */

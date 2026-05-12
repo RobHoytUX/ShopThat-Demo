@@ -86,10 +86,13 @@ function generateArticlesHTML(keyword) {
 //                 ├── 57th St.
 //                 │     ├── 57th St. Restaurants ─ …
 //                 │     └── 57th St. Hotels      ─ …
+//                 │     └── 57th St. Museums     ─ …
+//                 │     └── 57th St. Galleries   ─ …
 //                 └── Soho
 //                       ├── SoHo Hotels       ─ …
 //                       └── SoHo Restaurants  ─ …
 //                       └── SoHo Galleries    ─ …
+//                       └── SoHo Museums      ─ …
 // ──────────────────────────────────────────────────────────────────────────
 const defaultNodes = [
   // Root (rendered as “Louis Vuitton” by the tree view).
@@ -116,9 +119,11 @@ const defaultNodes = [
   { id: '57th St.', group: 3, value: 88, isArea: true, parent: 'Stores' },
   { id: 'Soho',     group: 3, value: 88, isArea: true, parent: 'Stores' },
 
-  // 57th St. categories — only Restaurants and Hotels per the spec.
+  // 57th St. categories
   { id: '57th St. Restaurants', group: 3, value: 80, parent: '57th St.' },
   { id: '57th St. Hotels',      group: 3, value: 80, parent: '57th St.' },
+  { id: '57th St. Museums',     group: 3, value: 80, parent: '57th St.' },
+  { id: '57th St. Galleries',   group: 3, value: 80, parent: '57th St.' },
 
   // 57th St. restaurants
   { id: 'The Mark',         group: 4, value: 70, parent: '57th St. Restaurants' },
@@ -142,10 +147,23 @@ const defaultNodes = [
   { id: 'Times Square Edition', group: 4, value: 65, parent: '57th St. Hotels' },
   { id: 'The Mark Hotel',       group: 4, value: 75, parent: '57th St. Hotels' },
 
+  // 57th St. museums
+  { id: 'MoMA Museum',                group: 4, value: 75, parent: '57th St. Museums' },
+  { id: 'Metropolitan Museum of Art', group: 4, value: 72, parent: '57th St. Museums' },
+  { id: 'The Guggenheim',             group: 4, value: 68, parent: '57th St. Museums' },
+  { id: 'The Frick Collection',       group: 4, value: 68, parent: '57th St. Museums' },
+
+  // 57th St. galleries
+  { id: 'Pace Gallery',          group: 4, value: 68, parent: '57th St. Galleries' },
+  { id: 'David Zwirner Chelsea', group: 4, value: 68, parent: '57th St. Galleries' },
+  { id: 'Gagosian Chelsea',      group: 4, value: 68, parent: '57th St. Galleries' },
+  { id: 'Hauser & Wirth Chelsea', group: 4, value: 68, parent: '57th St. Galleries' },
+
   // SoHo categories
   { id: 'SoHo Hotels',      group: 3, value: 80, parent: 'Soho' },
   { id: 'SoHo Restaurants', group: 3, value: 80, parent: 'Soho' },
   { id: 'SoHo Galleries',   group: 3, value: 80, parent: 'Soho' },
+  { id: 'SoHo Museums',     group: 3, value: 80, parent: 'Soho' },
 
   // SoHo hotels
   { id: 'CROSBY STREET HOTEL',       group: 4, value: 70, parent: 'SoHo Hotels' },
@@ -183,7 +201,13 @@ const defaultNodes = [
   { id: 'Hauser & Wirth',        group: 4, value: 65, parent: 'SoHo Galleries' },
   { id: 'Gladstone Gallery',     group: 4, value: 65, parent: 'SoHo Galleries' },
   { id: 'Gagosian Gallery',      group: 4, value: 65, parent: 'SoHo Galleries' },
-  { id: 'Lehmann Maupin',        group: 4, value: 65, parent: 'SoHo Galleries' }
+  { id: 'Lehmann Maupin',        group: 4, value: 65, parent: 'SoHo Galleries' },
+
+  // SoHo museums
+  { id: 'New Museum',                  group: 4, value: 68, parent: 'SoHo Museums' },
+  { id: 'The Drawing Center',          group: 4, value: 65, parent: 'SoHo Museums' },
+  { id: 'Museum of Ice Cream',         group: 4, value: 60, parent: 'SoHo Museums' },
+  { id: 'Leslie-Lohman Museum of Art', group: 4, value: 60, parent: 'SoHo Museums' }
 ];
 // Auto-generate links from the parent fields above so the bubble graph
 // adjacency mirrors the tree exactly. Cross-area extras (e.g. David Zwirner
@@ -237,6 +261,22 @@ const keywordCategories = {
   'MoMA Sculpture Garden': 'Galleries',
   'Sculpture Garden': 'Galleries',
   'Metropolitan Museum of Art': 'Galleries',
+  'The Guggenheim': 'Galleries',
+  'The Frick Collection': 'Galleries',
+  'Pace Gallery': 'Galleries',
+  'David Zwirner Chelsea': 'Galleries',
+  'Gagosian Chelsea': 'Galleries',
+  'Hauser & Wirth Chelsea': 'Galleries',
+  'David Zwirner Gallery': 'Galleries',
+  'Jack Shainman Gallery': 'Galleries',
+  'Hauser & Wirth': 'Galleries',
+  'Gladstone Gallery': 'Galleries',
+  'Gagosian Gallery': 'Galleries',
+  'Lehmann Maupin': 'Galleries',
+  'New Museum': 'Galleries',
+  'The Drawing Center': 'Galleries',
+  'Museum of Ice Cream': 'Galleries',
+  'Leslie-Lohman Museum of Art': 'Galleries',
   'Madeline Murals': 'Galleries',
 
   // Bars & Lounges

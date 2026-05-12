@@ -370,6 +370,14 @@
   .chatbot-wrapper.map-view-active .chatbot-map-product-title{font-size:9px;line-height:1.15;-webkit-line-clamp:2}
   .chatbot-wrapper.map-view-active .chatbot-map-product-price{font-size:10px}
   .chatbot-wrapper.map-view-active .chatbot-map-product-model,.chatbot-wrapper.map-view-active .chatbot-map-product-link{display:none}
+  .chatbot-venue-gallery-header{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;gap:8px;background:#fff;border-radius:12px;padding:8px 10px;box-shadow:0 2px 10px rgba(0,0,0,0.08)}
+  .chatbot-venue-gallery-title{font-size:12px;font-weight:700;color:#111;margin:0;line-height:1.2;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .chatbot-venue-gallery-count{font-size:10px;color:#666;margin-top:1px}
+  .chatbot-venue-gallery-back{border:1px solid rgba(0,0,0,0.16);background:#fff;border-radius:999px;padding:5px 8px;font-size:10px;font-weight:600;color:#111;cursor:pointer;white-space:nowrap}
+  .chatbot-venue-gallery-back:hover{background:#f7f7f7}
+  .chatbot-venue-image-card{background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,0.08);cursor:pointer;height:104px}
+  .chatbot-venue-image-card:hover{transform:translateY(-2px);box-shadow:0 4px 16px rgba(0,0,0,0.14)}
+  .chatbot-venue-image-card img{width:100%;height:100%;object-fit:cover;display:block}
   .chatbot-location-explorer{display:none !important;background:rgba(255,255,255,0.98);border-radius:12px;padding:16px;padding-bottom:24px;margin:0;box-shadow:0 2px 12px rgba(0,0,0,0.08);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);flex-direction:column;flex-shrink:0;min-height:250px}
   .chatbot-location-explorer.is-visible:not([hidden]){display:flex !important}
   .chatbot-explorer-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
@@ -903,6 +911,83 @@
       legendBtn.setAttribute('title', mapLegendVisible ? 'Hide map legend' : 'Show map legend');
     }
 
+    function canonicalVenueName(name) {
+      const raw = String(name || '').trim();
+      const aliases = {
+        'The Museum of Modern Art': 'MoMA Museum',
+        'The Metropolitan Museum': 'Metropolitan Museum of Art',
+        'The Carlyle Hotel': 'The Carlyle',
+        'The Plaza Hotel': 'The Plaza',
+        'Drawing Center': 'The Drawing Center',
+        'Crosby Street Hotel': 'CROSBY STREET HOTEL',
+        'The Crosby': 'CROSBY STREET HOTEL',
+        'The Mercer Hotel': 'THE MERCER',
+        'Hotel Public': 'PUBLIC',
+        'PUBLIC Hotel': 'PUBLIC',
+        'Gagosian Chelsea': 'Gagosian Gallery',
+        'Hauser & Wirth Chelsea': 'Hauser & Wirth',
+        'David Zwirner Chelsea': 'David Zwirner Gallery'
+      };
+      return aliases[raw] || raw;
+    }
+
+    function getVenueGalleryImages(venueName, location) {
+      const galleries = window.ShopThatVenueImageGalleries || {};
+      const canonical = canonicalVenueName(venueName);
+      const candidates = [
+        venueName,
+        canonical,
+        location && location.name,
+        location && canonicalVenueName(location.name)
+      ].filter(Boolean);
+      const urls = [];
+      candidates.forEach((name) => {
+        (galleries[name] || []).forEach((url) => {
+          if (url && urls.indexOf(url) === -1) urls.push(url);
+        });
+      });
+      if (!urls.length && location && location.image) urls.push(location.image);
+      if (!urls.length && window.LuxuryIntelligence && typeof window.LuxuryIntelligence.getVenueLocation === 'function') {
+        const loc = window.LuxuryIntelligence.getVenueLocation(canonical);
+        if (loc && loc.image) urls.push(loc.image);
+      }
+      return urls;
+    }
+
+    function renderVenueImageGallery(venueName, location) {
+      const images = getVenueGalleryImages(venueName, location);
+      productGallery.replaceChildren();
+
+      const label = String(venueName || (location && location.name) || 'Location');
+      const header = createEl('div', { class: 'chatbot-venue-gallery-header' });
+      const headerText = createEl('div');
+      headerText.appendChild(createEl('p', { class: 'chatbot-venue-gallery-title', text: label }));
+      headerText.appendChild(createEl('div', {
+        class: 'chatbot-venue-gallery-count',
+        text: images.length ? `${images.length} location image${images.length === 1 ? '' : 's'}` : 'No local images available'
+      }));
+      const backBtn = createEl('button', { class: 'chatbot-venue-gallery-back', type: 'button', text: 'Products' });
+      backBtn.addEventListener('click', () => renderMapView(false));
+      header.appendChild(headerText);
+      header.appendChild(backBtn);
+      productGallery.appendChild(header);
+
+      if (!images.length) return;
+
+      images.forEach((url, index) => {
+        const card = createEl('div', { class: 'chatbot-venue-image-card' });
+        const img = createEl('img', {
+          src: url,
+          alt: `${label} image ${index + 1}`,
+          loading: 'lazy'
+        });
+        img.addEventListener('click', () => openImagePreview(url));
+        img.addEventListener('error', () => { card.style.display = 'none'; });
+        card.appendChild(img);
+        productGallery.appendChild(card);
+      });
+    }
+
     // Function to initialize Leaflet map
     function initializeMap() {
       if (leafletMap) return; // Already initialized
@@ -964,9 +1049,12 @@
           ];
           
           stores.forEach(store => {
-            L.marker([store.lat, store.lng], { icon: lvIcon })
+            const storeMarker = L.marker([store.lat, store.lng], { icon: lvIcon })
               .bindPopup(`<b>${store.name}</b><br>${store.address}`)
               .addTo(leafletMap);
+            storeMarker.on('click', () => {
+              renderVenueImageGallery(store.name, store);
+            });
           });
           
           // Add all nearby locations to map by default with color-coded markers
@@ -1007,8 +1095,12 @@
               const marker = L.marker([location.lat, location.lng], { icon })
                 .bindPopup(popupContent)
                 .addTo(leafletMap);
+              marker.on('click', () => {
+                renderVenueImageGallery(location.name, location);
+              });
               if (location.name) {
                 venueMarkersByName.set(String(location.name).toLowerCase(), marker);
+                venueMarkersByName.set(canonicalVenueName(location.name).toLowerCase(), marker);
               }
               return marker;
             }
@@ -1116,6 +1208,7 @@
         if (marker) {
           setTimeout(() => { try { marker.openPopup(); } catch (_e) {} }, 650);
         }
+        renderVenueImageGallery(venueName, loc);
       };
 
       activate();
@@ -2844,7 +2937,7 @@
     }
     
     // Render map view with products
-    function renderMapView() {
+    function renderMapView(addProductMarkers = true) {
       productGallery.replaceChildren();
       
       const storedProducts = readStoredArray('droppedProducts');
@@ -2943,7 +3036,7 @@
           productGallery.appendChild(card);
           
           // Add marker to map if available
-          if (leafletMap && product.location) {
+          if (addProductMarkers && leafletMap && product.location) {
             L.marker([product.location.lat, product.location.lng])
               .bindPopup(`<b>${product.title}</b><br>${product.price}`)
               .addTo(leafletMap);
@@ -3044,6 +3137,9 @@
         const marker = L.marker([location.lat, location.lng])
           .bindPopup(popupContent)
           .addTo(leafletMap);
+        marker.on('click', () => {
+          renderVenueImageGallery(location.name, location);
+        });
         chatbotLocationMarkers.push(marker);
         
         // Add image to content
@@ -3073,6 +3169,7 @@
             setTimeout(() => {
               marker.openPopup();
             }, 500);
+            renderVenueImageGallery(location.name, location);
           }
         });
       });

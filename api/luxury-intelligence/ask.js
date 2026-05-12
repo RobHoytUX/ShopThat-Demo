@@ -38,9 +38,16 @@ const ALLOWED_KEYWORDS = {
     'Kusama': [
       'Victoria Miro', 'David Zwirner', 'Fondation LV', 'Kusama Museum'
     ],
+    '57th St.': [
+      'MoMA Museum', 'Metropolitan Museum of Art', 'The Guggenheim',
+      'The Frick Collection', 'Pace Gallery', 'David Zwirner Chelsea',
+      'Gagosian Chelsea', 'Hauser & Wirth Chelsea'
+    ],
     'SoHo': [
       'David Zwirner Gallery', 'Jack Shainman Gallery', 'Hauser & Wirth',
-      'Gladstone Gallery', 'Gagosian Gallery', 'Lehmann Maupin'
+      'Gladstone Gallery', 'Gagosian Gallery', 'Lehmann Maupin',
+      'New Museum', 'The Drawing Center', 'Museum of Ice Cream',
+      'Leslie-Lohman Museum of Art'
     ]
   }
 };
@@ -84,7 +91,13 @@ const VENUE_IMAGES = {
   'The Carlyle':          { url: 'assets/restaurants/carlyle-hotel.jpg',      area: '57th St.', category: 'hotels' },
   'MoMA Museum':                 { url: 'assets/museums/moma.jpg',         area: 'Kusama', category: 'galleries' },
   'Metropolitan Museum of Art':  { url: 'assets/museums/met-museum.jpg',   area: 'Kusama', category: 'galleries' },
+  'The Guggenheim':              { url: 'assets/museums/guggenheim.jpg',   area: '57th St.', category: 'galleries' },
+  'The Frick Collection':        { url: 'assets/museums/frick.jpg',        area: '57th St.', category: 'galleries' },
   'Fondation LV':                { url: 'assets/foundation-lv-png.png',    area: 'Kusama', category: 'galleries' },
+  'Pace Gallery':                { url: 'assets/kusama-gal1.png',          area: '57th St.', category: 'galleries' },
+  'David Zwirner Chelsea':       { url: 'assets/kusama-gal2.png',          area: '57th St.', category: 'galleries' },
+  'Gagosian Chelsea':            { url: 'assets/kusama-gal3.png',          area: '57th St.', category: 'galleries' },
+  'Hauser & Wirth Chelsea':      { url: 'assets/kusama-gal4.png',          area: '57th St.', category: 'galleries' },
 
   'BALTHAZAR':                   { url: 'assets/soho/restaurants/balthazar.png',          area: 'SoHo', category: 'restaurants' },
   'MINETTA TAVERN':              { url: 'assets/soho/restaurants/minetta-tavern.png',     area: 'SoHo', category: 'restaurants' },
