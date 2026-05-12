@@ -348,13 +348,13 @@
   .chatbot-product-gallery{display:none !important;width:100%;margin-top:6px;margin-bottom:0;overflow-x:auto;overflow-y:visible;white-space:nowrap;scrollbar-width:thin;padding:0 0 4px 0;gap:10px;flex-shrink:0;min-height:108px}
   .chatbot-product-gallery.is-visible{display:flex !important}
   .chatbot-wrapper.map-view-active .chatbot-product-gallery.is-visible{position:relative;left:auto;right:auto;bottom:auto;width:100%;display:grid !important;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;min-height:104px;max-height:min(280px,38vh);overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;white-space:normal;padding:4px 2px 4px 0;align-content:start;scrollbar-width:thin}
-  .chatbot-wrapper.map-view-active .chatbot-product-gallery.is-visible.is-venue-gallery{grid-template-columns:repeat(3,minmax(0,1fr));grid-auto-rows:auto;max-height:340px;overflow-y:auto;padding-right:6px}
+  .chatbot-wrapper.map-view-active .chatbot-product-gallery.is-visible.is-venue-gallery{grid-template-columns:repeat(3,minmax(0,1fr));grid-auto-rows:auto;max-height:340px;overflow-y:scroll;padding-right:6px;scrollbar-gutter:stable}
 
   .chatbot-header[hidden],.chatbot-messages[hidden],.chatbot-input[hidden]{display:none !important}
   .chatbot-product-gallery::-webkit-scrollbar{height:6px}
   .chatbot-wrapper.map-view-active .chatbot-product-gallery.is-visible::-webkit-scrollbar{width:6px;height:6px}
-  .chatbot-product-gallery::-webkit-scrollbar-track{background:rgba(0,0,0,0.06);border-radius:3px}
-  .chatbot-product-gallery::-webkit-scrollbar-thumb{background:rgba(0,0,0,0.25);border-radius:3px}
+  .chatbot-product-gallery::-webkit-scrollbar-track{background:rgba(0,0,0,0.08);border-radius:3px}
+  .chatbot-product-gallery::-webkit-scrollbar-thumb{background:rgba(0,0,0,0.38);border-radius:3px}
   .chatbot-map-empty{padding:20px;text-align:center;color:#666;font-size:14px;width:100%}
   .chatbot-map-product-card{flex:0 0 auto;width:248px;background:#fff;border-radius:14px;padding:12px;box-shadow:0 2px 12px rgba(0,0,0,0.08);display:flex;gap:10px;align-items:center;transition:all 0.2s ease;cursor:pointer;overflow:hidden;height:112px}
   .chatbot-map-product-card:hover{transform:translateY(-2px);box-shadow:0 4px 20px rgba(0,0,0,0.15)}
@@ -379,7 +379,7 @@
   .chatbot-venue-gallery-back:hover{background:#f7f7f7}
   .chatbot-venue-image-card{background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,0.08);cursor:pointer;height:140px}
   .chatbot-venue-image-card:hover{transform:translateY(-2px);box-shadow:0 4px 16px rgba(0,0,0,0.14)}
-  .chatbot-venue-image-card img{width:100%;height:100%;object-fit:cover;display:block}
+  .chatbot-venue-image-card img{width:100%;height:100%;object-fit:cover;display:block;background:#f5f5f5}
   .chatbot-location-explorer{display:none !important;background:rgba(255,255,255,0.98);border-radius:12px;padding:16px;padding-bottom:24px;margin:0;box-shadow:0 2px 12px rgba(0,0,0,0.08);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);flex-direction:column;flex-shrink:0;min-height:250px}
   .chatbot-location-explorer.is-visible:not([hidden]){display:flex !important}
   .chatbot-explorer-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
@@ -956,11 +956,25 @@
       return urls;
     }
 
+    function preloadVenueImages(urls) {
+      (urls || []).slice(0, 12).forEach((url) => {
+        const img = new Image();
+        img.decoding = 'async';
+        img.src = url;
+      });
+    }
+
+    function resetVenueGalleryMode() {
+      productGallery.classList.remove('is-venue-gallery');
+      wrapper.classList.remove('map-venue-gallery-active');
+    }
+
     function renderVenueImageGallery(venueName, location) {
       const images = getVenueGalleryImages(venueName, location);
       productGallery.replaceChildren();
       productGallery.classList.add('is-venue-gallery');
       wrapper.classList.add('map-venue-gallery-active');
+      preloadVenueImages(images);
 
       const label = String(venueName || (location && location.name) || 'Location');
       const header = createEl('div', { class: 'chatbot-venue-gallery-header' });
@@ -983,8 +997,10 @@
         const img = createEl('img', {
           src: url,
           alt: `${label} image ${index + 1}`,
-          loading: 'lazy'
+          loading: 'eager',
+          decoding: 'async'
         });
+        if (index < 6) img.setAttribute('fetchpriority', 'high');
         img.addEventListener('click', () => openImagePreview(url));
         img.addEventListener('error', () => { card.style.display = 'none'; });
         card.appendChild(img);
@@ -1254,8 +1270,7 @@
         inputW.removeAttribute('hidden');
         mapContainer.classList.remove('is-visible');
         productGallery.classList.remove('is-visible');
-        productGallery.classList.remove('is-venue-gallery');
-        wrapper.classList.remove('map-venue-gallery-active');
+        resetVenueGalleryMode();
         legendBtn.setAttribute('hidden', '');
         setMapLegendVisible(false);
         chatbotLocationExplorer.classList.remove('is-visible');
@@ -1271,8 +1286,7 @@
         inputW.setAttribute('hidden', '');
         mapContainer.classList.remove('is-visible');
         productGallery.classList.remove('is-visible');
-        productGallery.classList.remove('is-venue-gallery');
-        wrapper.classList.remove('map-venue-gallery-active');
+        resetVenueGalleryMode();
         legendBtn.setAttribute('hidden', '');
         setMapLegendVisible(false);
         chatbotLocationExplorer.classList.remove('is-visible');
@@ -1289,8 +1303,7 @@
         inputW.setAttribute('hidden', '');
         mapContainer.classList.remove('is-visible');
         productGallery.classList.remove('is-visible');
-        productGallery.classList.remove('is-venue-gallery');
-        wrapper.classList.remove('map-venue-gallery-active');
+        resetVenueGalleryMode();
         legendBtn.setAttribute('hidden', '');
         setMapLegendVisible(false);
         chatbotLocationExplorer.classList.remove('is-visible');
@@ -1340,8 +1353,7 @@
         inputW.setAttribute('hidden', '');
         mapContainer.classList.remove('is-visible');
         productGallery.classList.remove('is-visible');
-        productGallery.classList.remove('is-venue-gallery');
-        wrapper.classList.remove('map-venue-gallery-active');
+        resetVenueGalleryMode();
         legendBtn.setAttribute('hidden', '');
         setMapLegendVisible(false);
         chatbotLocationExplorer.classList.remove('is-visible');
@@ -2958,8 +2970,7 @@
     // Render map view with products
     function renderMapView(addProductMarkers = true) {
       productGallery.replaceChildren();
-      productGallery.classList.remove('is-venue-gallery');
-      wrapper.classList.remove('map-venue-gallery-active');
+      resetVenueGalleryMode();
       
       const storedProducts = readStoredArray('droppedProducts');
       // Match the product-dashboard map: show at most 3 products,
@@ -2995,8 +3006,11 @@
           const img = createEl('img', {
             class: 'chatbot-map-product-image',
             src: product.image || product.src,
-            alt: product.title
+            alt: product.title,
+            loading: 'eager',
+            decoding: 'async'
           });
+          img.setAttribute('fetchpriority', 'high');
           
           // Product info
           const info = createEl('div', { class: 'chatbot-map-product-info' });
