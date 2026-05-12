@@ -343,10 +343,12 @@
   .chatbot-map-container.is-visible{display:block}
   .chatbot-wrapper.map-view-active .chatbot-box{overflow:hidden}
   .chatbot-wrapper.map-view-active .chatbot-map-container{height:280px;margin:32px 0 10px 0}
+  .chatbot-wrapper.map-view-active.map-venue-gallery-active .chatbot-map-container{height:220px}
   .chatbot-wrapper.map-view-active .chatbot-location-explorer{margin-top:12px}
   .chatbot-product-gallery{display:none !important;width:100%;margin-top:6px;margin-bottom:0;overflow-x:auto;overflow-y:visible;white-space:nowrap;scrollbar-width:thin;padding:0 0 4px 0;gap:10px;flex-shrink:0;min-height:108px}
   .chatbot-product-gallery.is-visible{display:flex !important}
   .chatbot-wrapper.map-view-active .chatbot-product-gallery.is-visible{position:relative;left:auto;right:auto;bottom:auto;width:100%;display:grid !important;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;min-height:104px;max-height:min(280px,38vh);overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;white-space:normal;padding:4px 2px 4px 0;align-content:start;scrollbar-width:thin}
+  .chatbot-wrapper.map-view-active .chatbot-product-gallery.is-visible.is-venue-gallery{grid-template-columns:repeat(3,minmax(0,1fr));grid-auto-rows:auto;max-height:340px;overflow-y:auto;padding-right:6px}
 
   .chatbot-header[hidden],.chatbot-messages[hidden],.chatbot-input[hidden]{display:none !important}
   .chatbot-product-gallery::-webkit-scrollbar{height:6px}
@@ -375,7 +377,7 @@
   .chatbot-venue-gallery-count{font-size:10px;color:#666;margin-top:1px}
   .chatbot-venue-gallery-back{border:1px solid rgba(0,0,0,0.16);background:#fff;border-radius:999px;padding:5px 8px;font-size:10px;font-weight:600;color:#111;cursor:pointer;white-space:nowrap}
   .chatbot-venue-gallery-back:hover{background:#f7f7f7}
-  .chatbot-venue-image-card{background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,0.08);cursor:pointer;height:104px}
+  .chatbot-venue-image-card{background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,0.08);cursor:pointer;height:140px}
   .chatbot-venue-image-card:hover{transform:translateY(-2px);box-shadow:0 4px 16px rgba(0,0,0,0.14)}
   .chatbot-venue-image-card img{width:100%;height:100%;object-fit:cover;display:block}
   .chatbot-location-explorer{display:none !important;background:rgba(255,255,255,0.98);border-radius:12px;padding:16px;padding-bottom:24px;margin:0;box-shadow:0 2px 12px rgba(0,0,0,0.08);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);flex-direction:column;flex-shrink:0;min-height:250px}
@@ -957,6 +959,8 @@
     function renderVenueImageGallery(venueName, location) {
       const images = getVenueGalleryImages(venueName, location);
       productGallery.replaceChildren();
+      productGallery.classList.add('is-venue-gallery');
+      wrapper.classList.add('map-venue-gallery-active');
 
       const label = String(venueName || (location && location.name) || 'Location');
       const header = createEl('div', { class: 'chatbot-venue-gallery-header' });
@@ -986,6 +990,13 @@
         card.appendChild(img);
         productGallery.appendChild(card);
       });
+
+      const viewportHeight = window.innerHeight;
+      const expandedHeight = Math.min(650, Math.max(495, viewportHeight - 124));
+      setBoxSize(FULL_W, expandedHeight, true);
+      setTimeout(() => {
+        if (leafletMap) leafletMap.invalidateSize();
+      }, 100);
     }
 
     // Function to initialize Leaflet map
@@ -1243,6 +1254,8 @@
         inputW.removeAttribute('hidden');
         mapContainer.classList.remove('is-visible');
         productGallery.classList.remove('is-visible');
+        productGallery.classList.remove('is-venue-gallery');
+        wrapper.classList.remove('map-venue-gallery-active');
         legendBtn.setAttribute('hidden', '');
         setMapLegendVisible(false);
         chatbotLocationExplorer.classList.remove('is-visible');
@@ -1258,6 +1271,8 @@
         inputW.setAttribute('hidden', '');
         mapContainer.classList.remove('is-visible');
         productGallery.classList.remove('is-visible');
+        productGallery.classList.remove('is-venue-gallery');
+        wrapper.classList.remove('map-venue-gallery-active');
         legendBtn.setAttribute('hidden', '');
         setMapLegendVisible(false);
         chatbotLocationExplorer.classList.remove('is-visible');
@@ -1274,6 +1289,8 @@
         inputW.setAttribute('hidden', '');
         mapContainer.classList.remove('is-visible');
         productGallery.classList.remove('is-visible');
+        productGallery.classList.remove('is-venue-gallery');
+        wrapper.classList.remove('map-venue-gallery-active');
         legendBtn.setAttribute('hidden', '');
         setMapLegendVisible(false);
         chatbotLocationExplorer.classList.remove('is-visible');
@@ -1323,6 +1340,8 @@
         inputW.setAttribute('hidden', '');
         mapContainer.classList.remove('is-visible');
         productGallery.classList.remove('is-visible');
+        productGallery.classList.remove('is-venue-gallery');
+        wrapper.classList.remove('map-venue-gallery-active');
         legendBtn.setAttribute('hidden', '');
         setMapLegendVisible(false);
         chatbotLocationExplorer.classList.remove('is-visible');
@@ -2939,6 +2958,8 @@
     // Render map view with products
     function renderMapView(addProductMarkers = true) {
       productGallery.replaceChildren();
+      productGallery.classList.remove('is-venue-gallery');
+      wrapper.classList.remove('map-venue-gallery-active');
       
       const storedProducts = readStoredArray('droppedProducts');
       // Match the product-dashboard map: show at most 3 products,
