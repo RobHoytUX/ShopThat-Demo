@@ -52,6 +52,10 @@
       // they hang off the Kusama branch.
       'Kusama': [
         'Victoria Miro', 'David Zwirner', 'Fondation LV', 'Kusama Museum'
+      ],
+      'SoHo': [
+        'David Zwirner Gallery', 'Jack Shainman Gallery', 'Hauser & Wirth',
+        'Gladstone Gallery', 'Gagosian Gallery', 'Lehmann Maupin'
       ]
     }
   };
@@ -79,7 +83,8 @@
     galleries: {
       trigger: /\b(gallery|galleries|museum|museums|exhibition|exhibitions|art\s+space)\b/i,
       graphParents: {
-        'Kusama': ['Galleries', 'Museums']
+        'Kusama': ['Galleries', 'Museums'],
+        'SoHo': ['SoHo Galleries']
       },
       label: 'galleries & museums'
     }
@@ -122,30 +127,39 @@
     'Fondation LV':                { url: 'assets/foundation-lv-png.png',    area: 'Kusama', category: 'galleries', lat: 48.8763, lng: 2.2633,   address: '8 Av. du Mahatma Gandhi, Paris' },
     'David Zwirner':               { url: 'assets/kusama-gal2.png',          area: 'Kusama', category: 'galleries', lat: 40.7605, lng: -73.9700, address: '533 W 19th St' },
 
-    // SoHo restaurants (no curated image yet, but coordinates so the
-    // map click-through still works).
-    'BALTHAZAR':                   { area: 'SoHo', category: 'restaurants', lat: 40.7232, lng: -73.9978, address: '80 Spring St' },
-    'MINETTA TAVERN':              { area: 'SoHo', category: 'restaurants', lat: 40.7303, lng: -74.0007, address: '113 MacDougal St' },
+    // SoHo restaurants
+    'BALTHAZAR':                   { url: 'assets/soho/restaurants/balthazar.png',           area: 'SoHo', category: 'restaurants', lat: 40.7232, lng: -73.9978, address: '80 Spring St' },
+    'MINETTA TAVERN':              { url: 'assets/soho/restaurants/minetta-tavern.png',      area: 'SoHo', category: 'restaurants', lat: 40.7303, lng: -74.0007, address: '113 MacDougal St' },
     'LE COUCOU':                   { area: 'SoHo', category: 'restaurants', lat: 40.7196, lng: -73.9942, address: '138 Lafayette St' },
-    'LA MERCERIE':                 { area: 'SoHo', category: 'restaurants', lat: 40.7235, lng: -74.0010, address: '53 Howard St' },
-    'LOCANDA VERDE':               { area: 'SoHo', category: 'restaurants', lat: 40.7196, lng: -74.0090, address: '377 Greenwich St' },
+    'LA MERCERIE':                 { url: 'assets/soho/restaurants/la-mercerie.png',         area: 'SoHo', category: 'restaurants', lat: 40.7235, lng: -74.0010, address: '53 Howard St' },
+    'LOCANDA VERDE':               { url: 'assets/soho/restaurants/locanda-verde.png',       area: 'SoHo', category: 'restaurants', lat: 40.7196, lng: -74.0090, address: '377 Greenwich St' },
     'FRENCHETTE':                  { area: 'SoHo', category: 'restaurants', lat: 40.7191, lng: -74.0070, address: '241 W Broadway' },
-    'IL BUCO ALIMENTARI':          { area: 'SoHo', category: 'restaurants', lat: 40.7271, lng: -73.9925, address: '53 Great Jones St' },
-    'BAR PITTI':                   { area: 'SoHo', category: 'restaurants', lat: 40.7314, lng: -74.0014, address: '268 6th Ave' },
+    'IL BUCO ALIMENTARI':          { url: 'assets/soho/restaurants/il-buco-alimentari.jpg',  area: 'SoHo', category: 'restaurants', lat: 40.7271, lng: -73.9925, address: '53 Great Jones St' },
+    'BAR PITTI':                   { url: 'assets/soho/restaurants/bar-pitti.png',           area: 'SoHo', category: 'restaurants', lat: 40.7314, lng: -74.0014, address: '268 6th Ave' },
     'INDOCHINE':                   { area: 'SoHo', category: 'restaurants', lat: 40.7300, lng: -73.9909, address: '430 Lafayette St' },
-    'ST AMBROEUS':                 { area: 'SoHo', category: 'restaurants', lat: 40.7245, lng: -74.0017, address: '265 Lafayette St' },
+    'ST AMBROEUS':                 { url: 'assets/soho/restaurants/st-ambroeus.png',         area: 'SoHo', category: 'restaurants', lat: 40.7245, lng: -74.0017, address: '265 Lafayette St' },
     'DIRTY FRENCH':                { area: 'SoHo', category: 'restaurants', lat: 40.7184, lng: -73.9920, address: '180 Ludlow St' },
     "JACK'S WIFE FRIEDA":          { area: 'SoHo', category: 'restaurants', lat: 40.7236, lng: -74.0009, address: '50 Carmine St' },
     'JOSEPH LEONARD':              { area: 'SoHo', category: 'restaurants', lat: 40.7314, lng: -74.0029, address: '170 Waverly Pl' },
+    'ESTELLA':                     { url: 'assets/soho/restaurants/estela.png',              area: 'SoHo', category: 'restaurants', lat: 40.7216, lng: -73.9946, address: '47 E Houston St' },
+    "THE BUTCHER'S DAUGHTER":      { url: 'assets/soho/restaurants/butchers-daughter.png',   area: 'SoHo', category: 'restaurants', lat: 40.7206, lng: -73.9947, address: '19 Kenmare St' },
 
     // SoHo hotels
-    'THE MERCER':                  { area: 'SoHo', category: 'hotels', lat: 40.7241, lng: -74.0003, address: '147 Mercer St' },
-    'CROSBY STREET HOTEL':         { area: 'SoHo', category: 'hotels', lat: 40.7220, lng: -74.0001, address: '79 Crosby St' },
-    'THE BOWERY HOTEL':            { area: 'SoHo', category: 'hotels', lat: 40.7256, lng: -73.9926, address: '335 Bowery' },
-    'THE GREENWICH':               { area: 'SoHo', category: 'hotels', lat: 40.7191, lng: -74.0107, address: '377 Greenwich St' },
-    'THE STANDARD EAST VILLAGE':   { area: 'SoHo', category: 'hotels', lat: 40.7268, lng: -73.9879, address: '25 Cooper Square' },
-    'PUBLIC':                      { area: 'SoHo', category: 'hotels', lat: 40.7220, lng: -73.9926, address: '215 Chrystie St' },
-    'HOTEL BARRIERE FOUQUET':      { area: 'SoHo', category: 'hotels', lat: 40.7186, lng: -74.0049, address: '456 Greenwich St' }
+    'THE MERCER':                  { url: 'assets/soho/hotels/the-mercer.png',               area: 'SoHo', category: 'hotels', lat: 40.7241, lng: -74.0003, address: '147 Mercer St' },
+    'CROSBY STREET HOTEL':         { url: 'assets/soho/hotels/crosby-street-hotel.png',      area: 'SoHo', category: 'hotels', lat: 40.7220, lng: -74.0001, address: '79 Crosby St' },
+    'THE BOWERY HOTEL':            { url: 'assets/soho/hotels/the-bowery-hotel.png',         area: 'SoHo', category: 'hotels', lat: 40.7256, lng: -73.9926, address: '335 Bowery' },
+    'THE GREENWICH':               { url: 'assets/soho/hotels/the-greenwich.png',            area: 'SoHo', category: 'hotels', lat: 40.7191, lng: -74.0107, address: '377 Greenwich St' },
+    'THE STANDARD EAST VILLAGE':   { url: 'assets/soho/hotels/standard-east-village.png',    area: 'SoHo', category: 'hotels', lat: 40.7268, lng: -73.9879, address: '25 Cooper Square' },
+    'PUBLIC':                      { url: 'assets/soho/hotels/public.png',                   area: 'SoHo', category: 'hotels', lat: 40.7220, lng: -73.9926, address: '215 Chrystie St' },
+    'HOTEL BARRIERE FOUQUET':      { url: 'assets/soho/hotels/hotel-barriere-fouquet.png',  area: 'SoHo', category: 'hotels', lat: 40.7186, lng: -74.0049, address: '456 Greenwich St' },
+
+    // SoHo galleries
+    'David Zwirner Gallery':       { url: 'assets/soho/galleries/david-zwirner.png',         area: 'SoHo', category: 'galleries', lat: 40.7465, lng: -74.0070, address: '525 W 19th St' },
+    'Jack Shainman Gallery':       { url: 'assets/soho/galleries/jack-shainman.png',         area: 'SoHo', category: 'galleries', lat: 40.7159, lng: -74.0035, address: '46 Lafayette St' },
+    'Hauser & Wirth':              { url: 'assets/soho/galleries/hauser-wirth.png',          area: 'SoHo', category: 'galleries', lat: 40.7469, lng: -74.0064, address: '443 W 18th St' },
+    'Gladstone Gallery':           { url: 'assets/soho/galleries/gladstone-gallery.png',     area: 'SoHo', category: 'galleries', lat: 40.7489, lng: -74.0041, address: '515 W 24th St' },
+    'Gagosian Gallery':            { url: 'assets/soho/galleries/gagosian-gallery.png',      area: 'SoHo', category: 'galleries', lat: 40.7481, lng: -74.0055, address: '555 W 24th St' },
+    'Lehmann Maupin':              { url: 'assets/soho/galleries/lehmann-maupin.png',        area: 'SoHo', category: 'galleries', lat: 40.7490, lng: -74.0036, address: '501 W 24th St' }
   };
 
   /** Return { lat, lng, ...meta } for a venue, or null if unknown. */
@@ -272,6 +286,8 @@
       if (!bucket.length) {
         var fallback = (FALLBACK_ALLOWED[category] || {})[area] || [];
         fallback.forEach(function (v) { uniquePush(bucket, v); });
+      } else {
+        ((FALLBACK_ALLOWED[category] || {})[area] || []).forEach(function (v) { uniquePush(bucket, v); });
       }
       if (bucket.length) out[area] = bucket;
     });

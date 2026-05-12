@@ -37,6 +37,10 @@ const ALLOWED_KEYWORDS = {
   galleries: {
     'Kusama': [
       'Victoria Miro', 'David Zwirner', 'Fondation LV', 'Kusama Museum'
+    ],
+    'SoHo': [
+      'David Zwirner Gallery', 'Jack Shainman Gallery', 'Hauser & Wirth',
+      'Gladstone Gallery', 'Gagosian Gallery', 'Lehmann Maupin'
     ]
   }
 };
@@ -80,7 +84,32 @@ const VENUE_IMAGES = {
   'The Carlyle':          { url: 'assets/restaurants/carlyle-hotel.jpg',      area: '57th St.', category: 'hotels' },
   'MoMA Museum':                 { url: 'assets/museums/moma.jpg',         area: 'Kusama', category: 'galleries' },
   'Metropolitan Museum of Art':  { url: 'assets/museums/met-museum.jpg',   area: 'Kusama', category: 'galleries' },
-  'Fondation LV':                { url: 'assets/foundation-lv-png.png',    area: 'Kusama', category: 'galleries' }
+  'Fondation LV':                { url: 'assets/foundation-lv-png.png',    area: 'Kusama', category: 'galleries' },
+
+  'BALTHAZAR':                   { url: 'assets/soho/restaurants/balthazar.png',          area: 'SoHo', category: 'restaurants' },
+  'MINETTA TAVERN':              { url: 'assets/soho/restaurants/minetta-tavern.png',     area: 'SoHo', category: 'restaurants' },
+  'LA MERCERIE':                 { url: 'assets/soho/restaurants/la-mercerie.png',        area: 'SoHo', category: 'restaurants' },
+  'LOCANDA VERDE':               { url: 'assets/soho/restaurants/locanda-verde.png',      area: 'SoHo', category: 'restaurants' },
+  'IL BUCO ALIMENTARI':          { url: 'assets/soho/restaurants/il-buco-alimentari.jpg', area: 'SoHo', category: 'restaurants' },
+  'BAR PITTI':                   { url: 'assets/soho/restaurants/bar-pitti.png',          area: 'SoHo', category: 'restaurants' },
+  'ST AMBROEUS':                 { url: 'assets/soho/restaurants/st-ambroeus.png',        area: 'SoHo', category: 'restaurants' },
+  'ESTELLA':                     { url: 'assets/soho/restaurants/estela.png',             area: 'SoHo', category: 'restaurants' },
+  "THE BUTCHER'S DAUGHTER":      { url: 'assets/soho/restaurants/butchers-daughter.png',  area: 'SoHo', category: 'restaurants' },
+
+  'THE MERCER':                  { url: 'assets/soho/hotels/the-mercer.png',              area: 'SoHo', category: 'hotels' },
+  'CROSBY STREET HOTEL':         { url: 'assets/soho/hotels/crosby-street-hotel.png',     area: 'SoHo', category: 'hotels' },
+  'THE BOWERY HOTEL':            { url: 'assets/soho/hotels/the-bowery-hotel.png',        area: 'SoHo', category: 'hotels' },
+  'THE GREENWICH':               { url: 'assets/soho/hotels/the-greenwich.png',           area: 'SoHo', category: 'hotels' },
+  'THE STANDARD EAST VILLAGE':   { url: 'assets/soho/hotels/standard-east-village.png',   area: 'SoHo', category: 'hotels' },
+  'PUBLIC':                      { url: 'assets/soho/hotels/public.png',                  area: 'SoHo', category: 'hotels' },
+  'HOTEL BARRIERE FOUQUET':      { url: 'assets/soho/hotels/hotel-barriere-fouquet.png', area: 'SoHo', category: 'hotels' },
+
+  'David Zwirner Gallery':       { url: 'assets/soho/galleries/david-zwirner.png',        area: 'SoHo', category: 'galleries' },
+  'Jack Shainman Gallery':       { url: 'assets/soho/galleries/jack-shainman.png',        area: 'SoHo', category: 'galleries' },
+  'Hauser & Wirth':              { url: 'assets/soho/galleries/hauser-wirth.png',         area: 'SoHo', category: 'galleries' },
+  'Gladstone Gallery':           { url: 'assets/soho/galleries/gladstone-gallery.png',    area: 'SoHo', category: 'galleries' },
+  'Gagosian Gallery':            { url: 'assets/soho/galleries/gagosian-gallery.png',     area: 'SoHo', category: 'galleries' },
+  'Lehmann Maupin':              { url: 'assets/soho/galleries/lehmann-maupin.png',       area: 'SoHo', category: 'galleries' }
 };
 
 function escapeRegExp(s) {

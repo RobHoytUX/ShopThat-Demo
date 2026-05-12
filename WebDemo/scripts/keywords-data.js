@@ -89,6 +89,7 @@ function generateArticlesHTML(keyword) {
 //                 └── Soho
 //                       ├── SoHo Hotels       ─ …
 //                       └── SoHo Restaurants  ─ …
+//                       └── SoHo Galleries    ─ …
 // ──────────────────────────────────────────────────────────────────────────
 const defaultNodes = [
   // Root (rendered as “Louis Vuitton” by the tree view).
@@ -144,6 +145,7 @@ const defaultNodes = [
   // SoHo categories
   { id: 'SoHo Hotels',      group: 3, value: 80, parent: 'Soho' },
   { id: 'SoHo Restaurants', group: 3, value: 80, parent: 'Soho' },
+  { id: 'SoHo Galleries',   group: 3, value: 80, parent: 'Soho' },
 
   // SoHo hotels
   { id: 'CROSBY STREET HOTEL',       group: 4, value: 70, parent: 'SoHo Hotels' },
@@ -173,7 +175,15 @@ const defaultNodes = [
   { id: "THE BUTCHER'S DAUGHTER", group: 4, value: 55, parent: 'SoHo Restaurants' },
   { id: 'INDOCHINE',              group: 4, value: 60, parent: 'SoHo Restaurants' },
   { id: 'LA MERCERIE',            group: 4, value: 60, parent: 'SoHo Restaurants' },
-  { id: 'LE COUCOU',              group: 4, value: 65, parent: 'SoHo Restaurants' }
+  { id: 'LE COUCOU',              group: 4, value: 65, parent: 'SoHo Restaurants' },
+
+  // SoHo galleries
+  { id: 'David Zwirner Gallery', group: 4, value: 65, parent: 'SoHo Galleries' },
+  { id: 'Jack Shainman Gallery', group: 4, value: 65, parent: 'SoHo Galleries' },
+  { id: 'Hauser & Wirth',        group: 4, value: 65, parent: 'SoHo Galleries' },
+  { id: 'Gladstone Gallery',     group: 4, value: 65, parent: 'SoHo Galleries' },
+  { id: 'Gagosian Gallery',      group: 4, value: 65, parent: 'SoHo Galleries' },
+  { id: 'Lehmann Maupin',        group: 4, value: 65, parent: 'SoHo Galleries' }
 ];
 // Auto-generate links from the parent fields above so the bubble graph
 // adjacency mirrors the tree exactly. Cross-area extras (e.g. David Zwirner

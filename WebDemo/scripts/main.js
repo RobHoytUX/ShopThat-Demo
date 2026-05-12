@@ -408,6 +408,10 @@
   .chatbot-refresh{position:absolute;top:20px;right:8px;width:32px;height:32px;border-radius:16px;border:1px solid rgba(0,0,0,0.2);background:rgba(255,255,255,0.95);display:grid;place-items:center;color:#111;cursor:pointer;transition:opacity 200ms ease;z-index:10}
   .chatbot-refresh[hidden]{display:none}
   .chatbot-refresh.is-fading{opacity:0;pointer-events:none}
+  .chatbot-legend-toggle{position:absolute;top:20px;right:46px;width:32px;height:32px;border-radius:16px;border:1px solid rgba(0,0,0,0.2);background:rgba(255,255,255,0.95);display:grid;place-items:center;color:#111;cursor:pointer;transition:background 200ms ease,opacity 200ms ease;z-index:10}
+  .chatbot-legend-toggle:hover{background:rgba(255,255,255,1)}
+  .chatbot-legend-toggle.is-active{background:#111;color:#fff;border-color:#111}
+  .chatbot-legend-toggle[hidden]{display:none}
   .chatbot-back{position:absolute;top:20px;left:8px;width:24px;height:24px;border:0;background:transparent;color:#111;cursor:pointer;display:grid;place-items:center;z-index:10}
   .chatbot-back[hidden]{display:none}
   .chatbot-sort{position:absolute;top:20px;left:8px;width:32px;height:32px;border-radius:50%;border:1px solid rgba(0,0,0,0.2);background:rgba(255,255,255,0.95);display:grid;place-items:center;color:#111;cursor:pointer;transition:background 200ms ease;z-index:10}
@@ -498,6 +502,7 @@
   .chatbot-product-item--filled{background:transparent;border:1px solid rgba(0,0,0,0.15);position:relative;overflow:hidden}
   .chatbot-product-item--filled img{width:100%;height:100%;object-fit:cover}
   .chatbot-map-legend{position:absolute;bottom:20px;right:20px;background:white;padding:12px 16px;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,0.15);z-index:1000;min-width:180px}
+  .chatbot-map-legend[hidden]{display:none}
   .chatbot-map-legend .map-legend-title{font-size:13px;font-weight:600;margin:0 0 10px 0;color:#111}
   .chatbot-map-legend .map-legend-items{display:flex;flex-direction:column;gap:8px}
   .chatbot-map-legend .map-legend-item{display:flex;align-items:center;gap:8px}
@@ -598,6 +603,21 @@
     refreshPath.setAttribute('stroke-width','1.5');
     refreshIcon.appendChild(refreshPath);
     refreshBtn.appendChild(refreshIcon);
+    const legendBtn = createEl('button', { class: 'chatbot-legend-toggle', title: 'Show map legend', 'aria-label': 'Show map legend', 'aria-pressed': 'false', hidden: '' });
+    const legendIcon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    legendIcon.setAttribute('xmlns','http://www.w3.org/2000/svg');
+    legendIcon.setAttribute('viewBox','0 0 24 24');
+    legendIcon.setAttribute('fill','none');
+    legendIcon.setAttribute('stroke','currentColor');
+    legendIcon.setAttribute('width','18');
+    legendIcon.setAttribute('height','18');
+    const legendPath = document.createElementNS('http://www.w3.org/2000/svg','path');
+    legendPath.setAttribute('d','M4 6h16M4 12h16M4 18h16');
+    legendPath.setAttribute('stroke-linecap','round');
+    legendPath.setAttribute('stroke-linejoin','round');
+    legendPath.setAttribute('stroke-width','1.5');
+    legendIcon.appendChild(legendPath);
+    legendBtn.appendChild(legendIcon);
     const logo    = createEl('img', { class: 'chatbot-logo', src: 'assets/lv.png', alt: 'LV' });
     const title   = createEl('div', { class: 'chatbot-title', text: '' });
     const sub     = createEl('p', { class: 'chatbot-sub', text: 'Would you like to learn more about these?' });
@@ -857,6 +877,8 @@
     // Ad-hoc markers added on-the-fly for venues that aren't in the
     // map data but ARE in the LuxuryIntelligence venue catalog.
     const adhocVenueMarkers = new Map();
+    let mapLegendEl = null;
+    let mapLegendVisible = false;
 
     
     const chatbotLocationData = window.ShopThatMainMapData || {
@@ -865,6 +887,21 @@
       galleries: [],
       others: []
     };
+
+    function setMapLegendVisible(visible) {
+      mapLegendVisible = !!visible;
+      if (mapLegendEl) {
+        if (mapLegendVisible) {
+          mapLegendEl.removeAttribute('hidden');
+        } else {
+          mapLegendEl.setAttribute('hidden', '');
+        }
+      }
+      legendBtn.classList.toggle('is-active', mapLegendVisible);
+      legendBtn.setAttribute('aria-pressed', String(mapLegendVisible));
+      legendBtn.setAttribute('aria-label', mapLegendVisible ? 'Hide map legend' : 'Show map legend');
+      legendBtn.setAttribute('title', mapLegendVisible ? 'Hide map legend' : 'Show map legend');
+    }
 
     // Function to initialize Leaflet map
     function initializeMap() {
@@ -986,6 +1023,7 @@
           
           // Add map legend
           const mapLegend = createEl('div', { class: 'chatbot-map-legend' });
+          mapLegend.setAttribute('hidden', '');
           mapLegend.innerHTML = `
             <h4 class="map-legend-title">Map Legend</h4>
             <div class="map-legend-items">
@@ -1012,6 +1050,8 @@
             </div>
           `;
           document.getElementById('chatbot-map').appendChild(mapLegend);
+          mapLegendEl = mapLegend;
+          setMapLegendVisible(mapLegendVisible);
           
           // Fix map display after the container has had a layout frame.
           requestAnimationFrame(() => {
@@ -1110,6 +1150,8 @@
         inputW.removeAttribute('hidden');
         mapContainer.classList.remove('is-visible');
         productGallery.classList.remove('is-visible');
+        legendBtn.setAttribute('hidden', '');
+        setMapLegendVisible(false);
         chatbotLocationExplorer.classList.remove('is-visible');
         // Close location explorer and return to default size
         closeChatbotLocationExplorer();
@@ -1123,6 +1165,8 @@
         inputW.setAttribute('hidden', '');
         mapContainer.classList.remove('is-visible');
         productGallery.classList.remove('is-visible');
+        legendBtn.setAttribute('hidden', '');
+        setMapLegendVisible(false);
         chatbotLocationExplorer.classList.remove('is-visible');
         // Close location explorer and return to default size
         closeChatbotLocationExplorer();
@@ -1137,6 +1181,8 @@
         inputW.setAttribute('hidden', '');
         mapContainer.classList.remove('is-visible');
         productGallery.classList.remove('is-visible');
+        legendBtn.setAttribute('hidden', '');
+        setMapLegendVisible(false);
         chatbotLocationExplorer.classList.remove('is-visible');
         // Close location explorer and return to default size
         closeChatbotLocationExplorer();
@@ -1151,6 +1197,8 @@
         inputW.setAttribute('hidden', '');
         mapContainer.classList.add('is-visible');
         productGallery.classList.add('is-visible');
+        legendBtn.removeAttribute('hidden');
+        setMapLegendVisible(false);
         // Don't add is-visible to explorer yet - it opens when clicking a product card
 
         // Add map-view-active class to wrapper for compact gallery positioning
@@ -1182,6 +1230,8 @@
         inputW.setAttribute('hidden', '');
         mapContainer.classList.remove('is-visible');
         productGallery.classList.remove('is-visible');
+        legendBtn.setAttribute('hidden', '');
+        setMapLegendVisible(false);
         chatbotLocationExplorer.classList.remove('is-visible');
         
         // Close location explorer and return to default size
@@ -1463,7 +1513,7 @@
     // The back button is no longer needed since there are no detail views
     backBtn.setAttribute('hidden','');
 
-    box.appendChild(refreshBtn); box.appendChild(backBtn); box.appendChild(sortBtn); box.appendChild(mediaBtn); box.appendChild(header); box.appendChild(mapContainer); box.appendChild(productGallery); box.appendChild(chatbotLocationExplorer); box.appendChild(messages); box.appendChild(inputW);
+    box.appendChild(refreshBtn); box.appendChild(legendBtn); box.appendChild(backBtn); box.appendChild(sortBtn); box.appendChild(mediaBtn); box.appendChild(header); box.appendChild(mapContainer); box.appendChild(productGallery); box.appendChild(chatbotLocationExplorer); box.appendChild(messages); box.appendChild(inputW);
     
     // Navigation toggle functionality (menu only)
     sortBtn.addEventListener('click', (e) => {
@@ -1480,6 +1530,11 @@
       galleryVisible = !galleryVisible;
       mediaBtn.classList.toggle('is-active', galleryVisible);
       toggleGallery(galleryVisible);
+    });
+    legendBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      setMapLegendVisible(!mapLegendVisible);
     });
     wrapper.appendChild(toggle); wrapper.appendChild(box); wrapper.appendChild(chatbotNav);
     document.body.appendChild(wrapper);
