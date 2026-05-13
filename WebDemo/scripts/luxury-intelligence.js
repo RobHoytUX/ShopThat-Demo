@@ -70,7 +70,7 @@
   // own that category's leaves.
   var CATEGORY_CONFIG = {
     restaurants: {
-      trigger: /\b(restaurant|restaurants|dining|dine|diner|dinner|lunch|brunch|supper|cafe|caf[eé]s?|bistro|bistros|eatery|eateries|brasserie|brasseries|food|eat|where\s+to\s+eat)\b/i,
+      trigger: /\b(restaurant|restaurants|restaruant|restaruants|restaraunt|restaraunts|restuarant|restuarants|resturant|resturants|dining|dine|diner|dinner|lunch|brunch|supper|cafe|caf[eé]s?|bistro|bistros|eatery|eateries|brasserie|brasseries|food|eat|where\s+to\s+eat)\b/i,
       graphParents: {
         '57th St.': ['57th St. Restaurants'],
         'SoHo':     ['SoHo Restaurants']
@@ -241,6 +241,36 @@
     return { images: images, rank_data: rankData, imageVenues: imageVenues };
   }
 
+  function fillVenueImagePayload(payload, venuePool, maxImages) {
+    var out = payload || { images: [], rank_data: [], imageVenues: [] };
+    out.images = out.images || [];
+    out.rank_data = out.rank_data || [];
+    out.imageVenues = out.imageVenues || [];
+    var max = maxImages || 3;
+    var seenNames = {};
+    var seenUrls = {};
+    out.imageVenues.forEach(function (v) {
+      if (v && v.name) seenNames[String(v.name).toLowerCase()] = true;
+      if (v && v.url) seenUrls[v.url] = true;
+    });
+    out.images.forEach(function (url) { if (url) seenUrls[url] = true; });
+
+    (venuePool || []).some(function (name) {
+      if (out.images.length >= max) return true;
+      var key = String(name || '').toLowerCase();
+      var entry = VENUE_IMAGES[name];
+      if (!entry || !entry.url || seenNames[key] || seenUrls[entry.url]) return false;
+      seenNames[key] = true;
+      seenUrls[entry.url] = true;
+      out.images.push(entry.url);
+      out.rank_data.push({ url: entry.url, priority_rank: out.rank_data.length + 1, fallback: true });
+      out.imageVenues.push({ name: name, url: entry.url, area: entry.area || '', category: entry.category || '', fallback: true });
+      return false;
+    });
+
+    return out;
+  }
+
   /**
    * If the query is about restaurants / hotels / galleries, rebuild the
    * image set so each image actually corresponds to a venue mentioned in
@@ -266,7 +296,7 @@
     });
 
     var mentioned = findMentionedVenues(data.answer, pool);
-    var payload = buildVenueImagePayload(mentioned);
+    var payload = fillVenueImagePayload(buildVenueImagePayload(mentioned), pool, 3);
 
     // Constrained mode owns the image set: replace with venue-correct
     // images if we have them, otherwise blank the array so we never
@@ -275,7 +305,9 @@
     data.images = payload.images;
     data.rank_data = payload.rank_data;
     data.imageVenues = payload.imageVenues;
-    data.mentionedVenues = mentioned;
+    var payloadVenues = payload.imageVenues.map(function (v) { return v.name; });
+    data.mentionedVenues = mentioned.slice();
+    payloadVenues.forEach(function (name) { uniquePush(data.mentionedVenues, name); });
     return data;
   }
 

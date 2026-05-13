@@ -54,7 +54,7 @@ const ALLOWED_KEYWORDS = {
 
 const CATEGORY_TRIGGERS = {
   restaurants: {
-    re: /\b(restaurant|restaurants|dining|dine|diner|dinner|lunch|brunch|supper|cafe|caf[eé]s?|bistro|bistros|eatery|eateries|brasserie|brasseries|food|eat|where\s+to\s+eat)\b/i,
+    re: /\b(restaurant|restaurants|restaruant|restaruants|restaraunt|restaraunts|restuarant|restuarants|resturant|resturants|dining|dine|diner|dinner|lunch|brunch|supper|cafe|caf[eé]s?|bistro|bistros|eatery|eateries|brasserie|brasseries|food|eat|where\s+to\s+eat)\b/i,
     label: 'restaurants'
   },
   hotels: {
@@ -173,20 +173,41 @@ function alignImagesToVenues(data, query) {
   const images = [];
   const rankData = [];
   const imageVenues = [];
+  const seenNames = new Set();
+  const seenUrls = new Set();
   let rank = 1;
   mentioned.forEach((name) => {
     const entry = VENUE_IMAGES[name];
     if (!entry || !entry.url) return;
+    seenNames.add(String(name).toLowerCase());
+    seenUrls.add(entry.url);
     images.push(entry.url);
     rankData.push({ url: entry.url, priority_rank: rank });
     imageVenues.push({ name, url: entry.url, area: entry.area || '', category: entry.category || '' });
     rank += 1;
   });
 
+  pool.some((name) => {
+    if (images.length >= 3) return true;
+    const entry = VENUE_IMAGES[name];
+    const key = String(name || '').toLowerCase();
+    if (!entry || !entry.url || seenNames.has(key) || seenUrls.has(entry.url)) return false;
+    seenNames.add(key);
+    seenUrls.add(entry.url);
+    images.push(entry.url);
+    rankData.push({ url: entry.url, priority_rank: rank, fallback: true });
+    imageVenues.push({ name, url: entry.url, area: entry.area || '', category: entry.category || '', fallback: true });
+    rank += 1;
+    return false;
+  });
+
   data.images = images;
   data.rank_data = rankData;
   data.imageVenues = imageVenues;
-  data.mentionedVenues = mentioned;
+  data.mentionedVenues = mentioned.slice();
+  imageVenues.forEach((v) => {
+    if (v && v.name && data.mentionedVenues.indexOf(v.name) === -1) data.mentionedVenues.push(v.name);
+  });
   return data;
 }
 
