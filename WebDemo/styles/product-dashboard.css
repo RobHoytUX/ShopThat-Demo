@@ -806,6 +806,7 @@ html, body {
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: grab;
   user-select: none;
+  -webkit-user-select: none;
   transform-origin: center center;
 }
 
@@ -865,6 +866,10 @@ html, body {
   background: #f8f8f8;
   display: block;
   border-radius: 28px;
+  cursor: inherit;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-user-drag: none;
 }
 
 .dashboard-media-overlay {
@@ -1865,6 +1870,7 @@ html, body {
   gap: 12px;
   z-index: 1500; /* Same as chat - in front of scrim when card is focused */
   width: 525px;
+  height: 176px;
   opacity: 0;
   transform: translateY(20px);
   transition: all 0.3s ease;
@@ -1875,10 +1881,9 @@ html, body {
   transform: translateY(0);
 }
 
-/* My Products Floating Drawer - positioned above My Media */
 .my-products-drawer {
   position: fixed;
-  bottom: 292px; /* Clears the taller My Media drawer plus a visible gap */
+  bottom: 224px;
   left: 32px;
   background: rgba(255, 255, 255, 0.3);
   backdrop-filter: blur(12px);
@@ -1888,18 +1893,22 @@ html, body {
   box-shadow: 0 8px 32px rgba(31, 38, 135, 0.15);
   padding: 20px;
   padding-top: 16px;
-  display: none;
+  display: flex;
   flex-direction: column;
   gap: 12px;
-  z-index: 1500;
+  z-index: 1501;
   width: 525px;
+  height: 176px;
   opacity: 0;
-  transform: translateY(20px);
-  transition: all 0.3s ease;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translateY(12px);
+  transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s ease;
 }
 
 .my-products-drawer.visible {
-  display: flex;
+  visibility: visible;
+  pointer-events: auto;
 }
 
 .my-products-drawer.loaded {
@@ -1907,10 +1916,22 @@ html, body {
   transform: translateY(0);
 }
 
-@media (max-height: 720px) {
-  .my-products-drawer {
-    bottom: 260px;
-  }
+/* Product thumbnails inside the My Media drawer get a subtle "Products"
+   indicator so they remain visually distinguishable from media. */
+.my-media-image-wrapper.is-product-thumb::after {
+  content: 'Product';
+  position: absolute;
+  bottom: 6px;
+  right: 6px;
+  background: rgba(17, 17, 17, 0.85);
+  color: #fff;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 2px 6px;
+  border-radius: 999px;
+  pointer-events: none;
 }
 
 .my-media-header {
@@ -1954,6 +1975,8 @@ html, body {
   display: flex;
   align-items: center;
   gap: 16px;
+  flex: 0 0 104px;
+  min-height: 0;
 }
 
 .my-media-scroll-container {
@@ -1961,19 +1984,22 @@ html, body {
   overflow-x: hidden;
   overflow-y: hidden;
   position: relative;
+  height: 100%;
   padding: 4px 0;
 }
 
 .my-media-images {
   display: flex;
+  align-items: center;
   gap: 12px;
+  height: 100%;
   transition: transform 0.3s ease;
   will-change: transform;
 }
 
 .my-media-image {
-  width: 90px;
-  height: 90px;
+  width: 96px;
+  height: 96px;
   border-radius: 16px;
   object-fit: cover;
   cursor: grab;

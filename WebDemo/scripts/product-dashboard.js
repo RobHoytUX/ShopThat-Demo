@@ -1194,10 +1194,10 @@
   // Track which card's images are currently loaded
   let currentLoadedCardIndex = -1;
 
-  // Product images for specific cards (e.g., canvas-2 shows products)
+  // Product images for specific cards (e.g., canvas-4 shows products)
   const cardProductImages = {
-    // Card 2 (canvas-2.jpg) - Blue face paint has LV products
-    1: [
+    // Card 4 (canvas-4.jpg) - Hand holding blue polka-dot LV bag has LV products
+    3: [
       'assets/product-set1-1.jpg',  // Blue polka dot LV bag
       'assets/product-set1-2.jpg',  // B&W polka dot LV sneakers
       'assets/product-set1-3.jpg',  // Silver ball LV earrings
@@ -1208,6 +1208,46 @@
       'assets/product-set1-8.jpg'   // Silver studded LV jacket
     ]
   };
+
+  const productImagesBySource = new Map();
+
+  function registerProductImageSources(mediaItems) {
+    Object.entries(cardProductImages).forEach(([cardIndexKey, productImages]) => {
+      const cardIndex = Number(cardIndexKey);
+      const canvasItem = Array.isArray(mediaItems) ? mediaItems[cardIndex] : null;
+      if (canvasItem && canvasItem.src) {
+        productImagesBySource.set(canvasItem.src, productImages);
+      }
+      productImagesBySource.set(`assets/canvas-${cardIndex + 1}.jpg`, productImages);
+
+      (drawerImageSets[cardIndex] || []).forEach(src => {
+        productImagesBySource.set(src, productImages);
+      });
+    });
+  }
+
+  const productDrawerController = {
+    showForSource: null,
+    hide: null
+  };
+
+  function attachProductHover(el, src) {
+    if (!el || !src) return;
+    el.dataset.productHoverSrc = src;
+    el.addEventListener('mouseenter', () => {
+      if (productDrawerController.showForSource) {
+        productDrawerController.showForSource(src);
+      }
+    });
+    el.addEventListener('mouseleave', (event) => {
+      const next = event.relatedTarget;
+      if (next && next.closest && next.closest('#myProductsDrawer')) return;
+      if (next && next.closest && next.closest('[data-product-hover-src]')) return;
+      if (productDrawerController.hide) {
+        productDrawerController.hide();
+      }
+    });
+  }
 
   // ===== Smooth Drag & Drop Coordination =====
   // Shared controllers so renderMedia (canvas) and setupMyMediaDrawer can talk
@@ -1258,6 +1298,8 @@
 
     // Smooth floating-clone drag (replaces native HTML5 drag preview)
     attachDrawerImageDrag(img, wrapper, src);
+    attachProductHover(img, src);
+    attachProductHover(wrapper, src);
 
     if (typeof onFocusClick === 'function') {
       img.addEventListener('click', (e) => {
@@ -1568,6 +1610,7 @@
     console.log('Raw galleryImages from localStorage:', mediaJson);
     const media = readStoredArray('galleryImages');
     console.log('Parsed media:', media);
+    registerProductImageSources(media);
     
     updateBadge('mediaCount', media.length);
 
@@ -1626,8 +1669,11 @@
       const img = createEl('img', {
         class: 'dashboard-media-image',
         src: item.src,
-        alt: item.productData?.title || 'Media item'
+        alt: item.productData?.title || 'Media item',
+        draggable: 'false'
       });
+      img.addEventListener('dragstart', (e) => e.preventDefault());
+      attachProductHover(img, item.src);
 
       // Bookmark button
       const bookmarkBtn = createEl('button', { class: 'media-action-btn bookmark-btn' });
@@ -1670,6 +1716,7 @@
       glassContainer.dataset.originalY = pos.y;
       glassContainer.dataset.originalRotation = pos.rotation;
       glassContainer.dataset.originalZIndex = index + 1;
+      attachProductHover(glassContainer, item.src);
 
       // Per-card drag state (closure)
       let isDragging = false;
@@ -1984,16 +2031,11 @@
       // Find the index of the focused card
       const focusedIndex = cards.indexOf(card);
       
-      // Load curated images for this card if available and not already loaded
+      // Load curated images (and any focused-card products) into the single
+      // My Media drawer so the bottom-left area keeps the same height as in
+      // the default load state.
       if (drawerImageSets[focusedIndex] && currentLoadedCardIndex !== focusedIndex) {
         loadCuratedDrawerImages(focusedIndex);
-      }
-      
-      // Show/hide My Products component based on card
-      if (cardProductImages[focusedIndex]) {
-        showProductsDrawer(focusedIndex);
-      } else {
-        hideProductsDrawer();
       }
       
       // Ensure transition is enabled for smooth animation
@@ -2081,6 +2123,8 @@
         const innerImg = child.querySelector('img.my-media-image');
         if (innerImg) existing.set(innerImg.getAttribute('src'), child);
       });
+      const placeholder = drawerImagesEl.querySelector('.drawer-placeholder');
+      if (placeholder) placeholder.remove();
 
       // Build the new ordered list, reusing or creating elements as needed.
       const newChildren = [];
@@ -2361,15 +2405,30 @@
       });
     }
     
-    // Show the My Products drawer with product images
-    function showProductsDrawer(cardIndex) {
+    let productsHideTimer = null;
+
+    function showProductsDrawerForImages(productImages) {
       const productsDrawer = document.getElementById('myProductsDrawer');
       const productImagesEl = document.getElementById('productImages');
       
       if (!productsDrawer || !productImagesEl) return;
-      
-      const productImages = cardProductImages[cardIndex];
-      if (!productImages) return;
+      if (!Array.isArray(productImages) || productImages.length === 0) return;
+
+      if (productsHideTimer) {
+        clearTimeout(productsHideTimer);
+        productsHideTimer = null;
+      }
+
+      if (!productsDrawer._hoverBound) {
+        productsDrawer.addEventListener('mouseenter', () => {
+          if (productsHideTimer) {
+            clearTimeout(productsHideTimer);
+            productsHideTimer = null;
+          }
+        });
+        productsDrawer.addEventListener('mouseleave', hideProductsDrawer);
+        productsDrawer._hoverBound = true;
+      }
       
       // Show the drawer
       productsDrawer.classList.add('visible');
@@ -2417,17 +2476,29 @@
       // Setup scroll buttons
       setupProductsScrollButtons();
     }
+
+    function showProductsDrawerForSource(src) {
+      const productImages = productImagesBySource.get(src);
+      if (productImages) {
+        showProductsDrawerForImages(productImages);
+      }
+    }
     
     // Hide the My Products drawer
     function hideProductsDrawer() {
       const productsDrawer = document.getElementById('myProductsDrawer');
       if (productsDrawer) {
-        productsDrawer.classList.remove('loaded');
-        setTimeout(() => {
+        if (productsHideTimer) clearTimeout(productsHideTimer);
+        productsHideTimer = setTimeout(() => {
+          productsDrawer.classList.remove('loaded');
           productsDrawer.classList.remove('visible');
-        }, 300);
+          productsHideTimer = null;
+        }, 180);
       }
     }
+
+    productDrawerController.showForSource = showProductsDrawerForSource;
+    productDrawerController.hide = hideProductsDrawer;
     
     // Setup scroll buttons for products drawer
     function setupProductsScrollButtons() {
@@ -2439,7 +2510,7 @@
       if (!productImages || !scrollContainer || !leftBtn || !rightBtn) return;
       
       let scrollPosition = 0;
-      const scrollAmount = 224; // Image width + gap
+      const scrollAmount = 108; // Image width + gap
       
       leftBtn.onclick = () => {
         scrollPosition = Math.max(0, scrollPosition - scrollAmount);
