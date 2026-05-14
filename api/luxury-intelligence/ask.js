@@ -349,13 +349,40 @@ function metadataImageForResult(metadata) {
   ]);
 }
 
-function normalizeOmniverseResponse(data) {
+function detectCategories(query) {
+  const q = String(query || '');
+  return Object.keys(CATEGORY_TRIGGERS).filter((cat) => CATEGORY_TRIGGERS[cat].re.test(q));
+}
+
+function scopedQuery(query) {
+  const q = String(query || '');
+  const areas = detectAreas(q);
+  if (areas.length !== 1) return q;
+  const cats = detectCategories(q);
+  const area = areas[0];
+  const otherArea = area === 'SoHo' ? '57th St.' : 'SoHo';
+  const locationName = area === 'SoHo'
+    ? 'Louis Vuitton New York SoHo at 116 Greene St'
+    : 'Louis Vuitton 57th Street at 6 E 57th St';
+  const topic = cats.length
+    ? cats.map((cat) => CATEGORY_TRIGGERS[cat].label).join(', ')
+    : 'locations';
+
+  return `${q}
+
+IMPORTANT LOCATION SCOPE:
+The user asked for ${topic} near ${locationName}. Recommend ONLY places in the ${area} area near that store. Do not include recommendations, images, hotels, restaurants, galleries, museums, or store content from ${otherArea}.`;
+}
+
+function normalizeOmniverseResponse(data, query) {
   if (!data || typeof data !== 'object' || !Array.isArray(data.results)) return data;
 
   const images = [];
   const rankData = [];
   const imageVenues = [];
   const seen = new Set();
+  const areas = detectAreas(query);
+  const scopedArea = areas.length === 1 ? areas[0] : '';
 
   data.results.forEach((item, idx) => {
     const metadata = item && item.metadata;
@@ -371,6 +398,7 @@ function normalizeOmniverseResponse(data) {
     const displayName = knownVenueName || (alias && alias.name ? alias.name : name);
     const area = alias && alias.area ? alias.area : inferAreaFromResult(item, metadata);
     const category = alias && alias.category ? alias.category : inferCategoryFromResult(item, metadata);
+    if (scopedArea && area !== scopedArea) return;
     images.push(imageUrl);
     rankData.push({ url: imageUrl, priority_rank: idx + 1, relevance_score: item.relevance_score });
     const venue = {
@@ -407,7 +435,7 @@ function detectAreas(query) {
 
 function applyKeywordConstraints(query) {
   const q = String(query || '');
-  const cats = Object.keys(CATEGORY_TRIGGERS).filter((cat) => CATEGORY_TRIGGERS[cat].re.test(q));
+  const cats = detectCategories(q);
   if (!cats.length) return q;
   const areas = detectAreas(q);
 
@@ -448,11 +476,12 @@ module.exports = async function askLuxuryIntelligence(req, res) {
   try {
     const body = await readJsonBody(req);
     const originalQuery = String(body.query || '');
+    const finalQuery = scopedQuery(originalQuery);
     const topK = Number.isFinite(Number(body.top_k)) ? Number(body.top_k) : DEFAULT_TOP_K;
     const upstreamResponse = await fetch(upstreamUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ query: originalQuery, top_k: topK })
+      body: JSON.stringify({ query: finalQuery, top_k: topK })
     });
     const responseBody = await upstreamResponse.text();
     const contentType = upstreamResponse.headers.get('content-type') || 'application/json';
@@ -465,7 +494,7 @@ module.exports = async function askLuxuryIntelligence(req, res) {
     if (upstreamResponse.ok && /application\/json/i.test(contentType)) {
       try {
         const parsed = JSON.parse(responseBody);
-        return res.send(JSON.stringify(normalizeOmniverseResponse(parsed)));
+        return res.send(JSON.stringify(normalizeOmniverseResponse(parsed, originalQuery)));
       } catch (_e) {
         return res.send(responseBody);
       }

@@ -434,6 +434,8 @@
     var rankData = [];
     var imageVenues = [];
     var seen = {};
+    var areas = detectAreas(query);
+    var scopedArea = areas.length === 1 ? areas[0] : '';
 
     data.results.forEach(function (item, idx) {
       var metadata = item && item.metadata;
@@ -449,6 +451,9 @@
       var knownVenueName = knownVenueNameFor(name);
       var alias = knownVenueName ? null : (apiLocationAliasFor(name) || apiLocationAliasFor(googleMapName));
       var displayName = knownVenueName || (alias && alias.name ? alias.name : name);
+      var normalizedArea = alias && alias.area ? alias.area : area;
+      var normalizedCategory = alias && alias.category ? alias.category : category;
+      if (scopedArea && normalizedArea !== scopedArea) return;
       images.push(imageUrl);
       rankData.push({ url: imageUrl, priority_rank: idx + 1, relevance_score: item.relevance_score });
       var venue = {
@@ -456,8 +461,8 @@
         apiName: name,
         googleMapName: googleMapName,
         url: imageUrl,
-        area: alias && alias.area ? alias.area : area,
-        category: alias && alias.category ? alias.category : category,
+        area: normalizedArea,
+        category: normalizedCategory,
         index: item.index || '',
         source: 'omniverse'
       };
