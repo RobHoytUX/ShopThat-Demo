@@ -379,7 +379,7 @@
   .chatbot-venue-gallery-back:hover{background:#f7f7f7}
   .chatbot-venue-image-card{background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,0.08);cursor:pointer;height:140px}
   .chatbot-venue-image-card:hover{transform:translateY(-2px);box-shadow:0 4px 16px rgba(0,0,0,0.14)}
-  .chatbot-venue-image-card img{width:100%;height:100%;object-fit:cover;display:block;background:#f5f5f5}
+  .chatbot-venue-image-card img{width:100%;height:100%;object-fit:cover;display:block;background:#f5f5f5;color:transparent;-webkit-user-select:none;user-select:none}
   .chatbot-location-explorer{display:none !important;background:rgba(255,255,255,0.98);border-radius:12px;padding:16px;padding-bottom:24px;margin:0;box-shadow:0 2px 12px rgba(0,0,0,0.08);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);flex-direction:column;flex-shrink:0;min-height:250px}
   .chatbot-location-explorer.is-visible:not([hidden]){display:flex !important}
   .chatbot-explorer-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
@@ -1035,7 +1035,9 @@
       const label = String(venueName || (location && location.name) || 'Location');
       const header = createEl('div', { class: 'chatbot-venue-gallery-header' });
       const headerText = createEl('div');
-      headerText.appendChild(createEl('p', { class: 'chatbot-venue-gallery-title', text: label }));
+      const titleEl = createEl('p', { class: 'chatbot-venue-gallery-title', text: label });
+      titleEl.id = 'chatbot-venue-gallery-heading';
+      headerText.appendChild(titleEl);
       headerText.appendChild(createEl('div', {
         class: 'chatbot-venue-gallery-count',
         text: images.length ? `${images.length} location image${images.length === 1 ? '' : 's'}` : 'No local images available'
@@ -1052,10 +1054,11 @@
         const card = createEl('div', { class: 'chatbot-venue-image-card' });
         const img = createEl('img', {
           src: url,
-          alt: `${label} image ${index + 1}`,
+          alt: '',
           loading: 'eager',
           decoding: index < 6 ? 'sync' : 'async'
         });
+        img.setAttribute('aria-hidden', 'true');
         if (index < 6) img.setAttribute('fetchpriority', 'high');
         img.addEventListener('click', () => openImagePreview(url));
         img.addEventListener('error', () => { card.style.display = 'none'; });
