@@ -203,6 +203,53 @@ function getAreaScopedPool(cats, areas) {
   return pool;
 }
 
+/** True if venue labels resolve to a name on the curated allow-list for this query. */
+function poolHasVenue(pool, displayName, apiName, googleMapName) {
+  if (!pool || !pool.length) return true;
+  const lower = new Set(pool.map((p) => String(p).toLowerCase()));
+  const candidates = [displayName, apiName, googleMapName].filter(Boolean);
+  for (const c of candidates) {
+    const key = cleanMetadataName(c).toLowerCase();
+    if (lower.has(key)) return true;
+    const kn = knownVenueNameFor(c);
+    if (kn && lower.has(kn.toLowerCase())) return true;
+  }
+  return false;
+}
+
+/**
+ * For restaurant / hotel / gallery queries, replace the model answer with a
+ * list built only from dashboard keyword-tree venues so out-of-tree names
+ * (e.g. Carbone) never appear.
+ */
+function clampConstrainedAnswer(data, query) {
+  const cats = detectCategories(query);
+  if (!cats.length || !data || typeof data.answer !== 'string') return;
+  const areas = detectAreas(query);
+  const pool = getAreaScopedPool(cats, areas);
+  if (!pool.length) return;
+
+  let picks = findMentionedVenues(data.answer, pool);
+  const maxPicks = 8;
+  if (picks.length < 1) picks = pool.slice(0, Math.min(maxPicks, pool.length));
+  else if (picks.length > maxPicks) picks = picks.slice(0, maxPicks);
+
+  const topic = cats.map((c) => CATEGORY_TRIGGERS[c].label).join(', ');
+  let intro;
+  if (areas.length === 1) {
+    intro = `Here are curated ${topic} near **${areas[0]}** from the Louis Vuitton keyword guide:\n\n`;
+  } else {
+    intro = `Here are curated ${topic} from the Louis Vuitton keyword guide:\n\n`;
+  }
+
+  const lines = picks.map((name, i) => {
+    const meta = VENUE_IMAGES[name];
+    const addr = meta && meta.address ? meta.address : null;
+    return addr ? `${i + 1}. **${name}** (${addr})` : `${i + 1}. **${name}**`;
+  });
+  data.answer = intro + lines.join('\n');
+}
+
 /**
  * In constrained mode, replace the upstream `images` with venue-correct
  * local images for any mentioned venues. If we have no local image for a
@@ -401,6 +448,7 @@ function normalizeOmniverseResponse(data, query) {
   const areas = detectAreas(query);
   const scopedArea = areas.length === 1 ? areas[0] : '';
   const queryCats = detectCategories(query);
+  const allowPool = queryCats.length ? getAreaScopedPool(queryCats, areas) : [];
 
   data.results.forEach((item, idx) => {
     const metadata = item && item.metadata;
@@ -424,6 +472,7 @@ function normalizeOmniverseResponse(data, query) {
     }
     if (scopedArea && area !== scopedArea) return;
     if (!venueCategoryMatchesQuery(normalizedCategory, queryCats)) return;
+    if (allowPool.length && !poolHasVenue(allowPool, displayName, name, googleMapName)) return;
     images.push(imageUrl);
     rankData.push({ url: imageUrl, priority_rank: idx + 1, relevance_score: item.relevance_score });
     const venue = {
@@ -501,7 +550,7 @@ module.exports = async function askLuxuryIntelligence(req, res) {
   try {
     const body = await readJsonBody(req);
     const originalQuery = String(body.query || '');
-    const finalQuery = scopedQuery(originalQuery);
+    const finalQuery = applyKeywordConstraints(scopedQuery(originalQuery));
     const topK = Number.isFinite(Number(body.top_k)) ? Number(body.top_k) : DEFAULT_TOP_K;
     const upstreamResponse = await fetch(upstreamUrl, {
       method: 'POST',
@@ -519,10 +568,12 @@ module.exports = async function askLuxuryIntelligence(req, res) {
     if (upstreamResponse.ok && /application\/json/i.test(contentType)) {
       try {
         const parsed = JSON.parse(responseBody);
+        clampConstrainedAnswer(parsed, originalQuery);
         let out = normalizeOmniverseResponse(parsed, originalQuery);
         if (detectCategories(originalQuery).length) {
           out = alignImagesToVenues(out, originalQuery);
         }
+        if (out && typeof out === 'object' && 'results' in out) delete out.results;
         return res.send(JSON.stringify(out));
       } catch (_e) {
         return res.send(responseBody);

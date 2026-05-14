@@ -437,6 +437,7 @@
     var areas = detectAreas(query);
     var scopedArea = areas.length === 1 ? areas[0] : '';
     var queryCats = detectConstrainedCategories(query);
+    var allowPool = queryCats.length ? buildConstrainedVenuePool(query) : [];
 
     data.results.forEach(function (item, idx) {
       var metadata = item && item.metadata;
@@ -462,6 +463,7 @@
       }
       if (scopedArea && normalizedArea !== scopedArea) return;
       if (!venueCategoryMatchesQuery(normalizedCategory, queryCats)) return;
+      if (allowPool.length && !poolHasVenue(allowPool, displayName, name, googleMapName)) return;
       images.push(imageUrl);
       rankData.push({ url: imageUrl, priority_rank: idx + 1, relevance_score: item.relevance_score });
       var venue = {
@@ -504,17 +506,7 @@
     if (!data) return data;
     var cats = detectConstrainedCategories(query);
     if (!cats.length) return data;
-    var areas = detectAreas(query);
-
-    var pool = [];
-    cats.forEach(function (cat) {
-      var map = getCuratedMapFor(cat);
-      var areasForCat = areas.filter(function (a) { return map[a] && map[a].length; });
-      var keys = areasForCat.length ? areasForCat : Object.keys(map);
-      keys.forEach(function (area) {
-        (map[area] || []).forEach(function (v) { uniquePush(pool, v); });
-      });
-    });
+    var pool = buildConstrainedVenuePool(query);
 
     var mentioned = findMentionedVenues(data.answer, pool);
     var images = [];
@@ -639,6 +631,65 @@
     return hits;
   }
 
+  /** Flat pool of dashboard allow-list venues for this query (same logic as alignImagesToVenues). */
+  function buildConstrainedVenuePool(query) {
+    var cats = detectConstrainedCategories(query);
+    var areas = detectAreas(query);
+    var pool = [];
+    cats.forEach(function (cat) {
+      var map = getCuratedMapFor(cat);
+      var areasForCat = areas.filter(function (a) { return map[a] && map[a].length; });
+      var keys = areasForCat.length ? areasForCat : Object.keys(map);
+      keys.forEach(function (area) {
+        (map[area] || []).forEach(function (v) { uniquePush(pool, v); });
+      });
+    });
+    return pool;
+  }
+
+  function poolHasVenue(pool, displayName, apiName, googleMapName) {
+    if (!pool || !pool.length) return true;
+    var lower = {};
+    pool.forEach(function (p) { lower[String(p).toLowerCase()] = true; });
+    var candidates = [displayName, apiName, googleMapName].filter(Boolean);
+    for (var i = 0; i < candidates.length; i++) {
+      var key = cleanMetadataName(candidates[i]).toLowerCase();
+      if (lower[key]) return true;
+      var kn = knownVenueNameFor(candidates[i]);
+      if (kn && lower[kn.toLowerCase()]) return true;
+    }
+    return false;
+  }
+
+  /**
+   * Replace model prose with a list built only from keyword-tree venues
+   * (matches server-side enforcement).
+   */
+  function clampConstrainedAnswer(data, query) {
+    var cats = detectConstrainedCategories(query);
+    if (!cats.length || !data || typeof data.answer !== 'string') return;
+    var areas = detectAreas(query);
+    var pool = buildConstrainedVenuePool(query);
+    if (!pool.length) return;
+
+    var picks = findMentionedVenues(data.answer, pool);
+    var maxPicks = 8;
+    if (picks.length < 1) picks = pool.slice(0, Math.min(maxPicks, pool.length));
+    else if (picks.length > maxPicks) picks = picks.slice(0, maxPicks);
+
+    var topic = cats.map(function (c) { return CATEGORY_CONFIG[c].label; }).join(', ');
+    var intro = areas.length === 1
+      ? 'Here are curated ' + topic + ' near **' + areas[0] + '** from the Louis Vuitton keyword guide:\n\n'
+      : 'Here are curated ' + topic + ' from the Louis Vuitton keyword guide:\n\n';
+
+    var lines = picks.map(function (name, i) {
+      var meta = VENUE_IMAGES[name];
+      var addr = meta && meta.address ? meta.address : null;
+      return addr ? (i + 1) + '. **' + name + '** (' + addr + ')' : (i + 1) + '. **' + name + '**';
+    });
+    data.answer = intro + lines.join('\n');
+  }
+
   /**
    * Append a strict allow-list instruction to a user query when it is
    * about restaurants, galleries, or hotels. When the query also names
@@ -725,6 +776,7 @@
       if (!res.ok) throw new Error('HTTP ' + res.status);
       return res.json();
     }).then(function (data) {
+      clampConstrainedAnswer(data, query);
       var normalized = normalizeOmniverseResponse(data, query);
       return alignImagesToVenues(normalized, query);
     });
@@ -787,6 +839,8 @@
     findMentionedVenues: findMentionedVenues,
     normalizeOmniverseResponse: normalizeOmniverseResponse,
     alignImagesToVenues: alignImagesToVenues,
+    clampConstrainedAnswer: clampConstrainedAnswer,
+    buildConstrainedVenuePool: buildConstrainedVenuePool,
     getVenueLocation: getVenueLocation,
     VENUE_IMAGES: VENUE_IMAGES
   };
