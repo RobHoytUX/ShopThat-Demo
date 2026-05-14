@@ -898,6 +898,15 @@
       others: []
     };
 
+    /** LV boutiques shown on the chatbot map (shared for markers + gallery preload). */
+    const CHATBOT_LV_STORE_LOCATIONS = [
+      { lat: 40.7632, lng: -73.9732, name: 'Louis Vuitton 57th Street', address: '6 E 57th St, New York, NY 10022' },
+      { lat: 40.7245, lng: -73.9975, name: 'Louis Vuitton SoHo', address: '116 Greene St, New York, NY 10012' }
+    ];
+
+    /** URLs already queued for decode/network so we do not duplicate preload work. */
+    const venueGalleryPrewarmSeen = new Set();
+
     function setMapLegendVisible(visible) {
       mapLegendVisible = !!visible;
       if (mapLegendEl) {
@@ -961,12 +970,48 @@
       return urls;
     }
 
-    function preloadVenueImages(urls) {
-      (urls || []).slice(0, 12).forEach((url) => {
-        const img = new Image();
-        img.decoding = 'async';
-        img.src = url;
+    /**
+     * Warm the HTTP cache for every pinned venue on the chatbot map so the
+     * first open of a location gallery hits memory/disk cache instead of
+     * waiting on six cold network fetches.
+     */
+    function prewarmChatbotMapVenueGalleries(options) {
+      const opts = options || {};
+      const priorityN = opts.priorityN != null ? opts.priorityN : 6;
+      const deferDeepTier = opts.deferDeepTier !== false;
+
+      const locs = [];
+      ['restaurants', 'museums', 'galleries', 'others'].forEach((k) => {
+        (chatbotLocationData[k] || []).forEach((l) => locs.push(l));
       });
+      CHATBOT_LV_STORE_LOCATIONS.forEach((s) => locs.push(s));
+
+      const priority = [];
+      const tail = [];
+      locs.forEach((loc) => {
+        const imgs = getVenueGalleryImages(loc.name, loc);
+        imgs.forEach((u, i) => {
+          if (i < priorityN) priority.push(u);
+          else tail.push(u);
+        });
+      });
+
+      function enqueue(urls) {
+        urls.forEach((url) => {
+          if (!url || venueGalleryPrewarmSeen.has(url)) return;
+          venueGalleryPrewarmSeen.add(url);
+          const im = new Image();
+          im.src = url;
+        });
+      }
+
+      enqueue(priority);
+      if (deferDeepTier && tail.length) {
+        const idle = window.requestIdleCallback || function (cb) { setTimeout(() => cb({ didTimeout: false, timeRemaining: () => 0 }), 32); };
+        idle(() => enqueue(tail));
+      } else {
+        enqueue(tail);
+      }
     }
 
     function resetVenueGalleryMode() {
@@ -979,7 +1024,13 @@
       productGallery.replaceChildren();
       productGallery.classList.add('is-venue-gallery');
       wrapper.classList.add('map-venue-gallery-active');
-      preloadVenueImages(images);
+      images.forEach((url) => {
+        if (url && !venueGalleryPrewarmSeen.has(url)) {
+          venueGalleryPrewarmSeen.add(url);
+          const w = new Image();
+          w.src = url;
+        }
+      });
 
       const label = String(venueName || (location && location.name) || 'Location');
       const header = createEl('div', { class: 'chatbot-venue-gallery-header' });
@@ -1003,7 +1054,7 @@
           src: url,
           alt: `${label} image ${index + 1}`,
           loading: 'eager',
-          decoding: 'async'
+          decoding: index < 6 ? 'sync' : 'async'
         });
         if (index < 6) img.setAttribute('fetchpriority', 'high');
         img.addEventListener('click', () => openImagePreview(url));
@@ -1075,12 +1126,7 @@
           });
           
           // Add Louis Vuitton NYC store markers with custom icon
-          const stores = [
-            { lat: 40.7632, lng: -73.9732, name: 'Louis Vuitton 57th Street', address: '6 E 57th St, New York, NY 10022' },
-            { lat: 40.7245, lng: -73.9975, name: 'Louis Vuitton SoHo', address: '116 Greene St, New York, NY 10012' }
-          ];
-          
-          stores.forEach(store => {
+          CHATBOT_LV_STORE_LOCATIONS.forEach((store) => {
             const storeMarker = L.marker([store.lat, store.lng], { icon: lvIcon })
               .bindPopup(`<b>${store.name}</b><br>${store.address}`)
               .addTo(leafletMap);
@@ -1182,6 +1228,7 @@
             if (leafletMap) {
               leafletMap.invalidateSize();
             }
+            prewarmChatbotMapVenueGalleries({ priorityN: 6, deferDeepTier: true });
           });
       }
     }
@@ -3408,6 +3455,9 @@
     
     // Expose addToGallery function globally so product cards can access it
     window.addProductToGallery = addToGallery;
+
+    const idle = window.requestIdleCallback || function (cb) { setTimeout(() => cb({ didTimeout: false, timeRemaining: () => 0 }), 80); };
+    idle(() => prewarmChatbotMapVenueGalleries({ priorityN: 6, deferDeepTier: true }), { timeout: 2000 });
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initChatbot);
