@@ -948,6 +948,11 @@
           if (url && urls.indexOf(url) === -1) urls.push(url);
         });
       });
+      if (location && Array.isArray(location.images)) {
+        location.images.forEach((url) => {
+          if (url && urls.indexOf(url) === -1) urls.push(url);
+        });
+      }
       if (!urls.length && location && location.image) urls.push(location.image);
       if (!urls.length && window.LuxuryIntelligence && typeof window.LuxuryIntelligence.getVenueLocation === 'function') {
         const loc = window.LuxuryIntelligence.getVenueLocation(canonical);

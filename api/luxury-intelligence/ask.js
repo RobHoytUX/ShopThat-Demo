@@ -1,5 +1,51 @@
 const { readJsonBody } = require('../auth/_auth');
 
+const DEFAULT_UPSTREAM_URL = 'http://3.142.99.210:8000/query';
+const DEFAULT_TOP_K = 5;
+
+const API_LOCATION_ALIASES = {
+  'le cafe louis vuitton': {
+    name: 'Le Café Louis Vuitton',
+    area: '57th St.',
+    category: 'restaurants',
+    lat: 40.7632,
+    lng: -73.9732,
+    address: '6 E 57th St, New York, NY 10022'
+  },
+  'le café louis vuitton': {
+    name: 'Le Café Louis Vuitton',
+    area: '57th St.',
+    category: 'restaurants',
+    lat: 40.7632,
+    lng: -73.9732,
+    address: '6 E 57th St, New York, NY 10022'
+  },
+  'lv soho store': {
+    name: 'Louis Vuitton SoHo',
+    area: 'SoHo',
+    category: 'stores',
+    lat: 40.7245,
+    lng: -73.9975,
+    address: '116 Greene St, New York, NY 10012'
+  },
+  'louis vuitton new york soho': {
+    name: 'Louis Vuitton SoHo',
+    area: 'SoHo',
+    category: 'stores',
+    lat: 40.7245,
+    lng: -73.9975,
+    address: '116 Greene St, New York, NY 10012'
+  },
+  'louis vuitton soho': {
+    name: 'Louis Vuitton SoHo',
+    area: 'SoHo',
+    category: 'stores',
+    lat: 40.7245,
+    lng: -73.9975,
+    address: '116 Greene St, New York, NY 10012'
+  }
+};
+
 // ────────────────────────────────────────────────────────────────────────
 // Curated allow-list mirroring WebDemo/scripts/keywords-data.js, broken
 // down by NY area so a question about "57th St. restaurants" only
@@ -211,6 +257,149 @@ function alignImagesToVenues(data, query) {
   return data;
 }
 
+function firstMetadataValue(metadata, keys) {
+  if (!metadata || typeof metadata !== 'object') return '';
+  for (const key of keys) {
+    if (metadata[key] != null && String(metadata[key]).trim()) return String(metadata[key]).trim();
+  }
+  return '';
+}
+
+function cleanMetadataName(name) {
+  return String(name || '')
+    .replace(/\s*\((?:RESTAURANT|HOTEL|STORE|GALLERY|MUSEUM)\)\s*$/i, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function apiLocationAliasFor(name) {
+  const cleaned = cleanMetadataName(name);
+  return API_LOCATION_ALIASES[cleaned.toLowerCase()] || null;
+}
+
+function knownVenueNameFor(name) {
+  const wanted = cleanMetadataName(name).toLowerCase();
+  return Object.keys(VENUE_IMAGES).find((key) => key.toLowerCase() === wanted) || '';
+}
+
+function inferCategoryFromResult(item, metadata) {
+  const index = String((item && item.index) || '').toLowerCase();
+  const type = String(firstMetadataValue(metadata, ['Type', 'type', 'category']) || '').toLowerCase();
+  if (index.includes('restaurant') || type.includes('restaurant')) return 'restaurants';
+  if (index.includes('hotel') || type.includes('hotel')) return 'hotels';
+  if (index.includes('galler') || index.includes('museum') || type.includes('gallery') || type.includes('museum')) return 'galleries';
+  if (index.includes('product') || type.includes('product')) return 'products';
+  return '';
+}
+
+function inferAreaFromResult(item, metadata) {
+  const index = String((item && item.index) || '').toLowerCase();
+  const haystack = [
+    index,
+    firstMetadataValue(metadata, ['area', 'Area', 'location', 'Location', 'Keywords', 'Google Maps', 'GOOGLE MAP'])
+  ].join(' ').toLowerCase();
+  if (/\bsoho|so-ho\b/.test(haystack)) return 'SoHo';
+  if (/57|fifty[-\s]?seventh|midtown/.test(haystack)) return '57th St.';
+  return '';
+}
+
+function metadataNameForResult(item, metadata) {
+  const name = firstMetadataValue(metadata, [
+    'product_name',
+    'product_name_display',
+    'productName',
+    'name',
+    'title',
+    'Store',
+    'store_name',
+    'Restaurants',
+    'restaurant_name',
+    'HOTEL NAME',
+    'hotel_name',
+    'Gallery/Mueseum',
+    'Gallery/Museum',
+    'gallery_name',
+    'museum_name',
+    'Google Maps',
+    'Google Map',
+    'GOOGLE MAP',
+    'Image Name/ Drive Link'
+  ]) || String((item && item.index) || 'Recommendation');
+  return cleanMetadataName(name);
+}
+
+function googleMapNameForResult(metadata) {
+  return cleanMetadataName(firstMetadataValue(metadata, ['Google Maps', 'Google Map', 'GOOGLE MAP']));
+}
+
+function metadataImageForResult(metadata) {
+  return firstMetadataValue(metadata, [
+    'image_url',
+    'imageUrl',
+    'image',
+    'Image URL',
+    'image link',
+    'Image Link',
+    'AWS Links',
+    'AWS Link',
+    'AWS LINKS',
+    'AWS LINK',
+    'Drive Link',
+    'Image Name/ Drive Link'
+  ]);
+}
+
+function normalizeOmniverseResponse(data) {
+  if (!data || typeof data !== 'object' || !Array.isArray(data.results)) return data;
+
+  const images = [];
+  const rankData = [];
+  const imageVenues = [];
+  const seen = new Set();
+
+  data.results.forEach((item, idx) => {
+    const metadata = item && item.metadata;
+    if (!metadata || typeof metadata !== 'object') return;
+    const imageUrl = metadataImageForResult(metadata);
+    if (!imageUrl || seen.has(imageUrl)) return;
+    seen.add(imageUrl);
+
+    const name = metadataNameForResult(item, metadata);
+    const googleMapName = googleMapNameForResult(metadata);
+    const knownVenueName = knownVenueNameFor(name);
+    const alias = knownVenueName ? null : (apiLocationAliasFor(name) || apiLocationAliasFor(googleMapName));
+    const displayName = knownVenueName || (alias && alias.name ? alias.name : name);
+    const area = alias && alias.area ? alias.area : inferAreaFromResult(item, metadata);
+    const category = alias && alias.category ? alias.category : inferCategoryFromResult(item, metadata);
+    images.push(imageUrl);
+    rankData.push({ url: imageUrl, priority_rank: idx + 1, relevance_score: item.relevance_score });
+    const venue = {
+      name: displayName,
+      apiName: name,
+      googleMapName,
+      url: imageUrl,
+      area,
+      category,
+      index: item.index || '',
+      source: 'omniverse'
+    };
+    if (alias) {
+      venue.lat = alias.lat;
+      venue.lng = alias.lng;
+      venue.address = alias.address || '';
+    }
+    imageVenues.push(venue);
+  });
+
+  if (images.length) {
+    data.images = images;
+    data.rank_data = rankData;
+    data.imageVenues = imageVenues;
+    data.mentionedVenues = imageVenues.map((v) => v.name);
+  }
+  return data;
+}
+
 function detectAreas(query) {
   const q = String(query || '');
   return Object.keys(AREA_TRIGGERS).filter((area) => AREA_TRIGGERS[area].test(q));
@@ -254,19 +443,16 @@ module.exports = async function askLuxuryIntelligence(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const upstreamUrl = process.env.LUXURY_INTELLIGENCE_ASK_URL;
-  if (!upstreamUrl) {
-    return res.status(500).json({ error: 'Luxury Intelligence API is not configured' });
-  }
+  const upstreamUrl = DEFAULT_UPSTREAM_URL;
 
   try {
     const body = await readJsonBody(req);
     const originalQuery = String(body.query || '');
-    const constrainedQuery = applyKeywordConstraints(originalQuery);
+    const topK = Number.isFinite(Number(body.top_k)) ? Number(body.top_k) : DEFAULT_TOP_K;
     const upstreamResponse = await fetch(upstreamUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ query: constrainedQuery })
+      body: JSON.stringify({ query: originalQuery, top_k: topK })
     });
     const responseBody = await upstreamResponse.text();
     const contentType = upstreamResponse.headers.get('content-type') || 'application/json';
@@ -279,8 +465,7 @@ module.exports = async function askLuxuryIntelligence(req, res) {
     if (upstreamResponse.ok && /application\/json/i.test(contentType)) {
       try {
         const parsed = JSON.parse(responseBody);
-        const aligned = alignImagesToVenues(parsed, originalQuery);
-        return res.send(JSON.stringify(aligned));
+        return res.send(JSON.stringify(normalizeOmniverseResponse(parsed)));
       } catch (_e) {
         return res.send(responseBody);
       }

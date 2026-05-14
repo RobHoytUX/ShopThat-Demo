@@ -8,7 +8,9 @@
   'use strict';
 
   var ASK_URL = '/api/luxury-intelligence/ask';
+  var DEFAULT_TOP_K = 5;
   var ANALYZING_TEXT = 'Analyzing Luxury Catalogs';
+  var apiVenueLocations = {};
 
   /** Prompt tuned so dashboard can parse a bullet list of keyword phrases */
   var DASHBOARD_KEYWORDS_QUERY =
@@ -178,18 +180,76 @@
     'Leslie-Lohman Museum of Art': { area: 'SoHo', category: 'galleries', lat: 40.7216, lng: -74.0030, address: '26 Wooster St' }
   };
 
+  var API_LOCATION_ALIASES = {
+    'le cafe louis vuitton': {
+      name: 'Le Café Louis Vuitton',
+      area: '57th St.',
+      category: 'restaurants',
+      lat: 40.7632,
+      lng: -73.9732,
+      address: '6 E 57th St, New York, NY 10022'
+    },
+    'le café louis vuitton': {
+      name: 'Le Café Louis Vuitton',
+      area: '57th St.',
+      category: 'restaurants',
+      lat: 40.7632,
+      lng: -73.9732,
+      address: '6 E 57th St, New York, NY 10022'
+    },
+    'lv soho store': {
+      name: 'Louis Vuitton SoHo',
+      area: 'SoHo',
+      category: 'stores',
+      lat: 40.7245,
+      lng: -73.9975,
+      address: '116 Greene St, New York, NY 10012'
+    },
+    'louis vuitton new york soho': {
+      name: 'Louis Vuitton SoHo',
+      area: 'SoHo',
+      category: 'stores',
+      lat: 40.7245,
+      lng: -73.9975,
+      address: '116 Greene St, New York, NY 10012'
+    },
+    'louis vuitton soho': {
+      name: 'Louis Vuitton SoHo',
+      area: 'SoHo',
+      category: 'stores',
+      lat: 40.7245,
+      lng: -73.9975,
+      address: '116 Greene St, New York, NY 10012'
+    }
+  };
+
   /** Return { lat, lng, ...meta } for a venue, or null if unknown. */
   function getVenueLocation(name) {
-    var entry = VENUE_IMAGES[name];
+    var canonicalName = name;
+    var entry = VENUE_IMAGES[canonicalName];
+    if (!entry) {
+      var wanted = String(name || '').toLowerCase();
+      Object.keys(VENUE_IMAGES).some(function (key) {
+        if (key.toLowerCase() !== wanted) return false;
+        canonicalName = key;
+        entry = VENUE_IMAGES[key];
+        return true;
+      });
+    }
+    if (!entry) {
+      var runtimeLoc = apiVenueLocations[String(name || '').toLowerCase()];
+      if (runtimeLoc && runtimeLoc.lat != null && runtimeLoc.lng != null) return runtimeLoc;
+    }
     if (!entry || entry.lat == null || entry.lng == null) return null;
     return {
-      name: name,
+      name: canonicalName,
       lat: entry.lat,
       lng: entry.lng,
       area: entry.area || '',
       category: entry.category || '',
       address: entry.address || '',
-      image: entry.url || ''
+      image: entry.url || '',
+      images: entry.images || []
     };
   }
 
@@ -241,34 +301,182 @@
     return { images: images, rank_data: rankData, imageVenues: imageVenues };
   }
 
-  function fillVenueImagePayload(payload, venuePool, maxImages) {
-    var out = payload || { images: [], rank_data: [], imageVenues: [] };
-    out.images = out.images || [];
-    out.rank_data = out.rank_data || [];
-    out.imageVenues = out.imageVenues || [];
-    var max = maxImages || 3;
-    var seenNames = {};
-    var seenUrls = {};
-    out.imageVenues.forEach(function (v) {
-      if (v && v.name) seenNames[String(v.name).toLowerCase()] = true;
-      if (v && v.url) seenUrls[v.url] = true;
-    });
-    out.images.forEach(function (url) { if (url) seenUrls[url] = true; });
+  function firstMetadataValue(metadata, keys) {
+    if (!metadata || typeof metadata !== 'object') return '';
+    for (var i = 0; i < keys.length; i++) {
+      var key = keys[i];
+      if (metadata[key] != null && String(metadata[key]).trim()) return String(metadata[key]).trim();
+    }
+    return '';
+  }
 
-    (venuePool || []).some(function (name) {
-      if (out.images.length >= max) return true;
-      var key = String(name || '').toLowerCase();
-      var entry = VENUE_IMAGES[name];
-      if (!entry || !entry.url || seenNames[key] || seenUrls[entry.url]) return false;
-      seenNames[key] = true;
-      seenUrls[entry.url] = true;
-      out.images.push(entry.url);
-      out.rank_data.push({ url: entry.url, priority_rank: out.rank_data.length + 1, fallback: true });
-      out.imageVenues.push({ name: name, url: entry.url, area: entry.area || '', category: entry.category || '', fallback: true });
-      return false;
+  function cleanMetadataName(name) {
+    return String(name || '')
+      .replace(/\s*\((?:RESTAURANT|HOTEL|STORE|GALLERY|MUSEUM)\)\s*$/i, '')
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+
+  function apiLocationAliasFor(name) {
+    var cleaned = cleanMetadataName(name);
+    var key = cleaned.toLowerCase();
+    return API_LOCATION_ALIASES[key] || null;
+  }
+
+  function knownVenueNameFor(name) {
+    var wanted = cleanMetadataName(name).toLowerCase();
+    var found = '';
+    Object.keys(VENUE_IMAGES).some(function (key) {
+      if (key.toLowerCase() !== wanted) return false;
+      found = key;
+      return true;
+    });
+    return found;
+  }
+
+  function inferCategoryFromResult(item, metadata) {
+    var index = String((item && item.index) || '').toLowerCase();
+    var type = String(firstMetadataValue(metadata, ['Type', 'type', 'category']) || '').toLowerCase();
+    if (index.indexOf('restaurant') !== -1 || type.indexOf('restaurant') !== -1) return 'restaurants';
+    if (index.indexOf('hotel') !== -1 || type.indexOf('hotel') !== -1) return 'hotels';
+    if (index.indexOf('galler') !== -1 || index.indexOf('museum') !== -1 || type.indexOf('gallery') !== -1 || type.indexOf('museum') !== -1) return 'galleries';
+    if (index.indexOf('product') !== -1 || type.indexOf('product') !== -1) return 'products';
+    return '';
+  }
+
+  function inferAreaFromResult(item, metadata) {
+    var index = String((item && item.index) || '').toLowerCase();
+    var haystack = [
+      index,
+      firstMetadataValue(metadata, ['area', 'Area', 'location', 'Location', 'Keywords', 'Google Maps', 'GOOGLE MAP'])
+    ].join(' ').toLowerCase();
+    if (/\bsoho|so-ho\b/.test(haystack)) return 'SoHo';
+    if (/57|fifty[-\s]?seventh|midtown/.test(haystack)) return '57th St.';
+    return '';
+  }
+
+  function metadataNameForResult(item, metadata) {
+    var name = firstMetadataValue(metadata, [
+      'product_name',
+      'product_name_display',
+      'productName',
+      'name',
+      'title',
+      'Store',
+      'store_name',
+      'Restaurants',
+      'restaurant_name',
+      'HOTEL NAME',
+      'hotel_name',
+      'Gallery/Mueseum',
+      'Gallery/Museum',
+      'gallery_name',
+      'museum_name',
+      'Google Maps',
+      'Google Map',
+      'GOOGLE MAP',
+      'Image Name/ Drive Link'
+    ]) || String((item && item.index) || 'Recommendation');
+    return cleanMetadataName(name);
+  }
+
+  function googleMapNameForResult(metadata) {
+    return cleanMetadataName(firstMetadataValue(metadata, ['Google Maps', 'Google Map', 'GOOGLE MAP']));
+  }
+
+  function registerApiVenueLocation(venue) {
+    if (!venue || !venue.name || !venue.url) return;
+    var alias = apiLocationAliasFor(venue.name) || apiLocationAliasFor(venue.googleMapName);
+    if (!alias) return;
+    var key = String(venue.name).toLowerCase();
+    var loc = apiVenueLocations[key] || {
+      name: alias.name || venue.name,
+      lat: alias.lat,
+      lng: alias.lng,
+      area: alias.area || venue.area || '',
+      category: alias.category || venue.category || '',
+      address: alias.address || '',
+      image: venue.url,
+      images: []
+    };
+    if (loc.images.indexOf(venue.url) === -1) loc.images.push(venue.url);
+    if (!loc.image) loc.image = venue.url;
+    apiVenueLocations[key] = loc;
+    apiVenueLocations[String(loc.name).toLowerCase()] = loc;
+    if (venue.googleMapName) apiVenueLocations[String(venue.googleMapName).toLowerCase()] = loc;
+  }
+
+  function metadataImageForResult(metadata) {
+    return firstMetadataValue(metadata, [
+      'image_url',
+      'imageUrl',
+      'image',
+      'Image URL',
+      'image link',
+      'Image Link',
+      'AWS Links',
+      'AWS Link',
+      'AWS LINKS',
+      'AWS LINK',
+      'Drive Link',
+      'Image Name/ Drive Link'
+    ]);
+  }
+
+  /**
+   * Omniverse returns an answer plus `results[].metadata`. Normalize the
+   * metadata into the image payload shape both chatbots already render.
+   */
+  function normalizeOmniverseResponse(data, query) {
+    if (!data || typeof data !== 'object' || !Array.isArray(data.results)) return data;
+
+    var images = [];
+    var rankData = [];
+    var imageVenues = [];
+    var seen = {};
+
+    data.results.forEach(function (item, idx) {
+      var metadata = item && item.metadata;
+      if (!metadata || typeof metadata !== 'object') return;
+      var imageUrl = metadataImageForResult(metadata);
+      if (!imageUrl || seen[imageUrl]) return;
+      seen[imageUrl] = true;
+
+      var name = metadataNameForResult(item, metadata);
+      var category = inferCategoryFromResult(item, metadata);
+      var area = inferAreaFromResult(item, metadata);
+      var googleMapName = googleMapNameForResult(metadata);
+      var knownVenueName = knownVenueNameFor(name);
+      var alias = knownVenueName ? null : (apiLocationAliasFor(name) || apiLocationAliasFor(googleMapName));
+      var displayName = knownVenueName || (alias && alias.name ? alias.name : name);
+      images.push(imageUrl);
+      rankData.push({ url: imageUrl, priority_rank: idx + 1, relevance_score: item.relevance_score });
+      var venue = {
+        name: displayName,
+        apiName: name,
+        googleMapName: googleMapName,
+        url: imageUrl,
+        area: alias && alias.area ? alias.area : area,
+        category: alias && alias.category ? alias.category : category,
+        index: item.index || '',
+        source: 'omniverse'
+      };
+      if (alias) {
+        venue.lat = alias.lat;
+        venue.lng = alias.lng;
+        venue.address = alias.address || '';
+      }
+      imageVenues.push(venue);
+      registerApiVenueLocation(venue);
     });
 
-    return out;
+    if (images.length) {
+      data.images = images;
+      data.rank_data = rankData;
+      data.imageVenues = imageVenues;
+      data.mentionedVenues = imageVenues.map(function (v) { return v.name; });
+    }
+    return data;
   }
 
   /**
@@ -283,6 +491,9 @@
     if (!data) return data;
     var cats = detectConstrainedCategories(query);
     if (!cats.length) return data;
+    if (Array.isArray(data.imageVenues) && data.imageVenues.some(function (v) { return v && v.source === 'omniverse' && v.url; })) {
+      return data;
+    }
     var areas = detectAreas(query);
 
     var pool = [];
@@ -296,7 +507,7 @@
     });
 
     var mentioned = findMentionedVenues(data.answer, pool);
-    var payload = fillVenueImagePayload(buildVenueImagePayload(mentioned), pool, 3);
+    var payload = buildVenueImagePayload(mentioned);
 
     // Constrained mode owns the image set: replace with venue-correct
     // images if we have them, otherwise blank the array so we never
@@ -305,9 +516,7 @@
     data.images = payload.images;
     data.rank_data = payload.rank_data;
     data.imageVenues = payload.imageVenues;
-    var payloadVenues = payload.imageVenues.map(function (v) { return v.name; });
-    data.mentionedVenues = mentioned.slice();
-    payloadVenues.forEach(function (name) { uniquePush(data.mentionedVenues, name); });
+    data.mentionedVenues = mentioned;
     return data;
   }
 
@@ -450,17 +659,16 @@
   }
 
   function ask(query) {
-    var finalQuery = applyKeywordConstraints(query);
     return fetch(ASK_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'omit',
-      body: JSON.stringify({ query: finalQuery })
+      body: JSON.stringify({ query: query, top_k: DEFAULT_TOP_K })
     }).then(function (res) {
       if (!res.ok) throw new Error('HTTP ' + res.status);
       return res.json();
     }).then(function (data) {
-      return alignImagesToVenues(data, query);
+      return normalizeOmniverseResponse(data, query);
     });
   }
 
@@ -507,6 +715,7 @@
 
   global.LuxuryIntelligence = {
     ASK_URL: ASK_URL,
+    DEFAULT_TOP_K: DEFAULT_TOP_K,
     ANALYZING_TEXT: ANALYZING_TEXT,
     DASHBOARD_KEYWORDS_QUERY: DASHBOARD_KEYWORDS_QUERY,
     ask: ask,
@@ -518,6 +727,7 @@
     getCuratedListFor: getCuratedListFor,
     getCuratedMapFor: getCuratedMapFor,
     findMentionedVenues: findMentionedVenues,
+    normalizeOmniverseResponse: normalizeOmniverseResponse,
     alignImagesToVenues: alignImagesToVenues,
     getVenueLocation: getVenueLocation,
     VENUE_IMAGES: VENUE_IMAGES
