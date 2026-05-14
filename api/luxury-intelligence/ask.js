@@ -354,6 +354,23 @@ function detectCategories(query) {
   return Object.keys(CATEGORY_TRIGGERS).filter((cat) => CATEGORY_TRIGGERS[cat].re.test(q));
 }
 
+/**
+ * When the user asks for restaurants / hotels / galleries, omit Omniverse
+ * rows that are LV stores or products so image cards match the answer.
+ */
+function venueCategoryMatchesQuery(normalizedCategory, queryCats) {
+  if (!queryCats || !queryCats.length) return true;
+  const cat = String(normalizedCategory || '').toLowerCase();
+  if (cat === 'stores' || cat === 'store' || cat === 'products' || cat === 'product') return false;
+  let ok = false;
+  queryCats.forEach((qc) => {
+    if (qc === 'restaurants' && cat === 'restaurants') ok = true;
+    if (qc === 'hotels' && cat === 'hotels') ok = true;
+    if (qc === 'galleries' && cat === 'galleries') ok = true;
+  });
+  return ok;
+}
+
 function scopedQuery(query) {
   const q = String(query || '');
   const areas = detectAreas(q);
@@ -383,6 +400,7 @@ function normalizeOmniverseResponse(data, query) {
   const seen = new Set();
   const areas = detectAreas(query);
   const scopedArea = areas.length === 1 ? areas[0] : '';
+  const queryCats = detectCategories(query);
 
   data.results.forEach((item, idx) => {
     const metadata = item && item.metadata;
@@ -397,8 +415,15 @@ function normalizeOmniverseResponse(data, query) {
     const alias = knownVenueName ? null : (apiLocationAliasFor(name) || apiLocationAliasFor(googleMapName));
     const displayName = knownVenueName || (alias && alias.name ? alias.name : name);
     const area = alias && alias.area ? alias.area : inferAreaFromResult(item, metadata);
-    const category = alias && alias.category ? alias.category : inferCategoryFromResult(item, metadata);
+    let normalizedCategory = '';
+    if (knownVenueName && VENUE_IMAGES[knownVenueName]) {
+      normalizedCategory = VENUE_IMAGES[knownVenueName].category || '';
+    }
+    if (!normalizedCategory) {
+      normalizedCategory = alias && alias.category ? alias.category : inferCategoryFromResult(item, metadata);
+    }
     if (scopedArea && area !== scopedArea) return;
+    if (!venueCategoryMatchesQuery(normalizedCategory, queryCats)) return;
     images.push(imageUrl);
     rankData.push({ url: imageUrl, priority_rank: idx + 1, relevance_score: item.relevance_score });
     const venue = {
@@ -407,7 +432,7 @@ function normalizeOmniverseResponse(data, query) {
       googleMapName,
       url: imageUrl,
       area,
-      category,
+      category: normalizedCategory,
       index: item.index || '',
       source: 'omniverse'
     };
@@ -494,7 +519,11 @@ module.exports = async function askLuxuryIntelligence(req, res) {
     if (upstreamResponse.ok && /application\/json/i.test(contentType)) {
       try {
         const parsed = JSON.parse(responseBody);
-        return res.send(JSON.stringify(normalizeOmniverseResponse(parsed, originalQuery)));
+        let out = normalizeOmniverseResponse(parsed, originalQuery);
+        if (detectCategories(originalQuery).length) {
+          out = alignImagesToVenues(out, originalQuery);
+        }
+        return res.send(JSON.stringify(out));
       } catch (_e) {
         return res.send(responseBody);
       }

@@ -436,6 +436,7 @@
     var seen = {};
     var areas = detectAreas(query);
     var scopedArea = areas.length === 1 ? areas[0] : '';
+    var queryCats = detectConstrainedCategories(query);
 
     data.results.forEach(function (item, idx) {
       var metadata = item && item.metadata;
@@ -452,8 +453,15 @@
       var alias = knownVenueName ? null : (apiLocationAliasFor(name) || apiLocationAliasFor(googleMapName));
       var displayName = knownVenueName || (alias && alias.name ? alias.name : name);
       var normalizedArea = alias && alias.area ? alias.area : area;
-      var normalizedCategory = alias && alias.category ? alias.category : category;
+      var normalizedCategory = '';
+      if (knownVenueName && VENUE_IMAGES[knownVenueName]) {
+        normalizedCategory = VENUE_IMAGES[knownVenueName].category || '';
+      }
+      if (!normalizedCategory) {
+        normalizedCategory = alias && alias.category ? alias.category : category;
+      }
       if (scopedArea && normalizedArea !== scopedArea) return;
+      if (!venueCategoryMatchesQuery(normalizedCategory, queryCats)) return;
       images.push(imageUrl);
       rankData.push({ url: imageUrl, priority_rank: idx + 1, relevance_score: item.relevance_score });
       var venue = {
@@ -496,9 +504,6 @@
     if (!data) return data;
     var cats = detectConstrainedCategories(query);
     if (!cats.length) return data;
-    if (Array.isArray(data.imageVenues) && data.imageVenues.some(function (v) { return v && v.source === 'omniverse' && v.url; })) {
-      return data;
-    }
     var areas = detectAreas(query);
 
     var pool = [];
@@ -512,16 +517,45 @@
     });
 
     var mentioned = findMentionedVenues(data.answer, pool);
-    var payload = buildVenueImagePayload(mentioned);
+    var images = [];
+    var rankData = [];
+    var imageVenues = [];
+    var seenNames = {};
+    var seenUrls = {};
+    var rank = 1;
+    mentioned.forEach(function (name) {
+      var entry = VENUE_IMAGES[name];
+      if (!entry || !entry.url) return;
+      var key = String(name).toLowerCase();
+      seenNames[key] = true;
+      seenUrls[entry.url] = true;
+      images.push(entry.url);
+      rankData.push({ url: entry.url, priority_rank: rank });
+      imageVenues.push({ name: name, url: entry.url, area: entry.area || '', category: entry.category || '' });
+      rank += 1;
+    });
 
-    // Constrained mode owns the image set: replace with venue-correct
-    // images if we have them, otherwise blank the array so we never
-    // show a non-corresponding upstream image for a restaurant/hotel/
-    // gallery answer.
-    data.images = payload.images;
-    data.rank_data = payload.rank_data;
-    data.imageVenues = payload.imageVenues;
-    data.mentionedVenues = mentioned;
+    pool.some(function (name) {
+      if (images.length >= 3) return true;
+      var entry = VENUE_IMAGES[name];
+      var key = String(name || '').toLowerCase();
+      if (!entry || !entry.url || seenNames[key] || seenUrls[entry.url]) return false;
+      seenNames[key] = true;
+      seenUrls[entry.url] = true;
+      images.push(entry.url);
+      rankData.push({ url: entry.url, priority_rank: rank, fallback: true });
+      imageVenues.push({ name: name, url: entry.url, area: entry.area || '', category: entry.category || '', fallback: true });
+      rank += 1;
+      return false;
+    });
+
+    data.images = images;
+    data.rank_data = rankData;
+    data.imageVenues = imageVenues;
+    data.mentionedVenues = mentioned.slice();
+    imageVenues.forEach(function (v) {
+      if (v && v.name && data.mentionedVenues.indexOf(v.name) === -1) data.mentionedVenues.push(v.name);
+    });
     return data;
   }
 
@@ -576,6 +610,24 @@
       if (CATEGORY_CONFIG[cat].trigger.test(q)) hits.push(cat);
     });
     return hits;
+  }
+
+  /**
+   * When the user constrains to restaurants / hotels / galleries, drop
+   * Omniverse hits that are LV stores, products, or the wrong venue type
+   * so we never show boutique imagery alongside dining recommendations.
+   */
+  function venueCategoryMatchesQuery(normalizedCategory, queryCats) {
+    if (!queryCats || !queryCats.length) return true;
+    var cat = String(normalizedCategory || '').toLowerCase();
+    if (cat === 'stores' || cat === 'store' || cat === 'products' || cat === 'product') return false;
+    var ok = false;
+    queryCats.forEach(function (qc) {
+      if (qc === 'restaurants' && cat === 'restaurants') ok = true;
+      if (qc === 'hotels' && cat === 'hotels') ok = true;
+      if (qc === 'galleries' && cat === 'galleries') ok = true;
+    });
+    return ok;
   }
 
   function detectAreas(query) {
@@ -673,7 +725,8 @@
       if (!res.ok) throw new Error('HTTP ' + res.status);
       return res.json();
     }).then(function (data) {
-      return normalizeOmniverseResponse(data, query);
+      var normalized = normalizeOmniverseResponse(data, query);
+      return alignImagesToVenues(normalized, query);
     });
   }
 
