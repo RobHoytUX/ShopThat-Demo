@@ -234,7 +234,10 @@
               <h2 id="treeDrawerTitle">Select a Keyword</h2>
             </div>
             <div class="sidebar__body" id="treeDrawerBody">
-              <p class="sidebar__placeholder">Click on a node in the tree to see its details.</p>
+              <div id="treeDrawerViewportSection" class="tree-drawer-viewport-panel" aria-live="polite"></div>
+              <div id="treeDrawerDetailSection">
+                <p class="sidebar__placeholder">Click on a node in the tree to see its details.</p>
+              </div>
             </div>
           </aside>
         </div>
@@ -353,7 +356,7 @@
     <script src="scripts/keywords-graph-utils.js"></script>
     <script src="scripts/keywords-linear-view.js"></script>
     <script src="scripts/keywords.js?v=32" defer></script>
-    <script src="scripts/keywords-tree.js?v=18" defer></script>
+    <script src="scripts/keywords-tree.js?v=19" defer></script>
     <script src="scripts/keywords-scatter.js?v=3" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/d3-sankey@0.12.3/dist/d3-sankey.min.js"></script>
     <script src="scripts/keywords-sankey.js?v=3" defer></script>

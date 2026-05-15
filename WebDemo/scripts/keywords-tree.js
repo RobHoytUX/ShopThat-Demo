@@ -6,7 +6,9 @@
   var expandAllBtn = document.getElementById('treeExpandAll');
   var collapseAllBtn = document.getElementById('treeCollapseAll');
   var drawerTitleEl = document.getElementById('treeDrawerTitle');
-  var drawerBodyEl = document.getElementById('treeDrawerBody');
+  var drawerRootEl = document.getElementById('treeDrawerBody');
+  var viewportSectionEl = document.getElementById('treeDrawerViewportSection');
+  var detailSectionEl = document.getElementById('treeDrawerDetailSection');
 
   /** Graph keyword ids dimmed via the side panel (same behaviour as bubbles). */
   var treeDisabledNodes = new Set(
@@ -26,6 +28,8 @@
     treeDisabledNodes = new Set(window.ShopThatData.getDisabledKeywords());
     syncTreeDrawerChipClasses();
     updateTreeNodeDisabledVisuals();
+    refreshViewportKeywordChips();
+    updateResetButtonsDisabledState();
   }
   // Currently-focused node in the tree (the one whose details are shown in
   // the side panel). Clicking it again collapses children and closes the panel.
@@ -49,6 +53,10 @@
    * Shape: { [nodeKey]: { isExpanded: boolean, childKeys: string[] } }
    */
   var preSearchState = null;
+
+  /** RAF-throttled refresh of viewport keyword chips (zoom/pan fires often). */
+  var viewportChipsRaf = null;
+  var treeChipDelegationBound = false;
 
   var groupColorMap = {
     0: '#1e3a8a',
@@ -214,6 +222,7 @@
       .scaleExtent([0.2, 3])
       .on('zoom', function (event) {
         treeG.attr('transform', event.transform);
+        scheduleRefreshViewportKeywordChips();
       });
 
     treeSvg.call(zoomBehavior);
@@ -297,6 +306,144 @@
     return displayName === 'Louis Vuitton' ? 'LVMH' : displayName;
   }
 
+  function escapeHtml(s) {
+    return String(s)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  function rectsOverlap(a, b) {
+    return !(a.right <= b.left || a.left >= b.right || a.bottom <= b.top || a.top >= b.bottom);
+  }
+
+  /** Layout nodes whose bounding boxes intersect the tree canvas (respects zoom/pan). */
+  function getViewportVisibleTreeKeywords() {
+    if (!containerEl || !treeG) return [];
+    var rect = containerEl.getBoundingClientRect();
+    var inset = 8;
+    var view = {
+      left: rect.left + inset,
+      right: rect.right - inset,
+      top: rect.top + inset,
+      bottom: rect.bottom - inset
+    };
+    if (view.right <= view.left || view.bottom <= view.top) return [];
+
+    var seen = {};
+    var out = [];
+    treeG.selectAll('g.node').each(function (d) {
+      var r = this.getBoundingClientRect();
+      if (!rectsOverlap(r, view)) return;
+      var gid = graphIdFromTreeDisplayName(d.data.name);
+      if (seen[gid]) return;
+      seen[gid] = true;
+      out.push({ gid: gid, label: d.data.name });
+    });
+    out.sort(function (a, b) {
+      return a.label.localeCompare(b.label, undefined, { sensitivity: 'base' });
+    });
+    return out;
+  }
+
+  function scheduleRefreshViewportKeywordChips() {
+    if (!viewportSectionEl) return;
+    if (viewportChipsRaf) return;
+    viewportChipsRaf = window.requestAnimationFrame(function () {
+      viewportChipsRaf = null;
+      refreshViewportKeywordChips();
+    });
+  }
+
+  function updateResetButtonsDisabledState() {
+    if (!drawerRootEl) return;
+    var empty = treeDisabledNodes.size === 0;
+    drawerRootEl.querySelectorAll('.js-tree-reset-chips').forEach(function (btn) {
+      btn.disabled = empty;
+    });
+  }
+
+  function refreshViewportKeywordChips() {
+    if (!viewportSectionEl) return;
+    if (!initialized || !root || !treeG) {
+      viewportSectionEl.innerHTML =
+        '<p class="sidebar-hint" style="margin:0">Keywords here update from whichever tree labels intersect this panel as you pan and zoom.</p>';
+      return;
+    }
+    var visible = getViewportVisibleTreeKeywords();
+    var n = visible.length;
+    var struck = treeDisabledNodes.size;
+    var resetDisabled = struck === 0;
+
+    var chipsHtml = visible.map(function (item) {
+      var off = treeDisabledNodes.has(item.gid);
+      return (
+        '<span class="sidebar-chip sidebar-chip--toggle' +
+        (off ? ' sidebar-chip--disabled' : '') +
+        '" data-keyword="' +
+        escapeHtml(item.gid) +
+        '">' +
+        escapeHtml(item.label) +
+        '</span>'
+      );
+    }).join('');
+
+    viewportSectionEl.innerHTML =
+      '<div class="sidebar-section">' +
+      '<div class="sidebar-section-header">' +
+      '<div class="sidebar-section-label">Keywords in view</div>' +
+      treeResetChipsSvgBtn(resetDisabled) +
+      '</div>' +
+      '<p class="sidebar-hint">Only keywords whose labels intersect the tree canvas are listed. Click a chip to strike through and grey out that node on the tree without hiding it; click again to restore.</p>' +
+      '<div class="tree-viewport-meta">' +
+      '<strong>' +
+      n +
+      '</strong> in view' +
+      (struck ? ' · <span class="tree-viewport-meta-sub">' + struck + ' struck through</span>' : '') +
+      '</div>' +
+      '<div class="sidebar-chips">' +
+      (chipsHtml || '<span class="sidebar-no-data">Nothing in view — zoom out or pan.</span>') +
+      '</div>' +
+      '</div>';
+
+    updateResetButtonsDisabledState();
+  }
+
+  function bindTreeDrawerChipDelegation() {
+    if (!drawerRootEl || treeChipDelegationBound) return;
+    treeChipDelegationBound = true;
+    drawerRootEl.addEventListener('click', function (e) {
+      var resetBtn = e.target.closest('.js-tree-reset-chips');
+      if (resetBtn) {
+        if (resetBtn.disabled) return;
+        e.preventDefault();
+        treeDisabledNodes.clear();
+        persistTreeDisabledNodes();
+        drawerRootEl.querySelectorAll('.sidebar-chip--toggle').forEach(function (c) {
+          c.classList.remove('sidebar-chip--disabled');
+        });
+        updateTreeNodeDisabledVisuals();
+        updateResetButtonsDisabledState();
+        refreshViewportKeywordChips();
+        return;
+      }
+      var chip = e.target.closest('.sidebar-chip--toggle');
+      if (!chip || !drawerRootEl.contains(chip)) return;
+      var keyword = chip.getAttribute('data-keyword');
+      if (!keyword) return;
+      if (treeDisabledNodes.has(keyword)) {
+        treeDisabledNodes.delete(keyword);
+      } else {
+        treeDisabledNodes.add(keyword);
+      }
+      persistTreeDisabledNodes();
+      syncTreeDrawerChipClasses();
+      updateTreeNodeDisabledVisuals();
+      updateResetButtonsDisabledState();
+    });
+  }
+
   function updateTreeNodeDisabledVisuals() {
     if (!treeG) return;
     treeG.selectAll('g.node').each(function (d) {
@@ -313,58 +460,24 @@
         .interrupt('treeDisabledT')
         .transition('treeDisabledT')
         .duration(200)
-        .attr('opacity', isDisabled ? 0.4 : 1);
+        .attr('opacity', isDisabled ? 0.4 : 1)
+        .style('text-decoration', isDisabled ? 'line-through' : 'none')
+        .style('text-decoration-thickness', isDisabled ? '1.5px' : null);
     });
   }
 
   function syncTreeDrawerChipClasses() {
-    if (!drawerBodyEl) return;
-    drawerBodyEl.querySelectorAll('.sidebar-chip--toggle').forEach(function (chip) {
+    if (!drawerRootEl) return;
+    drawerRootEl.querySelectorAll('.sidebar-chip--toggle').forEach(function (chip) {
       var kw = chip.getAttribute('data-keyword');
       if (!kw) return;
       chip.classList.toggle('sidebar-chip--disabled', treeDisabledNodes.has(kw));
     });
   }
 
-  function attachTreeChipClickHandlers() {
-    if (!drawerBodyEl) return;
-    var chips = drawerBodyEl.querySelectorAll('.sidebar-chip--toggle');
-    var resetBtn = drawerBodyEl.querySelector('#treeResetChipsBtn');
-
-    function updateResetBtnState() {
-      if (resetBtn) resetBtn.disabled = treeDisabledNodes.size === 0;
-    }
-
-    chips.forEach(function (chip) {
-      chip.addEventListener('click', function () {
-        var keyword = chip.getAttribute('data-keyword');
-        if (!keyword) return;
-        if (treeDisabledNodes.has(keyword)) {
-          treeDisabledNodes.delete(keyword);
-        } else {
-          treeDisabledNodes.add(keyword);
-        }
-        persistTreeDisabledNodes();
-        syncTreeDrawerChipClasses();
-        updateTreeNodeDisabledVisuals();
-        updateResetBtnState();
-      });
-    });
-
-    if (resetBtn) {
-      resetBtn.addEventListener('click', function () {
-        treeDisabledNodes.clear();
-        persistTreeDisabledNodes();
-        chips.forEach(function (c) { c.classList.remove('sidebar-chip--disabled'); });
-        updateTreeNodeDisabledVisuals();
-        resetBtn.disabled = true;
-      });
-    }
-  }
-
   function treeResetChipsSvgBtn(disabled) {
     return (
-      '<button type="button" class="sidebar-reset-btn" id="treeResetChipsBtn" title="Reset all"' +
+      '<button type="button" class="sidebar-reset-btn js-tree-reset-chips" title="Reset all struck-through keywords"' +
       (disabled ? ' disabled' : '') + '>' +
       '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">' +
       '<path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>' +
@@ -379,7 +492,7 @@
       var off = treeDisabledNodes.has(gid);
       return (
         '<span class="sidebar-chip sidebar-chip--toggle' + (off ? ' sidebar-chip--disabled' : '') + '" data-keyword="' +
-        gid + '">' + name + '</span>'
+        escapeHtml(gid) + '">' + escapeHtml(name) + '</span>'
       );
     }).join('');
   }
@@ -519,6 +632,7 @@
     });
 
     updateTreeNodeDisabledVisuals();
+    scheduleRefreshViewportKeywordChips();
 
     // Auto-fit zoom after transition (search uses treeSearchFocusIds for a tight frame)
     setTimeout(function () { fitToView(treeNodes, treeSearchFocusIds); }, duration + 50);
@@ -612,13 +726,13 @@
 
   function resetTreeDetails() {
     if (drawerTitleEl) drawerTitleEl.textContent = 'Select a Keyword';
-    if (drawerBodyEl) {
-      drawerBodyEl.innerHTML = '<p class="sidebar__placeholder">Click on a node in the tree to see its details.</p>';
+    if (detailSectionEl) {
+      detailSectionEl.innerHTML = '<p class="sidebar__placeholder">Click on a node in the tree to see its details.</p>';
     }
   }
 
   function showNodeDetails(d) {
-    if (!drawerTitleEl || !drawerBodyEl) return;
+    if (!drawerTitleEl || !detailSectionEl) return;
 
     var name = d.data.name;
     var realId = (name === 'Louis Vuitton') ? 'LVMH' : name;
@@ -655,7 +769,7 @@
       html += '<div class="sidebar-section-label">Related Keywords</div>';
       html += treeResetChipsSvgBtn(treeDisabledNodes.size === 0);
       html += '</div>';
-      html += '<p class="sidebar-hint">Click a keyword to toggle visibility</p>';
+      html += '<p class="sidebar-hint">Strike through / grey out on the tree without hiding branches (same as chips above).</p>';
       if (childNames.length > 0) {
         html += '<div class="sidebar-section-label">Nested Keywords (' + childNames.length + ')</div>';
         html += '<div class="sidebar-chips">' + treeKeywordChipsHtml(childNames) + '</div>';
@@ -673,8 +787,8 @@
     html += '</div>';
 
     html += '</div>';
-    drawerBodyEl.innerHTML = html;
-    attachTreeChipClickHandlers();
+    detailSectionEl.innerHTML = html;
+    updateResetButtonsDisabledState();
   }
 
   // ─── Search snapshot helpers ───────────────────────────────────────────────
@@ -762,6 +876,7 @@
       clearSearchHighlights();
       update(root);
       updateTreeNodeDisabledVisuals();
+      scheduleRefreshViewportKeywordChips();
       return;
     }
 
@@ -825,6 +940,7 @@
       });
     }
     updateTreeNodeDisabledVisuals();
+    scheduleRefreshViewportKeywordChips();
   }
 
   // Event listeners
@@ -853,6 +969,7 @@
       if (treeSvg && rect.width > 0) {
         treeSvg.attr('width', rect.width).attr('height', rect.height);
       }
+      scheduleRefreshViewportKeywordChips();
     }
   };
 
@@ -866,4 +983,7 @@
   });
 
   window.addEventListener('shopthat-disabled-keywords-changed', syncTreeDisabledNodesFromShared);
+
+  bindTreeDrawerChipDelegation();
+  refreshViewportKeywordChips();
 })();

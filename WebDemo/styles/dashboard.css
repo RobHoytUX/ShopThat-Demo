@@ -736,6 +736,22 @@
   letter-spacing: 0.5px;
 }
 
+.tree-drawer-viewport-panel {
+  padding-bottom: 12px;
+  margin-bottom: 12px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.tree-viewport-meta {
+  font-size: 12px;
+  color: #6b7280;
+  margin-bottom: 8px;
+}
+
+.tree-viewport-meta-sub {
+  color: #9ca3af;
+}
+
 .sidebar-section {
   display: flex;
   flex-direction: column;
