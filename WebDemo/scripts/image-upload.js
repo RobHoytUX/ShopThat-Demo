@@ -123,6 +123,15 @@
     { name: 'Festival of Life – Zwirner', src: 'assets/kusama/festival-of-life-zwirner.png' }
   ];
 
+  (function appendImageDiscoveryArchive() {
+    for (var di = 1; di <= 37; di++) {
+      PERMANENT_IMAGES.push({
+        name: 'Image Discovery — screenshot ' + di,
+        src: 'assets/image-discovery/discovery-' + ('000' + di).slice(-3) + '.png'
+      });
+    }
+  })();
+
   var PERMANENT_ID_START = -1000;
 
   function buildPermanentGalleryItems() {
