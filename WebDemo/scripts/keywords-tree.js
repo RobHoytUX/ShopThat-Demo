@@ -99,6 +99,39 @@
     return lookup;
   }
 
+  function normalizeKeywordLabel(s) {
+    return String(s || '')
+      .toLowerCase()
+      .trim()
+      .replace(/\s+/g, ' ');
+  }
+
+  function stripLeadingArticle(s) {
+    return String(s || '').replace(/^(the|a|an)\s+/i, '').trim();
+  }
+
+  /**
+   * True when childLabel is redundant text already covered by parentLabel
+   * (e.g. MoMA ⊂ MoMA Museum, Frick Collection ⊂ The Frick Collection).
+   * Uses case-insensitive comparison, optional leading articles, and substring
+   * checks. Very short tokens (< 4 chars) are kept to avoid pruning acronyms
+   * like NY inside unrelated parents.
+   */
+  function isRedundantNestedKeyword(parentLabel, childLabel) {
+    var parentNorm = normalizeKeywordLabel(parentLabel);
+    var childNorm = normalizeKeywordLabel(childLabel);
+    if (!parentNorm || !childNorm) return false;
+    if (childNorm === parentNorm) return true;
+    if (childNorm.length < 4) return false;
+    if (parentNorm.indexOf(childNorm) !== -1) return true;
+    var pStrip = stripLeadingArticle(parentNorm);
+    var cStrip = stripLeadingArticle(childNorm);
+    if (cStrip.length >= 4 && pStrip.indexOf(cStrip) !== -1) return true;
+    if (cStrip.length >= 4 && parentNorm.indexOf(cStrip) !== -1) return true;
+    if (childNorm.length >= 4 && pStrip.indexOf(childNorm) !== -1) return true;
+    return false;
+  }
+
   function buildHierarchy() {
     var nodes = window.kwGetNodes ? window.kwGetNodes() : [];
     var links = window.kwGetLinks ? window.kwGetLinks() : [];
@@ -164,10 +197,14 @@
 
     function build(node) {
       var rawKids = (childrenMap[node.id] || []).slice();
+      var parentDisplayForNest = (node.id === rootNode.id) ? 'Louis Vuitton' : node.id;
+      rawKids = rawKids.filter(function (childNode) {
+        return !isRedundantNestedKeyword(parentDisplayForNest, childNode.id);
+      });
       rawKids.sort(function (a, b) {
         return ((b.value || 0) - (a.value || 0));
       });
-      var displayName = (node.id === rootNode.id) ? 'Louis Vuitton' : node.id;
+      var displayName = parentDisplayForNest;
       var built = {
         name: displayName,
         group: node.group != null ? node.group : 4,
@@ -182,7 +219,9 @@
         // own name is usually the first keyword in the array).
         var ownName = (node.id || '').toLowerCase();
         var keywords = locationKeywordsByName[node.id].filter(function (kw) {
-          return kw && kw.toLowerCase() !== ownName;
+          if (!kw) return false;
+          if (kw.toLowerCase() === ownName) return false;
+          return !isRedundantNestedKeyword(node.id, kw);
         });
         if (keywords.length) {
           built.children = keywords.map(function (kw) {
