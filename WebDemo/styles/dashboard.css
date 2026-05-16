@@ -4884,6 +4884,18 @@ svg#bubbleGraph { width: 100%; flex: 1; display: block; padding-top: 60px; min-h
   grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
   gap: 12px;
 }
+
+.upload-gallery-discovery {
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e5e7eb;
+}
+.upload-gallery-section__title {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0 0 1rem;
+  color: #111827;
+}
 .upload-gallery__card {
   position: relative;
   border-radius: 10px;
@@ -5223,6 +5235,8 @@ svg#bubbleGraph { width: 100%; flex: 1; display: block; padding-top: 60px; min-h
 .dark-mode .upload-preview__item { border-color: #374151; }
 .dark-mode .upload-gallery__card { border-color: #374151; background: #1f2937; }
 .dark-mode .upload-gallery__card .gallery-name { color: #9ca3af; }
+.dark-mode .upload-gallery-discovery { border-top-color: #374151; }
+.dark-mode .upload-gallery-section__title { color: #f3f4f6; }
 
 /* Image Licensing — Discovery patient sidebar + timeline */
 .discovery-shell {

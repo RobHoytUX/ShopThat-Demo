@@ -27,6 +27,8 @@
   // ─── Gallery elements ───
   var gallerySection = document.getElementById('uploadedGallery');
   var galleryGrid = document.getElementById('galleryGrid');
+  var discoveryGallerySection = document.getElementById('discoveryGallerySection');
+  var discoveryGalleryGrid = document.getElementById('discoveryGalleryGrid');
   var uploadedCountEl = document.getElementById('uploadedCount');
   var clearGalleryBtn = document.getElementById('clearGalleryBtn');
   var totalImagesEl = document.getElementById('dbTotalImages');
@@ -127,7 +129,8 @@
     for (var di = 1; di <= 37; di++) {
       PERMANENT_IMAGES.push({
         name: 'Image Discovery — screenshot ' + di,
-        src: 'assets/image-discovery/discovery-' + ('000' + di).slice(-3) + '.png'
+        src: 'assets/image-discovery/discovery-' + ('000' + di).slice(-3) + '.png',
+        isDiscovery: true
       });
     }
   })();
@@ -136,7 +139,14 @@
 
   function buildPermanentGalleryItems() {
     return PERMANENT_IMAGES.map(function (img, i) {
-      return { id: PERMANENT_ID_START - i, name: img.name, dataUrl: img.src, folder: null, isPermanent: true };
+      return {
+        id: PERMANENT_ID_START - i,
+        name: img.name,
+        dataUrl: img.src,
+        folder: null,
+        isPermanent: true,
+        isDiscovery: !!img.isDiscovery
+      };
     });
   }
 
@@ -414,14 +424,29 @@
     return galleryImages.filter(function (img) { return img.folder === currentFolder; });
   }
 
+  /** Same assets as visible at current folder, ordered like the UI: main grid then Image Discovery. */
+  function getVisibleImagesLightboxOrder() {
+    var visible = getVisibleImages();
+    if (currentFolder !== null) return visible;
+    var main = [];
+    var discovery = [];
+    visible.forEach(function (img) {
+      if (img.isDiscovery) discovery.push(img);
+      else main.push(img);
+    });
+    return main.concat(discovery);
+  }
+
   function renderGallery() {
     galleryGrid.innerHTML = '';
+    if (discoveryGalleryGrid) discoveryGalleryGrid.innerHTML = '';
     selectedIds.clear();
     updateBulkBar();
     updateMetrics();
 
     if (galleryImages.length === 0) {
       gallerySection.style.display = 'none';
+      if (discoveryGallerySection) discoveryGallerySection.style.display = 'none';
       return;
     }
 
@@ -430,6 +455,8 @@
     renderBreadcrumb();
 
     var visibleImages = getVisibleImages();
+    var mainImages = visibleImages.filter(function (img) { return !img.isDiscovery; });
+    var discoveryImages = visibleImages.filter(function (img) { return img.isDiscovery; });
 
     if (currentFolder === null) {
       uploadedCountEl.textContent = '(' + galleryImages.length + ' images, ' + folders.length + ' folder' + (folders.length !== 1 ? 's' : '') + ')';
@@ -439,11 +466,23 @@
       });
     } else {
       uploadedCountEl.textContent = '(' + visibleImages.length + ' image' + (visibleImages.length !== 1 ? 's' : '') + ')';
+      if (discoveryGallerySection) discoveryGallerySection.style.display = 'none';
     }
 
-    visibleImages.forEach(function (item) {
+    mainImages.forEach(function (item) {
       galleryGrid.appendChild(createImageCard(item));
     });
+
+    if (discoveryGallerySection && discoveryGalleryGrid) {
+      if (currentFolder === null && discoveryImages.length > 0) {
+        discoveryGallerySection.style.display = 'block';
+        discoveryImages.forEach(function (item) {
+          discoveryGalleryGrid.appendChild(createImageCard(item));
+        });
+      } else {
+        discoveryGallerySection.style.display = 'none';
+      }
+    }
 
     selectAllCheckbox.checked = false;
   }
@@ -571,9 +610,12 @@
   }
 
   function refreshSelectionUI() {
-    galleryGrid.querySelectorAll('.upload-gallery__card').forEach(function (card) {
-      var id = parseInt(card.dataset.imageId, 10);
-      card.classList.toggle('is-selected', selectedIds.has(id));
+    [galleryGrid, discoveryGalleryGrid].forEach(function (grid) {
+      if (!grid) return;
+      grid.querySelectorAll('.upload-gallery__card').forEach(function (card) {
+        var id = parseInt(card.dataset.imageId, 10);
+        card.classList.toggle('is-selected', selectedIds.has(id));
+      });
     });
     updateBulkBar();
     updateSelectAllCheckbox();
@@ -675,7 +717,7 @@
   // ─── Lightbox ───
 
   function openLightbox(item) {
-    lightboxList = getVisibleImages();
+    lightboxList = getVisibleImagesLightboxOrder();
     lightboxIndex = lightboxList.findIndex(function (img) { return img.id === item.id; });
     if (lightboxIndex < 0) lightboxIndex = 0;
     showLightboxImage();
