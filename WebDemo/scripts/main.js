@@ -898,10 +898,31 @@
     
     const chatbotLocationData = window.ShopThatMainMapData || {
       restaurants: [],
+      hotels: [],
       museums: [],
       galleries: [],
       others: []
     };
+
+    const CHATBOT_CATEGORY_MARKER_COLORS = {
+      restaurants: '#10b981',
+      hotels: '#14b8a6',
+      museums: '#8b5cf6',
+      galleries: '#f59e0b',
+      others: '#3b82f6'
+    };
+
+    function makeChatbotExplorerMarkerIcon(hexColor) {
+      return L.divIcon({
+        className: 'chatbot-explorer-category-marker',
+        html:
+          '<div style="width: 12px; height: 12px; background: ' +
+          hexColor +
+          '; border-radius: 50%; border: 2px solid white; box-shadow: 0 1px 3px rgba(0,0,0,0.4);"></div>',
+        iconSize: [12, 12],
+        iconAnchor: [6, 6]
+      });
+    }
 
     /** LV boutiques shown on the chatbot map (shared for markers + gallery preload). */
     const CHATBOT_LV_STORE_LOCATIONS = [
@@ -986,7 +1007,7 @@
       const deferDeepTier = opts.deferDeepTier !== false;
 
       const locs = [];
-      ['restaurants', 'museums', 'galleries', 'others'].forEach((k) => {
+      ['restaurants', 'hotels', 'museums', 'galleries', 'others'].forEach((k) => {
         (chatbotLocationData[k] || []).forEach((l) => locs.push(l));
       });
       CHATBOT_LV_STORE_LOCATIONS.forEach((s) => locs.push(s));
@@ -1251,6 +1272,13 @@
               iconSize: [12, 12],
               iconAnchor: [6, 6]
             });
+
+            const hotelIcon = L.divIcon({
+              className: 'custom-hotel-marker',
+              html: '<div style="width: 12px; height: 12px; background: #14b8a6; border-radius: 50%; border: 2px solid white; box-shadow: 0 1px 3px rgba(0,0,0,0.4);"></div>',
+              iconSize: [12, 12],
+              iconAnchor: [6, 6]
+            });
             
             const museumIcon = L.divIcon({
               className: 'custom-museum-marker',
@@ -1291,6 +1319,7 @@
             }
 
             chatbotLocationData.restaurants.forEach((l) => addLocationMarker(l, restaurantIcon));
+            (chatbotLocationData.hotels || []).forEach((l) => addLocationMarker(l, hotelIcon));
             chatbotLocationData.museums.forEach((l) => addLocationMarker(l, museumIcon));
             chatbotLocationData.galleries.forEach((l) => addLocationMarker(l, galleryIcon));
             chatbotLocationData.others.forEach((l) => addLocationMarker(l, otherIcon));
@@ -1550,10 +1579,12 @@
     
     const explorerTabs = createEl('div', { class: 'chatbot-explorer-tabs' });
     const tabRestaurants = createEl('button', { class: 'chatbot-explorer-tab is-active', 'data-category': 'restaurants', text: 'Restaurants' });
+    const tabHotels = createEl('button', { class: 'chatbot-explorer-tab', 'data-category': 'hotels', text: 'Hotels' });
     const tabMuseums = createEl('button', { class: 'chatbot-explorer-tab', 'data-category': 'museums', text: 'Museums' });
     const tabGalleries = createEl('button', { class: 'chatbot-explorer-tab', 'data-category': 'galleries', text: 'Galleries' });
     const tabOthers = createEl('button', { class: 'chatbot-explorer-tab', 'data-category': 'others', text: 'Others Nearby' });
     explorerTabs.appendChild(tabRestaurants);
+    explorerTabs.appendChild(tabHotels);
     explorerTabs.appendChild(tabMuseums);
     explorerTabs.appendChild(tabGalleries);
     explorerTabs.appendChild(tabOthers);
@@ -3321,13 +3352,17 @@
       const locations = chatbotLocationData[category] || [];
       
       if (!leafletMap) return;
+
+      const categoryIcon = makeChatbotExplorerMarkerIcon(
+        CHATBOT_CATEGORY_MARKER_COLORS[category] || CHATBOT_CATEGORY_MARKER_COLORS.others
+      );
       
       locations.forEach(location => {
         // Add standard marker to map (different from LV product markers)
         const popupContent = location.address 
           ? `<b>${location.name}</b><br><small>${location.address}</small>`
           : `<b>${location.name}</b>`;
-        const marker = L.marker([location.lat, location.lng])
+        const marker = L.marker([location.lat, location.lng], { icon: categoryIcon })
           .bindPopup(popupContent)
           .addTo(leafletMap);
         marker.on('click', () => {

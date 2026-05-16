@@ -11,13 +11,15 @@ const locationData = {
     { lat: 40.7741, lng: -73.9626, name: 'Cafe Carlyle', address: '35 E 76th St (The Carlyle)', image: 'assets/restaurants/cafe-carlyle.jpg', keywords: ['Cafe Carlyle', 'classic cabaret', 'concerts', 'iconic', 'cocktails', 'dress code', 'celebrities', 'evenings', '57th Street', 'New York'] },
     { lat: 40.7670, lng: -73.9800, name: 'Marea', address: '240 Central Park South', image: 'assets/restaurants/marea.jpg', keywords: ['Marea', 'High-end Italian seafood', 'housemade pastas', 'Central Park South', 'New York', '57th Street'] },
     { lat: 40.7754, lng: -73.9625, name: 'The Mark Restaurant by Jean-Georges', address: '25 E 77th St', image: 'assets/restaurants/the-mark-restaurant.jpg', keywords: ['Jean-Georges Vongerichten', 'Restaurant', 'Fresh from the market', 'The Mark Hotel', 'world class', 'innovative seasonings', 'hand crafted bar', 'comfortable dining room', '57th Street', 'New York'] },
-    { lat: 40.7643, lng: -73.9683, name: 'Le Bilboquet', address: '20 E 60th St', image: 'assets/restaurants/le-bilboquet.jpg', keywords: ['Le Bilboquet', 'Upper East Side', 'French-inspired', 'global bistro', 'people watching', 'iconic', 'lunch', 'brunch', 'dinner', '57th Street', 'New York'] },
-    // Luxury Hotels with Dining
+    { lat: 40.7643, lng: -73.9683, name: 'Le Bilboquet', address: '20 E 60th St', image: 'assets/restaurants/le-bilboquet.jpg', keywords: ['Le Bilboquet', 'Upper East Side', 'French-inspired', 'global bistro', 'people watching', 'iconic', 'lunch', 'brunch', 'dinner', '57th Street', 'New York'] }
+  ],
+  hotels: [
     { lat: 40.7741, lng: -73.9626, name: 'The Carlyle Hotel', address: '35 E 76th St', image: 'assets/restaurants/carlyle-hotel.jpg', keywords: ['The Carlyle', 'most famous hotel', 'Upper East Side', 'old-world Manhattan sophistication', 'JFK\'s New York White House', 'Hotel', 'iconic', 'cabaret', '57th Street', 'New York'] },
     { lat: 40.7754, lng: -73.9625, name: 'The Mark Hotel', address: '25 E 77th St', image: 'assets/restaurants/mark-hotel.jpg', keywords: ['The Mark Hotel', 'Luxury', 'Hotel', 'Central Park', 'Metropolitan Museum of Art', 'Polished', 'art deco-inspired', 'fitness center', 'salon', 'swanky bar', 'restaurant', '57th Street', 'New York'] },
     { lat: 40.7644, lng: -73.9747, name: 'The Plaza', address: '768 5th Ave', image: 'assets/restaurants/the-plaza.jpg', keywords: ['The Plaza', 'Luxury', 'Hotel', 'Landmark 19th-century building', 'Central Park', 'Afternoon tea', 'spa', 'gym', '57th Street', 'New York'] },
     { lat: 40.7611, lng: -73.9738, name: 'The St. Regis', address: '2 E 55th St', image: 'assets/restaurants/st-regis.jpg', keywords: ['The St Regis', 'luxury', 'hotel', 'Midtown Manhattan', 'MoMA', 'Central Park', 'gym', 'steam room', 'iconic bar', '57th Street', 'New York'] },
-    { lat: 40.7617, lng: -73.9789, name: 'The Baccarat Hotel', address: '28 W 53rd St', image: 'assets/restaurants/baccarat.jpg', keywords: ['The Baccarat', 'luxury', 'hotel', 'Museum of Modern Art', 'Central Park', 'Empire State Building', 'French cuisine', 'elegant bar', 'Afternoon tea', 'spa', 'gym', 'indoor pool'] }
+    { lat: 40.7617, lng: -73.9789, name: 'The Baccarat Hotel', address: '28 W 53rd St', image: 'assets/restaurants/baccarat.jpg', keywords: ['The Baccarat', 'luxury', 'hotel', 'Museum of Modern Art', 'Central Park', 'Empire State Building', 'French cuisine', 'elegant bar', 'Afternoon tea', 'spa', 'gym', 'indoor pool'] },
+    { lat: 40.7241, lng: -74.0003, name: 'The Mercer Hotel', address: '147 Mercer St', image: 'assets/soho/hotels/the-mercer.png', keywords: ['The Mercer', 'SoHo', 'luxury hotel', 'Sartiano'] }
   ],
   museums: [
     { lat: 40.7794, lng: -73.9632, name: 'The Metropolitan Museum', address: '1000 5th Ave', image: 'assets/museums/met-museum.jpg', keywords: ['The Met', 'Metropolitan Museum of Art', 'Museum', 'art', 'ancient art', 'European paintings', 'American art', 'Egyptian art', 'Central Park', 'Fifth Avenue', '57th Street', 'New York'] },
@@ -42,12 +44,10 @@ const locationData = {
     { lat: 40.7577, lng: -73.9788, name: 'Saks Fifth Avenue', address: '611 5th Ave', image: 'assets/kusama2.png' },
     { lat: 40.7625, lng: -73.9735, name: 'Tiffany & Co.', address: 'Fifth Avenue & 57th St', image: 'assets/kusama4.webp' },
     { lat: 40.7590, lng: -73.9775, name: 'Cartier', address: '653 5th Ave', image: 'assets/kusama3.png' },
-    // Hotels & Landmarks
-    { lat: 40.7644, lng: -73.9747, name: 'The Plaza Hotel', address: '768 5th Ave', image: 'assets/kusama1.png' },
+    // Landmarks
     { lat: 40.7587, lng: -73.9787, name: 'Rockefeller Center', address: '45 Rockefeller Plaza', image: 'assets/kusama2.png' },
     // Near SoHo
-    { lat: 40.7244, lng: -73.9976, name: 'Aesop', address: '113 Greene St', image: 'assets/kusama3.png' },
-    { lat: 40.7241, lng: -74.0003, name: 'The Mercer Hotel', address: '147 Mercer St', image: 'assets/kusama4.webp' }
+    { lat: 40.7244, lng: -73.9976, name: 'Aesop', address: '113 Greene St', image: 'assets/kusama3.png' }
   ]
 };
 

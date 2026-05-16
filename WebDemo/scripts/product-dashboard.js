@@ -100,7 +100,12 @@
     'Drawing Center': 'The Drawing Center',
     'David Zwirner': 'David Zwirner Chelsea',
     'Gagosian Gallery': 'Gagosian Chelsea',
-    'Hauser & Wirth': 'Hauser & Wirth Chelsea'
+    'Hauser & Wirth': 'Hauser & Wirth Chelsea',
+    'The Mark Hotel': 'The Mark Hotel',
+    'The Plaza': 'The Plaza',
+    'The St. Regis': 'The St. Regis',
+    'The Baccarat Hotel': 'The Baccarat',
+    'The Mercer Hotel': 'THE MERCER'
   };
 
   function resolveExplorerLocationImage(location) {
@@ -251,12 +256,13 @@
   let locationMarkers = []; // Store location markers for cleanup
   
   const dashboardMapData = window.ShopThatDashboardMapData || {};
-  const locationData = dashboardMapData.locationData || { restaurants: [], museums: [], galleries: [], others: [], stores: [] };
+  const locationData = dashboardMapData.locationData || { restaurants: [], hotels: [], museums: [], galleries: [], others: [], stores: [] };
   const storeLocations = dashboardMapData.storeLocations || [
     { lat: 40.7632, lng: -73.9732, name: 'Louis Vuitton 57th Street', address: '6 E 57th St, New York, NY 10022' },
     { lat: 40.7245, lng: -73.9975, name: 'Louis Vuitton SoHo', address: '116 Greene St, New York, NY 10012' }
   ];
   locationData.stores = Array.isArray(locationData.stores) ? locationData.stores : storeLocations;
+  if (!Array.isArray(locationData.hotels)) locationData.hotels = [];
   const MIN_MAP_PRODUCTS = 3;
   const defaultMapProducts = [
     { id: 'default-map-capucines-bb', title: 'LV X YK CAPUCINES BB', model: 'M46401', price: '$6,400.00', image: 'assets/Products/0047_LV X YK Capucines BB.jpg' },
@@ -2700,6 +2706,13 @@
           iconSize: [12, 12],
           iconAnchor: [6, 6]
         });
+
+        const hotelIcon = L.divIcon({
+          className: 'custom-hotel-marker',
+          html: '<div style="width: 12px; height: 12px; background: #14b8a6; border-radius: 50%; border: 2px solid white; box-shadow: 0 1px 3px rgba(0,0,0,0.4);"></div>',
+          iconSize: [12, 12],
+          iconAnchor: [6, 6]
+        });
         
         function addDashboardMarker(location, icon) {
           const popupContent = location.address
@@ -2717,6 +2730,7 @@
         locationData.stores.forEach((l) => addDashboardMarker(l, storeIcon));
         locationData.museums.forEach((l) => addDashboardMarker(l, museumIcon));
         locationData.restaurants.forEach((l) => addDashboardMarker(l, restaurantIcon));
+        (locationData.hotels || []).forEach((l) => addDashboardMarker(l, hotelIcon));
       };
       
       addNearbyLocations();
