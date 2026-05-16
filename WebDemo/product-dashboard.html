@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css" />
-  <link rel="stylesheet" href="styles/product-dashboard.css?v=20">
+  <link rel="stylesheet" href="styles/product-dashboard.css?v=21">
 </head>
 <body>
   <!-- Header -->
@@ -213,6 +213,7 @@
         <div class="map-keywords-container" id="mapKeywordsContainer"></div>
         <div class="dashboard-map-container">
           <div class="dashboard-map-wrapper">
+            <div class="dashboard-map-stack">
             <div id="dashboardMap" class="dashboard-map"></div>
             
             <!-- Map Legend -->
@@ -262,6 +263,20 @@
             <!-- Location images will be populated here -->
           </div>
         </div>
+            </div>
+
+            <div id="mapAreaLocationGallery" class="dashboard-map-location-gallery" hidden>
+              <div class="dashboard-map-location-gallery-head">
+                <div>
+                  <h4 class="dashboard-map-location-gallery-title">Locations near this boutique</h4>
+                  <p class="dashboard-map-location-gallery-sub" id="mapAreaLocationGallerySub"></p>
+                </div>
+                <button type="button" class="dashboard-map-location-gallery-explore btn btn--secondary btn--sm" id="mapAreaLocationGalleryExplore">
+                  Browse categories
+                </button>
+              </div>
+              <div class="dashboard-map-location-gallery-track" id="mapAreaLocationGalleryTrack"></div>
+            </div>
           </div>
           
           <div class="dashboard-map-products" id="mapProducts">
@@ -344,10 +359,10 @@
 
   <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/marked@11.1.1/marked.min.js"></script>
-  <script src="scripts/luxury-intelligence.js?v=7"></script>
+  <script src="scripts/luxury-intelligence.js?v=8"></script>
   <script src="scripts/shared-data.js?v=2"></script>
   <script src="scripts/dashboard-storage.js"></script>
   <script src="scripts/dashboard-map-data.js"></script>
-  <script src="scripts/product-dashboard.js?v=44"></script>
+  <script src="scripts/product-dashboard.js?v=45"></script>
 </body>
 </html>

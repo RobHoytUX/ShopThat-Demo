@@ -91,6 +91,52 @@
     return true;
   }
 
+  function hideDashboardAreaLocationGallery() {
+    const wrap = document.getElementById('mapAreaLocationGallery');
+    const track = document.getElementById('mapAreaLocationGalleryTrack');
+    if (track) track.replaceChildren();
+    if (wrap) wrap.setAttribute('hidden', '');
+  }
+
+  function renderDashboardAreaLocationGallery(storeLabel, area) {
+    const wrap = document.getElementById('mapAreaLocationGallery');
+    const track = document.getElementById('mapAreaLocationGalleryTrack');
+    const sub = document.getElementById('mapAreaLocationGallerySub');
+    const catalog = window.LuxuryIntelligence;
+    if (!wrap || !track || !catalog || typeof catalog.getVenuesWithImagesForArea !== 'function') return;
+
+    const venues = catalog.getVenuesWithImagesForArea(area);
+    track.replaceChildren();
+
+    if (!venues.length) {
+      wrap.setAttribute('hidden', '');
+      return;
+    }
+
+    wrap.removeAttribute('hidden');
+    if (sub) {
+      sub.textContent = `${storeLabel} · ${venues.length} nearby spots with photos`;
+    }
+
+    venues.forEach((v) => {
+      const card = createEl('div', { class: 'dashboard-map-location-card' });
+      const img = createEl('img', {
+        class: 'dashboard-map-location-card-img',
+        src: v.url,
+        alt: v.name,
+        loading: 'lazy'
+      });
+      img.addEventListener('error', () => { card.style.display = 'none'; });
+      const cap = createEl('div', { class: 'dashboard-map-location-card-label', text: v.name });
+      card.appendChild(img);
+      card.appendChild(cap);
+      card.addEventListener('click', () => {
+        focusVenueOnDashboardMap(v.name);
+      });
+      track.appendChild(card);
+    });
+  }
+
   function linkifyVenueMentionsInDashboard(root, venueNames) {
     if (!root || !Array.isArray(venueNames) || !venueNames.length) return;
     const catalog = window.LuxuryIntelligence;
@@ -2703,6 +2749,7 @@
 
     // Render products with locations
     productsEl.replaceChildren();
+    hideDashboardAreaLocationGallery();
     const productsJson = localStorage.getItem('droppedProducts');
     console.log('Map view - Raw products from localStorage:', productsJson);
     const storedProducts = readStoredArray('droppedProducts');
@@ -2792,14 +2839,24 @@
         card.addEventListener('click', (e) => {
           // Don't zoom or open explorer if clicking the link
           if (e.target.tagName === 'A' || e.target.closest('a')) return;
-          
+
+          productsEl.querySelectorAll('.dashboard-map-product').forEach((el) => el.classList.remove('is-selected'));
+          card.classList.add('is-selected');
+
           // Zoom to product's assigned store location
           if (leafletMap && product.location) {
             leafletMap.setView([product.location.lat, product.location.lng], 15);
           }
-          
-          // Open location explorer
-          openLocationExplorer();
+
+          const catalog = window.LuxuryIntelligence;
+          const area = catalog && typeof catalog.getAreaForLvStoreCoordinates === 'function'
+            ? catalog.getAreaForLvStoreCoordinates(product.location.lat, product.location.lng)
+            : '57th St.';
+          const storeIdx = storeLocations.findIndex(
+            (s) => Math.abs(s.lat - product.location.lat) < 0.004 && Math.abs(s.lng - product.location.lng) < 0.004
+          );
+          const storeLabel = storeIdx >= 0 ? storeLocations[storeIdx].name : 'Louis Vuitton';
+          renderDashboardAreaLocationGallery(storeLabel, area);
         });
         
         productsEl.appendChild(card);
@@ -3383,7 +3440,12 @@
   if (closeExplorerBtn) {
     closeExplorerBtn.addEventListener('click', closeLocationExplorer);
   }
-  
+
+  const mapAreaExploreBtn = document.getElementById('mapAreaLocationGalleryExplore');
+  if (mapAreaExploreBtn) {
+    mapAreaExploreBtn.addEventListener('click', () => openLocationExplorer());
+  }
+
   const locationTabs = document.querySelectorAll('.location-tab');
   locationTabs.forEach(tab => {
     tab.addEventListener('click', () => {

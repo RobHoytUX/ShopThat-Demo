@@ -282,6 +282,62 @@
   }
 
   /**
+   * Pick whether coordinates are anchored to the Midtown or SoHo LV boutique
+   * (used to show the correct neighborhood photo strip).
+   */
+  function getAreaForLvStoreCoordinates(lat, lng) {
+    var a = Number(lat);
+    var b = Number(lng);
+    if (!isFinite(a) || !isFinite(b)) return '57th St.';
+    var boutiques = [
+      { area: '57th St.', lat: 40.7632, lng: -73.9732 },
+      { area: 'SoHo', lat: 40.7245, lng: -73.9975 }
+    ];
+    var best = boutiques[0];
+    var bestSq = Infinity;
+    boutiques.forEach(function (s) {
+      var dx = a - s.lat;
+      var dy = b - s.lng;
+      var sq = dx * dx + dy * dy;
+      if (sq < bestSq) {
+        bestSq = sq;
+        best = s;
+      }
+    });
+    return best.area;
+  }
+
+  /**
+   * Curated venues in VENUE_IMAGES for one NY neighborhood, with local asset URLs.
+   * Dedupes by image URL so aliases (e.g. Baccarat / Baccarat Hotel) appear once.
+   */
+  function getVenuesWithImagesForArea(area) {
+    if (!area) return [];
+    var byUrl = {};
+    var out = [];
+    Object.keys(VENUE_IMAGES).forEach(function (name) {
+      var e = VENUE_IMAGES[name];
+      if (!e || !e.url || e.area !== area) return;
+      if (byUrl[e.url]) return;
+      byUrl[e.url] = true;
+      out.push({
+        name: name,
+        url: e.url,
+        lat: e.lat,
+        lng: e.lng,
+        address: e.address || '',
+        category: e.category || ''
+      });
+    });
+    out.sort(function (x, y) {
+      var c = String(x.category).localeCompare(String(y.category));
+      if (c !== 0) return c;
+      return String(x.name).localeCompare(String(y.name));
+    });
+    return out;
+  }
+
+  /**
    * Given a list of venue names (sorted in mention order), build the
    * image payload the renderers expect, using our local catalog.
    */
@@ -842,6 +898,8 @@
     clampConstrainedAnswer: clampConstrainedAnswer,
     buildConstrainedVenuePool: buildConstrainedVenuePool,
     getVenueLocation: getVenueLocation,
+    getAreaForLvStoreCoordinates: getAreaForLvStoreCoordinates,
+    getVenuesWithImagesForArea: getVenuesWithImagesForArea,
     VENUE_IMAGES: VENUE_IMAGES
   };
 })(typeof window !== 'undefined' ? window : this);

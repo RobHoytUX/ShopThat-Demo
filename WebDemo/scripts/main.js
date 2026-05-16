@@ -349,6 +349,11 @@
   .chatbot-product-gallery.is-visible{display:flex !important}
   .chatbot-wrapper.map-view-active .chatbot-product-gallery.is-visible{position:relative;left:auto;right:auto;bottom:auto;width:100%;display:grid !important;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;min-height:104px;max-height:min(280px,38vh);overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;white-space:normal;padding:4px 2px 4px 0;align-content:start;scrollbar-width:thin}
   .chatbot-wrapper.map-view-active .chatbot-product-gallery.is-visible.is-venue-gallery{grid-template-columns:repeat(3,minmax(0,1fr));grid-auto-rows:auto;max-height:340px;overflow-y:scroll;padding-right:6px;scrollbar-gutter:stable}
+  .chatbot-wrapper.map-view-active .chatbot-product-gallery.is-visible.is-area-venue-gallery{max-height:min(420px,44vh)}
+  .chatbot-area-venue-card{background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,0.08);cursor:pointer;display:flex;flex-direction:column;min-height:0}
+  .chatbot-area-venue-card:hover{transform:translateY(-2px);box-shadow:0 4px 16px rgba(0,0,0,0.14)}
+  .chatbot-area-venue-card img{width:100%;height:92px;object-fit:cover;display:block;background:#f5f5f5;-webkit-user-select:none;user-select:none}
+  .chatbot-area-venue-card-caption{padding:6px 8px;font-size:10px;font-weight:600;color:#111;line-height:1.2;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;background:#fff}
 
   .chatbot-header[hidden],.chatbot-messages[hidden],.chatbot-input[hidden]{display:none !important}
   .chatbot-product-gallery::-webkit-scrollbar{height:6px}
@@ -1015,13 +1020,14 @@
     }
 
     function resetVenueGalleryMode() {
-      productGallery.classList.remove('is-venue-gallery');
+      productGallery.classList.remove('is-venue-gallery', 'is-area-venue-gallery');
       wrapper.classList.remove('map-venue-gallery-active');
     }
 
     function renderVenueImageGallery(venueName, location) {
       const images = getVenueGalleryImages(venueName, location);
       productGallery.replaceChildren();
+      productGallery.classList.remove('is-area-venue-gallery');
       productGallery.classList.add('is-venue-gallery');
       wrapper.classList.add('map-venue-gallery-active');
       images.forEach((url) => {
@@ -1068,6 +1074,104 @@
 
       const viewportHeight = window.innerHeight;
       const expandedHeight = Math.min(650, Math.max(495, viewportHeight - 124));
+      setBoxSize(FULL_W, expandedHeight, true);
+      setTimeout(() => {
+        if (leafletMap) leafletMap.invalidateSize();
+      }, 100);
+    }
+
+    function flyToVenueCardOnChatbotMap(v) {
+      if (!leafletMap || v.lat == null || v.lng == null) return;
+      leafletMap.invalidateSize();
+      leafletMap.flyTo([v.lat, v.lng], 16, { animate: true, duration: 0.55 });
+      const keys = [String(v.name).toLowerCase(), String(canonicalVenueName(v.name)).toLowerCase()];
+      let marker = null;
+      keys.some((k) => {
+        marker = venueMarkersByName.get(k);
+        return !!marker;
+      });
+      if (marker) {
+        setTimeout(() => {
+          try {
+            marker.openPopup();
+          } catch (_e) {}
+        }, 600);
+      }
+    }
+
+    function renderProductAreaVenueGallery(product) {
+      const catalog = window.LuxuryIntelligence;
+      if (
+        !catalog ||
+        typeof catalog.getVenuesWithImagesForArea !== 'function' ||
+        typeof catalog.getAreaForLvStoreCoordinates !== 'function'
+      ) {
+        openChatbotLocationExplorer();
+        return;
+      }
+      if (!product || !product.location) {
+        openChatbotLocationExplorer();
+        return;
+      }
+
+      const area = catalog.getAreaForLvStoreCoordinates(product.location.lat, product.location.lng);
+      const venues = catalog.getVenuesWithImagesForArea(area);
+      const storeLabel = area === 'SoHo' ? 'Louis Vuitton SoHo' : 'Louis Vuitton 57th Street';
+
+      productGallery.replaceChildren();
+      productGallery.classList.add('is-venue-gallery', 'is-area-venue-gallery');
+      wrapper.classList.add('map-venue-gallery-active');
+
+      const header = createEl('div', { class: 'chatbot-venue-gallery-header' });
+      const headerText = createEl('div');
+      const titleEl = createEl('p', { class: 'chatbot-venue-gallery-title', text: 'Nearby locations' });
+      titleEl.id = 'chatbot-venue-gallery-heading';
+      headerText.appendChild(titleEl);
+      headerText.appendChild(createEl('div', {
+        class: 'chatbot-venue-gallery-count',
+        text:
+          storeLabel +
+          (venues.length ? ` · ${venues.length} photo${venues.length === 1 ? '' : 's'}` : '')
+      }));
+      const backBtn = createEl('button', { class: 'chatbot-venue-gallery-back', type: 'button', text: 'Products' });
+      backBtn.addEventListener('click', () => renderMapView(false));
+      header.appendChild(headerText);
+      header.appendChild(backBtn);
+      productGallery.appendChild(header);
+
+      if (!venues.length) {
+        productGallery.appendChild(
+          createEl('div', {
+            class: 'chatbot-map-empty',
+            text: 'No curated location photos for this neighborhood.'
+          })
+        );
+      } else {
+        venues.forEach((v) => {
+          const card = createEl('div', { class: 'chatbot-area-venue-card' });
+          const img = createEl('img', {
+            src: v.url,
+            alt: v.name,
+            loading: 'lazy',
+            decoding: 'async'
+          });
+          img.addEventListener('click', (e) => {
+            e.stopPropagation();
+            openImagePreview(v.url);
+          });
+          img.addEventListener('error', () => {
+            card.style.display = 'none';
+          });
+          const cap = createEl('div', { class: 'chatbot-area-venue-card-caption', text: v.name });
+          card.appendChild(img);
+          card.appendChild(cap);
+          card.addEventListener('click', () => flyToVenueCardOnChatbotMap(v));
+          productGallery.appendChild(card);
+        });
+      }
+
+      const viewportHeight = window.innerHeight;
+      const expandedHeight = Math.min(680, Math.max(495, viewportHeight - 124));
       setBoxSize(FULL_W, expandedHeight, true);
       setTimeout(() => {
         if (leafletMap) leafletMap.invalidateSize();
@@ -3106,7 +3210,7 @@
           card.appendChild(img);
           card.appendChild(info);
           
-          // Add click handler to zoom to product location and open explorer
+          // Add click handler: zoom to boutique + show curated neighborhood photos
           card.addEventListener('click', (e) => {
             // Don't zoom or open explorer if clicking the link
             if (e.target.tagName === 'A' || e.target.closest('a')) return;
@@ -3119,8 +3223,7 @@
               });
             }
             
-            // Open location explorer
-            openChatbotLocationExplorer();
+            renderProductAreaVenueGallery(product);
           });
           
           productGallery.appendChild(card);
