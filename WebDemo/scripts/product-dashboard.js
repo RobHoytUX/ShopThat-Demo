@@ -91,50 +91,29 @@
     return true;
   }
 
-  function hideDashboardAreaLocationGallery() {
-    const wrap = document.getElementById('mapAreaLocationGallery');
-    const track = document.getElementById('mapAreaLocationGalleryTrack');
-    if (track) track.replaceChildren();
-    if (wrap) wrap.setAttribute('hidden', '');
-  }
+  /** Align explorer cards with LuxuryIntelligence venue photo URLs */
+  const EXPLORER_VENUE_IMAGE_ALIASES = {
+    'The Metropolitan Museum': 'Metropolitan Museum of Art',
+    'The Museum of Modern Art': 'MoMA Museum',
+    'The Carlyle Hotel': 'The Carlyle',
+    'The Mark Restaurant by Jean-Georges': 'The Mark',
+    'Drawing Center': 'The Drawing Center',
+    'David Zwirner': 'David Zwirner Chelsea',
+    'Gagosian Gallery': 'Gagosian Chelsea',
+    'Hauser & Wirth': 'Hauser & Wirth Chelsea'
+  };
 
-  function renderDashboardAreaLocationGallery(storeLabel, area) {
-    const wrap = document.getElementById('mapAreaLocationGallery');
-    const track = document.getElementById('mapAreaLocationGalleryTrack');
-    const sub = document.getElementById('mapAreaLocationGallerySub');
+  function resolveExplorerLocationImage(location) {
+    if (!location) return '';
     const catalog = window.LuxuryIntelligence;
-    if (!wrap || !track || !catalog || typeof catalog.getVenuesWithImagesForArea !== 'function') return;
-
-    const venues = catalog.getVenuesWithImagesForArea(area);
-    track.replaceChildren();
-
-    if (!venues.length) {
-      wrap.setAttribute('hidden', '');
-      return;
+    if (!catalog || typeof catalog.getVenueLocation !== 'function') return location.image;
+    const mapped = EXPLORER_VENUE_IMAGE_ALIASES[location.name];
+    const candidates = [mapped, location.name].filter(Boolean);
+    for (let i = 0; i < candidates.length; i++) {
+      const meta = catalog.getVenueLocation(candidates[i]);
+      if (meta && meta.image) return meta.image;
     }
-
-    wrap.removeAttribute('hidden');
-    if (sub) {
-      sub.textContent = `${storeLabel} · ${venues.length} nearby spots with photos`;
-    }
-
-    venues.forEach((v) => {
-      const card = createEl('div', { class: 'dashboard-map-location-card' });
-      const img = createEl('img', {
-        class: 'dashboard-map-location-card-img',
-        src: v.url,
-        alt: v.name,
-        loading: 'lazy'
-      });
-      img.addEventListener('error', () => { card.style.display = 'none'; });
-      const cap = createEl('div', { class: 'dashboard-map-location-card-label', text: v.name });
-      card.appendChild(img);
-      card.appendChild(cap);
-      card.addEventListener('click', () => {
-        focusVenueOnDashboardMap(v.name);
-      });
-      track.appendChild(card);
-    });
+    return location.image;
   }
 
   function linkifyVenueMentionsInDashboard(root, venueNames) {
@@ -2749,7 +2728,6 @@
 
     // Render products with locations
     productsEl.replaceChildren();
-    hideDashboardAreaLocationGallery();
     const productsJson = localStorage.getItem('droppedProducts');
     console.log('Map view - Raw products from localStorage:', productsJson);
     const storedProducts = readStoredArray('droppedProducts');
@@ -2843,20 +2821,11 @@
           productsEl.querySelectorAll('.dashboard-map-product').forEach((el) => el.classList.remove('is-selected'));
           card.classList.add('is-selected');
 
-          // Zoom to product's assigned store location
           if (leafletMap && product.location) {
             leafletMap.setView([product.location.lat, product.location.lng], 15);
           }
 
-          const catalog = window.LuxuryIntelligence;
-          const area = catalog && typeof catalog.getAreaForLvStoreCoordinates === 'function'
-            ? catalog.getAreaForLvStoreCoordinates(product.location.lat, product.location.lng)
-            : '57th St.';
-          const storeIdx = storeLocations.findIndex(
-            (s) => Math.abs(s.lat - product.location.lat) < 0.004 && Math.abs(s.lng - product.location.lng) < 0.004
-          );
-          const storeLabel = storeIdx >= 0 ? storeLocations[storeIdx].name : 'Louis Vuitton';
-          renderDashboardAreaLocationGallery(storeLabel, area);
+          openLocationExplorer();
         });
         
         productsEl.appendChild(card);
@@ -2920,7 +2889,7 @@
       item.setAttribute('data-index', index);
       const img = createEl('img', { 
         class: 'location-image',
-        src: location.image,
+        src: resolveExplorerLocationImage(location),
         alt: location.name
       });
       const name = createEl('p', { class: 'location-name', text: location.name });
@@ -3439,11 +3408,6 @@
   const closeExplorerBtn = document.getElementById('closeLocationExplorer');
   if (closeExplorerBtn) {
     closeExplorerBtn.addEventListener('click', closeLocationExplorer);
-  }
-
-  const mapAreaExploreBtn = document.getElementById('mapAreaLocationGalleryExplore');
-  if (mapAreaExploreBtn) {
-    mapAreaExploreBtn.addEventListener('click', () => openLocationExplorer());
   }
 
   const locationTabs = document.querySelectorAll('.location-tab');

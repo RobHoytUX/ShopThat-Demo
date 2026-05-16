@@ -2,6 +2,7 @@
   'use strict';
 
 // Location data for explorer - Real locations near LV stores
+// Museum thumbnails under assets/museums/ are building/exterior photos aligned with luxury-intelligence VENUE_IMAGES.
 const locationData = {
   restaurants: [
     // Fine Dining & Luxury Restaurants
