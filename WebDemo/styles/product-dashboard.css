@@ -2184,7 +2184,7 @@ html, body {
 /* Map View */
 .dashboard-map-container {
   display: grid;
-  grid-template-columns: 1fr 380px;
+  grid-template-columns: minmax(0, 1fr) 380px;
   gap: 24px;
   height: calc(100vh - 200px);
   min-height: 600px;
@@ -2196,6 +2196,7 @@ html, body {
   border-radius: 16px;
   overflow: visible;
   height: 100%;
+  min-width: 0;
   min-height: 0;
   display: flex;
   flex-direction: column;
@@ -2231,6 +2232,7 @@ html, body {
   flex-direction: column;
   gap: 16px;
   height: 100%;
+  min-width: 0;
 }
 
 .dashboard-map-product {
@@ -2322,6 +2324,10 @@ html, body {
   border-radius: 16px;
   padding: 14px 16px 16px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  min-width: 0;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .dashboard-map-location-gallery[hidden] {
@@ -2351,10 +2357,23 @@ html, body {
 
 .dashboard-map-location-gallery-track {
   display: flex;
+  flex-wrap: nowrap;
   gap: 10px;
   overflow-x: auto;
-  padding-bottom: 4px;
+  overflow-y: visible;
+  padding-bottom: 8px;
+  max-width: 100%;
   scrollbar-width: thin;
+  -webkit-overflow-scrolling: touch;
+}
+
+.dashboard-map-location-gallery-track::-webkit-scrollbar {
+  height: 8px;
+}
+
+.dashboard-map-location-gallery-track::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.22);
+  border-radius: 4px;
 }
 
 .dashboard-map-location-card {
@@ -2362,10 +2381,13 @@ html, body {
   width: 120px;
   cursor: pointer;
   border-radius: 12px;
-  overflow: hidden;
+  overflow: visible;
   border: 1px solid rgba(0, 0, 0, 0.08);
   background: #fff;
   transition: transform 0.15s ease, box-shadow 0.15s ease;
+  display: flex;
+  flex-direction: column;
+  align-self: flex-start;
 }
 
 .dashboard-map-location-card:hover {
@@ -2379,16 +2401,21 @@ html, body {
   object-fit: cover;
   display: block;
   background: #f5f5f5;
+  border-radius: 11px 11px 0 0;
+  flex-shrink: 0;
 }
 
 .dashboard-map-location-card-label {
   font-size: 10px;
   font-weight: 600;
   color: #374151;
-  padding: 6px 8px;
-  line-height: 1.2;
-  max-height: 2.5em;
-  overflow: hidden;
+  padding: 8px;
+  line-height: 1.35;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  hyphens: auto;
+  flex: 1 1 auto;
 }
 
 /* Location Explorer */
@@ -2403,10 +2430,11 @@ html, body {
   padding: 20px 24px 24px 24px;
   box-shadow: 0 -4px 24px rgba(0,0,0,0.15);
   z-index: 1000;
-  max-height: 280px;
+  max-height: min(340px, 42vh);
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  min-height: 0;
   border-radius: 0 0 16px 16px;
   transform: translateY(0);
   transition: transform 0.3s ease, opacity 0.3s ease;
@@ -2500,11 +2528,14 @@ html, body {
 
 .location-explorer-content {
   display: flex;
+  flex-wrap: nowrap;
+  align-items: flex-start;
   gap: 12px;
   overflow-x: auto;
-  overflow-y: hidden;
-  padding-bottom: 8px;
+  overflow-y: auto;
+  padding-bottom: 12px;
   flex: 1;
+  min-height: 0;
   scroll-behavior: smooth;
 }
 
@@ -2529,11 +2560,15 @@ html, body {
 .location-item {
   cursor: pointer;
   border-radius: 12px;
-  overflow: hidden;
+  overflow: visible;
   transition: all 0.2s ease;
   background: #f8f8f8;
   flex: 0 0 auto;
   width: 180px;
+  display: flex;
+  flex-direction: column;
+  align-self: flex-start;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.06);
 }
 
 .location-item:hover {
@@ -2546,19 +2581,24 @@ html, body {
   height: 140px;
   object-fit: cover;
   display: block;
+  border-radius: 12px 12px 0 0;
+  flex-shrink: 0;
 }
 
 .location-name {
-  padding: 10px 8px;
+  padding: 10px 8px 12px;
   font-size: 12px;
   font-weight: 500;
   color: #111;
   margin: 0;
   text-align: center;
   background: #fff;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  hyphens: auto;
+  line-height: 1.35;
+  border-radius: 0 0 12px 12px;
 }
 
 .location-item.selected {
@@ -2794,7 +2834,7 @@ html, body {
   
   .dashboard-location-explorer {
     padding: 14px 16px 16px 16px;
-    max-height: 240px;
+    max-height: min(300px, 50vh);
   }
   
   .location-explorer-header h3 {
