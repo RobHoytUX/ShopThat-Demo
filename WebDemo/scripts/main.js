@@ -354,6 +354,9 @@
   .chatbot-area-venue-card:hover{transform:translateY(-2px);box-shadow:0 4px 16px rgba(0,0,0,0.14)}
   .chatbot-area-venue-card img{width:100%;height:92px;object-fit:cover;display:block;background:#f5f5f5;-webkit-user-select:none;user-select:none}
   .chatbot-area-venue-card-caption{padding:6px 8px;font-size:10px;font-weight:600;color:#111;line-height:1.2;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;background:#fff}
+  .chatbot-area-explorer-tabs{grid-column:1/-1;margin:0 0 6px}
+  .chatbot-area-explorer-tabs .chatbot-explorer-tab{padding:6px 10px;font-size:11px}
+  .chatbot-area-explorer-cards{grid-column:1/-1;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;align-content:start}
 
   .chatbot-header[hidden],.chatbot-messages[hidden],.chatbot-input[hidden]{display:none !important}
   .chatbot-product-gallery::-webkit-scrollbar{height:6px}
@@ -968,6 +971,62 @@
       return aliases[raw] || raw;
     }
 
+    /** Match product-dashboard Explore Nearby card images to Luxury Intelligence façade assets */
+    const CHATBOT_EXPLORER_IMAGE_ALIASES = {
+      'The Metropolitan Museum': 'Metropolitan Museum of Art',
+      'The Museum of Modern Art': 'MoMA Museum',
+      'The Carlyle Hotel': 'The Carlyle',
+      'The Mark Restaurant by Jean-Georges': 'The Mark',
+      'Drawing Center': 'The Drawing Center',
+      'David Zwirner': 'David Zwirner Chelsea',
+      'Gagosian Gallery': 'Gagosian Chelsea',
+      'Hauser & Wirth': 'Hauser & Wirth Chelsea',
+      'The Mark Hotel': 'The Mark Hotel',
+      'The Plaza': 'The Plaza',
+      'The St. Regis': 'The St. Regis',
+      'The Baccarat Hotel': 'The Baccarat',
+      'The Mercer Hotel': 'THE MERCER'
+    };
+
+    function resolveChatbotExplorerLocationImage(location) {
+      if (!location) return '';
+      const catalog = window.LuxuryIntelligence;
+      if (!catalog || typeof catalog.getVenueLocation !== 'function') return location.image || '';
+      const mapped = CHATBOT_EXPLORER_IMAGE_ALIASES[location.name];
+      const candidates = [mapped, location.name].filter(Boolean);
+      for (let i = 0; i < candidates.length; i++) {
+        const meta = catalog.getVenueLocation(candidates[i]);
+        if (meta && meta.image) return meta.image;
+      }
+      return location.image || '';
+    }
+
+    /** Same neighborhood buckets as product-dashboard map data (57th St. vs SoHo). */
+    function getChatbotMapLocationsByArea(areaStr) {
+      const catalog = window.LuxuryIntelligence;
+      const areaFn =
+        catalog && typeof catalog.getAreaForLvStoreCoordinates === 'function'
+          ? catalog.getAreaForLvStoreCoordinates.bind(catalog)
+          : null;
+      const keys = ['restaurants', 'hotels', 'museums', 'galleries', 'others'];
+      const buckets = {
+        restaurants: [],
+        hotels: [],
+        museums: [],
+        galleries: [],
+        others: []
+      };
+      if (!areaFn) return buckets;
+      keys.forEach((k) => {
+        (chatbotLocationData[k] || []).forEach((loc) => {
+          if (!loc || loc.lat == null || loc.lng == null) return;
+          if (areaFn(loc.lat, loc.lng) !== areaStr) return;
+          buckets[k].push(loc);
+        });
+      });
+      return buckets;
+    }
+
     function getVenueGalleryImages(venueName, location) {
       const galleries = window.ShopThatVenueImageGalleries || {};
       const canonical = canonicalVenueName(venueName);
@@ -1122,11 +1181,7 @@
 
     function renderProductAreaVenueGallery(product) {
       const catalog = window.LuxuryIntelligence;
-      if (
-        !catalog ||
-        typeof catalog.getVenuesWithImagesForArea !== 'function' ||
-        typeof catalog.getAreaForLvStoreCoordinates !== 'function'
-      ) {
+      if (!catalog || typeof catalog.getAreaForLvStoreCoordinates !== 'function') {
         openChatbotLocationExplorer();
         return;
       }
@@ -1136,8 +1191,16 @@
       }
 
       const area = catalog.getAreaForLvStoreCoordinates(product.location.lat, product.location.lng);
-      const venues = catalog.getVenuesWithImagesForArea(area);
+      const buckets = getChatbotMapLocationsByArea(area);
       const storeLabel = area === 'SoHo' ? 'Louis Vuitton SoHo' : 'Louis Vuitton 57th Street';
+      const CATEGORY_ORDER = ['restaurants', 'hotels', 'museums', 'galleries', 'others'];
+      const TAB_LABELS = {
+        restaurants: 'Restaurants',
+        hotels: 'Hotels',
+        museums: 'Museums',
+        galleries: 'Galleries',
+        others: 'Others Nearby'
+      };
 
       productGallery.replaceChildren();
       productGallery.classList.add('is-venue-gallery', 'is-area-venue-gallery');
@@ -1145,51 +1208,105 @@
 
       const header = createEl('div', { class: 'chatbot-venue-gallery-header' });
       const headerText = createEl('div');
-      const titleEl = createEl('p', { class: 'chatbot-venue-gallery-title', text: 'Nearby locations' });
+      const titleEl = createEl('p', { class: 'chatbot-venue-gallery-title', text: 'Explore Nearby' });
       titleEl.id = 'chatbot-venue-gallery-heading';
       headerText.appendChild(titleEl);
-      headerText.appendChild(createEl('div', {
-        class: 'chatbot-venue-gallery-count',
-        text:
-          storeLabel +
-          (venues.length ? ` · ${venues.length} photo${venues.length === 1 ? '' : 's'}` : '')
-      }));
+      const countEl = createEl('div', { class: 'chatbot-venue-gallery-count', text: storeLabel });
+      headerText.appendChild(countEl);
       const backBtn = createEl('button', { class: 'chatbot-venue-gallery-back', type: 'button', text: 'Products' });
       backBtn.addEventListener('click', () => renderMapView(false));
       header.appendChild(headerText);
       header.appendChild(backBtn);
       productGallery.appendChild(header);
 
-      if (!venues.length) {
+      const tabsRow = createEl('div', { class: 'chatbot-explorer-tabs chatbot-area-explorer-tabs' });
+      const cardsMount = createEl('div', { class: 'chatbot-area-explorer-cards', id: 'chatbot-area-explorer-cards' });
+      productGallery.appendChild(tabsRow);
+      productGallery.appendChild(cardsMount);
+
+      const totalInArea = CATEGORY_ORDER.reduce((n, k) => n + ((buckets[k] || []).length), 0);
+      if (!totalInArea) {
         productGallery.appendChild(
           createEl('div', {
             class: 'chatbot-map-empty',
-            text: 'No curated location photos for this neighborhood.'
+            text: 'No nearby venues for this neighborhood.'
           })
         );
-      } else {
-        venues.forEach((v) => {
+        const viewportHeight = window.innerHeight;
+        const expandedHeight = Math.min(680, Math.max(495, viewportHeight - 124));
+        setBoxSize(FULL_W, expandedHeight, true);
+        setTimeout(() => {
+          if (leafletMap) leafletMap.invalidateSize();
+        }, 100);
+        return;
+      }
+
+      let activeCategory =
+        CATEGORY_ORDER.find((c) => (buckets[c] || []).length > 0) || 'restaurants';
+
+      function updateCountLine(cat) {
+        const locs = buckets[cat] || [];
+        countEl.textContent =
+          storeLabel + (locs.length ? ` · ${locs.length} place${locs.length === 1 ? '' : 's'}` : '');
+      }
+
+      function renderCardsForCategory(cat) {
+        cardsMount.replaceChildren();
+        const locs = buckets[cat] || [];
+        updateCountLine(cat);
+        if (!locs.length) {
+          cardsMount.appendChild(
+            createEl('div', {
+              class: 'chatbot-map-empty',
+              style: 'grid-column: 1 / -1',
+              text: `No ${TAB_LABELS[cat] || cat} in this area.`
+            })
+          );
+          return;
+        }
+        locs.forEach((loc) => {
+          const imgUrl = resolveChatbotExplorerLocationImage(loc);
           const card = createEl('div', { class: 'chatbot-area-venue-card' });
           const img = createEl('img', {
-            src: v.url,
-            alt: v.name,
+            src: imgUrl,
+            alt: loc.name,
             loading: 'lazy',
             decoding: 'async'
           });
           img.addEventListener('click', (e) => {
             e.stopPropagation();
-            openImagePreview(v.url);
+            if (imgUrl) openImagePreview(imgUrl);
           });
           img.addEventListener('error', () => {
             card.style.display = 'none';
           });
-          const cap = createEl('div', { class: 'chatbot-area-venue-card-caption', text: v.name });
+          const cap = createEl('div', { class: 'chatbot-area-venue-card-caption', text: loc.name });
           card.appendChild(img);
           card.appendChild(cap);
-          card.addEventListener('click', () => flyToVenueCardOnChatbotMap(v));
-          productGallery.appendChild(card);
+          card.addEventListener('click', () => flyToVenueCardOnChatbotMap(loc));
+          cardsMount.appendChild(card);
         });
       }
+
+      CATEGORY_ORDER.forEach((cat) => {
+        const tab = createEl('button', {
+          type: 'button',
+          class: 'chatbot-explorer-tab',
+          'data-category': cat,
+          text: TAB_LABELS[cat] || cat
+        });
+        if (cat === activeCategory) tab.classList.add('is-active');
+        tab.addEventListener('click', () => {
+          activeCategory = cat;
+          tabsRow.querySelectorAll('.chatbot-explorer-tab').forEach((t) => {
+            t.classList.toggle('is-active', t.getAttribute('data-category') === cat);
+          });
+          renderCardsForCategory(cat);
+        });
+        tabsRow.appendChild(tab);
+      });
+
+      renderCardsForCategory(activeCategory);
 
       const viewportHeight = window.innerHeight;
       const expandedHeight = Math.min(680, Math.max(495, viewportHeight - 124));
@@ -3374,7 +3491,7 @@
         const item = createEl('div', { class: 'chatbot-explorer-item' });
         const img = createEl('img', { 
           class: 'chatbot-explorer-image',
-          src: location.image,
+          src: resolveChatbotExplorerLocationImage(location),
           alt: location.name
         });
         const name = createEl('p', { class: 'chatbot-explorer-name', text: location.name });
