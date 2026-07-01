@@ -27,6 +27,74 @@
       localStorage.setItem(CONNECTIONS_KEY, JSON.stringify(arr)); 
     }
   }
+
+  function escapeHtml(s) {
+    return String(s)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  function showKeywordToast(title, keywords) {
+    const existing = document.querySelector('.keyword-sync-toast');
+    if (existing) existing.remove();
+
+    const toast = document.createElement('div');
+    toast.className = 'keyword-sync-toast';
+    const list = (keywords || []).slice(0, 5).map(escapeHtml).join(', ');
+    const extra = keywords.length > 5 ? ` +${keywords.length - 5} more` : '';
+    toast.innerHTML = `
+      <div class="keyword-sync-toast__title">${escapeHtml(title)}</div>
+      <div class="keyword-sync-toast__body">${list}${extra}</div>
+    `;
+    document.body.appendChild(toast);
+    requestAnimationFrame(() => toast.classList.add('is-visible'));
+    setTimeout(() => {
+      toast.classList.remove('is-visible');
+      setTimeout(() => toast.remove(), 220);
+    }, 3800);
+  }
+
+  function addSelectedToTree() {
+    const selected = Array.from(selectedKeywords);
+    if (!selected.length) return;
+
+    if (window.ShopThatData && typeof window.ShopThatData.addKeywordsToGraph === 'function') {
+      const result = window.ShopThatData.addKeywordsToGraph(selected, {
+        parentName: 'Patient Chart Keywords',
+        source: 'keywords-manager'
+      });
+      const added = result.added || [];
+      const skipped = result.skipped || [];
+      if (added.length) {
+        showKeywordToast('Keywords added to tree', added);
+      } else {
+        showKeywordToast('Already in tree', skipped.length ? skipped : selected);
+      }
+      return;
+    }
+
+    const arr = load();
+    const conns = loadConnections();
+    const hasParent = arr.some(k => String(k.name || '').toLowerCase() === 'patient chart keywords');
+    if (!hasParent) {
+      arr.push({ id: 'Patient Chart Keywords', name: 'Patient Chart Keywords', value: 78, group: 2, parent: 'LVMH', isArea: true });
+    }
+    selected.forEach(name => {
+      const exists = arr.some(k => String(k.name || '').toLowerCase() === String(name).toLowerCase());
+      if (!exists) arr.push({ id: name, name, value: 50, group: 4, parent: 'Patient Chart Keywords' });
+      const linked = conns.some(c =>
+        (c.source === 'Patient Chart Keywords' && c.target === name) ||
+        (c.source === name && c.target === 'Patient Chart Keywords')
+      );
+      if (!linked) conns.push({ source: 'Patient Chart Keywords', target: name });
+    });
+    save(arr);
+    saveConnections(conns);
+    window.dispatchEvent(new CustomEvent('kw-data-updated', { detail: { addedKeywords: selected, source: 'keywords-manager' } }));
+    showKeywordToast('Keywords added to tree', selected);
+  }
   
   // Confirmation modal
   function showConfirmModal(title, message, onConfirm) {
@@ -90,6 +158,7 @@
           <span class="bulk-action-bar__count"><span id="selectedCount">0</span> selected</span>
           <button class="btn btn--secondary" id="bulkSelectAll">Select All</button>
           <button class="btn btn--secondary" id="bulkDeselectAll">Deselect All</button>
+          <button class="btn btn--secondary" id="bulkAddToTree">Add Selected to Tree</button>
           <button class="btn btn--danger" id="bulkDelete">Delete Selected</button>
         `;
         document.querySelector('.keywords').insertBefore(bar, document.querySelector('.keywords-gallery'));
@@ -104,6 +173,8 @@
           selectedKeywords.clear();
           renderWithSearch(true);
         });
+
+        document.getElementById('bulkAddToTree').addEventListener('click', addSelectedToTree);
         
         document.getElementById('bulkDelete').addEventListener('click', () => {
           const count = selectedKeywords.size;

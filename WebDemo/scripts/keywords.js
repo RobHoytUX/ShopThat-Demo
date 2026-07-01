@@ -424,43 +424,122 @@ console.log('Document ready state:', document.readyState);
     }
   }
   
-  // Always rebuild the keyword graph from the curated defaults above. Stored
-  // data from previous sessions (localStorage / ShopThatData) is intentionally
-  // ignored so the Louis Vuitton ▸ New York ▸ Stores ▸ 57th St./Soho hierarchy
-  // cannot regress to legacy flat structures or AI-cached clusters.
-  void loadStored;
-  void loadStoredConnections;
-  const initialNodes = defaultNodes.map(n => ({ ...n }));
-  const initialLinks = defaultLinks.map(l => ({ ...l }));
-
-  // Re-seed ShopThatData so other pages (keywords-manage, dashboard, etc.)
-  // observe the same curated graph instead of stale cached nodes.
-  try {
-    if (window.ShopThatData) {
-      const nowIso = new Date().toISOString();
-      const seededKeywords = initialNodes.map(n => ({
-        id: n.id,
-        name: n.id,
-        value: n.value || 50,
-        group: n.group || 1,
-        isArea: !!n.isArea,
-        isRoot: !!n.isRoot,
-        parent: n.parent || null,
-        uses: 0,
-        cost: 0,
-        totalCost: 0,
-        lastUsed: null,
-        created: nowIso
-      }));
-      window.ShopThatData.saveKeywords(seededKeywords);
-      window.ShopThatData.saveConnections(initialLinks.map(l => ({
-        source: typeof l.source === 'object' ? l.source.id : l.source,
-        target: typeof l.target === 'object' ? l.target.id : l.target
-      })));
-    }
-  } catch (e) {
-    console.warn('Keyword graph re-seed failed:', e);
+  function canonicalLink(source, target) {
+    const s = typeof source === 'object' && source !== null ? source.id : source;
+    const t = typeof target === 'object' && target !== null ? target.id : target;
+    if (!s || !t || s === t) return null;
+    return { source: String(s), target: String(t) };
   }
+
+  function mergeStoredKeywordGraph(defaultGraphNodes, defaultGraphLinks) {
+    const nodeMap = new Map();
+    const linkMap = new Map();
+    const nowIso = new Date().toISOString();
+    const patientParent = 'Patient Chart Keywords';
+
+    function addNode(node, preferExistingParent) {
+      if (!node) return;
+      const id = String(node.id || node.name || '').trim();
+      if (!id) return;
+      const existing = nodeMap.get(id);
+      if (!existing) {
+        nodeMap.set(id, { ...node, id, name: node.name || id });
+        return;
+      }
+      existing.value = Math.max(existing.value || 0, node.value || 0);
+      existing.group = Math.min(existing.group || 4, node.group || 4);
+      existing.isArea = existing.isArea || !!node.isArea;
+      existing.isRoot = existing.isRoot || !!node.isRoot;
+      if (!preferExistingParent && node.parent) existing.parent = node.parent;
+      if (!existing.parent && node.parent) existing.parent = node.parent;
+      if (!existing.source && node.source) existing.source = node.source;
+    }
+
+    function addLink(source, target) {
+      const link = canonicalLink(source, target);
+      if (!link) return;
+      const key = link.source < link.target ? link.source + '|' + link.target : link.target + '|' + link.source;
+      if (!linkMap.has(key)) linkMap.set(key, link);
+    }
+
+    defaultGraphNodes.forEach(node => addNode({ ...node }, true));
+    defaultGraphLinks.forEach(link => addLink(link.source, link.target));
+
+    let storedKeywords = [];
+    let storedConnections = [];
+    try {
+      storedKeywords = loadStored();
+      storedConnections = loadStoredConnections();
+    } catch (e) {
+      console.warn('Unable to read stored keywords for merge:', e);
+    }
+
+    const hasUnparentedStoredNode = storedKeywords.some(k => {
+      const id = String(k.id || k.name || '').trim();
+      return id && id !== 'LVMH' && !k.parent && !k.isRoot && !k.isArea && !nodeMap.has(id);
+    });
+    if (hasUnparentedStoredNode) {
+      addNode({ id: patientParent, name: patientParent, group: 2, value: 78, isArea: true, parent: 'LVMH', source: 'patient-chart' }, false);
+      addLink('LVMH', patientParent);
+    }
+
+    storedKeywords.forEach(k => {
+      const id = String(k.id || k.name || '').trim();
+      if (!id) return;
+      const isDefaultNode = nodeMap.has(id);
+      const parent = k.parent || (!isDefaultNode && !k.isRoot && !k.isArea ? patientParent : undefined);
+      addNode({
+        ...k,
+        id,
+        name: k.name || id,
+        value: k.value || 50,
+        group: k.group || 4,
+        parent,
+        source: k.source || (parent === patientParent ? 'patient-chart' : k.source)
+      }, isDefaultNode);
+      if (parent) addLink(parent, id);
+    });
+
+    Array.from(nodeMap.values()).forEach(node => {
+      if (node.parent) addLink(node.parent, node.id);
+    });
+    storedConnections.forEach(link => addLink(link.source, link.target));
+
+    const nodes = Array.from(nodeMap.values());
+    const links = Array.from(linkMap.values());
+
+    try {
+      if (window.ShopThatData) {
+        window.ShopThatData.saveKeywords(nodes.map(n => ({
+          id: n.id,
+          name: n.name || n.id,
+          value: n.value || 50,
+          group: n.group || 1,
+          isArea: !!n.isArea,
+          isRoot: !!n.isRoot,
+          parent: n.parent || null,
+          source: n.source || undefined,
+          uses: n.uses || 0,
+          cost: n.cost || 0,
+          totalCost: n.totalCost || 0,
+          lastUsed: n.lastUsed || null,
+          created: n.created || nowIso
+        })));
+        window.ShopThatData.saveConnections(links);
+      }
+    } catch (e) {
+      console.warn('Keyword graph merge sync failed:', e);
+    }
+
+    return { nodes, links };
+  }
+
+  const mergedInitialGraph = mergeStoredKeywordGraph(
+    defaultNodes.map(n => ({ ...n })),
+    defaultLinks.map(l => ({ ...l }))
+  );
+  const initialNodes = mergedInitialGraph.nodes;
+  const initialLinks = mergedInitialGraph.links;
 
   console.log('Keyword graph seeded:', {
     nodes: initialNodes.length,
@@ -2245,6 +2324,14 @@ console.log('Document ready state:', document.readyState);
   window.kwGetConnected = getConnectedNodeIds;
   window.kwNeighborhoodIdsForSearch = neighborhoodIdsForSearchQuery;
   window.kwGetArticlesHTML = generateArticlesHTML;
+
+  window.addEventListener('kw-data-updated', function () {
+    const merged = mergeStoredKeywordGraph(defaultNodes.map(n => ({ ...n })), defaultLinks.map(l => ({ ...l })));
+    allNodes = merged.nodes;
+    allLinks = merged.links;
+    selectedNode = selectedNode ? allNodes.find(n => n.id === selectedNode.id) || null : null;
+    setGraphData(allNodes, allLinks, true);
+  });
 
   window.addEventListener('shopthat-disabled-keywords-changed', syncDisabledNodesFromShared);
 

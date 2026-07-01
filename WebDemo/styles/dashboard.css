@@ -226,6 +226,17 @@
 .card__actions { display: flex; align-items: center; gap: 8px; }
 
 .chip { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; border: 1px solid #d9d9e6; border-radius: 999px; padding: 6px 10px; color: #312e81; background: #f6f7ff; }
+.chip.selected,
+.chip.is-selected,
+.keyword-chip.selected,
+.keyword-chip.is-selected,
+[data-keyword].selected,
+[data-keyword].is-selected {
+  color: #f8fafc;
+  border-color: rgba(147, 197, 253, 0.38);
+  background: linear-gradient(135deg, #172554 0%, #1e3a8a 58%, #312e81 100%);
+  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.18);
+}
 
 .btn { display: inline-flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 500; border-radius: 50px; padding: 10px 16px; cursor: pointer; border: 1px solid transparent; text-decoration: none; }
 .btn--primary { background: #6366f1; color: #fff; border-color: #6366f1; }
@@ -1634,8 +1645,9 @@ svg#bubbleGraph { width: 100%; flex: 1; display: block; padding-top: 60px; min-h
   position: relative;
 }
 .keyword-card--selected {
-  border-color: #6366F1;
-  background: rgba(99, 102, 241, 0.03);
+  border-color: rgba(49, 46, 129, 0.55);
+  background: linear-gradient(135deg, rgba(30, 41, 59, 0.08), rgba(67, 56, 202, 0.05));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45);
 }
 .keyword-card:hover { 
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); 
@@ -4076,11 +4088,11 @@ svg#bubbleGraph { width: 100%; flex: 1; display: block; padding-top: 60px; min-h
   align-items: center;
   gap: 16px;
   padding: 12px 20px;
-  background: linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%);
+  background: linear-gradient(135deg, #172554 0%, #312e81 58%, #3730a3 100%);
   border-radius: 12px;
   margin-top: 12px;
   margin-bottom: 16px;
-  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.22);
   animation: slideDown 0.2s ease;
 }
 
@@ -4213,8 +4225,8 @@ svg#bubbleGraph { width: 100%; flex: 1; display: block; padding-top: 60px; min-h
 
 /* Dark mode for new components */
 .dark-mode .keyword-card--selected {
-  border-color: #818CF8;
-  background: rgba(99, 102, 241, 0.1);
+  border-color: rgba(129, 140, 248, 0.5);
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.82), rgba(49, 46, 129, 0.34));
 }
 
 .dark-mode .keyword-card__delete-btn {
@@ -4281,7 +4293,42 @@ svg#bubbleGraph { width: 100%; flex: 1; display: block; padding-top: 60px; min-h
 }
 
 .dark-mode .bulk-action-bar {
-  background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
+  background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 58%, #312e81 100%);
+}
+
+.keyword-sync-toast {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 10050;
+  width: min(360px, calc(100vw - 48px));
+  padding: 14px 16px;
+  border-radius: 14px;
+  color: #f8fafc;
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.96), rgba(30, 41, 59, 0.94));
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  box-shadow: 0 18px 42px rgba(15, 23, 42, 0.32);
+  opacity: 0;
+  transform: translateY(14px);
+  pointer-events: none;
+  transition: opacity 180ms ease, transform 180ms ease;
+}
+
+.keyword-sync-toast.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.keyword-sync-toast__title {
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.keyword-sync-toast__body {
+  color: #cbd5e1;
+  font-size: 12px;
+  line-height: 1.45;
 }
 
 /* Blue icon variant for secondary buttons */
