@@ -458,7 +458,6 @@
   .chatbot-logo{display:block;margin:0 auto 8px;height:40px;width:auto}
   .chatbot-options{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-bottom:8px}
   .chatbot-options button{padding:6px 10px;border:1px solid rgba(0,0,0,0.35);border-radius:12px;background:rgba(255,255,255,0.92);cursor:pointer;font-size:12px}
-  .chatbot-options button.is-active,.chatbot-presets button.is-active{background:linear-gradient(135deg,#172554,#1e3a8a 56%,#312e81);border-color:rgba(147,197,253,0.45);color:#f8fafc;box-shadow:0 6px 16px rgba(15,23,42,0.2)}
   .chatbot-presets{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:24px 0 8px}
   .chatbot-presets button{padding:8px 12px;border:1px solid rgba(0,0,0,0.35);border-radius:16px;background:rgba(255,255,255,0.92);backdrop-filter:saturate(160%);font-size:12px;cursor:pointer;position:relative;transition:opacity 150ms ease, transform 150ms ease}
   .chatbot-presets[hidden]{display:none !important}
@@ -1920,12 +1919,6 @@
       setInputsEnabled(true);
       input.value = label;
       input.focus();
-      [presets, options].forEach((container) => {
-        if (!container) return;
-        Array.from(container.querySelectorAll('button')).forEach((button) => {
-          button.classList.toggle('is-active', button.textContent.trim() === label);
-        });
-      });
 
       addMessage('user', label);
 

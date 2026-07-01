@@ -353,33 +353,6 @@
       .replace(/"/g, '&quot;');
   }
 
-  function showPendingKeywordAddPopover(scope) {
-    if (!window.ShopThatData || typeof window.ShopThatData.getPendingKeywordAdds !== 'function') return;
-    var pending = window.ShopThatData.getPendingKeywordAdds();
-    if (!pending || !pending.keywords || !pending.keywords.length || !pending.created) return;
-    var ackKey = 'st_pending_keyword_adds_seen_' + scope;
-    try {
-      if (localStorage.getItem(ackKey) === pending.created) return;
-      localStorage.setItem(ackKey, pending.created);
-    } catch (e) { /* ignore private-mode storage failures */ }
-
-    var existing = document.querySelector('.keyword-sync-toast');
-    if (existing) existing.remove();
-    var toast = document.createElement('div');
-    toast.className = 'keyword-sync-toast';
-    var list = pending.keywords.slice(0, 6).map(escapeHtml).join(', ');
-    var extra = pending.keywords.length > 6 ? ' +' + (pending.keywords.length - 6) + ' more' : '';
-    toast.innerHTML =
-      '<div class="keyword-sync-toast__title">New keywords added</div>' +
-      '<div class="keyword-sync-toast__body">' + list + extra + '</div>';
-    document.body.appendChild(toast);
-    requestAnimationFrame(function () { toast.classList.add('is-visible'); });
-    setTimeout(function () {
-      toast.classList.remove('is-visible');
-      setTimeout(function () { toast.remove(); }, 220);
-    }, 5200);
-  }
-
   function rectsOverlap(a, b) {
     return !(a.right <= b.left || a.left >= b.right || a.bottom <= b.top || a.top >= b.bottom);
   }
@@ -1027,7 +1000,6 @@
 
   window.kwShowTreeTab = function () {
     syncTreeDisabledNodesFromShared();
-    showPendingKeywordAddPopover('tree');
     if (!initialized) {
       setTimeout(initTree, 50);
     } else {
