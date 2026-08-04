@@ -7,7 +7,8 @@
     disabledKeywords: 'st_disabled_keywords_v1',
     chatAnalytics: 'st_chat_analytics_v1',
     keywordUsage: 'st_keyword_usage_v1',
-    sessions: 'st_chat_sessions_v1'
+    sessions: 'st_chat_sessions_v1',
+    chatHandoff: 'st_chat_handoff_v1'
   };
   const DB_NAME = 'shopthat-client-store';
   const DB_VERSION = 1;
@@ -395,6 +396,27 @@
 
     saveChatSessions(sessions) {
       window.ShopThatStorage.write(STORAGE_KEYS.sessions, sessions);
+    },
+
+    // Chat handoff: lets one page hand its in-progress conversation to the
+    // next page so the receiving chat panel can mirror it instead of starting
+    // from an empty transcript.
+    setChatHandoff(handoff) {
+      window.ShopThatStorage.write(STORAGE_KEYS.chatHandoff, {
+        keyword: String(handoff && handoff.keyword || ''),
+        messages: Array.isArray(handoff && handoff.messages) ? handoff.messages : [],
+        createdAt: new Date().toISOString()
+      });
+    },
+
+    getChatHandoff() {
+      const stored = window.ShopThatStorage.readObject(STORAGE_KEYS.chatHandoff);
+      if (!stored || !Array.isArray(stored.messages) || stored.messages.length === 0) return null;
+      return stored;
+    },
+
+    clearChatHandoff() {
+      window.ShopThatStorage.remove(STORAGE_KEYS.chatHandoff);
     },
 
     // Analytics calculations

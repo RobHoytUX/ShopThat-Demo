@@ -454,7 +454,8 @@
   .chatbot-nav-separator{width:32px;height:1px;background:rgba(0,0,0,0.1);margin:4px 0}
   .chatbot-header{text-align:center;padding-top:8px}
   .chatbot-title{font-size:21px;font-weight:600;margin:0 0 8px}
-  .chatbot-sub{font-size:15px;color:#232323;margin:0 0 8px;font-weight:600}
+  .chatbot-sub{font-size:15px;color:#232323;margin:0 0 8px;font-weight:600;transition:opacity 220ms ease, transform 220ms ease}
+  .chatbot-sub.is-swapping{opacity:0;transform:translateY(-4px)}
   .chatbot-logo{display:block;margin:0 auto 8px;height:40px;width:auto}
   .chatbot-options{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-bottom:8px}
   .chatbot-options button{padding:6px 10px;border:1px solid rgba(0,0,0,0.35);border-radius:12px;background:rgba(255,255,255,0.92);cursor:pointer;font-size:12px}
@@ -479,6 +480,10 @@
   .chatbot-msg-markdown img{max-width:100%;height:auto;border-radius:8px}
   .chatbot-msg-markdown a{color:#1a1a1a;text-decoration:underline}
   .chatbot-msg-domain{font-size:11px;color:#666;margin-top:6px;font-weight:500}
+  .chatbot-msg-sources{margin-top:8px;padding-top:6px;border-top:1px solid rgba(0,0,0,0.1);display:flex;flex-direction:column;gap:2px}
+  .chatbot-msg-sources .sources-label{font-size:10px;letter-spacing:0.06em;text-transform:uppercase;color:#888;margin-bottom:2px}
+  .chatbot-msg-sources a{font-size:11px;color:#666;text-decoration:none;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .chatbot-msg-sources a:hover{color:#111;text-decoration:underline}
   .chatbot-msg-user{align-self:flex-end;background:rgba(0,0,0,0.78);color:#fff;border-radius:30px 30px 6px 30px;margin-right:8px}
   .chatbot-msg-bot{align-self:flex-start;background:#f2f2f2;color:#111;border-radius:30px 30px 30px 6px}
   .chatbot-images{align-self:stretch;width:100%;max-width:100%;background:transparent;padding:8px;border-radius:12px;display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-start;box-sizing:border-box;overflow:visible}
@@ -750,8 +755,8 @@
       text: 'x'
     });
     const imagePreviewBody = createEl('div', { class: 'luxury-image-preview-body' });
-    const imagePreviewImg = createEl('img', { class: 'luxury-image-preview-img', alt: 'Luxury Intelligence preview' });
-    const imagePreviewCaption = createEl('p', { class: 'luxury-image-preview-caption', text: 'Luxury Intelligence image preview' });
+    const imagePreviewImg = createEl('img', { class: 'luxury-image-preview-img', alt: 'Intelligence preview' });
+    const imagePreviewCaption = createEl('p', { class: 'luxury-image-preview-caption', text: 'Intelligence image preview' });
     imagePreviewBody.appendChild(imagePreviewImg);
     imagePreviewPanel.appendChild(imagePreviewClose);
     imagePreviewPanel.appendChild(imagePreviewBody);
@@ -1895,7 +1900,8 @@
         addMessage('bot', String(data.answer || ''), {
           renderMarkdown: true,
           domain: data.domain,
-          mentionedVenues: data.mentionedVenues || []
+          mentionedVenues: data.mentionedVenues || [],
+          sources: data.sources || []
         });
         if (data.images && Array.isArray(data.images) && data.images.length > 0) {
           displayImages(data.images, data.rank_data, data.imageVenues);
@@ -1909,9 +1915,34 @@
       } catch (e) {
         hideThinking();
         console.error('LuxuryIntelligence keyword query failed', e);
-        addMessage('bot', 'Luxury Intelligence is temporarily unavailable. Please try again in a moment.');
+        addMessage('bot', 'Intelligence is temporarily unavailable. Please try again in a moment.');
         finalizeAssistantTurnScroll();
       }
+    }
+
+    // Keywords that answer the immersive invitation by opening the gallery,
+    // rather than being answered inline by Luxury Intelligence.
+    const GALLERY_HANDOFF_KEYWORDS = ['kusama'];
+    const GALLERY_URL = 'product-dashboard.html';
+
+    function isGalleryHandoffKeyword(label) {
+      return GALLERY_HANDOFF_KEYWORDS.includes(String(label || '').trim().toLowerCase());
+    }
+
+    // Store the question/answer pair so the gallery's chat panel can continue
+    // the same conversation, then navigate. The short delay lets the visitor
+    // see their selection land in the transcript first.
+    function handOffToGallery(label) {
+      if (window.ShopThatData) {
+        window.ShopThatData.setChatHandoff({
+          keyword: label,
+          messages: [
+            { sender: 'bot', message: activeSubQuestion },
+            { sender: 'user', message: label }
+          ]
+        });
+      }
+      setTimeout(() => { window.location.href = GALLERY_URL; }, 450);
     }
 
     function onKeywordSelect(label){
@@ -1933,6 +1964,11 @@
         if (currentSessionId) {
           window.ShopThatData.addChatMessage(currentSessionId, label, 'user', [label]);
         }
+      }
+
+      if (isGalleryHandoffKeyword(label)) {
+        handOffToGallery(label);
+        return;
       }
 
       void runLuxuryQueryForKeyword(label);
@@ -2111,7 +2147,29 @@
     
     // Track whether products are in view for keyword display
     let productsInView = false;
-    
+
+    // The panel opens with a generic prompt, then asks the visitor into the
+    // Kusama gallery on its own. Selecting the "Kusama" chip answers whichever
+    // question is on screen, and that Q&A pair is what the gallery mirrors.
+    const IMMERSIVE_SUB_TEXT = 'Would you like to immerse yourself in Kusama\u2019s world?';
+    const IMMERSIVE_INVITE_DELAY = 1600;
+    let immersiveInviteTimer = null;
+    let activeSubQuestion = sub.textContent;
+
+    function scheduleImmersiveInvite() {
+      if (immersiveInviteTimer || activeSubQuestion === IMMERSIVE_SUB_TEXT) return;
+      immersiveInviteTimer = setTimeout(() => {
+        immersiveInviteTimer = null;
+        activeSubQuestion = IMMERSIVE_SUB_TEXT;
+        sub.classList.add('is-swapping');
+        setTimeout(() => {
+          sub.textContent = IMMERSIVE_SUB_TEXT;
+          sub.classList.remove('is-swapping');
+          ensureSizeForContent();
+        }, 220);
+      }, IMMERSIVE_INVITE_DELAY);
+    }
+
     // Helper function to show keywords based on scroll position
     function showKeywordsAnimated(allKeywords) {
       // First two chips when at top of page
@@ -2120,7 +2178,9 @@
       const productKeywords = ['Capucines BB', 'Capucines White', 'Twist MM'];
       
       showKeywords(initialKeywords);
-          
+
+      scheduleImmersiveInvite();
+
       // Set up scroll listener for product visibility
       setupProductScrollListener(initialKeywords, productKeywords);
       }
@@ -2265,6 +2325,27 @@
       });
     }
 
+    /** Numbered citation links for the sources returned alongside an answer. */
+    function buildSourcesList(sources, klass) {
+      const wrap = createEl('div', { class: klass });
+      wrap.appendChild(createEl('div', { class: 'sources-label', text: 'Sources' }));
+      sources.forEach((url, i) => {
+        let label;
+        try {
+          label = new URL(String(url)).hostname.replace(/^www\./, '');
+        } catch (e) {
+          label = String(url);
+        }
+        wrap.appendChild(createEl('a', {
+          href: String(url),
+          target: '_blank',
+          rel: 'noopener noreferrer',
+          text: `${i + 1}. ${label}`
+        }));
+      });
+      return wrap;
+    }
+
     function addMessage(sender, text, opts){
       const klass = sender === 'user' ? 'chatbot-msg chatbot-msg-user' : 'chatbot-msg chatbot-msg-bot';
       const div = createEl('div', { class: klass });
@@ -2279,6 +2360,9 @@
         if (opts.domain) {
           const dom = createEl('div', { class: 'chatbot-msg-domain', text: String(opts.domain) });
           div.appendChild(dom);
+        }
+        if (Array.isArray(opts.sources) && opts.sources.length) {
+          div.appendChild(buildSourcesList(opts.sources, 'chatbot-msg-sources'));
         }
       } else {
         div.textContent = markdownToText(text);
@@ -2438,7 +2522,7 @@
       if (thinkingIndicator) return; // Already showing
       
       thinkingIndicator = createEl('div', { class: 'chatbot-thinking' });
-      const thinkingText = createEl('span', { class: 'chatbot-thinking-text', text: (window.LuxuryIntelligence && window.LuxuryIntelligence.ANALYZING_TEXT) || 'Analyzing Luxury Catalogs' });
+      const thinkingText = createEl('span', { class: 'chatbot-thinking-text', text: (window.LuxuryIntelligence && window.LuxuryIntelligence.ANALYZING_TEXT) || 'Analyzing Catalogs' });
       const dots = createEl('div', { class: 'chatbot-dots' });
       
       // Create three animated dots
@@ -2498,7 +2582,7 @@
         hideThinking();
 
         const botResponse = String(d.answer || 'No response');
-        addMessage('bot', botResponse, { renderMarkdown: true, domain: d.domain, mentionedVenues: d.mentionedVenues || [] });
+        addMessage('bot', botResponse, { renderMarkdown: true, domain: d.domain, mentionedVenues: d.mentionedVenues || [], sources: d.sources || [] });
 
         if (d.images && Array.isArray(d.images) && d.images.length > 0) {
           displayImages(d.images, d.rank_data, d.imageVenues);
@@ -2515,7 +2599,7 @@
       } catch (e) {
         hideThinking();
         console.error('LuxuryIntelligence send failed', e);
-        addMessage('bot', '❗ Luxury Intelligence could not answer right now. Please try again.');
+        addMessage('bot', '❗ Intelligence could not answer right now. Please try again.');
         finalizeAssistantTurnScroll();
       }
     }
@@ -3592,7 +3676,7 @@
 
         displayProductCard(productInfo);
 
-        addMessage('bot', botResponse, { renderMarkdown: true, domain: data.domain, mentionedVenues: data.mentionedVenues || [] });
+        addMessage('bot', botResponse, { renderMarkdown: true, domain: data.domain, mentionedVenues: data.mentionedVenues || [], sources: data.sources || [] });
         if (data.images && Array.isArray(data.images) && data.images.length > 0) {
           displayImages(data.images, data.rank_data, data.imageVenues);
         } else {

@@ -179,6 +179,27 @@
     });
   }
 
+  /** Numbered citation links for the sources returned alongside an answer. */
+  function buildSourcesList(sources) {
+    const wrap = createEl('div', { class: 'ai-chat-sources' });
+    wrap.appendChild(createEl('div', { class: 'ai-chat-sources-label', text: 'Sources' }));
+    sources.forEach((url, i) => {
+      let label;
+      try {
+        label = new URL(String(url)).hostname.replace(/^www\./, '');
+      } catch (e) {
+        label = String(url);
+      }
+      wrap.appendChild(createEl('a', {
+        href: String(url),
+        target: '_blank',
+        rel: 'noopener noreferrer',
+        text: `${i + 1}. ${label}`
+      }));
+    });
+    return wrap;
+  }
+
   /** Render Luxury Intelligence API response (markdown + domain + ranked images) */
   function appendLuxuryIntelligenceToChat(chatMessages, data) {
     if (!chatMessages || !data) return;
@@ -195,6 +216,9 @@
     wrap.appendChild(md);
     if (data.domain) {
       wrap.appendChild(createEl('div', { class: 'ai-chat-domain', text: String(data.domain) }));
+    }
+    if (Array.isArray(data.sources) && data.sources.length) {
+      wrap.appendChild(buildSourcesList(data.sources));
     }
     chatMessages.appendChild(wrap);
 
@@ -232,9 +256,20 @@
       });
       imageMessage.appendChild(row);
       chatMessages.appendChild(imageMessage);
+      showAnswerImagesOnCanvas(data.images, data.imageVenues);
     }
 
-    chatMessages.scrollTop = chatMessages.scrollHeight;
+    scrollMessageToTop(chatMessages, wrap);
+  }
+
+  /**
+   * Bring a message's first line to the top of the thread instead of jumping to
+   * the end, so a long answer is read from its beginning.
+   */
+  function scrollMessageToTop(container, message) {
+    if (!container || !message) return;
+    const offset = message.getBoundingClientRect().top - container.getBoundingClientRect().top;
+    container.scrollTo({ top: Math.max(0, container.scrollTop + offset), behavior: 'smooth' });
   }
 
   // Navigation
@@ -806,25 +841,39 @@
     const minimizeBtn = document.getElementById('aiChatMinimize');
     const chatToggle = document.getElementById('aiChatToggle');
     
-    // Check localStorage for saved state (default to minimized)
+    // Check localStorage for saved state (default to minimized). Arriving from
+    // a handed-off conversation always opens the panel so the mirrored thread
+    // is visible.
     const savedState = localStorage.getItem('exploreChatOpen');
-    const isOpen = savedState === 'true';
-    
-    // Apply initial state
-    if (isOpen) {
-      chatPrompt.classList.remove('minimized');
-      chatToggle.classList.remove('visible');
-    } else {
-      chatPrompt.classList.add('minimized');
-      chatToggle.classList.add('visible');
-    }
-    
+    const pendingHandoff = window.ShopThatData && window.ShopThatData.getChatHandoff
+      ? window.ShopThatData.getChatHandoff()
+      : null;
+    const shouldOpen = savedState === 'true' || !!pendingHandoff;
+
+    // Always land closed so the gallery's fan-out has the stage to itself. If the
+    // panel is meant to be open it slides in once the cards have settled; the
+    // toggle stays hidden until then so it doesn't flash in and straight back out.
+    chatPrompt.classList.add('minimized');
+    chatToggle.classList.toggle('visible', !shouldOpen);
+
     // Fade in chat prompt
     setTimeout(() => {
       if (chatPrompt) {
         chatPrompt.classList.add('loaded');
       }
     }, 400);
+
+    if (shouldOpen) {
+      onPileIntroSettled(() => {
+        chatPrompt.classList.remove('minimized');
+        chatToggle.classList.remove('visible');
+        // Remember it as open so leaving and returning to the gallery doesn't
+        // look like the panel closed itself.
+        localStorage.setItem('exploreChatOpen', 'true');
+        // Let the panel finish opening before the conversation lands in it.
+        setTimeout(mirrorHandoffConversation, 260);
+      });
+    }
     
     if (minimizeBtn && chatToggle) {
       minimizeBtn.addEventListener('click', (e) => {
@@ -869,6 +918,10 @@
       newChatBtn.addEventListener('click', () => {
         if (!newChatBtn.disabled) {
           chatMessages.replaceChildren();
+          // Starting over also drops the handed-off thread so it isn't mirrored again.
+          if (window.ShopThatData && window.ShopThatData.clearChatHandoff) {
+            window.ShopThatData.clearChatHandoff();
+          }
           updateButtonStates();
           console.log('New chat started');
         }
@@ -877,13 +930,34 @@
     
     // Initialize button states
     updateButtonStates();
+
+    // Continue the conversation that led here: replay the homepage chatbot's
+    // invitation and the visitor's answer, then let the gallery itself answer
+    // the question.
+    function mirrorHandoffConversation() {
+      if (!pendingHandoff || chatMessages.children.length > 0) return;
+
+      pendingHandoff.messages.forEach(entry => {
+        addMessage(String(entry.message || ''), entry.sender === 'user');
+      });
+
+      const subject = pendingHandoff.keyword
+        ? `${pendingHandoff.keyword}\u2019s world`
+        : 'the campaign';
+      setTimeout(() => {
+        addMessage(
+          `Here is ${subject}. Drag any of these images into My Media to build a selection, then generate more from it.`,
+          false
+        );
+      }, 900);
+    }
     
     // Handle send — LV Luxury Intelligence API
     function sendMessage() {
       const message = chatInput.value.trim();
       if (!message) return;
       if (!window.LuxuryIntelligence) {
-        addMessage('Luxury Intelligence is not loaded. Refresh the page.', false);
+        addMessage('Intelligence is not loaded. Refresh the page.', false);
         return;
       }
       addMessage(message, true);
@@ -893,7 +967,7 @@
         setTimeout(() => { chatSend.style.transform = ''; }, 200);
       }
       const typing = createEl('div', { class: 'ai-chat-message ai ai-chat-typing' });
-      typing.textContent = ((window.LuxuryIntelligence && window.LuxuryIntelligence.ANALYZING_TEXT) || 'Analyzing Luxury Catalogs') + '...';
+      typing.textContent = ((window.LuxuryIntelligence && window.LuxuryIntelligence.ANALYZING_TEXT) || 'Analyzing Catalogs') + '...';
       chatMessages.appendChild(typing);
       chatMessages.scrollTop = chatMessages.scrollHeight;
       window.LuxuryIntelligence.ask(message).then(function (data) {
@@ -903,7 +977,7 @@
       }).catch(function (err) {
         console.error(err);
         typing.remove();
-        addMessage('Could not reach Luxury Intelligence. Try again.', false);
+        addMessage('Could not reach Intelligence. Try again.', false);
       });
     }
     
@@ -992,7 +1066,7 @@
       messagesContainer.scrollTop = messagesContainer.scrollHeight;
       
       const filename = imageSrc.split('/').pop().replace(/\.(jpg|png|jpeg|gif)$/i, '');
-      previewStatus.textContent = 'Asking Luxury Intelligence…';
+      previewStatus.textContent = 'Asking Intelligence…';
 
       (async function analyzeDrop() {
         try {
@@ -1012,7 +1086,7 @@
           console.error(e);
           previewStatus.textContent = 'Analysis unavailable';
           addMessage(
-            'Luxury Intelligence could not analyze this image. It was still saved to your favorites.',
+            'Intelligence could not analyze this image. It was still saved to your favorites.',
             false
           );
           addToFavorites(imageSrc, 'tab1');
@@ -1141,7 +1215,7 @@
       const message = chatInput.value.trim();
       if (!message) return;
       if (!window.LuxuryIntelligence) {
-        addMessage('Luxury Intelligence is not loaded. Refresh the page.', false);
+        addMessage('Intelligence is not loaded. Refresh the page.', false);
         return;
       }
       const contextual =
@@ -1154,7 +1228,7 @@
         setTimeout(() => { chatSend.style.transform = ''; }, 200);
       }
       const typing = createEl('div', { class: 'ai-chat-message ai ai-chat-typing' });
-      typing.textContent = ((window.LuxuryIntelligence && window.LuxuryIntelligence.ANALYZING_TEXT) || 'Analyzing Luxury Catalogs') + '...';
+      typing.textContent = ((window.LuxuryIntelligence && window.LuxuryIntelligence.ANALYZING_TEXT) || 'Analyzing Catalogs') + '...';
       chatMessages.appendChild(typing);
       chatMessages.scrollTop = chatMessages.scrollHeight;
       window.LuxuryIntelligence.ask(contextual).then(function (data) {
@@ -1164,7 +1238,7 @@
       }).catch(function (err) {
         console.error(err);
         typing.remove();
-        addMessage('Could not reach Luxury Intelligence. Try again.', false);
+        addMessage('Could not reach Intelligence. Try again.', false);
       });
     }
 
@@ -1295,9 +1369,32 @@
     hasImage: null,             // (src) => boolean
   };
 
-  // Sources of images the user has dragged into My Media. Persisted for the
-  // session so they survive focus/unfocus and switching between cards (which
-  // overwrite the curated drawer set).
+  // Report a generation run in the gallery chat so the conversation reflects
+  // what just happened on the canvas.
+  function notifyChatOfGeneration(selectionCount, generatedCount) {
+    const chatMessages = document.getElementById('aiChatMessages');
+    if (!chatMessages) return;
+    const source = selectionCount === 1 ? '1 image' : `${selectionCount} images`;
+    const text = generatedCount > 0
+      ? `Generated ${generatedCount} new image${generatedCount === 1 ? '' : 's'} from your selection of ${source}.`
+      : `No further variations left for your selection of ${source}. Drag in another image to generate more.`;
+    chatMessages.appendChild(createEl('div', { class: 'ai-chat-message ai', text: text }));
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+  }
+
+  // Related media used as the "generated" results for a dropped image. Canvas
+  // cards map to their curated set by filename index.
+  function curatedSetForSrc(src) {
+    const match = /canvas-(\d+)\./.exec(String(src || ''));
+    if (match) {
+      const setIndex = parseInt(match[1], 10) - 1;
+      if (drawerImageSets[setIndex]) return drawerImageSets[setIndex];
+    }
+    return null;
+  }
+
+  // Sources of images the user has dragged into My Media. This is the selection
+  // that the Generate action works from, and it survives focus/unfocus.
   const userDroppedSrcs = new Set();
 
   // Build a drawer-image element with a bookmark button + smooth pointer
@@ -1529,7 +1626,7 @@
       drawerImages.replaceChildren();
       const placeholder = createEl('div', {
         class: 'drawer-placeholder',
-        text: 'Click an image card to load curated media'
+        text: 'Drag images here to build a selection, then generate from it'
       });
       placeholder.style.cssText = 'display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; color: rgba(0,0,0,0.4); font-size: 14px; font-style: italic; padding: 20px; text-align: center;';
       drawerImages.appendChild(placeholder);
@@ -1572,6 +1669,8 @@
       wrapper.classList.add('is-entering');
       drawerImages.insertBefore(wrapper, drawerImages.firstChild);
       setTimeout(() => wrapper.classList.remove('is-entering'), 450);
+
+      updateGenerateAvailability();
     };
 
     drawerController.removeImageSmoothly = function(src) {
@@ -1585,6 +1684,8 @@
         list.splice(idx, 1);
         localStorage.setItem('drawerImages', JSON.stringify(list));
       }
+
+      updateGenerateAvailability();
 
       // Find the matching DOM nodes (could be the bare img or a wrapper)
       // and animate the outermost match out.
@@ -1609,6 +1710,93 @@
         }, 200);
       });
     };
+
+    // ===== Generate from a dragged-in selection =====
+    // The Generate action is only reachable once the user has dragged images
+    // into My Media — clicking a card never produces media.
+    const generateBtn = document.getElementById('generateMediaBtn');
+
+    function updateGenerateAvailability() {
+      if (!generateBtn) return;
+      const count = userDroppedSrcs.size;
+      if (count === 0) {
+        generateBtn.hidden = true;
+        return;
+      }
+      generateBtn.hidden = false;
+      generateBtn.disabled = false;
+      generateBtn.classList.remove('is-generating');
+      generateBtn.textContent = count === 1
+        ? 'Generate from 1 image'
+        : `Generate from ${count} images`;
+    }
+
+    // Pick related media for the dropped images, skipping anything already in
+    // the drawer so repeated runs keep adding new results.
+    function collectGeneratedImages() {
+      const present = new Set(readStoredArray('drawerImages'));
+      const results = [];
+      userDroppedSrcs.forEach(src => {
+        (curatedSetForSrc(src) || []).forEach(candidate => {
+          if (present.has(candidate) || results.includes(candidate)) return;
+          results.push(candidate);
+        });
+      });
+      return results;
+    }
+
+    function appendGeneratedImage(src) {
+      const list = readStoredArray('drawerImages');
+      if (!list.includes(src)) {
+        list.push(src);
+        localStorage.setItem('drawerImages', JSON.stringify(list));
+      }
+      const placeholder = drawerImages.querySelector('.drawer-placeholder');
+      if (placeholder) placeholder.remove();
+
+      const wrapper = buildDrawerImageWithBookmark(src, list.length - 1);
+      wrapper.classList.add('is-entering');
+      drawerImages.appendChild(wrapper);
+      setTimeout(() => wrapper.classList.remove('is-entering'), 450);
+    }
+
+    function generateFromSelection() {
+      if (!generateBtn || generateBtn.disabled) return;
+      const selectionSize = userDroppedSrcs.size;
+      if (selectionSize === 0) return;
+
+      const generated = collectGeneratedImages();
+      generateBtn.disabled = true;
+      generateBtn.classList.add('is-generating');
+      generateBtn.textContent = 'Generating\u2026';
+
+      if (generated.length === 0) {
+        setTimeout(() => {
+          notifyChatOfGeneration(selectionSize, 0);
+          updateGenerateAvailability();
+        }, 700);
+        return;
+      }
+
+      // Stagger the results in so it reads as generation rather than a paste.
+      generated.forEach((src, index) => {
+        setTimeout(() => appendGeneratedImage(src), 420 + index * 140);
+      });
+
+      setTimeout(() => {
+        notifyChatOfGeneration(selectionSize, generated.length);
+        updateGenerateAvailability();
+      }, 420 + generated.length * 140);
+    }
+
+    if (generateBtn) {
+      generateBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        generateFromSelection();
+      });
+    }
+
+    updateGenerateAvailability();
 
     // Fade in drawer after a short delay
     setTimeout(() => {
@@ -1641,12 +1829,15 @@
     console.log('Raw galleryImages from localStorage:', mediaJson);
     const media = readStoredArray('galleryImages');
     console.log('Parsed media:', media);
-    registerProductImageSources(media);
+    // Product hovers are keyed by canvas position, so they only make sense for
+    // the default set — answer images would inherit unrelated products.
+    if (!isShowingAnswerImages()) registerProductImageSources(media);
     
     updateBadge('mediaCount', media.length);
 
     if (media.length === 0) {
       showEmptyState(grid, 'No media items yet', 'Add images to your media gallery from the main page');
+      markPileIntroSettled();
       return;
     }
 
@@ -2046,29 +2237,32 @@
       const card = createMediaCardElement(item, index);
       cards.push(card);
       grid.appendChild(card);
-
-      // Staggered fade-in for the initial render only
-      setTimeout(() => {
-        card.style.animation = `cardArrange 0.3s ease-out forwards`;
-        card.style.animationDelay = `${index * 0.04}s`;
-      }, 50);
     });
+
+    // The arrival pile plays until it has actually finished. A re-render that
+    // interrupts it (storage sync, window focus) rebuilds the cards, so the
+    // intro is restarted on the new elements rather than lost.
+    if (!pileIntroDone && cards.length > 0) {
+      animateCardsFromPile(cards);
+    } else {
+      // Staggered fade-in for re-renders once the intro has already played
+      cards.forEach((card, index) => {
+        setTimeout(() => {
+          card.style.animation = `cardArrange 0.3s ease-out forwards`;
+          card.style.animationDelay = `${index * 0.04}s`;
+        }, 50);
+      });
+      markPileIntroSettled();
+    }
 
     // Focus a card
     function focusCard(card) {
       focusedCard = card;
       backdrop.classList.add('active');
       
-      // Find the index of the focused card
-      const focusedIndex = cards.indexOf(card);
-      
-      // Load curated images (and any focused-card products) into the single
-      // My Media drawer so the bottom-left area keeps the same height as in
-      // the default load state.
-      if (drawerImageSets[focusedIndex] && currentLoadedCardIndex !== focusedIndex) {
-        loadCuratedDrawerImages(focusedIndex);
-      }
-      
+      // Clicking a card only zooms it. Populating My Media is reserved for
+      // drag & drop, so no curated media is loaded here.
+
       // Ensure transition is enabled for smooth animation
       cards.forEach(c => {
         if (c.style.transition === 'none') {
@@ -2129,73 +2323,6 @@
       });
     }
     
-    // Load curated images into the My Media drawer based on card index.
-    // User-dropped images always appear first so they persist visually across
-    // focus changes (and across the unfocus/refocus cycle).
-    function loadCuratedDrawerImages(cardIndex) {
-      currentLoadedCardIndex = cardIndex;
-
-      const curated = drawerImageSets[cardIndex] || drawerImageSets[0];
-      const userList = Array.from(userDroppedSrcs);
-      // Compose: user-dropped images first, then curated (deduped)
-      const imageSet = [...userList, ...curated.filter(s => !userDroppedSrcs.has(s))];
-      localStorage.setItem('drawerImages', JSON.stringify(imageSet));
-
-      const drawerImagesEl = document.getElementById('drawerImages');
-      if (!drawerImagesEl) return;
-
-      // Reuse existing DOM nodes for sources that are already present so the
-      // user-dropped images stay put (and don't re-animate) when switching
-      // between cards. Only newly-added curated entries get the staggered
-      // fade-in.
-      const existing = new Map();
-      Array.from(drawerImagesEl.children).forEach(child => {
-        if (!child.classList || !child.classList.contains('my-media-image-wrapper')) return;
-        const innerImg = child.querySelector('img.my-media-image');
-        if (innerImg) existing.set(innerImg.getAttribute('src'), child);
-      });
-      const placeholder = drawerImagesEl.querySelector('.drawer-placeholder');
-      if (placeholder) placeholder.remove();
-
-      // Build the new ordered list, reusing or creating elements as needed.
-      const newChildren = [];
-      let newCount = 0;
-      imageSet.forEach((src, index) => {
-        let wrapper = existing.get(src);
-        if (wrapper) {
-          // Reuse — leave it visible, no entry animation
-          existing.delete(src);
-          // Make sure click handler points to the latest focusMediaImage
-          // (closures from previous renderMedia calls are fine because the
-          // function body is identical; we keep the existing handler).
-        } else {
-          wrapper = buildDrawerImageWithBookmark(src, index, focusMediaImage);
-          // Stagger entry animation for newly-introduced images only
-          wrapper.style.opacity = '0';
-          wrapper.style.transform = 'translateY(10px)';
-          const delay = newCount * 80;
-          newCount++;
-          setTimeout(() => {
-            wrapper.style.transition = 'all 0.3s ease-out';
-            wrapper.style.opacity = '1';
-            wrapper.style.transform = 'translateY(0)';
-          }, delay);
-        }
-        newChildren.push(wrapper);
-      });
-
-      // Remove any leftover elements that aren't in the new set
-      existing.forEach(el => {
-        if (el.parentNode) el.parentNode.removeChild(el);
-      });
-
-      // Reorder DOM to match imageSet
-      newChildren.forEach((el, i) => {
-        if (drawerImagesEl.children[i] !== el) {
-          drawerImagesEl.insertBefore(el, drawerImagesEl.children[i] || null);
-        }
-      });
-    }
     
     // Focus a media image from the drawer as a new card
     function focusMediaImage(imageSrc, title) {
@@ -2578,6 +2705,168 @@
   function _seedRand(seed) {
     const x = Math.sin(seed * 9301 + 49297) * 233280;
     return x - Math.floor(x);
+  }
+
+  // Arrival animation: the cards start stacked in a single pile at the centre
+  // of the layout, hold for a beat, then fan out one after another to their real
+  // positions. Plays once per page load; a re-render that interrupts it restarts
+  // it on the new cards.
+  let pileIntroDone = false;
+  let pileIntroTimers = [];
+  const PILE_HOLD_MS = 620;
+  const PILE_FAN_STAGGER_MS = 110;
+  const PILE_FAN_DURATION_MS = 620;
+
+  // Lets the rest of the page wait for the cards to finish arriving before it
+  // appears, so the fan-out owns the entrance on its own.
+  let pileIntroSettled = false;
+  const pileIntroWaiters = [];
+
+  function onPileIntroSettled(fn) {
+    if (pileIntroSettled) { fn(); return; }
+    pileIntroWaiters.push(fn);
+  }
+
+  function markPileIntroSettled() {
+    if (pileIntroSettled) return;
+    pileIntroSettled = true;
+    pileIntroWaiters.splice(0).forEach(fn => fn());
+  }
+
+  /** Let the pile intro run again on the next render, for a new set of cards. */
+  function replayPileIntro() {
+    pileIntroTimers.forEach(clearTimeout);
+    pileIntroTimers = [];
+    pileIntroDone = false;
+  }
+
+  // An answer that comes back with images takes the canvas over. The images it
+  // replaces are parked under this key so Reset can put them back.
+  const GALLERY_DEFAULTS_KEY = 'galleryImagesDefaults';
+
+  function isShowingAnswerImages() {
+    return localStorage.getItem(GALLERY_DEFAULTS_KEY) !== null;
+  }
+
+  function updateGalleryResetVisibility() {
+    const btn = document.getElementById('galleryResetBtn');
+    if (btn) btn.hidden = !isShowingAnswerImages();
+  }
+
+  /** Re-stack the canvas around a fresh set of images and fan them back out. */
+  function setCanvasImages(items) {
+    localStorage.setItem('galleryImages', JSON.stringify(items));
+    replayPileIntro();
+    if (currentView === 'media') renderMedia();
+    updateBadge('mediaCount', items.length);
+    updateGalleryResetVisibility();
+  }
+
+  /** Swap the gallery canvas over to the images that came back with an answer. */
+  function showAnswerImagesOnCanvas(images, imageVenues) {
+    const srcs = [];
+    (images || []).forEach((image) => {
+      const src = String(image || '').trim();
+      if (src && srcs.indexOf(src) === -1) srcs.push(src);
+    });
+    if (!srcs.length) return;
+
+    const titleBySrc = {};
+    (imageVenues || []).forEach((venue) => {
+      if (venue && venue.url && venue.name) titleBySrc[venue.url] = venue.name;
+    });
+
+    if (!isShowingAnswerImages()) {
+      localStorage.setItem(GALLERY_DEFAULTS_KEY, localStorage.getItem('galleryImages') || '[]');
+    }
+
+    const positions = generateStackedPositions(srcs.length);
+    setCanvasImages(srcs.map((src, i) => ({
+      src: src,
+      position: positions[i],
+      productData: { title: titleBySrc[src] || 'From your answer' }
+    })));
+  }
+
+  function restoreDefaultCanvasImages() {
+    const saved = localStorage.getItem(GALLERY_DEFAULTS_KEY);
+    if (saved === null) return;
+    localStorage.removeItem(GALLERY_DEFAULTS_KEY);
+    let items;
+    try {
+      items = JSON.parse(saved);
+    } catch (e) {
+      items = [];
+    }
+    setCanvasImages(Array.isArray(items) ? items : []);
+  }
+
+  function animateCardsFromPile(cardEls) {
+    if (!cardEls.length) return;
+    // Drop any in-flight intro so a restarted one can't fight it.
+    pileIntroTimers.forEach(clearTimeout);
+    pileIntroTimers = [];
+
+    // Safety net: whatever happens to the phased timers below, nothing waiting on
+    // the intro (the chat panel) may be left stranded off screen.
+    pileIntroTimers.push(setTimeout(
+      markPileIntroSettled,
+      30 + PILE_HOLD_MS + cardEls.length * PILE_FAN_STAGGER_MS + PILE_FAN_DURATION_MS + 500
+    ));
+
+    // Pile at the centre of where the cards will end up, so the stack is always
+    // on screen regardless of how many cards there are.
+    const originX = cardEls.reduce((sum, c) => sum + parseFloat(c.dataset.originalX), 0) / cardEls.length;
+    const originY = cardEls.reduce((sum, c) => sum + parseFloat(c.dataset.originalY), 0) / cardEls.length;
+
+    cardEls.forEach((card, index) => {
+      const dx = originX - parseFloat(card.dataset.originalX);
+      const dy = originY - parseFloat(card.dataset.originalY);
+      // Alternate the tilt so the stack reads as a shuffled deck.
+      const pileRotation = (index % 2 === 0 ? -1 : 1) * (3 + (index % 3) * 2.5);
+
+      card.style.transition = 'none';
+      card.style.transform = `translate(${dx}px, ${dy}px) rotate(${pileRotation}deg) scale(0.9)`;
+      card.style.opacity = '0';
+      // Topmost card of the pile is the first one to leave.
+      card.style.zIndex = String(cardEls.length - index);
+    });
+
+    // Fade the pile in, then release the cards. Driven by timers rather than
+    // requestAnimationFrame: rAF is suspended when the page isn't compositing,
+    // which would otherwise leave every card stuck at opacity 0.
+    pileIntroTimers.push(setTimeout(() => {
+      cardEls.forEach(card => {
+        card.style.transition = 'opacity 260ms ease';
+        card.style.opacity = '1';
+      });
+
+      pileIntroTimers.push(setTimeout(() => {
+        cardEls.forEach((card, index) => {
+          pileIntroTimers.push(setTimeout(() => {
+            const restRotation = parseFloat(card.dataset.originalRotation) || 0;
+            card.style.transition = `transform ${PILE_FAN_DURATION_MS}ms cubic-bezier(0.22, 1, 0.36, 1)`;
+            card.style.transform = `rotate(${restRotation}deg) scale(0.95)`;
+            card.style.zIndex = card.dataset.originalZIndex;
+            // Once settled, pin the card to its resting transform without a
+            // transition before handing control back to the normal interaction
+            // transition. This guarantees the final layout even if the fan
+            // transition never got a chance to animate.
+            pileIntroTimers.push(setTimeout(() => {
+              card.style.transition = 'none';
+              card.style.transform = `rotate(${restRotation}deg) scale(0.95)`;
+              void card.offsetHeight;
+              card.style.transition = 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
+            }, PILE_FAN_DURATION_MS + 20));
+          }, index * PILE_FAN_STAGGER_MS));
+        });
+
+        pileIntroTimers.push(setTimeout(() => {
+          pileIntroDone = true;
+          markPileIntroSettled();
+        }, cardEls.length * PILE_FAN_STAGGER_MS + PILE_FAN_DURATION_MS + 40));
+      }, PILE_HOLD_MS));
+    }, 30));
   }
 
   // Generate stacked card positions (deterministic — same input = same output)
@@ -3484,6 +3773,10 @@
   // Initialize demo data - only if no existing user data
   // These are the default canvas card images shown on page load
   function initializeDemoData() {
+    // While answer images hold the canvas the defaults live in the backup key,
+    // so topping them up here would mix the two sets together.
+    if (isShowingAnswerImages()) return;
+
     const demoMedia = [
       { src: 'assets/canvas-1.jpg', productData: { title: 'Kusama Portrait - Polka Dot Room' } },
       { src: 'assets/canvas-2.jpg', productData: { title: 'Blue Face Paint Editorial' } },
@@ -3534,6 +3827,12 @@
   updateBadge('mediaCount', media.length);
   // Include persistent default favorites (across all tabs) in the initial count
   updateBadge('favoritesCount', favorites.length + defaultFavoritesTotalCount);
+
+  const galleryResetBtn = document.getElementById('galleryResetBtn');
+  if (galleryResetBtn) {
+    galleryResetBtn.addEventListener('click', restoreDefaultCanvasImages);
+  }
+  updateGalleryResetVisibility();
 
   // Initialize the default view
   switchView(currentView);

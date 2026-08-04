@@ -35,18 +35,22 @@ Required runtime environment variables:
 - `SHOPTHAT_AUTH_SECRET`
 - `SHOPTHAT_AUTH_USERS`
 - `LUXURY_INTELLIGENCE_ASK_URL`
+- `LUXURY_INTELLIGENCE_API_KEY`
 - `KEYWORDS_GRAPH_API_URL`
 - Backend-specific keys documented in the relevant `.env.example` files.
 
-## Local Static Demo
+## Local Demo
 
-Serve `WebDemo` from the repo root with any static file server, for example:
+Run the dev server from the repo root. It serves `WebDemo` and runs the `api/`
+functions on the same origin, so the AI chat works locally exactly as deployed:
 
 ```sh
-python3 -m http.server 8080 --directory WebDemo
+cp .env.example .env   # then fill in LUXURY_INTELLIGENCE_API_KEY
+node dev-server.js     # http://localhost:8080
 ```
 
-Serverless API routes require a Vercel-compatible local runtime or deployment environment.
+A plain static server (`python3 -m http.server 8080 --directory WebDemo`) still
+serves the pages, but `/api/*` will 404 and the chat will fail.
 
 ## Security Notes
 

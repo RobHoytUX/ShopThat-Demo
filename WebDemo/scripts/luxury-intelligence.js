@@ -8,8 +8,13 @@
   'use strict';
 
   var ASK_URL = '/api/luxury-intelligence/ask';
-  var DEFAULT_TOP_K = 5;
-  var ANALYZING_TEXT = 'Analyzing Luxury Catalogs';
+  // Answers are anchored to a boutique; these are the two the demo covers.
+  var STORE_LOCATIONS = {
+    '57th St.': 'Louis Vuitton, 6 East 57th Street, New York',
+    'SoHo': 'Louis Vuitton, 116 Greene Street, New York'
+  };
+  var DEFAULT_STORE_AREA = '57th St.';
+  var ANALYZING_TEXT = 'Analyzing Catalogs';
   var apiVenueLocations = {};
 
   /** Prompt tuned so dashboard can parse a bullet list of keyword phrases */
@@ -223,9 +228,53 @@
     }
   };
 
+  // How the chat API tends to name venues in prose, mapped to the catalog
+  // keys above, so a mention can still resolve to a photo and a map pin.
+  var VENUE_NAME_ALIASES = {
+    'The Museum of Modern Art': 'MoMA Museum',
+    'Museum of Modern Art': 'MoMA Museum',
+    'MoMA': 'MoMA Museum',
+    'The Metropolitan Museum of Art': 'Metropolitan Museum of Art',
+    'The Metropolitan Museum': 'Metropolitan Museum of Art',
+    'The Met': 'Metropolitan Museum of Art',
+    'Guggenheim Museum': 'The Guggenheim',
+    'The Guggenheim Museum': 'The Guggenheim',
+    'Guggenheim': 'The Guggenheim',
+    'Frick Collection': 'The Frick Collection',
+    'The Frick': 'The Frick Collection',
+    'Baccarat Hotel': 'The Baccarat Hotel',
+    'Baccarat': 'The Baccarat Hotel',
+    'St. Regis': 'ST Regis',
+    'The St. Regis': 'ST Regis',
+    'Carlyle Hotel': 'The Carlyle',
+    'The Carlyle Hotel': 'The Carlyle',
+    'Plaza Hotel': 'The Plaza',
+    'The Plaza Hotel': 'The Plaza',
+    'Mark Hotel': 'The Mark Hotel',
+    'Fondation Louis Vuitton': 'Fondation LV'
+  };
+
+  // Catalog names that double as ordinary words. Matched case-sensitively so
+  // "open to the public" doesn't turn into a hotel recommendation.
+  var CASE_SENSITIVE_VENUE_NAMES = ['PUBLIC', 'OMEN', 'The Modern', 'The Mark'];
+
+  function canonicalVenueName(name) {
+    var raw = String(name || '').trim();
+    if (!raw) return '';
+    if (VENUE_NAME_ALIASES[raw]) return VENUE_NAME_ALIASES[raw];
+    var wanted = raw.toLowerCase();
+    var hit = '';
+    Object.keys(VENUE_NAME_ALIASES).some(function (key) {
+      if (key.toLowerCase() !== wanted) return false;
+      hit = VENUE_NAME_ALIASES[key];
+      return true;
+    });
+    return hit || raw;
+  }
+
   /** Return { lat, lng, ...meta } for a venue, or null if unknown. */
   function getVenueLocation(name) {
-    var canonicalName = name;
+    var canonicalName = canonicalVenueName(name);
     var entry = VENUE_IMAGES[canonicalName];
     if (!entry) {
       var wanted = String(name || '').toLowerCase();
@@ -822,20 +871,86 @@
     return '<p>' + esc + '</p>';
   }
 
-  function ask(query) {
+  /** The API answers relative to one boutique, so "nearby" follows the question. */
+  function storeLocationForQuery(query) {
+    var areas = detectAreas(query);
+    if (areas.length === 1 && STORE_LOCATIONS[areas[0]]) return STORE_LOCATIONS[areas[0]];
+    return STORE_LOCATIONS[DEFAULT_STORE_AREA];
+  }
+
+  /** Catalog venues named in an answer, in the order they appear in it. */
+  function venueMentionsInAnswer(answer) {
+    var text = String(answer || '');
+    if (!text) return [];
+    var names = Object.keys(VENUE_IMAGES).concat(Object.keys(VENUE_NAME_ALIASES));
+    var positioned = [];
+    names.forEach(function (name) {
+      var flags = CASE_SENSITIVE_VENUE_NAMES.indexOf(name) === -1 ? 'i' : '';
+      var pattern = new RegExp('\\b' + escapeRegExp(name) + '\\b', flags);
+      var idx = text.search(pattern);
+      if (idx !== -1) positioned.push({ name: name, idx: idx });
+    });
+    positioned.sort(function (a, b) { return a.idx - b.idx; });
+    var out = [];
+    positioned.forEach(function (p) { uniquePush(out, p.name); });
+    return out;
+  }
+
+  /**
+   * Pair an answer with local venue photos: every catalog venue named in the
+   * prose contributes its image and becomes clickable through to the map,
+   * alongside whatever image the API returned for the answer as a whole.
+   */
+  function attachVenueContext(data) {
+    if (!data || typeof data !== 'object') return data;
+
+    var images = Array.isArray(data.images) ? data.images.slice() : [];
+    var rankData = [];
+    var imageVenues = [];
+    var mentionedVenues = [];
+    var seenUrls = {};
+    images.forEach(function (url) {
+      seenUrls[url] = true;
+      rankData.push({ url: url, priority_rank: rankData.length + 1 });
+    });
+
+    venueMentionsInAnswer(data.answer).forEach(function (name) {
+      uniquePush(mentionedVenues, name);
+      var entry = VENUE_IMAGES[canonicalVenueName(name)];
+      if (!entry || !entry.url || seenUrls[entry.url]) return;
+      seenUrls[entry.url] = true;
+      images.push(entry.url);
+      rankData.push({ url: entry.url, priority_rank: rankData.length + 1 });
+      imageVenues.push({
+        name: name,
+        url: entry.url,
+        area: entry.area || '',
+        category: entry.category || ''
+      });
+    });
+
+    data.images = images;
+    data.rank_data = rankData;
+    data.imageVenues = imageVenues;
+    data.mentionedVenues = mentionedVenues;
+    data.sources = Array.isArray(data.sources) ? data.sources : [];
+    return data;
+  }
+
+  function ask(query, options) {
+    var opts = options || {};
     return fetch(ASK_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'omit',
-      body: JSON.stringify({ query: query, top_k: DEFAULT_TOP_K })
+      body: JSON.stringify({
+        message: String(query || ''),
+        store_location: opts.storeLocation || storeLocationForQuery(query)
+      })
     }).then(function (res) {
       if (!res.ok) throw new Error('HTTP ' + res.status);
       return res.json();
-    }).then(function (data) {
-      clampConstrainedAnswer(data, query);
-      var normalized = normalizeOmniverseResponse(data, query);
-      return alignImagesToVenues(normalized, query);
-    });
+    }).then(attachVenueContext);
   }
 
   /**
@@ -881,7 +996,8 @@
 
   global.LuxuryIntelligence = {
     ASK_URL: ASK_URL,
-    DEFAULT_TOP_K: DEFAULT_TOP_K,
+    STORE_LOCATIONS: STORE_LOCATIONS,
+    storeLocationForQuery: storeLocationForQuery,
     ANALYZING_TEXT: ANALYZING_TEXT,
     DASHBOARD_KEYWORDS_QUERY: DASHBOARD_KEYWORDS_QUERY,
     ask: ask,

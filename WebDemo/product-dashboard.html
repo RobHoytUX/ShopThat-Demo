@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css" />
-  <link rel="stylesheet" href="styles/product-dashboard.css?v=23">
+  <link rel="stylesheet" href="styles/product-dashboard.css?v=24">
 </head>
 <body>
   <!-- Header -->
@@ -95,6 +95,7 @@
 
       <!-- Media View -->
       <section class="dashboard-view" id="mediaView">
+        <button class="gallery-reset-btn" id="galleryResetBtn" hidden>Reset</button>
         <div class="media-filters" style="display:none;">
           <div class="media-filter-badges">
             <button class="media-filter-badge" data-filter="campaign">Kusama x LV campaign</button>
@@ -185,6 +186,7 @@
           </div>
           <div class="my-media-header">
             <h3>My Media</h3>
+            <button class="generate-media-btn" id="generateMediaBtn" hidden>Generate from selection</button>
             <button class="clear-selection-btn" id="clearSelectionBtn">Clear Selection</button>
           </div>
           <div class="my-media-drawer-content">
@@ -351,10 +353,10 @@
 
   <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/marked@11.1.1/marked.min.js"></script>
-  <script src="scripts/luxury-intelligence.js?v=8"></script>
-  <script src="scripts/shared-data.js?v=2"></script>
+  <script src="scripts/luxury-intelligence.js?v=9"></script>
+  <script src="scripts/shared-data.js?v=3"></script>
   <script src="scripts/dashboard-storage.js"></script>
   <script src="scripts/dashboard-map-data.js?v=3"></script>
-  <script src="scripts/product-dashboard.js?v=47"></script>
+  <script src="scripts/product-dashboard.js?v=60"></script>
 </body>
 </html>

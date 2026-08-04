@@ -46,7 +46,7 @@
         const venue = venuesByUrl[url];
         const img = document.createElement('img');
         img.src = url;
-        img.alt = venue && venue.name ? venue.name : 'Luxury intelligence result';
+        img.alt = venue && venue.name ? venue.name : 'Intelligence result';
         img.loading = 'lazy';
         img.style.width = '100%';
         img.style.height = '84px';
@@ -133,7 +133,7 @@
         if (window.LuxuryIntelligence && typeof window.LuxuryIntelligence.ask === 'function') {
           payload = await window.LuxuryIntelligence.ask(message);
         } else {
-          payload = { answer: 'Luxury Intelligence client is not available on this page yet.', images: [] };
+          payload = { answer: 'Intelligence client is not available on this page yet.', images: [] };
         }
 
         thinkingMsg.remove();
