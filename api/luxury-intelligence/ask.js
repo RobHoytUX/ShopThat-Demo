@@ -40,6 +40,8 @@ module.exports = async function askLuxuryIntelligence(req, res) {
     return res.status(400).json({ error: 'A message is required' });
   }
   const storeLocation = String((body && body.store_location) || DEFAULT_STORE_LOCATION);
+  const kRaw = body && body.k;
+  const k = Number.isFinite(Number(kRaw)) ? Math.max(1, Math.min(20, Number(kRaw))) : 5;
 
   let upstreamResponse;
   let responseText;
@@ -50,7 +52,7 @@ module.exports = async function askLuxuryIntelligence(req, res) {
         'content-type': 'application/json',
         'x-api-key': apiKey
       },
-      body: JSON.stringify({ message, store_location: storeLocation }),
+      body: JSON.stringify({ message, store_location: storeLocation, k }),
       signal: AbortSignal.timeout(UPSTREAM_TIMEOUT_MS)
     });
     responseText = await upstreamResponse.text();

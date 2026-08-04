@@ -574,7 +574,13 @@
     "assets/soho/venue-galleries/crosby-street-hotel/image-011.jpg"
   ],
   "The Frick Collection": [
-    "assets/museums/frick.jpg"
+    "assets/museums/frick/fragonard-the-meeting.png",
+    "assets/museums/frick/fragonard-love-letters.png",
+    "assets/museums/frick/fragonard-lover-crowned.png",
+    "assets/museums/frick/ingres-comtesse-dhaussonville.png",
+    "assets/museums/frick/vermeer-mistress-and-maid.png",
+    "assets/museums/frick/bellini-st-francis.png",
+    "assets/museums/frick/veronese-virtue-and-vice.png"
   ],
   "The Guggenheim": [
     "assets/museums/guggenheim.jpg"

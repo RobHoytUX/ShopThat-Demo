@@ -9,6 +9,7 @@
   var drawerRootEl = document.getElementById('treeDrawerBody');
   var viewportSectionEl = document.getElementById('treeDrawerViewportSection');
   var detailSectionEl = document.getElementById('treeDrawerDetailSection');
+  var articlesBodyEl = document.getElementById('treeArticlesBody');
 
   /** Graph keyword ids dimmed via the side panel (same behaviour as bubbles). */
   var treeDisabledNodes = new Set(
@@ -197,9 +198,11 @@
 
     function build(node) {
       var rawKids = (childrenMap[node.id] || []).slice();
-      var parentDisplayForNest = (node.id === rootNode.id) ? 'Louis Vuitton' : node.id;
+      var parentDisplayForNest = (node.id === rootNode.id)
+        ? (rootNode.apiLabel || 'Louis Vuitton')
+        : (node.apiLabel || node.id);
       rawKids = rawKids.filter(function (childNode) {
-        return !isRedundantNestedKeyword(parentDisplayForNest, childNode.id);
+        return !isRedundantNestedKeyword(parentDisplayForNest, childNode.apiLabel || childNode.id);
       });
       rawKids.sort(function (a, b) {
         return ((b.value || 0) - (a.value || 0));
@@ -207,8 +210,11 @@
       var displayName = parentDisplayForNest;
       var built = {
         name: displayName,
+        graphId: node.id,
         group: node.group != null ? node.group : 4,
-        value: node.value != null ? node.value : 50
+        value: node.value != null ? node.value : 50,
+        evidence: node.evidence || '',
+        sourceUrl: node.sourceUrl || ''
       };
       if (rawKids.length) {
         built.children = rawKids.map(build);
@@ -267,13 +273,13 @@
     treeSvg.call(zoomBehavior);
     treeSvg.call(zoomBehavior.transform, d3.zoomIdentity.translate(80, h / 2).scale(0.85));
 
-    // Looser vertical spacing + stronger separation between subtrees so that
-    // when Kusama and New York (or any two branches of the root) are expanded
-    // simultaneously, their leaves don’t crowd into each other.
+    // Vertical pitch is a baseline only — resolveLabelCollisions() below pushes
+    // whole sibling subtrees apart when 20px Poppins labels would overlap
+    // (cross-column: sibling text into a neighbour’s expanded children).
     treeLayout = d3.tree()
-      .nodeSize([46, 240])
+      .nodeSize([56, 260])
       .separation(function (a, b) {
-        if (a.parent === b.parent) return 1;
+        if (a.parent === b.parent) return 1.2;
         // Different direct parents — walk up until we find the common
         // ancestor, then scale the gap by how far the two nodes are from it.
         // Nodes that sit in entirely different top-level branches (e.g. a
@@ -285,7 +291,7 @@
         while (ap && bp && ap !== bp) { ap = ap.parent; bp = bp.parent; }
         var commonDepth = ap ? ap.depth : 0;
         var dist = (a.depth - commonDepth) + (b.depth - commonDepth);
-        return 1.4 + dist * 0.35;
+        return 1.55 + dist * 0.4;
       });
 
     root = d3.hierarchy(data);
@@ -341,8 +347,310 @@
       d.y + ' ' + d.x;
   }
 
+  // ─── Label collision resolution ──────────────────────────────────────────
+  // Tree labels use ~20px Poppins; long leaf text often spans past the next
+  // depth column, so a sibling (e.g. MoMA) can paint over a neighbour’s
+  // expanded children (e.g. Frick). d3.tree separation alone can’t see label
+  // width — resolve after layout by nudging whole sibling branches apart.
+  var LABEL_CHAR_W = 10.6;
+  var LABEL_HEIGHT = 24;
+  var LABEL_GAP = 8;
+  var DEPTH_DX = 280;
+
+  function estimateLabelWidth(name, depth) {
+    var len = String(name || '').length;
+    var cw = depth < 2 ? LABEL_CHAR_W + 0.6 : LABEL_CHAR_W;
+    return Math.max(28, 6 + len * cw);
+  }
+
+  /** Axis-aligned label+circle box in tree coords (x vertical, y horizontal). */
+  function labelBounds(d) {
+    var w = estimateLabelWidth(d.data && d.data.name, d.depth);
+    var internal = !!(d.children || d._children);
+    var r = d.depth === 0 ? 10 : 6;
+    var left;
+    var right;
+    if (internal) {
+      left = d.y - 14 - w;
+      right = d.y + r + 6;
+    } else {
+      left = d.y - r - 4;
+      right = d.y + 14 + w;
+    }
+    var half = LABEL_HEIGHT / 2;
+    return { left: left, right: right, top: d.x - half, bottom: d.x + half };
+  }
+
+  function shiftSubtree(d, dx) {
+    d.x += dx;
+    if (d.children) {
+      d.children.forEach(function (c) { shiftSubtree(c, dx); });
+    }
+  }
+
+  function collectSubtreeNodes(d, out) {
+    out.push(d);
+    if (d.children) {
+      d.children.forEach(function (c) { collectSubtreeNodes(c, out); });
+    }
+  }
+
+  /**
+   * Minimum downward shift of subtree B so no label in A overlaps any in B.
+   * Returns 0 when already clear (or only non-overlapping columns).
+   */
+  function neededSubtreeShift(nodesA, nodesB) {
+    var delta = 0;
+    for (var i = 0; i < nodesA.length; i++) {
+      var ab = labelBounds(nodesA[i]);
+      for (var j = 0; j < nodesB.length; j++) {
+        var bb = labelBounds(nodesB[j]);
+        if (bb.right <= ab.left || bb.left >= ab.right) continue;
+        var need = LABEL_GAP - (bb.top - ab.bottom);
+        if (need > delta) delta = need;
+      }
+    }
+    return delta;
+  }
+
+  /**
+   * After d3.tree + fixed depth spacing: bottom-up, push sibling subtrees
+   * apart whenever any label in one horizontally-overlaps a label in the next.
+   * Shifting the whole branch (and following siblings) keeps expand/collapse
+   * geometry coherent — e.g. Frick’s children move with Frick so MoMA’s long
+   * right-side label can’t sit on top of them.
+   */
+  function resolveLabelCollisions(rootNode) {
+    if (!rootNode) return;
+
+    function resolve(node) {
+      if (!node.children || !node.children.length) return;
+      node.children.forEach(resolve);
+
+      var guard = 0;
+      while (guard++ < 24) {
+        var moved = false;
+        for (var i = 1; i < node.children.length; i++) {
+          var leftNodes = [];
+          var rightNodes = [];
+          collectSubtreeNodes(node.children[i - 1], leftNodes);
+          collectSubtreeNodes(node.children[i], rightNodes);
+          var delta = neededSubtreeShift(leftNodes, rightNodes);
+          if (delta < 0.5) continue;
+          for (var k = i; k < node.children.length; k++) {
+            shiftSubtree(node.children[k], delta);
+          }
+          moved = true;
+        }
+        if (!moved) break;
+      }
+
+      // Keep the parent centered on its (possibly shifted) children.
+      node.x = (node.children[0].x + node.children[node.children.length - 1].x) / 2;
+    }
+
+    resolve(rootNode);
+  }
+
   function graphIdFromTreeDisplayName(displayName) {
-    return displayName === 'Louis Vuitton' ? 'LVMH' : displayName;
+    if (displayName === 'Louis Vuitton') return 'LVMH';
+    var nodes = window.kwGetNodes ? window.kwGetNodes() : [];
+    var match = nodes.find(function (n) {
+      return n.id === displayName || n.apiLabel === displayName;
+    });
+    return match ? match.id : displayName;
+  }
+
+  function findGraphNodeForTreeNode(d) {
+    var nodes = window.kwGetNodes ? window.kwGetNodes() : [];
+    if (!nodes.length) return null;
+    if (d && d.data && d.data.graphId) {
+      var byId = nodes.find(function (n) { return n.id === d.data.graphId; });
+      if (byId) return byId;
+    }
+    var name = d && d.data ? d.data.name : '';
+    if (name === 'Louis Vuitton') {
+      return nodes.find(function (n) { return n.isRoot || n.id === 'LVMH' || n.group === 0; }) || null;
+    }
+    return nodes.find(function (n) {
+      return n.id === name || n.apiLabel === name;
+    }) || null;
+  }
+
+  function publisherFromUrl(url) {
+    try {
+      return new URL(url).hostname.replace(/^www\./, '');
+    } catch (_) {
+      return 'Source';
+    }
+  }
+
+  function titleFromUrl(url) {
+    try {
+      var path = new URL(url).pathname.replace(/\/+$/, '');
+      var slug = path.split('/').filter(Boolean).pop() || '';
+      if (!slug) return publisherFromUrl(url);
+      return decodeURIComponent(slug)
+        .replace(/[-_]+/g, ' ')
+        .replace(/\.(html?|aspx?|php)$/i, '')
+        .replace(/\b\w/g, function (c) { return c.toUpperCase(); });
+    } catch (_) {
+      return 'Related article';
+    }
+  }
+
+  /**
+   * Collect unique source articles for a tree node from API `source_url` /
+   * `evidence` on the node and its descendants (the corpus behind the keywords).
+   */
+  function collectApiArticlesForTreeNode(d) {
+    var byUrl = Object.create(null);
+    var order = [];
+
+    function addFromFields(sourceUrl, evidence, label) {
+      var url = String(sourceUrl || '').trim();
+      if (!url || byUrl[url]) return;
+      byUrl[url] = {
+        url: url,
+        title: (evidence && String(evidence).trim()) || titleFromUrl(url),
+        publisher: publisherFromUrl(url),
+        label: label || '',
+        evidence: evidence || ''
+      };
+      order.push(url);
+    }
+
+    function walk(node) {
+      if (!node) return;
+      var data = node.data || {};
+      var graphNode = findGraphNodeForTreeNode(node);
+      addFromFields(
+        data.sourceUrl || (graphNode && graphNode.sourceUrl),
+        data.evidence || (graphNode && graphNode.evidence),
+        data.name || (graphNode && (graphNode.apiLabel || graphNode.id))
+      );
+      // Prefer live graph fields when tree data was built without them
+      if (graphNode) {
+        addFromFields(graphNode.sourceUrl, graphNode.evidence, graphNode.apiLabel || graphNode.id);
+      }
+      var kids = (node.children || node._children || []);
+      kids.forEach(walk);
+    }
+
+    walk(d);
+    return order.map(function (url) { return byUrl[url]; });
+  }
+
+  function renderApiArticlesHTML(articles) {
+    if (!articles || !articles.length) {
+      return '<p class="sidebar__placeholder" style="padding:24px 8px">No source articles for this keyword yet.</p>';
+    }
+    return (
+      '<div class="sidebar-articles">' +
+      articles.map(function (article) {
+        var title = escapeHtml(article.title || 'Related article');
+        var publisher = escapeHtml(article.publisher || 'Source');
+        var url = escapeHtml(article.url || '#');
+        var label = article.label ? escapeHtml(article.label) : '';
+        var initial = publisher.charAt(0).toUpperCase() || 'A';
+        return (
+          '<a class="sidebar-article sidebar-article--api" href="' + url + '" target="_blank" rel="noopener noreferrer" data-article-url="' + url + '">' +
+          '<div class="sidebar-article-main">' +
+          '<div class="sidebar-article-image sidebar-article-image--source" aria-hidden="true">' +
+          '<span class="sidebar-article-favicon">' + initial + '</span>' +
+          '<img class="sidebar-article-thumb" alt="" hidden loading="lazy" referrerpolicy="no-referrer">' +
+          '</div>' +
+          '<div class="sidebar-article-info">' +
+          '<div class="sidebar-article-title">' + title + '</div>' +
+          '<div class="sidebar-article-publisher">' + publisher + '</div>' +
+          '</div>' +
+          '</div>' +
+          (label
+            ? '<div class="sidebar-article-footer"><span class="sidebar-article-keyword-badge">' + label + '</span></div>'
+            : '') +
+          '</a>'
+        );
+      }).join('') +
+      '</div>'
+    );
+  }
+
+  var articlePreviewCache = Object.create(null);
+  var articlePreviewInflight = Object.create(null);
+
+  function fetchArticlePreview(url) {
+    if (!url) return Promise.resolve(null);
+    if (articlePreviewCache[url]) return Promise.resolve(articlePreviewCache[url]);
+    if (articlePreviewInflight[url]) return articlePreviewInflight[url];
+
+    articlePreviewInflight[url] = fetch('/api/link-preview?url=' + encodeURIComponent(url), {
+      method: 'GET',
+      credentials: 'omit',
+      headers: { Accept: 'application/json' }
+    })
+      .then(function (response) {
+        return response.json().then(function (data) {
+          if (!response.ok) throw new Error((data && data.error) || 'preview failed');
+          articlePreviewCache[url] = data;
+          return data;
+        });
+      })
+      .catch(function () {
+        articlePreviewCache[url] = { image: '', title: '' };
+        return articlePreviewCache[url];
+      })
+      .finally(function () {
+        delete articlePreviewInflight[url];
+      });
+
+    return articlePreviewInflight[url];
+  }
+
+  function hydrateArticleCards(rootEl) {
+    if (!rootEl) return;
+    var cards = rootEl.querySelectorAll('.sidebar-article--api[data-article-url]');
+    cards.forEach(function (card) {
+      var url = card.getAttribute('data-article-url');
+      if (!url) return;
+      fetchArticlePreview(url).then(function (preview) {
+        if (!preview || !card.isConnected) return;
+        var titleEl = card.querySelector('.sidebar-article-title');
+        if (titleEl && preview.title) {
+          titleEl.textContent = preview.title;
+        }
+        if (!preview.image) return;
+        var imageWrap = card.querySelector('.sidebar-article-image');
+        var img = card.querySelector('.sidebar-article-thumb');
+        var fallback = card.querySelector('.sidebar-article-favicon');
+        if (!img || !imageWrap) return;
+        img.onload = function () {
+          img.hidden = false;
+          imageWrap.classList.add('has-thumb');
+          if (fallback) fallback.hidden = true;
+        };
+        img.onerror = function () {
+          img.removeAttribute('src');
+          img.hidden = true;
+          imageWrap.classList.remove('has-thumb');
+          if (fallback) fallback.hidden = false;
+        };
+        // Proxy through same-origin so hotlink-blocked CDNs still render.
+        img.src = '/api/link-preview/image?url=' + encodeURIComponent(preview.image);
+      });
+    });
+  }
+
+  function resetArticlesPanel() {
+    if (articlesBodyEl) {
+      articlesBodyEl.innerHTML = '<p class="sidebar__placeholder">Select a keyword to see source articles.</p>';
+    }
+  }
+
+  function updateArticlesPanel(d) {
+    if (!articlesBodyEl) return;
+    var articles = collectApiArticlesForTreeNode(d);
+    articlesBodyEl.innerHTML = renderApiArticlesHTML(articles);
+    hydrateArticleCards(articlesBodyEl);
   }
 
   function escapeHtml(s) {
@@ -434,7 +742,6 @@
       '<div class="sidebar-section-label">Keywords in view</div>' +
       treeResetChipsSvgBtn(resetDisabled) +
       '</div>' +
-      '<p class="sidebar-hint">Only keywords whose labels intersect the tree canvas are listed. Click a chip to strike through and grey out that node on the tree without hiding it; click again to restore.</p>' +
       '<div class="tree-viewport-meta">' +
       '<strong>' +
       n +
@@ -541,8 +848,10 @@
     var treeNodes = treeData.descendants();
     var treeLinks = treeData.links();
 
-    // Fixed horizontal spacing
-    treeNodes.forEach(function (d) { d.y = d.depth * 200; });
+    // Fixed horizontal spacing (wide enough for mid-length labels; very long
+    // ones still rely on resolveLabelCollisions for vertical clearance).
+    treeNodes.forEach(function (d) { d.y = d.depth * DEPTH_DX; });
+    resolveLabelCollisions(root);
 
     // ─── NODES ───
     var node = treeG.selectAll('g.node')
@@ -707,7 +1016,7 @@
     subset.forEach(function (d) {
       var name = d.data.name || '';
       var internal = !!(d.children || d._children);
-      var estW = 20 + name.length * 7.4;
+      var estW = estimateLabelWidth(name, d.depth);
       var r = d.depth === 0 ? 10 : 6;
       var yL;
       var yR;
@@ -768,65 +1077,39 @@
     if (detailSectionEl) {
       detailSectionEl.innerHTML = '<p class="sidebar__placeholder">Click on a node in the tree to see its details.</p>';
     }
+    resetArticlesPanel();
   }
 
   function showNodeDetails(d) {
     if (!drawerTitleEl || !detailSectionEl) return;
 
     var name = d.data.name;
-    var realId = (name === 'Louis Vuitton') ? 'LVMH' : name;
     drawerTitleEl.textContent = name;
 
-    var allChildren = d.children || d._children || [];
-    var childNames = allChildren.map(function (c) { return c.data.name; });
+    var graphNode = findGraphNodeForTreeNode(d);
+    var evidence = (d.data && d.data.evidence) || (graphNode && graphNode.evidence) || '';
+    var sourceUrl = (d.data && d.data.sourceUrl) || (graphNode && graphNode.sourceUrl) || '';
 
-    var nodes = window.kwGetNodes ? window.kwGetNodes() : [];
-    var getConnected = window.kwGetConnected;
-
-    var nodeObj = nodes.find(function (n) { return n.id === realId; });
-    var value = nodeObj ? nodeObj.value : (d.data.value || 0);
-
-    var connCount = 0;
-    var connNames = [];
-    if (getConnected && nodeObj) {
-      var connIds = getConnected(nodeObj);
-      connNames = nodes.filter(function (n) { return connIds.has(n.id) && n.id !== realId; }).map(function (n) { return n.id; });
-      connCount = connNames.length;
+    var html = '<div class="sidebar-content">';
+    if (evidence) {
+      html +=
+        '<div class="sidebar-section">' +
+        '<div class="sidebar-section-label">Evidence</div>' +
+        '<p class="sidebar-description">' + escapeHtml(evidence) + '</p>' +
+        (sourceUrl
+          ? '<p class="sidebar-description"><a href="' + escapeHtml(sourceUrl) + '" target="_blank" rel="noopener noreferrer">Open source</a></p>'
+          : '') +
+        '</div>';
+    } else {
+      html +=
+        '<div class="sidebar-section">' +
+        '<p class="sidebar-description">Keyword from the intelligence tree. Related source articles appear in the panel below when available.</p>' +
+        '</div>';
     }
-
-    var html = '';
-
-    html += '<div class="sidebar-content">';
-    html += '<div class="sidebar-stats">';
-    html += '<div class="sidebar-stat"><span class="sidebar-stat-value">' + value + '</span><span class="sidebar-stat-label">Volume</span></div>';
-    html += '<div class="sidebar-stat"><span class="sidebar-stat-value">' + connCount + '</span><span class="sidebar-stat-label">Connections</span></div>';
     html += '</div>';
 
-    if (childNames.length > 0 || connNames.length > 0) {
-      html += '<div class="sidebar-section">';
-      html += '<div class="sidebar-section-header">';
-      html += '<div class="sidebar-section-label">Related Keywords</div>';
-      html += treeResetChipsSvgBtn(treeDisabledNodes.size === 0);
-      html += '</div>';
-      html += '<p class="sidebar-hint">Strike through / grey out on the tree without hiding branches (same as chips above).</p>';
-      if (childNames.length > 0) {
-        html += '<div class="sidebar-section-label">Nested Keywords (' + childNames.length + ')</div>';
-        html += '<div class="sidebar-chips">' + treeKeywordChipsHtml(childNames) + '</div>';
-      }
-      if (connNames.length > 0) {
-        html += '<div class="sidebar-section-label">All Connections</div>';
-        html += '<div class="sidebar-chips">' + treeKeywordChipsHtml(connNames) + '</div>';
-      }
-      html += '</div>';
-    }
-
-    html += '<div class="sidebar-section">';
-    html += '<div class="sidebar-section-label">Related Articles</div>';
-    html += '<div class="sidebar-articles">' + (window.kwGetArticlesHTML ? window.kwGetArticlesHTML(realId) : '') + '</div>';
-    html += '</div>';
-
-    html += '</div>';
     detailSectionEl.innerHTML = html;
+    updateArticlesPanel(d);
     updateResetButtonsDisabledState();
   }
 

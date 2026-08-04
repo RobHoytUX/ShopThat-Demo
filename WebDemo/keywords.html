@@ -8,7 +8,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles/main.css?v=1">
-    <link rel="stylesheet" href="styles/dashboard.css?v=22">
+    <link rel="stylesheet" href="styles/dashboard.css?v=26">
   </head>
   <body class="app app--keywords">
     <aside class="sidebar" aria-label="Primary">
@@ -22,6 +22,10 @@
         <a class="is-active" href="keywords.html">
           <svg class="sidebar__nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="4" y1="9" x2="20" y2="9"/><line x1="4" y1="15" x2="20" y2="15"/><line x1="10" y1="3" x2="8" y2="21"/><line x1="16" y1="3" x2="14" y2="21"/></svg>
           <span class="sidebar__nav-text">Keywords</span>
+        </a>
+        <a href="campaigns.html">
+          <svg class="sidebar__nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+          <span class="sidebar__nav-text">Campaigns</span>
         </a>
         <a href="internals.html">
           <svg class="sidebar__nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
@@ -42,6 +46,10 @@
         <a href="financials.html">
           <svg class="sidebar__nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg>
           <span class="sidebar__nav-text">Financials</span>
+        </a>
+        <a href="financials.html#rewards-calculator">
+          <svg class="sidebar__nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="12" y2="14"/><line x1="8" y1="18" x2="12" y2="18"/></svg>
+          <span class="sidebar__nav-text">Rewards Calculator</span>
         </a>
       </nav>
       <div class="sidebar__signout">
@@ -76,23 +84,10 @@
           <span class="appbar__title-row">Keywords</span>
         </h1>
         <div class="appbar__actions">
-          <a href="financials.html#rewards-calculator" class="btn btn--rewards-calc">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <rect x="4" y="2" width="16" height="20" rx="2"/>
-              <line x1="8" y1="6" x2="16" y2="6"/>
-              <line x1="8" y1="10" x2="16" y2="10"/>
-              <line x1="8" y1="14" x2="12" y2="14"/>
-              <line x1="8" y1="18" x2="12" y2="18"/>
-            </svg>
-            Rewards Calculator
-          </a>
-          <a href="campaigns.html" class="btn btn--primary btn--campaign">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <circle cx="12" cy="12" r="10"/>
-              <path d="M12 8v8M8 12h8"/>
-            </svg>
-            Campaigns
-          </a>
+          <div class="kw-view-toggle" role="group" aria-label="Keyword tree view">
+            <button type="button" class="btn btn--secondary btn--sm is-active" id="kwViewBrand" data-kw-view="brand">Brand view</button>
+            <button type="button" class="btn btn--secondary btn--sm" id="kwViewStore" data-kw-view="store">Store view</button>
+          </div>
         </div>
       </div>
     </header>
@@ -229,17 +224,27 @@
           <div class="keywords__canvas" id="treeViewCanvas">
             <div id="treeContainer" class="kw-tree-container"></div>
           </div>
-          <aside class="keywords__sidebar" id="treeDetailsDrawer" aria-label="Keyword details">
-            <div class="sidebar__header">
-              <h2 id="treeDrawerTitle">Select a Keyword</h2>
-            </div>
-            <div class="sidebar__body" id="treeDrawerBody">
-              <div id="treeDrawerViewportSection" class="tree-drawer-viewport-panel" aria-live="polite"></div>
-              <div id="treeDrawerDetailSection">
-                <p class="sidebar__placeholder">Click on a node in the tree to see its details.</p>
+          <div class="keywords__side-stack">
+            <aside class="keywords__sidebar keywords__sidebar--half" id="treeDetailsDrawer" aria-label="Keyword details">
+              <div class="sidebar__header">
+                <h2 id="treeDrawerTitle">Select a Keyword</h2>
               </div>
-            </div>
-          </aside>
+              <div class="sidebar__body" id="treeDrawerBody">
+                <div id="treeDrawerViewportSection" class="tree-drawer-viewport-panel" aria-live="polite"></div>
+                <div id="treeDrawerDetailSection">
+                  <p class="sidebar__placeholder">Click on a node in the tree to see its details.</p>
+                </div>
+              </div>
+            </aside>
+            <aside class="keywords__sidebar keywords__sidebar--half keywords__articles-panel" id="treeArticlesDrawer" aria-label="Related articles">
+              <div class="sidebar__header">
+                <h2 id="treeArticlesTitle">Related Articles</h2>
+              </div>
+              <div class="sidebar__body" id="treeArticlesBody">
+                <p class="sidebar__placeholder">Select a keyword to see source articles.</p>
+              </div>
+            </aside>
+          </div>
         </div>
       </div>
 
@@ -347,16 +352,17 @@
     <script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="scripts/shared-data.js?v=3"></script>
-    <script src="scripts/luxury-intelligence.js?v=9"></script>
+    <script src="scripts/luxury-intelligence.js?v=11"></script>
     <script src="scripts/keywords-graph-api.js"></script>
+    <script src="scripts/keywords-tree-api.js?v=2"></script>
     <script src="scripts/keywords-ai-panel.js"></script>
     <script src="scripts/keywords-data.js"></script>
     <script src="scripts/dashboard-map-data.js"></script>
-    <script src="scripts/keywords-bubble-state.js"></script>
+    <script src="scripts/keywords-bubble-state.js?v=2"></script>
     <script src="scripts/keywords-graph-utils.js"></script>
     <script src="scripts/keywords-linear-view.js"></script>
-    <script src="scripts/keywords.js?v=32" defer></script>
-    <script src="scripts/keywords-tree.js?v=19" defer></script>
+    <script src="scripts/keywords.js?v=37" defer></script>
+    <script src="scripts/keywords-tree.js?v=26" defer></script>
     <script src="scripts/keywords-scatter.js?v=3" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/d3-sankey@0.12.3/dist/d3-sankey.min.js"></script>
     <script src="scripts/keywords-sankey.js?v=3" defer></script>

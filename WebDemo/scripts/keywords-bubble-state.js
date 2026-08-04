@@ -73,6 +73,7 @@
 
   function nodeLabel(node) {
     if (!node) return '';
+    if (node.apiLabel) return node.apiLabel;
     if (node.id === 'LVMH' || (node.group === 0 && node.isRoot)) return 'Louis Vuitton';
     return node.id;
   }

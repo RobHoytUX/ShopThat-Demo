@@ -210,7 +210,7 @@ console.log('Document ready state:', document.readyState);
   const AI_GRAPH_CACHE_KEY = 'st_ai_keywords_graph_v2';
   const AI_GRAPH_CACHE_MAX_AGE_MS = 1000 * 60 * 60 * 6;
   const AI_GRAPH_QUERY =
-    'You are a luxury intelligence analyst. Using available backend article context and ecommerce product catalogs, generate keywords for a knowledge graph. Respond ONLY in markdown with these exact headings: "### LVMH", "### Soho", "### 57th St." Under each heading provide exactly 8 short keyword phrases (2-5 words), one per bullet, with no explanations.';
+    'Generate keywords for a Louis Vuitton New York knowledge graph. Respond ONLY in markdown with these exact headings: "### Kusama", "### Soho", "### 57th St." Under each heading provide exactly 8 short keyword phrases (2-5 words), one per bullet. Cover campaign themes, museums, galleries, hotels, and restaurants where relevant. No introductions or explanations.';
 
   function normalizeKeywordLabel(label) {
     return String(label || '')
@@ -223,17 +223,17 @@ console.log('Document ready state:', document.readyState);
   }
 
   function parseAiKeywordSections(answer) {
-    const sections = { LVMH: [], Soho: [], '57th St.': [] };
-    const seen = { LVMH: new Set(), Soho: new Set(), '57th St.': new Set() };
-    let current = 'LVMH';
+    const sections = { Kusama: [], Soho: [], '57th St.': [], LVMH: [] };
+    const seen = { Kusama: new Set(), Soho: new Set(), '57th St.': new Set(), LVMH: new Set() };
+    let current = 'Kusama';
     const lines = String(answer || '').split(/\r?\n/);
 
     lines.forEach((line) => {
       const raw = line.trim();
       if (!raw) return;
 
-      if (/^#{1,6}\s*lvmh\b/i.test(raw) || /^lvmh\b[:\-]/i.test(raw)) {
-        current = 'LVMH';
+      if (/^#{1,6}\s*kusama\b/i.test(raw) || /^kusama\b[:\-]/i.test(raw)) {
+        current = 'Kusama';
         return;
       }
       if (/^#{1,6}\s*soho\b/i.test(raw) || /^soho\b[:\-]/i.test(raw)) {
@@ -242,6 +242,10 @@ console.log('Document ready state:', document.readyState);
       }
       if (/^#{1,6}\s*57(th)?\s*(st|street)\b/i.test(raw) || /^57(th)?\s*(st|street)\b[:\-]/i.test(raw)) {
         current = '57th St.';
+        return;
+      }
+      if (/^#{1,6}\s*lvmh\b/i.test(raw) || /^lvmh\b[:\-]/i.test(raw)) {
+        current = 'LVMH';
         return;
       }
 
@@ -255,18 +259,26 @@ console.log('Document ready state:', document.readyState);
       }
     });
 
-    if (sections.LVMH.length === 0 && window.LuxuryIntelligence && window.LuxuryIntelligence.extractKeywordPhrases) {
-      const fallback = window.LuxuryIntelligence.extractKeywordPhrases(answer, 12);
+    // Flat bullet lists with no headings still count — split across the three branches.
+    const totalNamed = sections.Kusama.length + sections.Soho.length + sections['57th St.'].length;
+    if (totalNamed === 0 && window.LuxuryIntelligence && window.LuxuryIntelligence.extractKeywordPhrases) {
+      const fallback = window.LuxuryIntelligence.extractKeywordPhrases(answer, 18);
       fallback.forEach((k, idx) => {
-        if (idx < 4) sections.LVMH.push(k);
-        else if (idx < 8) sections.Soho.push(k);
+        if (idx < 6) sections.Kusama.push(k);
+        else if (idx < 12) sections.Soho.push(k);
+        else sections['57th St.'].push(k);
+      });
+    } else if (totalNamed === 0 && sections.LVMH.length) {
+      sections.LVMH.forEach((k, idx) => {
+        if (idx % 3 === 0) sections.Kusama.push(k);
+        else if (idx % 3 === 1) sections.Soho.push(k);
         else sections['57th St.'].push(k);
       });
     }
 
-    sections.LVMH = sections.LVMH.slice(0, 8);
-    sections.Soho = sections.Soho.slice(0, 8);
-    sections['57th St.'] = sections['57th St.'].slice(0, 8);
+    sections.Kusama = sections.Kusama.slice(0, 10);
+    sections.Soho = sections.Soho.slice(0, 10);
+    sections['57th St.'] = sections['57th St.'].slice(0, 10);
     return sections;
   }
 
@@ -281,65 +293,98 @@ console.log('Document ready state:', document.readyState);
     return Math.max(42, 88 - (idx * 6));
   }
 
-  function buildAiGraphFromSections(sections) {
-    const nodeMap = new Map();
-    const linkMap = new Set();
+  /** Guess a curated category parent from the phrase text. */
+  function inferParentForKeyword(label, section) {
+    const text = String(label || '').toLowerCase();
+    if (section === 'Kusama') {
+      if (/\b(museum|fondation|frick|moma|met)\b/.test(text)) return 'Museums';
+      if (/\b(gallery|zwirner|miro|pace|gagosian)\b/.test(text)) return 'Galleries';
+      if (/\b(dot|pumpkin|mirror|style|fashion|campaign)\b/.test(text)) return 'Style';
+      return 'Kusama';
+    }
+    if (section === 'Soho') {
+      if (/\b(hotel|stay|lodging|mercer|crosby|bowery|public)\b/.test(text)) return 'SoHo Hotels';
+      if (/\b(restaurant|dining|cafe|bistro|tavern|food|eat)\b/.test(text)) return 'SoHo Restaurants';
+      if (/\b(gallery|zwirner|gagosian|hauser|gladstone)\b/.test(text)) return 'SoHo Galleries';
+      if (/\b(museum|drawing center|new museum)\b/.test(text)) return 'SoHo Museums';
+      return 'Soho';
+    }
+    if (section === '57th St.') {
+      if (/\b(museum|frick|moma|met|guggenheim|modern art)\b/.test(text)) return '57th St. Museums';
+      if (/\b(hotel|plaza|regis|baccarat|mark hotel|stay)\b/.test(text)) return '57th St. Hotels';
+      if (/\b(gallery|pace|zwirner|gagosian|hauser)\b/.test(text)) return '57th St. Galleries';
+      if (/\b(restaurant|dining|cafe|bernardin|the modern|marea|grill)\b/.test(text)) return '57th St. Restaurants';
+      return '57th St.';
+    }
+    return 'LVMH';
+  }
 
-    function addNode(node) {
-      if (!node || !node.id) return;
-      const existing = nodeMap.get(node.id);
-      if (!existing) {
-        nodeMap.set(node.id, { ...node });
-        return;
+  /**
+   * Fold API keyword phrases into the curated Louis Vuitton tree. Previous
+   * AI leaves are replaced so Generate can be run again without stacking junk.
+   */
+  function mergeAiKeywordsIntoCuratedGraph(sections) {
+    const baseNodes = defaultNodes
+      .filter((n) => !n.fromAi)
+      .map((n) => ({ ...n }));
+    const baseLinks = defaultLinks.map((l) => ({
+      source: typeof l.source === 'object' ? l.source.id : l.source,
+      target: typeof l.target === 'object' ? l.target.id : l.target
+    }));
+
+    const nodeIds = new Set(baseNodes.map((n) => n.id));
+    const linkKeys = new Set(baseLinks.map((l) => {
+      const a = String(l.source);
+      const b = String(l.target);
+      return a < b ? a + '|' + b : b + '|' + a;
+    }));
+
+    function addLeaf(label, section) {
+      const id = normalizeKeywordLabel(label);
+      if (!id || nodeIds.has(id)) return;
+      const parent = inferParentForKeyword(id, section);
+      if (!nodeIds.has(parent) && parent !== 'LVMH') {
+        // Fall back to the section root if the inferred category is missing.
+        const fallback = section === 'Kusama' ? 'Kusama'
+          : section === 'Soho' ? 'Soho'
+          : section === '57th St.' ? '57th St.'
+          : 'LVMH';
+        baseNodes.push({
+          id: id,
+          group: 4,
+          value: 64,
+          parent: nodeIds.has(fallback) ? fallback : 'LVMH',
+          fromAi: true
+        });
+      } else {
+        baseNodes.push({
+          id: id,
+          group: 4,
+          value: 64,
+          parent: parent,
+          fromAi: true
+        });
       }
-      existing.value = Math.max(existing.value || 0, node.value || 0);
-      existing.group = Math.min(existing.group || 4, node.group || 4);
-      existing.isArea = existing.isArea || !!node.isArea;
-      existing.isRoot = existing.isRoot || !!node.isRoot;
+      nodeIds.add(id);
+      const parentId = baseNodes.find((n) => n.id === id).parent;
+      const key = parentId < id ? parentId + '|' + id : id + '|' + parentId;
+      if (!linkKeys.has(key)) {
+        linkKeys.add(key);
+        baseLinks.push({ source: parentId, target: id });
+      }
     }
 
-    function addLink(source, target) {
-      if (!source || !target || source === target) return;
-      const a = String(source);
-      const b = String(target);
-      const key = a < b ? a + '|' + b : b + '|' + a;
-      if (linkMap.has(key)) return;
-      linkMap.add(key);
-    }
+    (sections.Kusama || []).forEach((k) => addLeaf(k, 'Kusama'));
+    (sections.Soho || []).forEach((k) => addLeaf(k, 'Soho'));
+    (sections['57th St.'] || []).forEach((k) => addLeaf(k, '57th St.'));
+    (sections.LVMH || []).forEach((k) => addLeaf(k, 'Kusama'));
 
-    addNode({ id: 'LVMH', group: 0, value: 100, isRoot: true });
-    addNode({ id: 'Soho', group: 1, value: 90, isArea: true });
-    addNode({ id: '57th St.', group: 1, value: 90, isArea: true });
-    addLink('LVMH', 'Soho');
-    addLink('LVMH', '57th St.');
+    return { nodes: baseNodes, links: baseLinks };
+  }
 
-    const lvmhKeywords = sections.LVMH || [];
-    const lvmhSoho = [];
-    const lvmh57 = [];
-    lvmhKeywords.forEach((label, idx) => {
-      if (idx % 2 === 0) lvmhSoho.push(label);
-      else lvmh57.push(label);
-    });
-
-    const areaDefs = [
-      { area: 'Soho', keywords: lvmhSoho.concat(sections.Soho || []) },
-      { area: '57th St.', keywords: lvmh57.concat(sections['57th St.'] || []) }
-    ];
-
-    areaDefs.forEach((entry) => {
-      entry.keywords.forEach((label, idx) => {
-        addNode({ id: label, group: groupForIndex(idx), value: valueForIndex(idx) });
-        addLink(entry.area, label);
-        if (idx > 0) addLink(entry.keywords[idx - 1], label);
-      });
-    });
-
-    const nodes = Array.from(nodeMap.values());
-    const links = Array.from(linkMap).map((key) => {
-      const parts = key.split('|');
-      return { source: parts[0], target: parts[1] };
-    });
-    return { nodes, links };
+  function buildAiGraphFromSections(sections) {
+    // Prefer merging into the curated hierarchy so tree/bubble views stay coherent.
+    return mergeAiKeywordsIntoCuratedGraph(sections);
   }
 
   function cacheAiGraph(graph) {
@@ -379,6 +424,8 @@ console.log('Document ready state:', document.readyState);
       group: node.group || 1,
       isArea: !!node.isArea,
       isRoot: !!node.isRoot,
+      parent: node.parent || null,
+      fromAi: !!node.fromAi,
       uses: 0,
       cost: 0,
       totalCost: 0,
@@ -391,37 +438,113 @@ console.log('Document ready state:', document.readyState);
     return true;
   }
 
-  async function bootstrapAiKeywordGraph() {
-    if (!window.ShopThatData || !window.LuxuryIntelligence || typeof window.LuxuryIntelligence.ask !== 'function') return;
-    if (window.__kwAiGraphLoading) return;
-    window.__kwAiGraphLoading = true;
+  function countSectionKeywords(sections) {
+    if (!sections) return 0;
+    return (sections.Kusama || []).length
+      + (sections.Soho || []).length
+      + (sections['57th St.'] || []).length
+      + (sections.LVMH || []).length;
+  }
 
-    try {
-      const cachedGraph = loadCachedAiGraph();
-      if (cachedGraph) {
-        applyAiGraphToSharedData(cachedGraph);
-        window.dispatchEvent(new CustomEvent('kw-data-updated'));
-        return;
-      }
+  /** Cached brand + store trees so view toggles swap instantly. */
+  const treeGraphCache = { brand: null, store: null };
+  let preloadTreesPromise = null;
 
-      const intel = await window.LuxuryIntelligence.ask(AI_GRAPH_QUERY);
-      const sections = parseAiKeywordSections(intel && intel.answer);
-      const totalKeywords = sections.LVMH.length + sections.Soho.length + sections['57th St.'].length;
-      if (totalKeywords < 9) {
-        console.warn('AI keyword response too small; using existing keyword graph');
-        return;
-      }
+  function applyTreeGraph(graph) {
+    if (!graph || !Array.isArray(graph.nodes) || graph.nodes.length < 2) return false;
+    applyAiGraphToSharedData(graph);
+    cacheAiGraph(graph);
+    setGraphData(graph.nodes.map((n) => ({ ...n })), graph.links.map((l) => ({ ...l })), true);
+    window.dispatchEvent(new CustomEvent('kw-data-updated', {
+      detail: { view: graph.meta && graph.meta.view, label: graph.meta && graph.meta.label }
+    }));
+    return true;
+  }
 
-      const graph = buildAiGraphFromSections(sections);
-      if (applyAiGraphToSharedData(graph)) {
-        cacheAiGraph(graph);
-        window.dispatchEvent(new CustomEvent('kw-data-updated'));
-      }
-    } catch (e) {
-      console.warn('AI keyword graph bootstrap failed', e);
-    } finally {
-      window.__kwAiGraphLoading = false;
+  /**
+   * Load the live keyword tree from GET /keywords/tree (brand or store view)
+   * and replace the on-page graph with that hierarchy.
+   */
+  async function generateKeywordsFromApi(options) {
+    const opts = options || {};
+    const treeApi = window.ShopThatKeywordsTreeApi;
+    if (!treeApi || typeof treeApi.loadGraph !== 'function') {
+      throw new Error('Keywords tree API client is not loaded');
     }
+
+    const view = opts.view === 'store' ? 'store' : 'brand';
+    if (treeGraphCache[view] && !opts.force) {
+      applyTreeGraph(treeGraphCache[view]);
+      return treeGraphCache[view];
+    }
+
+    const graph = await treeApi.loadGraph(
+      view === 'store'
+        ? { subjectId: opts.subjectId || treeApi.DEFAULT_SUBJECT_ID }
+        : { brandId: opts.brandId || treeApi.DEFAULT_BRAND_ID }
+    );
+
+    if (!graph || !graph.nodes || graph.nodes.length < 2) {
+      throw new Error('Keywords tree returned an empty graph');
+    }
+
+    treeGraphCache[view] = graph;
+    applyTreeGraph(graph);
+    return graph;
+  }
+
+  /**
+   * Prefetch brand + store trees in parallel, then show brand by default.
+   */
+  function preloadKeywordTrees() {
+    if (preloadTreesPromise) return preloadTreesPromise;
+
+    const treeApi = window.ShopThatKeywordsTreeApi;
+    if (!treeApi || typeof treeApi.loadGraph !== 'function') {
+      console.warn('Keywords tree API client is not loaded');
+      return Promise.resolve();
+    }
+
+    window.__kwAiGraphLoading = true;
+    preloadTreesPromise = (async () => {
+      try {
+        const [brandResult, storeResult] = await Promise.allSettled([
+          treeApi.loadGraph({ brandId: treeApi.DEFAULT_BRAND_ID }),
+          treeApi.loadGraph({ subjectId: treeApi.DEFAULT_SUBJECT_ID })
+        ]);
+
+        if (brandResult.status === 'fulfilled' && brandResult.value && brandResult.value.nodes.length >= 2) {
+          treeGraphCache.brand = brandResult.value;
+        } else if (brandResult.status === 'rejected') {
+          console.error('Brand keywords tree failed', brandResult.reason);
+        }
+
+        if (storeResult.status === 'fulfilled' && storeResult.value && storeResult.value.nodes.length >= 2) {
+          treeGraphCache.store = storeResult.value;
+        } else if (storeResult.status === 'rejected') {
+          console.error('Store keywords tree failed', storeResult.reason);
+        }
+
+        const preferred = window.__kwTreeView === 'store' ? 'store' : 'brand';
+        if (treeGraphCache[preferred]) {
+          applyTreeGraph(treeGraphCache[preferred]);
+        } else if (treeGraphCache.brand) {
+          window.__kwTreeView = 'brand';
+          applyTreeGraph(treeGraphCache.brand);
+        } else if (treeGraphCache.store) {
+          window.__kwTreeView = 'store';
+          applyTreeGraph(treeGraphCache.store);
+        }
+      } finally {
+        window.__kwAiGraphLoading = false;
+      }
+    })();
+
+    return preloadTreesPromise;
+  }
+
+  async function bootstrapAiKeywordGraph() {
+    return generateKeywordsFromApi({ view: window.__kwTreeView || 'brand' });
   }
   
   // Always rebuild the keyword graph from the curated defaults above. Stored
@@ -1703,7 +1826,7 @@ console.log('Document ready state:', document.readyState);
       showLVMHDetails();
       return;
     }
-    drawerTitle.textContent = d.id;
+      drawerTitle.textContent = d.apiLabel || d.id;
     
     // Use allLinks to get ALL connections, not just visible ones
     const connections = allLinks.filter(l => {
@@ -1717,10 +1840,20 @@ console.log('Document ready state:', document.readyState);
       const targetId = typeof l.target === 'object' ? l.target.id : l.target;
       return sourceId === d.id ? targetId : sourceId;
     });
-    
-    // Remove duplicates and sort
+
     const uniqueKeywords = [...new Set(relatedKeywords)].sort();
-    
+    const labelFor = (id) => {
+      const node = allNodes.find((n) => n.id === id);
+      return (node && node.apiLabel) || id;
+    };
+    const displayName = d.apiLabel || d.id;
+    const description = d.evidence
+      ? escapeHtml(d.evidence)
+      : `Placeholder description about ${escapeHtml(displayName)} with sample insights.`;
+    const sourceLink = d.sourceUrl
+      ? `<p class="sidebar-description"><a href="${escapeHtml(d.sourceUrl)}" target="_blank" rel="noopener noreferrer">Source</a></p>`
+      : '';
+
     drawerBody.innerHTML = `
       <div class="sidebar-content">
         <div class="sidebar-stats">
@@ -1734,8 +1867,9 @@ console.log('Document ready state:', document.readyState);
           </div>
           </div>
         <div class="sidebar-section">
-          <div class="sidebar-section-label">Description</div>
-          <p class="sidebar-description">Placeholder description about ${escapeHtml(d.id)} with sample insights.</p>
+          <div class="sidebar-section-label">${d.evidence ? 'Evidence' : 'Description'}</div>
+          <p class="sidebar-description">${description}</p>
+          ${sourceLink}
         </div>
         <div class="sidebar-section">
           <div class="sidebar-section-header">
@@ -1751,7 +1885,7 @@ console.log('Document ready state:', document.readyState);
           <p class="sidebar-hint">Click a keyword to toggle visibility</p>
           <div class="sidebar-chips">
             ${uniqueKeywords.length > 0 
-              ? uniqueKeywords.map(kw => `<span class="sidebar-chip sidebar-chip--toggle${disabledNodes.has(kw) ? ' sidebar-chip--disabled' : ''}" data-keyword="${escapeHtml(kw)}">${escapeHtml(kw)}</span>`).join('')
+              ? uniqueKeywords.map(kw => `<span class="sidebar-chip sidebar-chip--toggle${disabledNodes.has(kw) ? ' sidebar-chip--disabled' : ''}" data-keyword="${escapeHtml(kw)}">${escapeHtml(labelFor(kw))}</span>`).join('')
               : '<span class="sidebar-no-data">No related keywords</span>'
             }
           </div>
@@ -1759,7 +1893,7 @@ console.log('Document ready state:', document.readyState);
         <div class="sidebar-section">
           <div class="sidebar-section-label">Related Articles</div>
           <div class="sidebar-articles">
-            ${generateArticlesHTML(d.id)}
+            ${generateArticlesHTML(displayName)}
           </div>
         </div>
       </div>
@@ -2452,12 +2586,56 @@ console.log('Document ready state:', document.readyState);
   // Initialize dark mode
   initDarkMode();
 
-  // Bootstrap graph keywords from Luxury Intelligence API — DISABLED.
-  // The keyword graph is now driven by the curated `defaultNodes`/`defaultLinks`
-  // above (Louis Vuitton ▸ Kusama / 57th St. / SoHo). Re-enable only if the
-  // demo should pull live AI keywords again.
-  // setTimeout(bootstrapAiKeywordGraph, 180);
-  void bootstrapAiKeywordGraph; // keep symbol referenced so linters stay quiet
+  // Brand + store trees preload on landing; toggle swaps the cached graph.
+  window.__kwTreeView = 'brand';
+  const kwViewBrand = document.getElementById('kwViewBrand');
+  const kwViewStore = document.getElementById('kwViewStore');
+  const kwViewToggle = document.querySelector('.kw-view-toggle');
+
+  function syncKeywordTreeViewButtons() {
+    if (kwViewBrand) kwViewBrand.classList.toggle('is-active', window.__kwTreeView === 'brand');
+    if (kwViewStore) kwViewStore.classList.toggle('is-active', window.__kwTreeView === 'store');
+  }
+
+  function setKeywordTreeView(view) {
+    const next = view === 'store' ? 'store' : 'brand';
+    window.__kwTreeView = next;
+    syncKeywordTreeViewButtons();
+
+    if (treeGraphCache[next]) {
+      applyTreeGraph(treeGraphCache[next]);
+      return;
+    }
+
+    // Wait for the shared prefetch, then fall back to a one-off fetch.
+    void (async () => {
+      if (preloadTreesPromise) {
+        try { await preloadTreesPromise; } catch (_) { /* logged in preload */ }
+      }
+      if (window.__kwTreeView !== next) return;
+      if (treeGraphCache[next]) {
+        applyTreeGraph(treeGraphCache[next]);
+        return;
+      }
+      try {
+        await generateKeywordsFromApi({ view: next });
+      } catch (err) {
+        console.error('Switch keywords tree view failed', err);
+      }
+    })();
+  }
+
+  if (kwViewBrand) kwViewBrand.addEventListener('click', () => setKeywordTreeView('brand'));
+  if (kwViewStore) kwViewStore.addEventListener('click', () => setKeywordTreeView('store'));
+
+  if (kwViewToggle) kwViewToggle.setAttribute('aria-busy', 'true');
+  void preloadKeywordTrees().finally(() => {
+    if (kwViewToggle) kwViewToggle.removeAttribute('aria-busy');
+    syncKeywordTreeViewButtons();
+  });
+
+  // Expose for console debugging.
+  window.ShopThatGenerateKeywords = generateKeywordsFromApi;
 
 })();
 

@@ -17,6 +17,48 @@
   var ANALYZING_TEXT = 'Analyzing Catalogs';
   var apiVenueLocations = {};
 
+  // Curated Frick Collection gallery — used when the visitor asks to see it,
+  // so the chat and canvas fan-out show works rather than a single façade photo.
+  var FRICK_COLLECTION_GALLERY = [
+    { url: 'assets/museums/frick/fragonard-the-meeting.png', name: 'Fragonard — The Meeting' },
+    { url: 'assets/museums/frick/fragonard-love-letters.png', name: 'Fragonard — Love Letters' },
+    { url: 'assets/museums/frick/fragonard-lover-crowned.png', name: 'Fragonard — The Lover Crowned' },
+    { url: 'assets/museums/frick/ingres-comtesse-dhaussonville.png', name: "Ingres — Comtesse d'Haussonville" },
+    { url: 'assets/museums/frick/vermeer-mistress-and-maid.png', name: 'Vermeer — Mistress and Maid' },
+    { url: 'assets/museums/frick/bellini-st-francis.png', name: 'Bellini — St. Francis in the Desert' },
+    { url: 'assets/museums/frick/veronese-virtue-and-vice.png', name: 'Veronese — Virtue and Vice' }
+  ];
+
+  function isFrickShowQuery(query) {
+    var q = String(query || '');
+    if (!/\bfrick\b/i.test(q)) return false;
+    return /\b(show|see|view|display|look\s+at|open|browse)\b/i.test(q)
+      || /\bfrick\s+collection\b/i.test(q);
+  }
+
+  function applyFrickCollectionGallery(data) {
+    if (!data || typeof data !== 'object') return data;
+    var images = [];
+    var rankData = [];
+    var imageVenues = [];
+    FRICK_COLLECTION_GALLERY.forEach(function (item, idx) {
+      images.push(item.url);
+      rankData.push({ url: item.url, priority_rank: idx + 1 });
+      imageVenues.push({
+        name: item.name,
+        url: item.url,
+        area: '57th St.',
+        category: 'galleries'
+      });
+    });
+    data.images = images;
+    data.rank_data = rankData;
+    data.imageVenues = imageVenues;
+    if (!Array.isArray(data.mentionedVenues)) data.mentionedVenues = [];
+    uniquePush(data.mentionedVenues, 'The Frick Collection');
+    return data;
+  }
+
   /** Prompt tuned so dashboard can parse a bullet list of keyword phrases */
   var DASHBOARD_KEYWORDS_QUERY =
     'You are a luxury marketing analyst. Respond with ONLY a markdown bullet list of 8 short keyword phrases (2–6 words each) for Louis Vuitton luxury intelligence across: Kusama fashion, LV campaigns, SoHo boutiques, museums, galleries, hotels, and product pricing. One phrase per line starting with "- ". No title or introduction.';
@@ -939,18 +981,26 @@
 
   function ask(query, options) {
     var opts = options || {};
+    var originalQuery = String(query || '');
     return fetch(ASK_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'omit',
       body: JSON.stringify({
-        message: String(query || ''),
-        store_location: opts.storeLocation || storeLocationForQuery(query)
+        message: originalQuery,
+        store_location: opts.storeLocation || storeLocationForQuery(originalQuery),
+        k: Number.isFinite(Number(opts.k)) ? Number(opts.k) : 5
       })
     }).then(function (res) {
       if (!res.ok) throw new Error('HTTP ' + res.status);
       return res.json();
-    }).then(attachVenueContext);
+    }).then(function (data) {
+      var enriched = attachVenueContext(data);
+      if (isFrickShowQuery(originalQuery)) {
+        return applyFrickCollectionGallery(enriched);
+      }
+      return enriched;
+    });
   }
 
   /**
@@ -1001,6 +1051,8 @@
     ANALYZING_TEXT: ANALYZING_TEXT,
     DASHBOARD_KEYWORDS_QUERY: DASHBOARD_KEYWORDS_QUERY,
     ask: ask,
+    isFrickShowQuery: isFrickShowQuery,
+    FRICK_COLLECTION_GALLERY: FRICK_COLLECTION_GALLERY,
     markdownToHtml: markdownToHtml,
     extractKeywordPhrases: extractKeywordPhrases,
     applyKeywordConstraints: applyKeywordConstraints,

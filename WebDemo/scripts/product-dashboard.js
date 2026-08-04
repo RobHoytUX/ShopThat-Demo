@@ -949,6 +949,9 @@
           `Here is ${subject}. Drag any of these images into My Media to build a selection, then generate more from it.`,
           false
         );
+        if (window.ShopThatData && window.ShopThatData.clearChatHandoff) {
+          window.ShopThatData.clearChatHandoff();
+        }
       }, 900);
     }
     
@@ -1316,13 +1319,10 @@
 
   const productImagesBySource = new Map();
 
-  function registerProductImageSources(mediaItems) {
+  function registerProductImageSources(_mediaItems) {
+    // Key by canvas filename (not pile index) so gallery reorder stays correct.
     Object.entries(cardProductImages).forEach(([cardIndexKey, productImages]) => {
       const cardIndex = Number(cardIndexKey);
-      const canvasItem = Array.isArray(mediaItems) ? mediaItems[cardIndex] : null;
-      if (canvasItem && canvasItem.src) {
-        productImagesBySource.set(canvasItem.src, productImages);
-      }
       productImagesBySource.set(`assets/canvas-${cardIndex + 1}.jpg`, productImages);
 
       (drawerImageSets[cardIndex] || []).forEach(src => {
@@ -1854,13 +1854,23 @@
 
     // Ensure every media item has a stable position (persisted, so re-renders
     // don't reshuffle and so newly-dropped cards stay where the user put them).
+    // Answer galleries always get a fresh compact layout so spacing tweaks apply
+    // immediately instead of keeping a previous wide spread.
     let positionsChanged = false;
-    media.forEach((item, idx) => {
-      if (!item.position || typeof item.position.x !== 'number') {
-        item.position = generateStackedPositions(idx + 1)[idx];
-        positionsChanged = true;
-      }
-    });
+    if (isShowingAnswerImages()) {
+      const fresh = generateStackedPositions(media.length);
+      media.forEach((item, idx) => {
+        item.position = fresh[idx];
+      });
+      positionsChanged = true;
+    } else {
+      media.forEach((item, idx) => {
+        if (!item.position || typeof item.position.x !== 'number') {
+          item.position = generateStackedPositions(idx + 1)[idx];
+          positionsChanged = true;
+        }
+      });
+    }
     if (positionsChanged) {
       localStorage.setItem('galleryImages', JSON.stringify(media));
     }
@@ -2740,17 +2750,49 @@
     pileIntroDone = false;
   }
 
-  // An answer that comes back with images takes the canvas over. The images it
-  // replaces are parked under this key so Reset can put them back.
+  // An answer that comes back with images takes the canvas over. This key flags
+  // that override so Reset can restore the Kusama/LV default fan-out below.
   const GALLERY_DEFAULTS_KEY = 'galleryImagesDefaults';
+
+  // Default Gallery fan-out (Kusama × LV) — order matches the campaign screenshot.
+  const DEFAULT_GALLERY_IMAGES = [
+    { src: 'assets/canvas-4.jpg', productData: { title: 'LV x Kusama Blue Bag' } },
+    { src: 'assets/canvas-2.jpg', productData: { title: 'Blue Face Paint Editorial' } },
+    { src: 'assets/canvas-3.jpg', productData: { title: 'Kusama Polka Dot Hat' } },
+    { src: 'assets/canvas-5.jpg', productData: { title: 'Blue Paint Swatch' } },
+    { src: 'assets/canvas-1.jpg', productData: { title: 'Kusama Portrait - Polka Dot Room' } }
+  ];
+
+  const DEFAULT_GALLERY_SRCS = DEFAULT_GALLERY_IMAGES.map((d) => d.src);
+
+  function buildDefaultGalleryItems() {
+    const positions = generateStackedPositions(DEFAULT_GALLERY_IMAGES.length);
+    return DEFAULT_GALLERY_IMAGES.map((item, i) => ({
+      src: item.src,
+      position: positions[i],
+      productData: { title: item.productData.title }
+    }));
+  }
 
   function isShowingAnswerImages() {
     return localStorage.getItem(GALLERY_DEFAULTS_KEY) !== null;
   }
 
+  /** Restore the Kusama/LV default fan-out (same set as first page load). */
+  function restoreDefaultCanvasImages() {
+    localStorage.removeItem(GALLERY_DEFAULTS_KEY);
+    setCanvasImages(buildDefaultGalleryItems());
+  }
+
+  function galleryMatchesDefaults(media) {
+    const list = Array.isArray(media) ? media : readStoredArray('galleryImages');
+    return list.length === DEFAULT_GALLERY_SRCS.length
+      && list.every((item, i) => item && item.src === DEFAULT_GALLERY_SRCS[i]);
+  }
+
   function updateGalleryResetVisibility() {
     const btn = document.getElementById('galleryResetBtn');
-    if (btn) btn.hidden = !isShowingAnswerImages();
+    if (btn) btn.hidden = galleryMatchesDefaults();
   }
 
   /** Re-stack the canvas around a fresh set of images and fan them back out. */
@@ -2776,8 +2818,9 @@
       if (venue && venue.url && venue.name) titleBySrc[venue.url] = venue.name;
     });
 
+    // Park the canonical Kusama defaults for Reset.
     if (!isShowingAnswerImages()) {
-      localStorage.setItem(GALLERY_DEFAULTS_KEY, localStorage.getItem('galleryImages') || '[]');
+      localStorage.setItem(GALLERY_DEFAULTS_KEY, JSON.stringify(buildDefaultGalleryItems()));
     }
 
     const positions = generateStackedPositions(srcs.length);
@@ -2786,19 +2829,6 @@
       position: positions[i],
       productData: { title: titleBySrc[src] || 'From your answer' }
     })));
-  }
-
-  function restoreDefaultCanvasImages() {
-    const saved = localStorage.getItem(GALLERY_DEFAULTS_KEY);
-    if (saved === null) return;
-    localStorage.removeItem(GALLERY_DEFAULTS_KEY);
-    let items;
-    try {
-      items = JSON.parse(saved);
-    } catch (e) {
-      items = [];
-    }
-    setCanvasImages(Array.isArray(items) ? items : []);
   }
 
   function animateCardsFromPile(cardEls) {
@@ -2872,20 +2902,22 @@
   // Generate stacked card positions (deterministic — same input = same output)
   function generateStackedPositions(count) {
     const positions = [];
-    const baseX = 80;
-    const baseY = 100;
-    const horizontalSpacing = 220;
-    const verticalStagger = 150;
-    const rotationRange = 6;
+    // Keep the fan compact: cards are ~240px wide, so a short step makes them
+    // overlap like a real stack instead of sitting in a wide row.
+    const baseX = 120;
+    const baseY = 90;
+    const horizontalSpacing = 96;
+    const verticalStagger = 72;
+    const rotationRange = 8;
 
     for (let i = 0; i < count; i++) {
       const r1 = _seedRand(i * 1.7 + 0.3);
       const r2 = _seedRand(i * 2.3 + 1.1);
       const r3 = _seedRand(i * 3.1 + 2.7);
 
-      const x = baseX + (i * horizontalSpacing) + (r1 - 0.5) * 40;
+      const x = baseX + (i * horizontalSpacing) + (r1 - 0.5) * 18;
       const staggerOffset = (i % 2 === 0) ? 0 : verticalStagger;
-      const y = baseY + staggerOffset + (r2 - 0.5) * 60;
+      const y = baseY + staggerOffset + (r2 - 0.5) * 28;
       const rotation = (r3 - 0.5) * rotationRange;
 
       positions.push({ x, y, rotation });
@@ -3770,38 +3802,11 @@
     );
   }
 
-  // Initialize demo data - only if no existing user data
-  // These are the default canvas card images shown on page load
+  // Always land on the canonical 5. Persisted homepage/chat leftovers must not
+  // inflate the pile; chat answers call showAnswerImagesOnCanvas after load.
   function initializeDemoData() {
-    // While answer images hold the canvas the defaults live in the backup key,
-    // so topping them up here would mix the two sets together.
-    if (isShowingAnswerImages()) return;
-
-    const demoMedia = [
-      { src: 'assets/canvas-1.jpg', productData: { title: 'Kusama Portrait - Polka Dot Room' } },
-      { src: 'assets/canvas-2.jpg', productData: { title: 'Blue Face Paint Editorial' } },
-      { src: 'assets/canvas-3.jpg', productData: { title: 'Kusama Polka Dot Outfit' } },
-      { src: 'assets/canvas-4.jpg', productData: { title: 'LV x Kusama Blue Bag' } },
-      { src: 'assets/canvas-5.jpg', productData: { title: 'Blue Paint Swatch' } }
-    ];
-
-    const existingMedia = readStoredArray('galleryImages');
-
-    // Remove old image1-7.png defaults
-    const legacySrcs = [
-      'assets/image1.png', 'assets/image2.png', 'assets/image3.png',
-      'assets/image4.png', 'assets/image5.png', 'assets/image6.png', 'assets/image7.png'
-    ];
-    const cleaned = existingMedia.filter(item => !legacySrcs.includes(item.src));
-
-    const demoSrcs = demoMedia.map(d => d.src);
-    const existingSrcs = cleaned.map(e => e.src);
-    const missingDemo = demoMedia.filter(d => !existingSrcs.includes(d.src));
-
-    if (missingDemo.length > 0 || cleaned.length !== existingMedia.length) {
-      localStorage.setItem('galleryImages', JSON.stringify([...cleaned, ...missingDemo]));
-    }
-
+    localStorage.removeItem(GALLERY_DEFAULTS_KEY);
+    localStorage.setItem('galleryImages', JSON.stringify(buildDefaultGalleryItems()));
     currentLoadedCardIndex = -1;
   }
 

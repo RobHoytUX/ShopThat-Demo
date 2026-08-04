@@ -36,6 +36,7 @@ Required runtime environment variables:
 - `SHOPTHAT_AUTH_USERS`
 - `LUXURY_INTELLIGENCE_ASK_URL`
 - `LUXURY_INTELLIGENCE_API_KEY`
+- `KEYWORDS_TREE_API_URL`
 - `KEYWORDS_GRAPH_API_URL`
 - Backend-specific keys documented in the relevant `.env.example` files.
 
