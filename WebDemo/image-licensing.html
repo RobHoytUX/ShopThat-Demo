@@ -93,8 +93,6 @@
           <div class="toolbar__left">
             <div class="card__tabs">
               <button class="tab-btn active" data-tab="overview">Overview</button>
-              <button class="tab-btn" data-tab="instafeed">Instafeed</button>
-              <button class="tab-btn" data-tab="database">Database</button>
               <button class="tab-btn" data-tab="discovery">Discovery</button>
               <button class="tab-btn" data-tab="analytics">Analytics</button>
             </div>
@@ -154,155 +152,6 @@
         </section>
       </div>
 
-      <!-- Instafeed Tab -->
-      <div class="tab-content" id="instafeed-tab" style="display: none;">
-        <!-- Tab Navigation -->
-        <section class="toolbar" aria-label="Navigation Tabs" style="margin-bottom: 1.5rem;">
-          <div class="toolbar__left">
-            <div class="card__tabs">
-              <button class="tab-btn" data-tab="overview">Overview</button>
-              <button class="tab-btn active" data-tab="instafeed">Instafeed</button>
-              <button class="tab-btn" data-tab="database">Database</button>
-              <button class="tab-btn" data-tab="discovery">Discovery</button>
-              <button class="tab-btn" data-tab="analytics">Analytics</button>
-            </div>
-          </div>
-        </section>
-        
-        <section class="card" style="margin-bottom: 1.5rem;">
-          <div class="card__header">
-            <h2>Instagram Feed Integration</h2>
-          </div>
-          <div class="card__content" style="padding: 1rem;">
-            <p style="color: #6b7280; margin-bottom: 1.5rem;">Museums, hotels, and partners can enable their Instagram feeds to provide high-quality, curated content for licensing.</p>
-            
-            <div class="keywords-performance-grid">
-              <div class="keyword-performance-item">
-                <div class="keyword-performance-header">
-                  <h3 class="keyword-performance-name">The Carlyle Hotel</h3>
-                  <span class="keyword-performance-rank" style="background: #10B981; color: white;">Connected</span>
-                </div>
-                <div class="keyword-performance-metrics">
-                  <div class="keyword-metric">
-                    <span class="keyword-metric-label">Images Available</span>
-                    <span class="keyword-metric-value usage">342</span>
-                  </div>
-                  <div class="keyword-metric">
-                    <span class="keyword-metric-label">Last Sync</span>
-                    <span class="keyword-metric-value" style="font-size: 14px;">2 hours ago</span>
-                  </div>
-                </div>
-              </div>
-              
-              <div class="keyword-performance-item">
-                <div class="keyword-performance-header">
-                  <h3 class="keyword-performance-name">David Zwirner Gallery</h3>
-                  <span class="keyword-performance-rank" style="background: #10B981; color: white;">Connected</span>
-                </div>
-                <div class="keyword-performance-metrics">
-                  <div class="keyword-metric">
-                    <span class="keyword-metric-label">Images Available</span>
-                    <span class="keyword-metric-value usage">528</span>
-                  </div>
-                  <div class="keyword-metric">
-                    <span class="keyword-metric-label">Last Sync</span>
-                    <span class="keyword-metric-value" style="font-size: 14px;">1 hour ago</span>
-                  </div>
-                </div>
-              </div>
-              
-              <div class="keyword-performance-item">
-                <div class="keyword-performance-header">
-                  <h3 class="keyword-performance-name">MoMA</h3>
-                  <span class="keyword-performance-rank" style="background: #f59e0b; color: white;">Pending</span>
-                </div>
-                <div class="keyword-performance-metrics">
-                  <div class="keyword-metric">
-                    <span class="keyword-metric-label">Images Available</span>
-                    <span class="keyword-metric-value usage">—</span>
-                  </div>
-                  <div class="keyword-metric">
-                    <span class="keyword-metric-label">Status</span>
-                    <span class="keyword-metric-value" style="font-size: 14px;">Awaiting approval</span>
-                  </div>
-                </div>
-              </div>
-              
-              <div class="keyword-performance-item">
-                <div class="keyword-performance-header">
-                  <h3 class="keyword-performance-name">The St. Regis NYC</h3>
-                  <span class="keyword-performance-rank" style="background: #10B981; color: white;">Connected</span>
-                </div>
-                <div class="keyword-performance-metrics">
-                  <div class="keyword-metric">
-                    <span class="keyword-metric-label">Images Available</span>
-                    <span class="keyword-metric-value usage">189</span>
-                  </div>
-                  <div class="keyword-metric">
-                    <span class="keyword-metric-label">Last Sync</span>
-                    <span class="keyword-metric-value" style="font-size: 14px;">4 hours ago</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-      </div>
-
-      <!-- Database Tab -->
-      <div class="tab-content" id="database-tab" style="display: none;">
-        <!-- Tab Navigation -->
-        <section class="toolbar" aria-label="Navigation Tabs" style="margin-bottom: 1.5rem;">
-          <div class="toolbar__left">
-            <div class="card__tabs">
-              <button class="tab-btn" data-tab="overview">Overview</button>
-              <button class="tab-btn" data-tab="instafeed">Instafeed</button>
-              <button class="tab-btn active" data-tab="database">Database</button>
-              <button class="tab-btn" data-tab="discovery">Discovery</button>
-              <button class="tab-btn" data-tab="analytics">Analytics</button>
-            </div>
-          </div>
-        </section>
-        
-        <section class="card">
-          <div class="card__header">
-            <h2>Image Database</h2>
-          </div>
-          <div class="card__content" style="padding: 1.5rem;">
-            <div class="rpv-three-column-layout">
-              <div class="rpv-section-1">
-                <div class="rpv-metrics">
-                  <div class="metric-item">
-                    <span class="metric-label">Total Images</span>
-                    <span class="metric-value rpv-green" id="dbTotalImages">0</span>
-                    <span class="metric-unit">in database</span>
-                  </div>
-                </div>
-              </div>
-              <div class="rpv-section-2">
-                <div class="benchmark-metrics">
-                  <div class="metric-item">
-                    <span class="metric-label">Licensed</span>
-                    <span class="metric-value traditional-gray" id="dbLicensedImages">0</span>
-                    <span class="metric-unit">active licenses</span>
-                  </div>
-                </div>
-              </div>
-              <div class="rpv-section-1">
-                <div class="rpv-metrics">
-                  <div class="metric-item">
-                    <span class="metric-label">Available</span>
-                    <span class="metric-value rpv-green" id="dbAvailableImages">0</span>
-                    <span class="metric-unit">for licensing</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-          </div>
-        </section>
-      </div>
-
       <!-- Upload Modal -->
       <div class="modal-overlay" id="uploadModal" style="display:none;">
         <div class="modal-content upload-modal">
@@ -355,8 +204,6 @@
           <div class="toolbar__left">
             <div class="card__tabs">
               <button class="tab-btn" data-tab="overview">Overview</button>
-              <button class="tab-btn" data-tab="instafeed">Instafeed</button>
-              <button class="tab-btn" data-tab="database">Database</button>
               <button class="tab-btn active" data-tab="discovery">Discovery</button>
               <button class="tab-btn" data-tab="analytics">Analytics</button>
             </div>
@@ -491,8 +338,6 @@
           <div class="toolbar__left">
             <div class="card__tabs">
               <button class="tab-btn" data-tab="overview">Overview</button>
-              <button class="tab-btn" data-tab="instafeed">Instafeed</button>
-              <button class="tab-btn" data-tab="database">Database</button>
               <button class="tab-btn" data-tab="discovery">Discovery</button>
               <button class="tab-btn active" data-tab="analytics">Analytics</button>
             </div>

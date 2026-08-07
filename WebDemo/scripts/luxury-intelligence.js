@@ -985,7 +985,7 @@
     return fetch(ASK_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      credentials: 'omit',
+      credentials: 'same-origin',
       body: JSON.stringify({
         message: originalQuery,
         store_location: opts.storeLocation || storeLocationForQuery(originalQuery),

@@ -207,7 +207,7 @@
 
     var response = await fetch(TREE_URL + '?' + params.toString(), {
       method: 'GET',
-      credentials: 'omit',
+      credentials: 'same-origin',
       headers: { Accept: 'application/json' }
     });
     var data = await response.json().catch(function () { return {}; });

@@ -719,20 +719,20 @@
     });
   });
 
-  // Render Chat History
+  // Render Profile (conversation history)
   function renderChatHistory() {
     const container = document.getElementById('chatContainer');
     container.replaceChildren();
 
     if (!window.ShopThatData) {
-      showEmptyState(container, 'No chat history available', 'Start a conversation on the main page');
+      showEmptyState(container, 'No conversations yet', 'Start a conversation on the main page');
       return;
     }
 
     const sessions = window.ShopThatData.getChatSessions();
     
     if (sessions.length === 0) {
-      showEmptyState(container, 'No chat history yet', 'Your conversations will appear here');
+      showEmptyState(container, 'No conversations yet', 'Your conversations will appear here');
       return;
     }
 
@@ -1854,10 +1854,10 @@
 
     // Ensure every media item has a stable position (persisted, so re-renders
     // don't reshuffle and so newly-dropped cards stay where the user put them).
-    // Answer galleries always get a fresh compact layout so spacing tweaks apply
-    // immediately instead of keeping a previous wide spread.
+    // Default + answer galleries get a fresh layout so spacing tweaks apply
+    // immediately instead of keeping a previous spread.
     let positionsChanged = false;
-    if (isShowingAnswerImages()) {
+    if (isShowingAnswerImages() || galleryMatchesDefaults(media)) {
       const fresh = generateStackedPositions(media.length);
       media.forEach((item, idx) => {
         item.position = fresh[idx];
@@ -2902,11 +2902,10 @@
   // Generate stacked card positions (deterministic — same input = same output)
   function generateStackedPositions(count) {
     const positions = [];
-    // Keep the fan compact: cards are ~240px wide, so a short step makes them
-    // overlap like a real stack instead of sitting in a wide row.
-    const baseX = 120;
+    // Cards are ~240px wide; a moderate step keeps overlap but lets the fan breathe.
+    const baseX = 100;
     const baseY = 90;
-    const horizontalSpacing = 96;
+    const horizontalSpacing = 160;
     const verticalStagger = 72;
     const rotationRange = 8;
 

@@ -282,7 +282,7 @@ html, body {
   margin: 0;
 }
 
-/* Chat History */
+/* Profile */
 .dashboard-chat-container {
   display: flex;
   flex-direction: column;

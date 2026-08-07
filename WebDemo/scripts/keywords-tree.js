@@ -585,7 +585,7 @@
 
     articlePreviewInflight[url] = fetch('/api/link-preview?url=' + encodeURIComponent(url), {
       method: 'GET',
-      credentials: 'omit',
+      credentials: 'same-origin',
       headers: { Accept: 'application/json' }
     })
       .then(function (response) {
